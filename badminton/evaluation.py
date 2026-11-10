@@ -67,6 +67,22 @@ def _prediction_label(result):
     return value if value in ("IN", "OUT", "REVIEW") else "ERROR"
 
 
+def automatically_inferred(result):
+    """Keep operator-selected identity/contact out of automatic model scores."""
+    decision = result.get('decision', {})
+    decision = decision if isinstance(decision, dict) else {}
+    config = result.get('config') or {}
+    landing = result.get('selected_landing') or {}
+    return not (result.get('assistance_used') or decision.get('assistance_used')
+                or result.get('automatic_evaluation_eligible') is False
+                or decision.get('evaluation_eligible') is False
+                or landing.get('assistance_used') or landing.get('identity_assisted')
+                or landing.get('identity_source') == 'operator_selected_track'
+                or config.get('request_context')
+                or (config.get('identity') or {}).get('hit_anchors')
+                or (config.get('events') or {}).get('target_track_id') is not None)
+
+
 def _human_verified(annotation):
     return (annotation.get("status") == "verified"
             and annotation.get("source") == "human_review"
@@ -356,9 +372,14 @@ def evaluate_run(run_dir, annotations_dir=None) -> dict:
     time_errors, position_errors = [], []
     position_exclusions = Counter()
     decision_counts = Counter(_prediction_label(result) for result in results)
+    automatic_counts = Counter(_prediction_label(result) for result in results if automatically_inferred(result))
+    assisted_counts = Counter(_prediction_label(result) for result in results if not automatically_inferred(result))
     for result in results:
         identifier = result.get("video_id") or result.get("id")
         annotation = annotations.get(identifier)
+        if not automatically_inferred(result):
+            exclusions['human_assisted_prediction'] += 1
+            continue
         if annotation is None:
             exclusions["no_annotation"] += 1
             continue
@@ -391,7 +412,7 @@ def evaluate_run(run_dir, annotations_dir=None) -> dict:
             position_exclusions["missing_compatible_independent_position_reference_or_observed_contact"] += 1
     total = len(results)
     known_ids = {r.get("video_id") or r.get("id") for r in results}
-    components = _component_metrics(results, annotations)
+    components = _component_metrics([result for result in results if automatically_inferred(result)], annotations)
     durations = []
     for result in results:
         timings = result.get("timings", {})
@@ -406,7 +427,9 @@ def evaluate_run(run_dir, annotations_dir=None) -> dict:
             "annotations_without_matching_result": sorted(set(annotations) - known_ids),
             "result_read_errors": result_errors, "annotation_read_errors": annotation_errors,
             "operational": {"decision_counts": dict(decision_counts),
-                            "automatic_coverage": _rate(decision_counts["IN"] + decision_counts["OUT"], total),
+                            "automatic_decision_counts": dict(automatic_counts),
+                            "assisted_decision_counts": dict(assisted_counts),
+                            "automatic_coverage": _rate(automatic_counts["IN"] + automatic_counts["OUT"], total),
                             "review_rate": _rate(decision_counts["REVIEW"], total),
                             "processing_error_rate": _rate(decision_counts["ERROR"], total),
                             "clip_analysis_seconds": _distribution(durations),

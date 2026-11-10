@@ -148,12 +148,255 @@ class _OnnxDetector:
         return _nms(detections)
 
 
+class _HogPeople:
+    """Sample the bundled OpenCV pedestrian model, without claiming court identity.
+
+    A model box is only a possible occluder. Cached boxes carry their age so that
+    an old detection is never presented as a fresh observation or verified player.
+    """
+
+    def __init__(self, config):
+        self.backend = config.get("person_backend", "hog")
+        if self.backend not in {"hog", "none"}:
+            raise ValueError("person_backend must be hog or none")
+        self.interval = int(config.get("person_interval", 16))
+        self.width = int(config.get("person_width", 960))
+        if not 1 <= self.interval <= 120 or not 128 <= self.width <= 1280:
+            raise ValueError("invalid person detector interval or width")
+        self.hog = None
+        if self.backend == "hog":
+            self.hog = cv2.HOGDescriptor()
+            self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
+        self.boxes = []
+        self.observed_index = None
+
+    def detect(self, frame, index):
+        if self.hog is None:
+            return [], {"backend": "none", "sampled": False}
+        height, width = frame.shape[:2]
+        ratio = min(1.0, self.width / width)
+        sample_width, sample_height = round(width * ratio), round(height * ratio)
+        sampled = index % self.interval == 0
+        if sampled:
+            self.boxes = []
+            self.observed_index = index
+            if sample_width >= 64 and sample_height >= 128:
+                sample = cv2.resize(frame, (sample_width, sample_height), interpolation=cv2.INTER_AREA)
+                boxes, weights = self.hog.detectMultiScale(
+                    sample, winStride=(8, 8), padding=(8, 8), scale=1.08,
+                    hitThreshold=0.0, groupThreshold=2.0)
+                for box, score in zip(boxes, np.asarray(weights).reshape(-1)):
+                    x, y, w, h = (float(value) / ratio for value in box)
+                    if not math.isfinite(float(score)):
+                        continue
+                    self.boxes.append({"bbox": [round(x, 3), round(y, 3), round(w, 3), round(h, 3)],
+                                       "model_margin": round(float(score), 4)})
+                self.boxes = sorted(self.boxes, key=lambda item: -item["model_margin"])[:16]
+        age = index - self.observed_index if self.observed_index is not None else None
+        regions = [{**box, "kind": "hog_person_hypothesis", "person_confirmed": False,
+                    "person_model_detected": True, "target_court_player_confirmed": False,
+                    "observation_frame_index": self.observed_index, "age_frames": age,
+                    "interpolated_observation": False} for box in self.boxes]
+        return regions, {"backend": "opencv_hog_default_people", "sampled": sampled,
+                         "observation_frame_index": self.observed_index, "age_frames": age,
+                         "model_box_count": len(regions), "independently_validated": False}
+
+
+class _NativeRoiDetector:
+    """Bounded source-resolution re-detection, not resized evidence cropping.
+
+    Windows follow global candidates and recent native proposals. Two rotating
+    exploration windows also examine pixels missed by the low-resolution scan.
+    This deliberately reports incomplete source coverage; it is not exhaustive
+    tiled detection and does not certify shuttle identity or contact.
+    """
+
+    def __init__(self, config, output_shape, background, roi, max_area):
+        self.config = config
+        self.height, self.width = output_shape[:2]
+        self.background, self.roi = background, roi
+        self.max_area = max_area
+        self.size = int(config.get("highres_roi_size", 192))
+        self.budget = int(config.get("highres_max_rois", 8))
+        self.explore = int(config.get("highres_exploration_rois", min(2, self.budget)))
+        if not 32 <= self.size <= 1024 or not 1 <= self.budget <= 64 or not 0 <= self.explore <= self.budget:
+            raise ValueError("invalid high-resolution ROI size, budget, or exploration count")
+        self.previous = None
+        self.recent = []
+        self.source_shape = None
+
+    def _boxes(self, detections, shape, index):
+        height, width = shape[:2]
+        sx, sy = width / self.width, height / self.height
+        boxes = []
+
+        def append(cx, cy, origin):
+            if not (0 <= cx < width and 0 <= cy < height):
+                return
+            low_x, low_y = min(self.width - 1, int(cx / sx)), min(self.height - 1, int(cy / sy))
+            if self.roi[low_y, low_x] == 0:
+                return
+            left = max(0, min(max(0, width - self.size), round(cx - self.size / 2)))
+            top = max(0, min(max(0, height - self.size), round(cy - self.size / 2)))
+            box = [left, top, min(self.size, width - left), min(self.size, height - top)]
+            # Nearby windows mostly read the same pixels. Keep separate objects
+            # inside the first window, instead of spending the budget twice.
+            if any(abs(left - old["bbox"][0]) < box[2] * .55
+                   and abs(top - old["bbox"][1]) < box[3] * .55 for old in boxes):
+                return
+            boxes.append({"bbox": box, "origin": origin})
+
+        proposal_budget = self.budget - self.explore
+        # Alternate global and previous-native proposals so neither monopolizes
+        # the entire bounded native-resolution budget.
+        ranked = sorted(detections, key=lambda item: -item["confidence"])
+        for position in range(max(len(ranked), len(self.recent))):
+            for proposals, origin in ((ranked, "global_candidate"), (self.recent, "previous_native_candidate")):
+                if len(boxes) >= proposal_budget:
+                    break
+                if position < len(proposals):
+                    point = proposals[position]
+                    append(point["x"] * sx, point["y"] * sy, origin)
+            if len(boxes) >= proposal_budget:
+                break
+        if self.explore == 0:
+            return boxes
+        xs = list(range(0, width, self.size))
+        ys = list(range(0, height, self.size))
+        grid = [(min(width - 1, x + self.size / 2), min(height - 1, y + self.size / 2))
+                for y in ys for x in xs]
+        # Fill unused proposal slots as well, making source-only detections
+        # possible even when the low-resolution scan has no observations.
+        for offset in range(len(grid)):
+            if len(boxes) >= self.budget:
+                break
+            x, y = grid[(index * max(1, self.explore) + offset) % len(grid)]
+            append(x, y, "rotating_exploration")
+        return boxes
+
+    def detect(self, raw_source, detections, index, camera_motion):
+        if (not isinstance(raw_source, np.ndarray) or raw_source.dtype != np.uint8
+                or raw_source.ndim not in (2, 3) or not raw_source.size
+                or raw_source.ndim == 3 and raw_source.shape[2] != 3):
+            raise ValueError("source_frames must contain uint8 BGR or grayscale frames")
+        source = _bgr(raw_source)
+        if self.source_shape is not None and source.shape != self.source_shape:
+            raise ValueError("source_frames dimensions must remain constant")
+        self.source_shape = source.shape
+        sh, sw = source.shape[:2]
+        sx, sy = sw / self.width, sh / self.height
+        if sw <= self.width and sh <= self.height:
+            return [], {"status": "not_higher_resolution", "source_size": [sw, sh], "rois": []}
+        if abs(sx / sy - 1) > .03:
+            raise ValueError("source_frames and analysis frames must have the same displayed aspect ratio")
+        windows = self._boxes(detections, source.shape, index)
+        native = []
+        area_limit = self.max_area * sx * sy
+        for window in windows:
+            x, y, w, h = window["bbox"]
+            patch = source[y:y + h, x:x + w]
+            gray = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
+            left, top = int(x / sx), int(y / sy)
+            right, bottom = min(self.width, math.ceil((x + w) / sx)), min(self.height, math.ceil((y + h) / sy))
+            background = cv2.resize(self.background[top:bottom, left:right], (w, h), interpolation=cv2.INTER_LINEAR)
+            foreground = cv2.absdiff(gray, background)
+            if self.previous is None:
+                temporal = foreground
+            else:
+                old = cv2.cvtColor(self.previous[y:y + h, x:x + w], cv2.COLOR_BGR2GRAY)
+                if camera_motion.get("compensated"):
+                    dx, dy = camera_motion["translation_px"]
+                    old = cv2.warpAffine(old, np.float32([[1, 0, dx * sx], [0, 1, dy * sy]]),
+                                         (w, h), borderMode=cv2.BORDER_REFLECT)
+                temporal = cv2.absdiff(gray, old)
+            hsv = cv2.cvtColor(patch, cv2.COLOR_BGR2HSV)
+            bright = cv2.inRange(hsv, np.array([0, 0, int(self.config.get("min_brightness", 155))], np.uint8),
+                                 np.array([179, int(self.config.get("max_saturation", 115)), 255], np.uint8))
+            local_base = cv2.GaussianBlur(gray, (0, 0), max(1.0, min(12.0, 4 * sw / 1280)))
+            contrast = cv2.subtract(gray, local_base)
+            cue = ((temporal >= float(self.config.get("motion_threshold", 16)))
+                   & (foreground >= float(self.config.get("background_threshold", 8)))
+                   & (contrast >= float(self.config.get("contrast_threshold", 8))))
+            # Reject complete broad bright objects before edge differencing;
+            # otherwise a white shirt becomes many apparent small shuttles.
+            broad = np.where(patch.min(axis=2) >= int(self.config.get("broad_white_min", 205)), 255, 0).astype(np.uint8)
+            _, broad_labels, broad_stats, _ = cv2.connectedComponentsWithStats(broad, 8)
+            large = np.flatnonzero(broad_stats[:, cv2.CC_STAT_AREA] > area_limit * 1.5)
+            large = large[large != 0]
+            exclusion = np.isin(broad_labels, large) if len(large) else np.zeros_like(gray, dtype=bool)
+            # Segment the whole small bright object, then use motion/contrast
+            # as evidence for that component. Segmenting only changed pixels
+            # would move the centroid to a leading edge between frames.
+            mask = np.where((bright > 0) & ~exclusion, 255, 0).astype(np.uint8)
+            count, labels, stats, centers = cv2.connectedComponentsWithStats(mask, 8)
+            for label in range(1, count):
+                bx, by, bw, bh, area = map(int, stats[label])
+                if not 1 <= area <= area_limit or max(bw, bh) / max(1, min(bw, bh)) > 4:
+                    continue
+                if max(bw, bh) > max(18.0, 34 * sw / 1280) or area / (bw * bh) < .12:
+                    continue
+                if ((bx == 0 and x > 0) or (by == 0 and y > 0)
+                        or (bx + bw >= w and x + w < sw) or (by + bh >= h and y + h < sh)):
+                    continue  # the ROI cut through this object
+                pixels = labels[by:by + bh, bx:bx + bw] == label
+                cue_fraction = float(cue[by:by + bh, bx:bx + bw][pixels].mean())
+                if cue_fraction < .15:
+                    continue
+                source_x, source_y = float(centers[label][0] + x), float(centers[label][1] + y)
+                cx, cy = source_x / sx, source_y / sy
+                if not self.roi[min(self.height - 1, int(cy)), min(self.width - 1, int(cx))]:
+                    continue
+                motion = float(temporal[by:by + bh, bx:bx + bw][pixels].mean())
+                local_contrast = float(contrast[by:by + bh, bx:bx + bw][pixels].mean())
+                score = .2 + .35 * min(1.0, motion / 90) + .3 * min(1.0, local_contrast / 65) + .15 * area / (bw * bh)
+                native.append({"x": round(cx, 3), "y": round(cy, 3),
+                               "radius": round(max(.5, math.sqrt(area / math.pi) / min(sx, sy)), 3),
+                               "bbox": [(x + bx) / sx, (y + by) / sy, bw / sx, bh / sy],
+                               "confidence": round(min(.95, score), 4),
+                               "confidence_kind": "heuristic_rank_not_probability",
+                               "method": "opencv_source_roi_component", "native_resolution_observation": True,
+                               "source_px": [round(source_x, 3), round(source_y, 3)],
+                               "source_bbox": [x + bx, y + by, bw, bh],
+                               "source_size": [sw, sh], "roi_origin": window["origin"],
+                               "motion_supported_fraction": round(cue_fraction, 4),
+                               "foreground_difference": round(motion, 3), "local_contrast": round(local_contrast, 3)})
+        self.previous = source  # one additional original frame, never the whole clip
+        native = _nms(native, max(.5, self.width / 1280), 512)
+        self.recent = native[:16]
+        return native, {"status": "analyzed", "source_size": [sw, sh], "rois": windows,
+                        "roi_count": len(windows), "proposal_count": len(native),
+                        "pixels_examined": sum(row["bbox"][2] * row["bbox"][3] for row in windows),
+                        "full_source_scan": False, "score_kind": "heuristic_rank_not_probability"}
+
+
+def _merge_native(global_candidates, native_candidates, distance):
+    """Prefer measured native location when both scales support one candidate."""
+    pending = list(global_candidates)
+    combined = []
+    for native in native_candidates:
+        matches = [item for item in pending
+                   if math.hypot(item["x"] - native["x"], item["y"] - native["y"])
+                   <= max(distance, min(item["radius"], native["radius"]))]
+        refined = dict(native)
+        if matches:
+            best = max(matches, key=lambda item: item["confidence"])
+            refined["global_confidence"] = best["confidence"]
+            refined["native_confidence"] = native["confidence"]
+            refined["confidence"] = max(best["confidence"], native["confidence"])
+            refined["method"] = "opencv_source_roi_with_global_support"
+            pending = [item for item in pending if item not in matches]
+        combined.append(refined)
+    return pending + combined
+
+
 def detect_sequence(frames, timestamps, config=None):
     """Return frame-wise observations in the supplied frames' coordinate system.
 
     ``backend='opencv_candidates'`` is the default. ``backend='onnx'`` requires
-    explicit weights and class mapping. Optional ``source_frames`` can provide
-    higher-resolution frames for tiled ONNX inference. A ``scorer_path`` loads
+    explicit weights and class mapping. Optional ``source_frames`` provides
+    native ROI re-detection by default, or tiled ONNX inference. ``highres_enabled``
+    can disable native ROI work. Sampled ``person_backend='hog'`` boxes are model
+    hypotheses only. A ``scorer_path`` loads
     the separately trained patch classifier; learned scores change ranking only
     when ``use_learned_confidence=True`` is explicitly selected.
     """
@@ -176,6 +419,7 @@ def detect_sequence(frames, timestamps, config=None):
     source_frames = config.get("source_frames", frames)
     if len(source_frames) != len(frames):
         raise ValueError("source_frames must match frames in length")
+    people = _HogPeople(config)
     scorer = None
     if config.get("scorer_path"):
         from .learning import load_candidate_scorer
@@ -189,6 +433,8 @@ def detect_sequence(frames, timestamps, config=None):
     max_area = float(config.get("max_area", max(40.0, 180 * scale * scale)))
     if not math.isfinite(min_area) or not math.isfinite(max_area) or min_area <= 0 or max_area < min_area:
         raise ValueError("min_area and max_area must be positive finite ordered values")
+    native_detector = (_NativeRoiDetector(config, frames[0].shape, background, roi, max_area)
+                       if not onnx and config.get("highres_enabled", True) and "source_frames" in config else None)
     previous_gray = None
     recent_motion = np.zeros((height, width), np.float32)
     background_low = cv2.erode(background, np.ones((3, 3), np.uint8))
@@ -237,10 +483,17 @@ def detect_sequence(frames, timestamps, config=None):
                                           "person_confirmed": False})
         occlusion_regions.sort(key=lambda item: item["bbox"][2] * item["bbox"][3], reverse=True)
         occlusion_regions = occlusion_regions[:24]
+        people_regions, person_diagnostics = people.detect(frame, index)
+        occlusion_regions.extend(people_regions)
+        high_resolution = {"status": "disabled" if not config.get("highres_enabled", True) else "source_frames_not_supplied",
+                           "roi_count": 0, "proposal_count": 0, "full_source_scan": False}
         if onnx:
-            detections = onnx.detect(_bgr(source_frames[index]), frame.shape)
+            source_frame = _bgr(source_frames[index])
+            detections = onnx.detect(source_frame, frame.shape)
             detections = [d for d in detections if roi[min(height - 1, max(0, round(d["y"]))), min(width - 1, max(0, round(d["x"])))] > 0]
             proposal_count = len(detections)
+            high_resolution = {"status": "onnx_tiled", "source_size": [source_frame.shape[1], source_frame.shape[0]],
+                               "full_source_scan": True, "proposal_count": proposal_count}
         else:
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             bright = cv2.inRange(hsv, np.array([0, 0, int(config.get("min_brightness", 155))], np.uint8),
@@ -292,6 +545,18 @@ def detect_sequence(frames, timestamps, config=None):
                                    "possible_occluder_overlap": overlaps})
             proposal_count = len(detections)
             detections = _nms(detections, max(1.0, 3 * scale), max_candidates)
+        if native_detector is not None:
+            native, high_resolution = native_detector.detect(source_frames[index], detections, index, camera_motion)
+            for item in native:
+                item["possible_occluder_overlap"] = any(
+                    b[0] <= item["x"] <= b[0] + b[2] and b[1] <= item["y"] <= b[1] + b[3]
+                    for b in (region["bbox"] for region in occlusion_regions))
+                if item["possible_occluder_overlap"]:
+                    item["confidence"] = round(item["confidence"] * .85, 4)
+            global_count = len(detections)
+            detections = _merge_native(detections, native, max(1.0, 3 * scale))
+            proposal_count += max(0, len(detections) - global_count)
+            detections = _nms(detections, max(1.0, 3 * scale), max_candidates)
         if scorer:
             rescored = scorer.score(frame, detections, preprocessing=config.get("frame_preprocessing"))
             for old, new in zip(detections, rescored):
@@ -304,6 +569,7 @@ def detect_sequence(frames, timestamps, config=None):
             detections = _nms(rescored, max(1.0, 3 * scale), max_candidates)
         record = {"frame_index": index, "time": float(timestamp), "detections": detections,
                   "occlusion_regions": occlusion_regions, "detector": dict(provenance),
+                  "person_detector": person_diagnostics, "high_resolution": high_resolution,
                   "camera_motion": camera_motion, "proposal_count_before_limit": proposal_count,
                   "candidate_limit_reached": proposal_count > max_candidates}
         if scorer:
@@ -324,6 +590,11 @@ def summarize_detection_quality(frame_records, tracks):
     if tracks and ambiguous / len(tracks) > 0.5:
         warnings.append("MANY_AMBIGUOUS_TRACKLETS")
     backends = sorted({record.get("detector", {}).get("backend", "unknown") for record in frame_records})
+    native_rows = [record.get("high_resolution", {}) for record in frame_records]
+    native_frames = sum(row.get("status") == "analyzed" for row in native_rows)
+    native_detections = sum(bool(item.get("native_resolution_observation"))
+                            for record in frame_records for item in record.get("detections", []))
+    person_sampled = sum(bool(record.get("person_detector", {}).get("sampled")) for record in frame_records)
     if "opencv_candidates" in backends:
         warnings.append("HEURISTIC_DETECTOR_NOT_VALIDATED")
     return {"frames": len(frame_records), "detection_count": sum(counts),
@@ -334,5 +605,10 @@ def summarize_detection_quality(frame_records, tracks):
             "track_count": len(tracks), "ambiguous_track_count": ambiguous,
             "ambiguous_track_fraction": round(ambiguous / len(tracks), 4) if tracks else 0.0,
             "backends": backends, "warnings": warnings,
+            "native_roi_frames": native_frames,
+            "native_roi_count": sum(row.get("roi_count", 0) for row in native_rows),
+            "native_proposal_count": sum(row.get("proposal_count", 0) for row in native_rows if row.get("status") == "analyzed"),
+            "native_retained_detection_count": native_detections,
+            "person_detector_sampled_frames": person_sampled,
             "precision_measured": False, "recall_measured": False,
             "note": "Candidate volume and track ambiguity describe this run; they do not measure detection accuracy."}

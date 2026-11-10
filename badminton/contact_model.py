@@ -21,6 +21,28 @@ from .learning import PREPROCESSING, _load_manifest, _patch
 
 CLASSES = ("airborne", "first_contact", "after_contact")
 ARCHITECTURE = "temporal_contact_cnn_v1"
+SOURCE_PREPROCESSING = "opencv_source_native_bgr_v1"
+SUPPORTED_PREPROCESSING = (PREPROCESSING, SOURCE_PREPROCESSING)
+
+
+def native_contact_patch(frame, x, y, size):
+    """Crop native pixels with the same RGB/zero-padding convention as training.
+
+    Unlike padding an entire 4K frame, allocation is bounded by the patch size.
+    The centre is rounded exactly as in ``learning._patch``.
+    """
+    if (not isinstance(size, int) or size < 2 or size % 2
+            or frame is None or frame.ndim != 3 or frame.shape[2] != 3
+            or frame.dtype != np.uint8):
+        raise ValueError("A uint8 BGR frame and an even patch size are required")
+    height, width = frame.shape[:2]
+    if not np.isfinite([x, y]).all() or not 0 <= x < width or not 0 <= y < height:
+        raise ValueError("Contact crop centre is outside the source frame")
+    left, top = int(round(float(x))) - size // 2, int(round(float(y))) - size // 2
+    x0, y0, x1, y1 = max(0, left), max(0, top), min(width, left + size), min(height, top + size)
+    patch = np.zeros((size, size, 3), dtype=np.uint8)
+    patch[y0-top:y1-top, x0-left:x1-left] = frame[y0:y1, x0:x1]
+    return cv2.cvtColor(patch, cv2.COLOR_BGR2RGB)
 
 
 def _records(manifest, annotations_dir):
@@ -108,11 +130,14 @@ def contact_training_readiness(manifest, annotations_dir, minimum_per_class=2):
             "qualification_note": "Training prerequisites do not imply qualification for automatic contact certification."}
 
 
-def build_contact_examples(manifest, annotations_dir, video_dir=None, patch_size=48, minimum_per_class=2):
+def build_contact_examples(manifest, annotations_dir, video_dir=None, patch_size=48, minimum_per_class=2,
+                           *, preprocessing=PREPROCESSING):
     from .media import probe
     manifest = _load_manifest(manifest)
     if not isinstance(patch_size, int) or patch_size < 24 or patch_size > 128 or patch_size % 2:
         raise ValueError("patch_size must be even and between 24 and 128")
+    if preprocessing not in SUPPORTED_PREPROCESSING:
+        raise ValueError("Unsupported contact training preprocessing")
     readiness = contact_training_readiness(manifest, annotations_dir, minimum_per_class)
     if not readiness["ready"]:
         raise ValueError("Contact training data not ready: " + "; ".join(readiness["reasons"]))
@@ -130,7 +155,8 @@ def build_contact_examples(manifest, annotations_dir, video_dir=None, patch_size
                 digest.update(block)
         if digest.hexdigest() != first["sha256"]:
             raise ValueError(f"Changed source video: {video_id}")
-        times = probe(path)["timestamps"]
+        media = probe(path)
+        times = media["timestamps"]
         requested = defaultdict(list)
         for i, record in indexed:
             center = record["frame_index"]
@@ -141,8 +167,13 @@ def build_contact_examples(manifest, annotations_dir, video_dir=None, patch_size
                 raise ValueError("Contact training window contains a timestamp discontinuity")
             record["frame_interval_seconds"] = float(np.median(steps))
             intervals.append(record["frame_interval_seconds"])
+            native = preprocessing == SOURCE_PREPROCESSING
+            record["model_width"] = media["width"] if native else record["width"]
+            record["model_height"] = media["height"] if native else record["height"]
+            scale = np.array([record["model_width"] / record["width"], record["model_height"] / record["height"]])
+            record["model_candidate_px"] = (np.array([record["x"], record["y"]]) * scale).tolist()
             if record["contact_px"] is not None:
-                offset = np.asarray(record["contact_px"]) - [record["x"], record["y"]]
+                offset = (np.asarray(record["contact_px"]) - [record["x"], record["y"]]) * scale
                 if np.any(np.abs(offset) > patch_size / 2 - 2):
                     raise ValueError("Confirmed contact point lies outside candidate crop")
                 offsets[i] = offset / (patch_size / 2)
@@ -158,12 +189,17 @@ def build_contact_examples(manifest, annotations_dir, video_dir=None, patch_size
                 if not ok:
                     raise ValueError(f"Source frame missing in {video_id}")
                 for i, window_index, record in requested.get(frame_index, []):
-                    resized = cv2.resize(frame, (record["width"], record["height"]), interpolation=cv2.INTER_AREA)
-                    clips[i][window_index] = _patch(resized, record["x"], record["y"], patch_size)
+                    if preprocessing == SOURCE_PREPROCESSING:
+                        if frame.shape[:2] != (record["model_height"], record["model_width"]):
+                            raise ValueError("Source orientation/dimensions differ from the annotation transform")
+                        clips[i][window_index] = native_contact_patch(frame, *record["model_candidate_px"], patch_size)
+                    else:
+                        resized = cv2.resize(frame, (record["width"], record["height"]), interpolation=cv2.INTER_AREA)
+                        clips[i][window_index] = _patch(resized, record["x"], record["y"], patch_size)
         finally:
             capture.release()
     return {"report": readiness, "samples": records, "clips": np.asarray(clips, dtype=np.uint8),
-            "offsets": offsets, "patch_size": patch_size,
+            "offsets": offsets, "patch_size": patch_size, "preprocessing": preprocessing,
             "frame_interval_range_seconds": [min(intervals), max(intervals)]}
 
 
@@ -219,7 +255,7 @@ def _qualified(metadata):
     total, covered = spatial.get("test_count", 0), spatial.get("test_covered", 0)
     bound = spatial.get("uncertainty_px")
     return bool(metadata.get("dataset_kind") == "real_video"
-                and metadata.get("preprocessing") == PREPROCESSING
+                and metadata.get("preprocessing") in SUPPORTED_PREPROCESSING
                 and evidence.get("statistical_unit") == "rally_group"
                 and validation_groups and test_groups and validation_groups.isdisjoint(test_groups)
                 and validation_groups.isdisjoint(split_groups.get("train", []))
@@ -236,12 +272,14 @@ def _qualified(metadata):
 
 
 def train_contact_model(manifest, annotations_dir, video_dir, output_path, epochs=20,
-                        learning_rate=0.002, patch_size=48, minimum_per_class=2, seed=42):
+                        learning_rate=0.002, patch_size=48, minimum_per_class=2, seed=42,
+                        *, preprocessing=PREPROCESSING):
     import torch
     if not isinstance(epochs, int) or not 1 <= epochs <= 1000 or not 0 < learning_rate <= 0.1:
         raise ValueError("Invalid training epochs or learning_rate")
     manifest = _load_manifest(manifest)
-    prepared = build_contact_examples(manifest, annotations_dir, video_dir, patch_size, minimum_per_class)
+    prepared = build_contact_examples(manifest, annotations_dir, video_dir, patch_size, minimum_per_class,
+                                      preprocessing=preprocessing)
     torch.manual_seed(seed)
     model = _network()
     inputs = torch.from_numpy(prepared["clips"].transpose(0, 4, 1, 2, 3).copy()).float() / 255
@@ -310,11 +348,13 @@ def train_contact_model(manifest, annotations_dir, video_dir, output_path, epoch
             confusion[actual, predicted] += 1
         metrics[split] = {"count": len(array), "accuracy": float(np.trace(confusion) / len(array)), "confusion": confusion.tolist()}
     metadata = {"architecture": ARCHITECTURE, "dataset_kind": manifest.get("dataset_kind", "real_video"),
-                "preprocessing": PREPROCESSING,
+                "preprocessing": preprocessing,
                 "classes": list(CLASSES), "window_frames": 5, "patch_size": patch_size,
                 "threshold": threshold, "qualification_evidence": evidence,
                 "frame_interval_range_seconds": prepared["frame_interval_range_seconds"],
-                "analysis_sizes": sorted({(r["width"], r["height"]) for r in prepared["samples"]}),
+                "analysis_sizes": sorted({(r["model_width"], r["model_height"]) for r in prepared["samples"]}),
+                "annotation_sizes": sorted({(r["width"], r["height"]) for r in prepared["samples"]}),
+                "coordinate_system": "source_pixels" if preprocessing == SOURCE_PREPROCESSING else "analysis_pixels",
                 "selected_epoch": best_epoch, "epochs": epochs, "seed": seed,
                 "label_source": "explicit_reviewed_temporal_classes_and_cork_points",
                 "metrics": metrics, "probabilities_calibrated": False,
@@ -347,14 +387,19 @@ def _load_checkpoint_cached(path_string, mtime_ns, size, inode, ctime_ns):
     return model, metadata, hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def infer_contact(frames, timestamps, candidate, checkpoint, preprocessing=None):
-    """Return a proposed cork point; certify it only with qualified heldout evidence."""
-    import torch
+def _checkpoint(checkpoint):
     path = Path(checkpoint).resolve()
     stat = path.stat()
-    model, metadata, digest = _load_checkpoint_cached(str(path), stat.st_mtime_ns, stat.st_size, stat.st_ino, stat.st_ctime_ns)
-    patch_size = metadata["patch_size"]
-    result = {"contact_observed": False, "contact_px": None, "probabilities": None,
+    return _load_checkpoint_cached(str(path), stat.st_mtime_ns, stat.st_size, stat.st_ino, stat.st_ctime_ns)
+
+
+def contact_checkpoint_metadata(checkpoint):
+    """Read a copy of the preprocessing contract before extracting native crops."""
+    return copy.deepcopy(_checkpoint(checkpoint)[1])
+
+
+def _prediction_result(metadata, digest, preprocessing):
+    return {"contact_observed": False, "contact_px": None, "probabilities": None,
               "model_origin": "learned_temporal_contact", "reason_codes": [],
               "provenance": {"weights_sha256": digest,
                              "architecture": ARCHITECTURE, "dataset_kind": metadata.get("dataset_kind"),
@@ -362,22 +407,28 @@ def infer_contact(frames, timestamps, candidate, checkpoint, preprocessing=None)
                              "runtime_preprocessing": preprocessing,
                              "automatic_contact_qualified": _qualified(metadata),
                              "qualification_evidence": copy.deepcopy(metadata.get("qualification_evidence"))}}
-    index, point = candidate.get("frame_index"), candidate.get("candidate_px")
-    if point is None:
-        point = candidate.get("contact_px")
-    if (not isinstance(index, int) or index < 2 or index + 2 >= len(frames) or len(timestamps) != len(frames)
-            or not isinstance(point, (list, tuple)) or len(point) != 2
-            or not all(isinstance(v, (int, float)) for v in point) or not np.isfinite(point).all()):
-        result["reason_codes"].append("CONTACT_MODEL_INCOMPLETE_WINDOW")
-        return result
-    window = frames[index - 2:index + 3]
-    if any(frame is None or frame.ndim != 3 or frame.shape[2] != 3 or frame.dtype != np.uint8 for frame in window):
-        raise ValueError("Contact model frames must be uint8 BGR images")
-    height, width = window[0].shape[:2]
-    if any(frame.shape != window[0].shape for frame in window) or not 0 <= point[0] < width or not 0 <= point[1] < height:
+
+
+def _predict_patches(clips, times, candidate, image_size, model, metadata, digest, preprocessing):
+    """Shared training/inference contract: five RGB crops at a fixed native centre."""
+    import torch
+    result = _prediction_result(metadata, digest, preprocessing)
+    patch_size = metadata["patch_size"]
+    point = candidate.get("candidate_px", candidate.get("contact_px"))
+    index = candidate.get("frame_index")
+    width, height = image_size
+    if (not isinstance(index, int) or isinstance(index, bool) or not isinstance(point, (list, tuple))
+            or len(point) != 2 or not all(isinstance(v, (int, float)) for v in point)
+            or not np.isfinite(point).all() or not 0 <= point[0] < width or not 0 <= point[1] < height):
         result["reason_codes"].append("CONTACT_MODEL_INVALID_CROP")
         return result
-    steps = np.diff(np.asarray(timestamps[index - 2:index + 3], dtype=float))
+    clips = np.asarray(clips)
+    if clips.shape != (5, patch_size, patch_size, 3) or clips.dtype != np.uint8:
+        raise ValueError("Contact model requires five uint8 RGB crops matching its trained patch size")
+    if len(times) != 5:
+        result["reason_codes"].append("CONTACT_MODEL_INCOMPLETE_WINDOW")
+        return result
+    steps = np.diff(np.asarray(times, dtype=float))
     if not np.isfinite(steps).all() or np.any(steps <= 0) or max(steps) > np.median(steps) * 1.75:
         result["reason_codes"].append("CONTACT_MODEL_TIMESTAMP_GAP")
         return result
@@ -385,7 +436,6 @@ def infer_contact(frames, timestamps, candidate, checkpoint, preprocessing=None)
     interval_range = metadata.get("frame_interval_range_seconds", [])
     compatible = ([width, height] in [list(size) for size in trained_sizes]
                   and len(interval_range) == 2 and interval_range[0] * 0.8 <= np.median(steps) <= interval_range[1] * 1.2)
-    clips = np.stack([_patch(frame, point[0], point[1], patch_size) for frame in window])
     tensor = torch.from_numpy(clips.transpose(3, 0, 1, 2).copy()[None]).float() / 255
     with torch.no_grad():
         logits, offset = model(tensor)
@@ -393,9 +443,9 @@ def infer_contact(frames, timestamps, candidate, checkpoint, preprocessing=None)
         proposed = np.asarray(point) + offset[0].numpy() * patch_size / 2
     result.update(probabilities={name: float(probabilities[i]) for i, name in enumerate(CLASSES)},
                   proposed_contact_px=proposed.astype(float).tolist(), frame_index=index,
-                  time=float(timestamps[index]), confidence=float(probabilities[1]),
+                  time=float(times[2]), confidence=float(probabilities[1]),
                   confidence_kind="uncalibrated_softmax_with_heldout_threshold_evidence")
-    if metadata.get("preprocessing") != PREPROCESSING or preprocessing != PREPROCESSING:
+    if metadata.get("preprocessing") not in SUPPORTED_PREPROCESSING or preprocessing != metadata.get("preprocessing"):
         result["reason_codes"].append("CONTACT_MODEL_PREPROCESSING_MISMATCH")
     if not compatible:
         result["reason_codes"].append("CONTACT_MODEL_CAPTURE_DOMAIN_MISMATCH")
@@ -411,3 +461,40 @@ def infer_contact(frames, timestamps, candidate, checkpoint, preprocessing=None)
                       contact_radius_px=0.0, uncertainty_px=float(uncertainty) + 1.0,
                       contact_evidence_source="qualified_learned_contact_localization")
     return result
+
+
+def infer_contact_patches(clips, times, candidate, checkpoint, *, image_size, preprocessing):
+    """Infer from native crops without retaining full-resolution temporal frames.
+
+    ``candidate_px`` and ``image_size`` are in original source pixels. The
+    patches must come from ``native_contact_patch`` with the checkpoint size;
+    no resized/legacy checkpoint is silently treated as a native model.
+    """
+    model, metadata, digest = _checkpoint(checkpoint)
+    return _predict_patches(clips, times, candidate, image_size, model, metadata, digest, preprocessing)
+
+
+def infer_contact(frames, timestamps, candidate, checkpoint, preprocessing=None):
+    """Return a proposed cork point; certify it only with qualified heldout evidence."""
+    model, metadata, digest = _checkpoint(checkpoint)
+    patch_size = metadata["patch_size"]
+    result = _prediction_result(metadata, digest, preprocessing)
+    index, point = candidate.get("frame_index"), candidate.get("candidate_px")
+    if point is None:
+        point = candidate.get("contact_px")
+    if (not isinstance(index, int) or index < 2 or index + 2 >= len(frames) or len(timestamps) != len(frames)
+            or not isinstance(point, (list, tuple)) or len(point) != 2
+            or not all(isinstance(v, (int, float)) for v in point) or not np.isfinite(point).all()):
+        result["reason_codes"].append("CONTACT_MODEL_INCOMPLETE_WINDOW")
+        return result
+    window = [frames[i] for i in range(index - 2, index + 3)]
+    if any(frame is None or frame.ndim != 3 or frame.shape[2] != 3 or frame.dtype != np.uint8 for frame in window):
+        raise ValueError("Contact model frames must be uint8 BGR images")
+    height, width = window[0].shape[:2]
+    if any(frame.shape != window[0].shape for frame in window) or not 0 <= point[0] < width or not 0 <= point[1] < height:
+        result["reason_codes"].append("CONTACT_MODEL_INVALID_CROP")
+        return result
+    crop = native_contact_patch if preprocessing == SOURCE_PREPROCESSING else _patch
+    clips = np.stack([crop(frame, point[0], point[1], patch_size) for frame in window])
+    return _predict_patches(clips, timestamps[index - 2:index + 3], candidate, (width, height),
+                            model, metadata, digest, preprocessing)

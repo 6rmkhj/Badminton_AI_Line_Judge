@@ -14,6 +14,197 @@ import cv2
 import numpy as np
 
 
+def lens_geometry(config, width, height):
+    """Validate known camera intrinsics and scale them to analysis coordinates.
+
+    Intrinsics must come from an independent lens calibration. A court fit is
+    not enough to estimate lens distortion. ``image_size`` is [width, height]
+    of the images used to measure the supplied camera matrix.
+    """
+    if not config:
+        return None
+    if not isinstance(config, dict) or config.get("model", "opencv_radial_tangential") != "opencv_radial_tangential":
+        raise ValueError("known lens calibration currently requires the OpenCV radial/tangential model")
+    matrix = np.asarray(config.get("camera_matrix"), dtype=np.float64)
+    distortion = np.asarray(config.get("dist_coeffs"), dtype=np.float64).reshape(-1)
+    size = np.asarray(config.get("image_size", [width, height]), dtype=float)
+    if (matrix.shape != (3, 3) or not np.isfinite(matrix).all()
+            or matrix[0, 0] <= 0 or matrix[1, 1] <= 0
+            or not np.allclose(matrix[2], [0, 0, 1])
+            or not np.allclose([matrix[0, 1], matrix[1, 0]], [0, 0])
+            or distortion.size not in (4, 5, 8, 12, 14)
+            or not np.isfinite(distortion).all()
+            or size.shape != (2,) or not np.isfinite(size).all() or (size <= 0).any()):
+        raise ValueError("lens needs a finite camera_matrix, 4/5/8/12/14 dist_coeffs and positive image_size")
+    scaled = np.diag([width / size[0], height / size[1], 1.0]) @ matrix
+    return {"camera_matrix": scaled.tolist(), "dist_coeffs": distortion.tolist(),
+            "image_size": [width, height], "reference_image_size": size.tolist(),
+            "source": "provided_independent_camera_intrinsics", "model": "opencv_radial_tangential"}
+
+
+def points_for_homography(points, calibration):
+    """Map raw analysis-image points to the pixel space used to fit H.
+
+    Detections and evidence remain in the original, distorted image. Consumers
+    must call this before applying a homography fitted on rectified imagery.
+    No airborne-point-to-floor conversion is performed by this helper.
+    """
+    array = np.asarray(points, dtype=np.float64)
+    if array.ndim != 2 or array.shape[1] != 2 or not np.isfinite(array).all():
+        raise ValueError("image points must be finite Nx2 coordinates")
+    if calibration.get("homography_pixel_space", "raw_analysis_pixels") == "raw_analysis_pixels":
+        return array.copy()
+    if calibration.get("homography_pixel_space") != "undistorted_analysis_pixels":
+        raise ValueError("unknown homography pixel space")
+    lens = calibration.get("lens")
+    if not isinstance(lens, dict):
+        raise ValueError("rectified homography requires lens metadata")
+    matrix = np.asarray(lens["camera_matrix"], dtype=np.float64)
+    distortion = np.asarray(lens["dist_coeffs"], dtype=np.float64)
+    return cv2.undistortPoints(array.reshape(-1, 1, 2), matrix, distortion, P=matrix).reshape(-1, 2)
+
+
+def _raw_points(points, lens):
+    array = np.asarray(points, dtype=np.float64).reshape(-1, 2)
+    if lens is None:
+        return array
+    matrix = np.asarray(lens["camera_matrix"], dtype=np.float64)
+    normalized = np.column_stack((array, np.ones(len(array)))) @ np.linalg.inv(matrix).T
+    projected, _ = cv2.projectPoints(normalized, np.zeros(3), np.zeros(3), matrix,
+                                     np.asarray(lens["dist_coeffs"], dtype=np.float64))
+    return projected.reshape(-1, 2)
+
+
+def assess_camera_stability(frames, config=None):
+    """Measure robust background motion before reusing one court homography.
+
+    Sparse optical flow is fitted with RANSAC against the first frame. Inlier
+    coverage is required, so a moving player cannot alone certify camera
+    stability. Unobservable or inconsistent estimates remain REVIEW. Motion is
+    expressed in the same analysis pixels as the court and contact coordinates.
+    """
+    cfg = dict(config or {})
+    if not frames:
+        return {"status": "review", "reason_codes": ["CAMERA_STABILITY_NO_FRAMES"], "observations": []}
+    height, width = frames[0].shape[:2]
+    reduced_width = min(width, max(160, int(cfg.get("analysis_width", 640))))
+    scale = reduced_width / width
+    size = (reduced_width, max(1, round(height * scale)))
+    threshold = float(cfg.get("max_displacement_px", 3.0))
+    if not math.isfinite(threshold) or threshold <= 0:
+        raise ValueError("max_displacement_px must be finite and positive")
+    # A brief camera bump at the contact frame can invalidate H even when all
+    # neighbouring samples are stable. The default therefore checks every
+    # analysed frame. Explicit subsampling remains a diagnostic, never a basis
+    # for automatic metric acceptance.
+    count = min(len(frames), max(2, int(cfg.get("max_sample_frames", len(frames)))))
+    indices = np.unique(np.linspace(0, len(frames) - 1, count).astype(int)).tolist()
+    def gray(frame):
+        return cv2.cvtColor(cv2.resize(frame, size, interpolation=cv2.INTER_AREA), cv2.COLOR_BGR2GRAY)
+    reference = gray(frames[0])
+    corners = cv2.goodFeaturesToTrack(reference, maxCorners=500, qualityLevel=.015,
+                                     minDistance=8, blockSize=5)
+    observations = []
+    if corners is not None and len(corners) >= 12:
+        for index in indices[1:]:
+            current = gray(frames[index])
+            tracked, status, _ = cv2.calcOpticalFlowPyrLK(reference, current, corners, None,
+                                                        winSize=(21, 21), maxLevel=3)
+            if tracked is None or status is None:
+                observations.append({"frame_index": index, "status": "unobservable"})
+                continue
+            good = status.ravel().astype(bool) & np.isfinite(tracked.reshape(-1, 2)).all(axis=1)
+            before, after = corners.reshape(-1, 2)[good], tracked.reshape(-1, 2)[good]
+            if len(before) < 12:
+                observations.append({"frame_index": index, "status": "unobservable"})
+                continue
+            affine, inliers = cv2.estimateAffinePartial2D(before, after, method=cv2.RANSAC,
+                                                         ransacReprojThreshold=1.5, maxIters=1000)
+            if affine is None or inliers is None:
+                observations.append({"frame_index": index, "status": "unobservable"})
+                continue
+            accepted = inliers.ravel().astype(bool)
+            support = int(accepted.sum())
+            cells = np.floor(before[accepted] / np.array(size) * [4, 3]).astype(int)
+            coverage = len(set(map(tuple, cells)))
+            measured = support >= 12 and support / len(before) >= .5 and coverage >= 4
+            boundary = np.array([[0, 0], [size[0]-1, 0], [size[0]-1, size[1]-1], [0, size[1]-1]], float)
+            shifted = np.column_stack((boundary, np.ones(4))) @ affine.T
+            displacement = float(np.linalg.norm(shifted-boundary, axis=1).max() / scale)
+            observations.append({"frame_index": index, "status": "measured" if measured else "unobservable",
+                                 "inlier_count": support, "inlier_fraction": round(support / len(before), 4),
+                                 "spatial_grid_cells": coverage, "displacement_px": round(displacement, 4)})
+    measured = [o for o in observations if o["status"] == "measured"]
+    max_displacement = max((o["displacement_px"] for o in measured), default=None)
+    reasons = []
+    if len(indices) != len(frames):
+        reasons.append("CAMERA_STABILITY_PARTIAL_COVERAGE")
+    if max_displacement is not None and max_displacement > threshold:
+        reasons.append("CAMERA_MOVED_FROM_CALIBRATION_REFERENCE")
+    if len(measured) != len(indices) - 1 or not measured:
+        reasons.append("CAMERA_STABILITY_UNOBSERVABLE")
+    return {"status": "review" if reasons else "ok", "reason_codes": reasons or ["ALL_ANALYZED_FRAMES_BACKGROUND_STABLE"],
+            "max_displacement_px": max_displacement, "threshold_px": threshold,
+            "reference_frame_index": 0, "sampled_frame_indices": indices,
+            "all_frames_sampled": len(indices) == len(frames), "observations": observations,
+            "method": "reference_optical_flow_ransac_background_motion"}
+
+
+def guard_calibration_stability(calibration, stability):
+    """Invalidate metric acceptance without discarding useful fit hypotheses."""
+    result = dict(calibration)
+    result["camera_stability"] = stability
+    incomplete = stability.get("all_frames_sampled") is False
+    if stability.get("status") != "ok" or incomplete:
+        if result.get("status") == "ok":
+            result["status"] = "review"
+        reasons = stability.get("reason_codes", ["CAMERA_STABILITY_UNCONFIRMED"])
+        if incomplete:
+            reasons = reasons + ["CAMERA_STABILITY_PARTIAL_COVERAGE"]
+        result["reason_codes"] = list(dict.fromkeys(result.get("reason_codes", []) + reasons))
+        result["judgment_region_px"] = None
+        result["metric_coordinates_available"] = False
+    return result
+
+
+def _segment_model(background, config, roi_polygon=None):
+    """Optional ONNX binary line segmentation, with explicit preprocessing."""
+    size = config.get("line_model_input_size", [512, 512])
+    if len(size) != 2 or min(map(int, size)) < 16 or max(map(int, size)) > 4096:
+        raise ValueError("line_model_input_size must be [width, height] between 16 and 4096")
+    rgb = cv2.cvtColor(cv2.resize(background, tuple(map(int, size))), cv2.COLOR_BGR2RGB).astype(np.float32) / 255
+    mean = np.asarray(config.get("line_model_mean_rgb", [0, 0, 0]), np.float32)
+    std = np.asarray(config.get("line_model_std_rgb", [1, 1, 1]), np.float32)
+    if mean.shape != (3,) or std.shape != (3,) or not np.isfinite(mean).all() or not np.isfinite(std).all() or (std <= 0).any():
+        raise ValueError("line-model RGB mean/std must be finite three-vectors, with positive std")
+    network = cv2.dnn.readNetFromONNX(str(config["line_model_path"]))
+    network.setInput(np.transpose((rgb-mean)/std, (2, 0, 1))[None])
+    output = np.asarray(network.forward(), dtype=float)
+    if output.ndim == 4 and output.shape[0] == 1:
+        output = output[0]
+    if output.ndim == 3:
+        channel = int(config.get("line_model_output_channel", 0))
+        if not 0 <= channel < len(output):
+            raise ValueError("line_model_output_channel out of range")
+        output = output[channel]
+    if output.ndim != 2 or min(output.shape) < 2 or not np.isfinite(output).all():
+        raise ValueError("line model must return a finite [1,C,H,W], [C,H,W], or [H,W] mask")
+    output_kind = config.get("line_model_output_kind", "probability")
+    if output_kind == "logit":
+        output = 1 / (1 + np.exp(-np.clip(output, -60, 60)))
+    elif output_kind != "probability" or output.min() < 0 or output.max() > 1:
+        raise ValueError("line output must be probabilities in [0,1] or declared logit")
+    threshold = float(config.get("line_model_threshold", .5))
+    if not math.isfinite(threshold) or not 0 < threshold < 1:
+        raise ValueError("line_model_threshold must be in (0,1)")
+    mask = (cv2.resize(output.astype(np.float32), (background.shape[1], background.shape[0])) >= threshold).astype(np.uint8) * 255
+    if roi_polygon is not None:
+        roi = np.zeros_like(mask)
+        cv2.fillPoly(roi, [np.asarray(roi_polygon, np.int32)], 255)
+        mask = cv2.bitwise_and(mask, roi)
+    return mask
+
+
 COURT_CORNERS_M = np.array([[0, 0], [6.1, 0], [6.1, 13.4], [0, 13.4]], np.float32)
 TEMPLATE_LINES_M = [
     ((0, 0), (0, 13.4)), ((6.1, 0), (6.1, 13.4)),
@@ -210,7 +401,7 @@ def _manual_reference(hint, width, height):
             "independent_control_point_error_px": None}
 
 
-def calibrate(frames: list[np.ndarray], court_hint: dict | None = None) -> dict:
+def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: dict | None = None) -> dict:
     """Estimate the full doubles-court plane from several stationary-camera frames.
 
     Optional ``court_hint['roi_polygon_px']`` restricts a target area without
@@ -218,6 +409,7 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None) -> dict:
     ordered [near-left, near-right, far-right, far-left] manual references and
     always return REVIEW. A homography on a REVIEW result is a hypothesis only.
     """
+    cfg = dict(config or {})
     base = {"status": "failed", "homography": None, "polygon_px": None, "confidence": 0.0,
             "reason_codes": [], "method": "colour_hough_court_template",
             "manual_reference": False, "confidence_kind": "geometric support score, not a calibrated probability",
@@ -225,7 +417,10 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None) -> dict:
             "candidate_polygons_px": [], "line_fit_error_px": None,
             "independent_control_point_error_px": None, "lens_distortion_corrected": False,
             "coordinate_convention": "x=0..6.1 m left-to-right across near baseline, y=0..13.4 m near-to-far",
-            "metric_accuracy_validated": False}
+            "metric_accuracy_validated": False, "metric_coordinates_available": False,
+            "homography_pixel_space": "raw_analysis_pixels", "line_fit_error_pixel_space": "raw_analysis_pixels",
+            "judgment_region_px": None,
+            "supported_line_regions_px": [], "line_roles_confirmed": False}
     if not frames:
         return {**base, "reason_codes": ["NO_VIDEO_FRAMES"]}
     first = np.asarray(frames[0])
@@ -236,10 +431,25 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None) -> dict:
     selected = [np.asarray(frames[int(i)]) for i in np.linspace(0, len(frames)-1, min(5, len(frames)))]
     if any(f.shape != first.shape or f.dtype != np.uint8 for f in selected):
         return {**base, "reason_codes": ["INCONSISTENT_VIDEO_FRAME_FORMAT"]}
+    try:
+        lens = lens_geometry(cfg.get("lens"), width, height)
+    except (ValueError, TypeError, KeyError):
+        return {**base, "reason_codes": ["INVALID_KNOWN_LENS_CALIBRATION"]}
+    if lens:
+        base.update(lens=lens, lens_distortion_corrected=True,
+                    homography_pixel_space="undistorted_analysis_pixels",
+                    line_fit_error_pixel_space="undistorted_analysis_pixels")
+        matrix, distortion = np.asarray(lens["camera_matrix"]), np.asarray(lens["dist_coeffs"])
+        selected = [cv2.undistort(frame, matrix, distortion, None, matrix) for frame in selected]
     hint = court_hint or {}
     if "reference_points_px" in hint or "corners_px" in hint:
         try:
-            return {**base, **_manual_reference(hint, width, height)}
+            transformed = dict(hint)
+            key = "reference_points_px" if "reference_points_px" in hint else "corners_px"
+            transformed[key] = points_for_homography(hint[key], base).tolist()
+            result = {**base, **_manual_reference(transformed, width, height)}
+            result["polygon_px"] = _raw_points(result["polygon_px"], lens).tolist()
+            return result
         except (ValueError, TypeError, cv2.error):
             return {**base, "reason_codes": ["INVALID_MANUAL_REFERENCE"]}
     roi = hint.get("roi_polygon_px", hint.get("roi"))
@@ -248,12 +458,33 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None) -> dict:
             roi = np.asarray(roi, float)
             if roi.ndim != 2 or roi.shape[1] != 2 or len(roi) < 3 or not np.isfinite(roi).all():
                 raise ValueError("invalid ROI")
+            roi = points_for_homography(roi, base)
         except (ValueError, TypeError):
             return {**base, "reason_codes": ["INVALID_TARGET_COURT_ROI"]}
     background = np.median(np.stack(selected), axis=0).astype(np.uint8)
-    mask, colour = segment_lines(background, roi)
+    if cfg.get("line_model_path"):
+        try:
+            mask, colour = _segment_model(background, cfg, roi), "learned_line_mask"
+            base.update(method="onnx_line_segmentation_hough_court_template",
+                        line_model_path=str(cfg["line_model_path"]), line_model_accuracy_validated=False)
+        except (ValueError, TypeError, KeyError, OSError, cv2.error) as error:
+            return {**base, "reason_codes": ["LINE_SEGMENTATION_MODEL_FAILED"], "model_error": str(error)[:500]}
+    else:
+        mask, colour = segment_lines(background, roi)
     lines = _merged_lines(mask)
-    base.update(line_segments_px=[r["segment"] for r in lines], line_colour=colour,
+    raw_segments = [_raw_points(np.asarray(r["segment"]).reshape(2, 2), lens).reshape(-1).tolist() for r in lines]
+    regions = []
+    for segment in raw_segments:
+        a, b = np.asarray(segment).reshape(2, 2)
+        direction = b-a
+        normal = np.array([-direction[1], direction[0]]) / max(np.linalg.norm(direction), 1e-9)
+        polygon = np.array([a+normal*3, b+normal*3, b-normal*3, a-normal*3])
+        polygon[:, 0] = polygon[:, 0].clip(0, width-1)
+        polygon[:, 1] = polygon[:, 1].clip(0, height-1)
+        regions.append({"polygon_px": polygon.tolist(), "line_segment_px": segment,
+                        "court_line_role": None, "metric_coordinates_available": False})
+    base.update(line_segments_px=raw_segments, line_colour=colour,
+                supported_line_regions_px=regions,
                 background_frame_count=len(selected), mask_pixel_count=int(np.count_nonzero(mask)))
     if len(lines) < 4:
         return {**base, "reason_codes": ["INSUFFICIENT_COURT_LINES"],
@@ -285,13 +516,17 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None) -> dict:
     # A camera cannot establish a surveyed metric error bound from image support
     # alone. The support score merely determines whether this baseline fit can be
     # passed to downstream evidence gates, not official judging accuracy.
+    raw_polygon = _raw_points(best["polygon"], lens).tolist()
     base.update(status="review" if reasons else "ok", homography=best["homography"].tolist(),
-                polygon_px=best["polygon"].tolist(), confidence=round(best["score"], 6),
+                polygon_px=raw_polygon, polygon_homography_space_px=best["polygon"].tolist(),
+                confidence=round(best["score"], 6),
                 reason_codes=reasons or ["FULL_COURT_TEMPLATE_SUPPORTED"],
                 line_fit_error_px=round(best["line_fit_error_px"], 4),
                 line_support=best["line_support"], supported_line_count=best["supported_line_count"],
                 visible_fraction=best["visible_fraction"], competing_fit_margin=round(margin, 6),
                 partial_line_mode=not corners_inside,
-                candidate_polygons_px=[{"polygon_px": r["polygon"].tolist(), "support_score": round(r["score"], 6)} for r in distinct],
+                judgment_region_px=raw_polygon if not reasons else None,
+                metric_coordinates_available=not reasons, line_roles_confirmed=not reasons,
+                candidate_polygons_px=[{"polygon_px": _raw_points(r["polygon"], lens).tolist(), "support_score": round(r["score"], 6)} for r in distinct],
                 template_lines_m=court_template_lines())
     return base
