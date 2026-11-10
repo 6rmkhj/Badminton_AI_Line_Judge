@@ -99,7 +99,8 @@ def _analyze_video(video_path, output_dir, config=None):
     from .calibration import calibrate, assess_camera_stability, guard_calibration_stability
     from .detection import detect_sequence, summarize_detection_quality
     from .tracking import track_detections
-    from .events import estimate_landings, refine_source_contacts, validate_contact_modes
+    from .events import (estimate_landings, refine_source_contacts, validate_contact_modes,
+                         prioritize_review_candidates, review_refinement_regions, review_region_indices)
     from .identity import apply_identity
     from .decision import decide
     config = dict(config or {})
@@ -114,7 +115,7 @@ def _analyze_video(video_path, output_dir, config=None):
     validate_contact_modes(event_config)
     learned_input = bool(detector_config.get('model_path') or detector_config.get('scorer_path')
                          or event_config.get('contact_model_path'))
-    if learned_input:
+    if learned_input or detector_config.get('refinement_regions'):
         frames = load_frames(source, presentation['frame_count'], config.get('max_frames', 3000),
                              resize_to=(presentation['width'], presentation['height']))
         preprocessing = 'opencv_source_bgr_area_v1'
@@ -148,6 +149,10 @@ def _analyze_video(video_path, output_dir, config=None):
     timings['tracking_seconds'] = time.perf_counter() - clock
     clock = time.perf_counter()
     event_config['frame_preprocessing'] = preprocessing
+    event_config['review_refinement_regions'] = detector_config.get('refinement_regions',
+        event_config.get('review_refinement_regions', []))
+    review_regions = review_refinement_regions(event_config,
+        (frames[0].shape[1], frames[0].shape[0]), len(timestamps))
     identity_config = dict(config.get('identity') or {})
     if identity_config.get('event_window_seconds') is not None:
         event_config['event_window_seconds'] = identity_config['event_window_seconds']
@@ -166,16 +171,17 @@ def _analyze_video(video_path, output_dir, config=None):
     requested = select_requested_landings(landings, identity_config)
     decision = aggregate_decision([landing['decision'] for landing in requested])
     assistance_used = bool(identity_config.get('hit_anchors') or event_config.get('target_track_id') is not None
-                           or config.get('request_context'))
+                           or config.get('request_context') or review_regions)
     if assistance_used:
         decision.update(assistance_used=True, evaluation_eligible=False)
     timings['events_and_decision_seconds'] = time.perf_counter() - clock
-    selected = max(requested, key=lambda x: x.get('confidence', 0), default=None)
+    display_candidates = prioritize_review_candidates(requested, review_regions)
+    selected = display_candidates[0] if display_candidates else None
     artifacts = {'preview': 'preview.mp4', 'detections': 'detections.json', 'evidence': []}
     evidence_dir = output / 'evidence'
     evidence_dir.mkdir(exist_ok=True)
     # Preserve several candidate contexts, including original-resolution crops.
-    for landing in sorted(landings, key=lambda x: x.get('confidence', 0), reverse=True)[:6]:
+    for landing in prioritize_review_candidates(landings, review_regions)[:6]:
         index = max(0, min(len(frames)-1, int(landing.get('frame_index', 0))))
         filename = f"{landing['event_id']}.jpg"
         cv2.imwrite(str(evidence_dir / filename), _draw_frame(frames[index], calibration, tracks, index, landing))
@@ -194,6 +200,16 @@ def _analyze_video(video_path, output_dir, config=None):
             if evidence['source_crop_info']['status'] == 'saved':
                 evidence['source_crop'] = 'evidence/' + crop_name
         artifacts['evidence'].append(evidence)
+    review_refinement = {
+        'status': ('matched_candidates' if any(review_region_indices(item, review_regions) for item in landings)
+                   else 'no_matching_candidate') if review_regions else 'not_requested',
+        'regions': review_regions,
+        'matching_event_ids': [item['event_id'] for item in landings if review_region_indices(item, review_regions)],
+        'selected_event_id': selected['event_id'] if selected else None,
+        'selected_in_requested_region': bool(selected and review_region_indices(selected, review_regions)),
+        'scope': 'Evidence prioritization only; all landing decisions remain in the request aggregate.',
+        'assistance_used': bool(review_regions),
+    }
     representative = int(len(frames) / 2)
     cv2.imwrite(str(output / 'overview.jpg'), _draw_frame(frames[representative], calibration, tracks, representative))
     artifacts['overview'] = 'overview.jpg'
@@ -211,6 +227,7 @@ def _analyze_video(video_path, output_dir, config=None):
               'timestamps': timestamps, 'calibration': calibration, 'camera_stability': stability, 'tracks': tracks,
               'detection_quality': summarize_detection_quality(detections, tracks),
               'landings': landings, 'selected_landing': selected, 'decision': decision,
+              'review_refinement': review_refinement,
               'timings': timings, 'artifacts': artifacts, 'config': config,
               'assistance_used': assistance_used, 'automatic_evaluation_eligible': not assistance_used,
               'identity': {'requested_event_count': len(requested),
