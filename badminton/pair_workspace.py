@@ -128,7 +128,7 @@ def combine_views(views, *, same_event_confirmed=False, event_source=None, diffe
         for key in list(view):
             if key.startswith("_"):
                 view.pop(key)
-    return {
+    result = {
         "decision": label, "reason_codes": reasons, "reasons": [REASONS[code] for code in reasons],
         "same_event_confirmed": bool(same_event_confirmed),
         "event_correspondence_source": event_source if same_event_confirmed else None,
@@ -138,6 +138,10 @@ def combine_views(views, *, same_event_confirmed=False, event_source=None, diffe
         "ground_truth_created": False, "human_verified": False,
         "scope": "A/B verdict linkage; no 3D reconstruction or common pixel coordinates.",
     }
+    from .review_diagnostics import pair_diagnostics
+    result["review_diagnostics"] = pair_diagnostics(result)
+    result["refinement_available"] = any(view.get("refinement_available") is True for view in views.values())
+    return result
 
 
 class PairWorkspace:
@@ -334,8 +338,11 @@ class PairWorkspace:
         if not isinstance(body, dict) or not isinstance(body.get("views"), dict) or set(body["views"]) != {"A", "B"}:
             raise PairWorkspaceError(400, "A와 B 두 시점을 함께 입력하세요.")
         same_event, reuse = body.get("same_event_confirmed", False), body.get("reuse_review", True)
-        if not isinstance(same_event, bool) or not isinstance(reuse, bool):
+        refine = body.get("refine_review_regions", False)
+        if not isinstance(same_event, bool) or not isinstance(reuse, bool) or not isinstance(refine, bool):
             raise PairWorkspaceError(400, "같은 랠리 확인 및 검수 재사용 값은 참/거짓이어야 합니다.")
+        if refine and reuse:
+            raise PairWorkspaceError(400, "집중 재분석은 기존 판정 재사용을 끈 새 분석으로 실행하세요.")
         if body.get("rules", RULES) != RULES:
             raise PairWorkspaceError(400, "현재 A/B 작업은 복식 랠리 경계를 사용합니다.")
         catalog = self._catalog()
@@ -349,7 +356,7 @@ class PairWorkspace:
             job = {"job_id": identifier, "status": "queued", "created_at": now, "updated_at": now,
                    "views": {camera: {"status": "queued", "file": value["file"]} for camera, value in selected.items()},
                    "result": None, "request": {"views": selected, "same_event_confirmed": same_event,
-                                              "reuse_review": reuse, "rules": deepcopy(RULES)}}
+                                              "reuse_review": reuse, "refine_review_regions": refine, "rules": deepcopy(RULES)}}
             self.jobs[identifier] = job
             self._persist(job)
             self.executor.submit(self._run, identifier)
@@ -435,7 +442,7 @@ class PairWorkspace:
         entry = catalog[matches[0]] if len(matches) == 1 else None
         return original, digest, matches, entry
 
-    def _view(self, identifier, camera, selected, reuse, catalog):
+    def _view(self, identifier, camera, selected, reuse, catalog, refine=False):
         started = time.perf_counter()
         self._progress(identifier, camera, "running")
         base = {"camera_id": camera, "file": selected["file"], "status": "completed", "rules": deepcopy(RULES),
@@ -445,6 +452,9 @@ class PairWorkspace:
         try:
             original, digest, candidates, entry = self._resolve(selected, catalog)
             base.update(source_sha256=digest, _candidate_ids=candidates)
+            from .review_refinement import review_regions
+            hint = entry["row"]["annotation"] if entry and entry["kind"] == "review" and self._review_valid(entry["row"]) else {}
+            base["refinement_available"] = bool(review_regions(hint)) and original is not None
             if reuse and entry is not None and entry["kind"] == "review":
                 row = entry["row"]
                 if not self._review_valid(row):
@@ -459,6 +469,9 @@ class PairWorkspace:
                     contact_time_seconds=annotation.get("time") if direct in {"IN", "OUT"} else None,
                     reason_codes=deepcopy(row["review"].get("direct_reason_codes", row["review"].get("reason_codes", []))),
                     rationale=annotation.get("rationale", ""),
+                    review_details={"observation_status": annotation.get("observation_status"),
+                        "follow_up_actions": deepcopy(annotation.get("follow_up_actions") or []),
+                        "focus_time_seconds": annotation.get("time")},
                     source_verification="current_original_sha256" if original is not None else "packaged_source_bound_review")
             else:
                 if original is None:
@@ -471,6 +484,13 @@ class PairWorkspace:
                     raise PairWorkspaceError(413, f"영상 한 개는 {MAX_FRAMES}프레임 이하여야 합니다.")
                 config = _read(self.project / "configs/poc.json", {"analysis_width": 960, "max_frames": MAX_FRAMES})
                 config.update(video_id=f"pair_{identifier}_{camera.lower()}", rules=deepcopy(RULES), max_frames=MAX_FRAMES)
+                regions = review_regions(hint, min(metadata["width"], config.get("analysis_width", 960)),
+                                         metadata["frame_count"]) if refine else []
+                if regions:
+                    config.setdefault("detector", {}).update(refinement_regions=regions, include_dark_components=True)
+                    base["refinement"] = {"source": "ai_visual_review", "source_sha256": digest,
+                        "regions": regions, "assistance_used": True, "automatic_benchmark_eligible": False,
+                        "scope": "검수 좌표는 후보 검색에만 사용하며 기존 판정·접촉 확정을 복사하지 않습니다."}
                 cv2.setNumThreads(max(1, min(2, int(config.get("opencv_threads", 2)))))
                 output = self.root / "jobs" / identifier / "views" / camera
                 result = analyze_video(original, output, config=config)
@@ -490,7 +510,8 @@ class PairWorkspace:
                 if contact is None and decision != "REVIEW":
                     contact = (result.get("selected_landing") or {}).get("time")
                 base.update(automatic_decision=decision, direct_decision=decision, assisted_decision=decision,
-                    qualified=decision in {"IN", "OUT"}, review_source="automatic", processing_mode="fresh_analysis",
+                    qualified=decision in {"IN", "OUT"}, review_source="ai_review_guided_search" if regions else "automatic",
+                    processing_mode="review_guided_reanalysis" if regions else "fresh_analysis",
                     preview_url=prefix + quote(artifacts.get("preview", "preview.mp4"), safe="/"),
                     evidence_urls=evidence, contact_time_seconds=contact if _finite(contact) else None,
                     reason_codes=(result.get("decision") or {}).get("reason_codes", []),
@@ -528,7 +549,8 @@ class PairWorkspace:
                     and row.get("source_sha256") == views[camera]["source_sha256"]
                     and other_entry["row"].get("source_sha256") == views[partner]["source_sha256"])
                 if (valid_pair and match.get("same_event_confirmed_by_ai") is True
-                        and validation.get("qualified") is True and validation.get("originating_video_id") == other_id
+                        and (validation.get("event_correspondence_validated") is True or validation.get("qualified") is True)
+                        and validation.get("originating_video_id") == other_id
                         and len(match.get("matched_actions", [])) >= 2):
                     accepted = True
                     actions = [{"camera_id": camera, "other_camera_id": partner, **deepcopy(action)}
@@ -545,17 +567,20 @@ class PairWorkspace:
         try:
             catalog = self._catalog()
             with ThreadPoolExecutor(max_workers=2, thread_name_prefix="pair-view") as pool:
-                futures = {pool.submit(self._view, identifier, camera, selected, request["reuse_review"], catalog): camera
+                futures = {pool.submit(self._view, identifier, camera, selected, request["reuse_review"], catalog,
+                                       request.get("refine_review_regions", False)): camera
                            for camera, selected in request["views"].items()}
                 views = {futures[future]: future.result() for future in as_completed(futures)}
             views = {camera: views[camera] for camera in ("A", "B")}
             accepted, rejected, actions = self._correspondence(views, catalog)
-            if not request["reuse_review"]:
+            if not request["reuse_review"] and not request.get("refine_review_regions", False):
                 accepted, actions = False, []
             confirmed = accepted or request["same_event_confirmed"]
             source = "verified_ai_action_correspondence" if accepted else "operator_pair_selection" if confirmed else None
             result = combine_views(views, same_event_confirmed=confirmed, event_source=source, different_event=rejected)
             result.update(matched_actions=actions, clock_synchronization_claimed=False,
+                          refinement_requested=request.get("refine_review_regions", False),
+                          refinement_applied_camera_ids=[camera for camera, view in views.items() if view.get("refinement")],
                           elapsed_seconds=round(time.perf_counter() - started, 6), completed_at=_now())
             with self.lock:
                 job.update(status="completed_with_errors" if any(v["status"] == "failed" for v in views.values()) else "completed",
