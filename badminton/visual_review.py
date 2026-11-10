@@ -412,8 +412,9 @@ def _apply_cross_view_review(records, results, root, output):
         if not row["review"]["valid"] or not row["source_integrity"]["verified"]:
             reasons.append("CROSS_VIEW_RECEIVER_RECORD_INVALID")
         if donor:
-            if (not donor["review"]["valid"] or not donor["source_integrity"]["verified"]
-                    or donor["direct_assisted_decision"] not in {"IN", "OUT"}
+            if not donor["review"]["valid"] or not donor["source_integrity"]["verified"]:
+                reasons.append("CROSS_VIEW_PARTNER_RECORD_INVALID")
+            if (donor["direct_assisted_decision"] not in {"IN", "OUT"}
                     or (donor.get("annotation") or {}).get("target_contact_identity_confirmed") is not True):
                 reasons.append("CROSS_VIEW_DONOR_HAS_NO_DIRECT_QUALIFIED_CONTACT")
             if annotation.get("rules") != (donor.get("annotation") or {}).get("rules"):
@@ -482,7 +483,13 @@ def _apply_cross_view_review(records, results, root, output):
         if row["video_id"] in conflicts or donor and donor["video_id"] in conflicts:
             reasons.append("CROSS_VIEW_QUALIFIED_CONTACTS_CONFLICT")
         reasons = list(dict.fromkeys(reasons))
+        # Correspondence is independent of observing the landing. Missing donor
+        # contact still prevents label transfer even when the rally is matched.
+        event_reasons = [reason for reason in reasons if reason not in {
+            "CROSS_VIEW_DONOR_HAS_NO_DIRECT_QUALIFIED_CONTACT", "CROSS_VIEW_QUALIFIED_CONTACTS_CONFLICT"}]
         row["cross_view_review"] = {"qualified": not reasons, "reason_codes": reasons,
+                                    "event_correspondence_validated": not event_reasons,
+                                    "event_reason_codes": event_reasons,
                                     "originating_video_id": donor["video_id"] if donor else None,
                                     "clock_synchronization_claimed": False, "action_timing_check": timing_check}
         for index, image in enumerate(images):
@@ -558,7 +565,8 @@ def audit_filename_pairs(records):
                 result["rationale"] = str(match.get("rationale") or "")
                 result["reason_codes"] = list(review.get("reason_codes") or [])
                 accepted = (match.get("same_event_confirmed_by_ai") is True
-                            and review.get("qualified") is True
+                            and (review.get("event_correspondence_validated") is True
+                                 or review.get("qualified") is True)
                             and review.get("originating_video_id") == target_id)
                 result.update(status="accepted" if accepted else "rejected" if review else "not_validated",
                               validated=accepted)

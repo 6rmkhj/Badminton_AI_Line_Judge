@@ -270,6 +270,30 @@ def test_cross_view_transfer_keeps_donor_coordinates_and_local_unknown(context):
     assert not receiver['evaluation_eligible']
 
 
+def test_correspondence_is_independent_of_missing_donor_contact(context):
+    root,run,labels,out,annotation,donor=_cross_view_context(context)
+    donor.update(label='UNKNOWN',contact_observed=False,observation_status='contact_occluded',
+                 target_contact_identity_confirmed=False)
+    (labels/'v_2.json').write_text(json.dumps(donor))
+    report=build_visual_review_report(run,labels,out,project_root=root)
+    receiver=report['videos'][0]
+    assert receiver['cross_view_review']['event_correspondence_validated']
+    assert not receiver['cross_view_review']['qualified']
+    assert report['assisted_counts']['REVIEW']==2
+    assert report['cross_view_transferred_count']==0
+
+
+def test_invalid_partner_cannot_establish_event_correspondence(context):
+    root,run,labels,out,annotation,donor=_cross_view_context(context)
+    donor['source_sha256']='0'*64
+    (labels/'v_2.json').write_text(json.dumps(donor))
+    report=build_visual_review_report(run,labels,out,project_root=root)
+    receiver=report['videos'][0]
+    assert not receiver['cross_view_review']['event_correspondence_validated']
+    assert 'CROSS_VIEW_PARTNER_RECORD_INVALID' in receiver['cross_view_review']['event_reason_codes']
+    assert receiver['assisted_decision']=='REVIEW'
+
+
 @pytest.mark.parametrize('mutation,reason', [
     ('uninspected','CROSS_VIEW_ACTION_NOT_IN_INSPECTED_SOURCE_FRAMES'),
     ('one_action','CROSS_VIEW_NEEDS_TWO_DISTINCT_REVIEWED_ACTIONS'),
