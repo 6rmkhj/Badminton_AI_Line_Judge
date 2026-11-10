@@ -439,3 +439,97 @@ def test_cross_view_accepts_unknown_constant_offset_without_claiming_clock_sync(
     assert check['action_offsets_seconds']==pytest.approx([.5,.5])
     assert check['offset_spread_seconds']==pytest.approx(0)
     assert check['clock_synchronization_claimed'] is False
+
+
+def _pair_record(identifier, filename, decision, digest=None, annotation=None):
+    return {'video_id':identifier,'file':filename,'assisted_decision':decision,
+            'direct_assisted_decision':decision,'source_sha256':digest or identifier,
+            'annotation':annotation or {}}
+
+
+def test_filename_pair_audit_flags_missing_transfer_candidate_without_propagation():
+    from badminton.visual_review import audit_filename_pairs
+    records=[_pair_record('a1','a시점 1.mp4','REVIEW'),_pair_record('b1','b시점 1.mp4','IN')]
+    original=deepcopy(records)
+    audit=audit_filename_pairs(records)
+    assert audit['counts']['one_review_with_decided_partner']==1
+    item=audit['items'][0]
+    assert item['review_video_id']=='a1' and item['donor_candidate']['video_id']=='b1'
+    assert item['receiver_correspondence']['status']=='missing'
+    assert not item['event_correspondence_validated']
+    assert audit['filename_only_propagation'] is False
+    assert records==original
+
+
+def test_filename_pair_audit_counts_both_review_and_conflicting_labels():
+    from badminton.visual_review import audit_filename_pairs
+    records=[_pair_record('a1','a시점 1.mp4','REVIEW'),_pair_record('b1','b시점 1.mp4','REVIEW'),
+             _pair_record('a2','a시점 2.mp4','IN'),_pair_record('b2','b시점 2.mp4','OUT'),
+             _pair_record('a3','a시점 3.mp4','OUT'),_pair_record('b3','b시점 3.mp4','OUT')]
+    audit=audit_filename_pairs(records)
+    assert audit['counts']=={'both_resolved_same_label':1,'both_review':1,
+                             'one_review_with_decided_partner':0,'conflicting_resolved_labels':1}
+    assert audit['both_review_video_count']==2
+    assert audit['event_correspondence_validated_pair_count']==0
+    assert records[2]['assisted_decision']=='IN' and records[3]['assisted_decision']=='OUT'
+
+
+def test_duplicate_content_across_filename_pairs_does_not_override_reviewed_mismatch():
+    from badminton.visual_review import audit_filename_pairs
+    mismatch={'cross_view_candidates':[{'other_video_id':'b18','status':'different_rally',
+        'same_event_confirmed_by_ai':False,'rationale':'B18 repeats B17; A18 has a different shot sequence.'}]}
+    records=[_pair_record('a17','a시점 17.mp4','IN'),_pair_record('b17','b시점 17.mp4','IN','duplicate'),
+             _pair_record('a18','a시점 18.mp4','REVIEW',annotation=mismatch),
+             _pair_record('b18','b시점 18.mp4','IN','duplicate')]
+    original=deepcopy(records);audit=audit_filename_pairs(records)
+    assert audit['duplicate_content_across_pair_count']==2
+    item=next(pair for pair in audit['items'] if pair['review_video_id']=='a18')
+    assert item['duplicate_content_across_pairs']
+    assert item['receiver_correspondence']['status']=='rejected_different_event'
+    assert item['cross_pair_duplicates'][0]['duplicate_video_id']=='b17'
+    assert not item['event_correspondence_validated']
+    assert records==original
+
+
+def test_pair_audit_acceptance_requires_validated_action_correspondence():
+    from badminton.visual_review import audit_filename_pairs
+    a=_pair_record('a1','a시점 1.mp4','IN',annotation={'cross_view_match':{
+        'other_video_id':'b1','same_event_confirmed_by_ai':True,'rationale':'Two reviewed actions.'}})
+    b=_pair_record('b1','b시점 1.mp4','IN')
+    audit=audit_filename_pairs([a,b])
+    assert not audit['items'][0]['event_correspondence_validated']
+    a['cross_view_review']={'qualified':False,'originating_video_id':'b1',
+                            'reason_codes':['CROSS_VIEW_ACTION_TIMING_INCONSISTENT']}
+    assert audit_filename_pairs([a,b])['items'][0]['correspondence'][0]['status']=='rejected'
+    a['cross_view_review'].update(qualified=True,reason_codes=[])
+    assert audit_filename_pairs([a,b])['event_correspondence_validated_pair_count']==1
+
+
+def test_pair_audit_keeps_different_directories_and_unpaired_files_separate():
+    from badminton.visual_review import audit_filename_pairs
+    records=[_pair_record('a1','day1/a시점 1.mp4','IN'),_pair_record('b1','day1/b시점 1.mp4','IN'),
+             _pair_record('a2','day2/a시점 1.mp4','REVIEW'),_pair_record('b2','day2/b시점 1.mp4','REVIEW'),
+             _pair_record('unknown','unpaired.mp4','REVIEW')]
+    audit=audit_filename_pairs(records)
+    assert audit['candidate_pair_count']==2
+    assert audit['unpaired_video_ids']==['unknown']
+
+
+def test_report_prominently_exposes_missing_opposite_view_review(context):
+    root,result,annotation=context
+    result.update(file='a시점 1.mp4')
+    annotation.update(file='a시점 1.mp4',label='UNKNOWN',contact_observed=False,
+                      observation_status='contact_out_of_view',target_contact_identity_confirmed=False)
+    donor,donor_annotation=deepcopy(result),deepcopy(annotation)
+    donor.update(video_id='v_2',file='b시점 1.mp4',source_sha256=hashlib.sha256(b'video2').hexdigest())
+    donor_annotation.update(video_id='v_2',file='b시점 1.mp4',source_sha256=donor['source_sha256'],
+                            label='IN',contact_observed=True,observation_status='contact_observed',
+                            target_contact_identity_confirmed=True)
+    run,labels,out=_write_run(root,[result,donor],[annotation,donor_annotation])
+    (root/'video/b시점 1.mp4').write_bytes(b'video2')
+    report=build_visual_review_report(run,labels,out,project_root=root)
+    assert report['assisted_counts']=={'IN':1,'OUT':0,'REVIEW':1}
+    assert report['filename_pair_audit']['counts']['one_review_with_decided_partner']==1
+    text=(out/'index.html').read_text()
+    assert 'id="filename-pair-audit"' in text and 'data-mixed-review="v_1"' in text
+    assert '사건 대응 검수 누락' in text and '같은 번호는 같은 사건의 증거가 아닙니다' in text

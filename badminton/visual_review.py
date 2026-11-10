@@ -22,6 +22,7 @@ import cv2
 import numpy as np
 
 from .decision import rule_region
+from .dataset import pair_identity
 
 
 LABELS = {"IN", "OUT", "UNKNOWN"}
@@ -33,6 +34,11 @@ OBSERVATION_LABELS = {"contact_observed": "접촉 관측", "contact_interval": "
                       "no_contact_in_clip": "영상 내 접촉 없음", "contact_occluded": "접촉 가림",
                       "contact_out_of_view": "접촉이 화면 밖", "target_ambiguous": "대상 식별 불명확",
                       "line_ambiguous": "경계선 불명확", "missing": "검수 기록 없음"}
+PAIR_CATEGORIES = ("both_resolved_same_label", "both_review", "one_review_with_decided_partner",
+                   "conflicting_resolved_labels")
+PAIR_CATEGORY_LABELS = {"both_resolved_same_label": "양쪽 판정 일치", "both_review": "양쪽 REVIEW",
+                        "one_review_with_decided_partner": "상대는 판정됨·한쪽 REVIEW",
+                        "conflicting_resolved_labels": "양쪽 판정 상충"}
 
 
 def _number(value):
@@ -516,6 +522,116 @@ def _apply_cross_view_review(records, results, root, output):
             row["review"]["reason_codes"].append("CROSS_VIEW_QUALIFIED_CONTACTS_CONFLICT")
 
 
+def audit_filename_pairs(records):
+    """Expose missed opposite-view follow-ups without propagating filenames.
+
+    A filename pair is a search candidate only. Accepted event correspondence
+    must still come from the separately validated visual action observations.
+    This diagnostic does not mutate or combine any video decision.
+    """
+    groups, hashes, pair_by_id = defaultdict(list), defaultdict(list), {}
+    unpaired = []
+    for row in records:
+        filename = row.get("file")
+        key, view = pair_identity(Path(filename).name) if isinstance(filename, str) else (None, None)
+        if key is not None:
+            key = (Path(filename).parent / key).as_posix()
+            groups[key].append((view, row))
+            pair_by_id[row["video_id"]] = key
+        else:
+            unpaired.append(row["video_id"])
+        digest = row.get("source_sha256")
+        if isinstance(digest, str) and digest:
+            hashes[digest].append(row)
+
+    def correspondence(receiver, partner):
+        annotation = receiver.get("annotation") or {}
+        match = annotation.get("cross_view_match")
+        review = receiver.get("cross_view_review") or {}
+        target_id = partner["video_id"]
+        result = {"receiver_video_id": receiver["video_id"], "candidate_partner_video_id": target_id,
+                  "status": "missing", "validated": False, "reason_codes": [], "rationale": ""}
+        if isinstance(match, dict):
+            if match.get("other_video_id") != target_id:
+                result.update(status="points_to_another_video", linked_video_id=match.get("other_video_id"))
+            else:
+                result["rationale"] = str(match.get("rationale") or "")
+                result["reason_codes"] = list(review.get("reason_codes") or [])
+                accepted = (match.get("same_event_confirmed_by_ai") is True
+                            and review.get("qualified") is True
+                            and review.get("originating_video_id") == target_id)
+                result.update(status="accepted" if accepted else "rejected" if review else "not_validated",
+                              validated=accepted)
+        candidates = annotation.get("cross_view_candidates")
+        if isinstance(candidates, list):
+            examined = next((candidate for candidate in candidates if isinstance(candidate, dict)
+                             and candidate.get("other_video_id") == target_id), None)
+            if examined is not None:
+                result["examined_candidate_status"] = examined.get("status")
+                result["examined_candidate_rationale"] = str(examined.get("rationale") or "")
+                if result["status"] == "missing":
+                    result.update(status="rejected_different_event" if examined.get("status") == "different_rally"
+                                  and examined.get("same_event_confirmed_by_ai") is False else "examined_not_confirmed",
+                                  rationale=str(examined.get("rationale") or ""))
+        return result
+
+    items, ambiguous_groups = [], []
+    for key, members in sorted(groups.items()):
+        if len(members) != 2 or {view for view, _ in members} != {"a", "b"}:
+            ambiguous_groups.append({"pair_key": key, "video_ids": [row["video_id"] for _, row in members],
+                                     "reason": "Expected exactly one A and one B filename"})
+            unpaired.extend(row["video_id"] for _, row in members)
+            continue
+        members.sort(key=lambda value: value[0])
+        left, right = members[0][1], members[1][1]
+        labels = [row.get("assisted_decision", "REVIEW") for row in (left, right)]
+        resolved = [value in {"IN", "OUT"} for value in labels]
+        if all(resolved):
+            category = "both_resolved_same_label" if labels[0] == labels[1] else "conflicting_resolved_labels"
+        elif not any(resolved):
+            category = "both_review"
+        else:
+            category = "one_review_with_decided_partner"
+        views = [{"video_id": row["video_id"], "file": row["file"], "view": view,
+                  "assisted_decision": row.get("assisted_decision", "REVIEW"),
+                  "direct_assisted_decision": row.get("direct_assisted_decision", "REVIEW"),
+                  "source_sha256": row.get("source_sha256")} for view, row in members]
+        correspondences = [correspondence(left, right), correspondence(right, left)]
+        duplicates = []
+        for _, row in members:
+            for duplicate in hashes.get(row.get("source_sha256"), []):
+                other_pair = pair_by_id.get(duplicate["video_id"])
+                if other_pair is not None and other_pair != key:
+                    duplicates.append({"video_id": row["video_id"], "duplicate_video_id": duplicate["video_id"],
+                                       "duplicate_file": duplicate["file"], "other_pair_key": other_pair})
+        item = {"pair_key": key, "category": category, "views": views,
+                "event_correspondence_validated": any(value["validated"] for value in correspondences),
+                "correspondence": correspondences,
+                "duplicate_content_across_pairs": bool(duplicates), "cross_pair_duplicates": duplicates,
+                "duplicate_content_within_pair": bool(left.get("source_sha256"))
+                                                   and left.get("source_sha256") == right.get("source_sha256"),
+                "donor_candidate": None, "review_video_id": None}
+        if category == "one_review_with_decided_partner":
+            receiver, donor = (right, left) if resolved[0] else (left, right)
+            item["review_video_id"] = receiver["video_id"]
+            item["donor_candidate"] = {"video_id": donor["video_id"], "file": donor["file"],
+                                       "assisted_decision": donor["assisted_decision"],
+                                       "direct_assisted_decision": donor.get("direct_assisted_decision", "REVIEW")}
+            item["receiver_correspondence"] = next(value for value in correspondences
+                                                   if value["receiver_video_id"] == receiver["video_id"])
+        items.append(item)
+    counts = Counter(item["category"] for item in items)
+    return {"candidate_pair_count": len(items), "counts": {category: counts[category] for category in PAIR_CATEGORIES},
+            "both_review_video_count": 2 * counts["both_review"],
+            "mixed_review_video_count": counts["one_review_with_decided_partner"],
+            "event_correspondence_validated_pair_count": sum(item["event_correspondence_validated"] for item in items),
+            "duplicate_content_across_pair_count": sum(item["duplicate_content_across_pairs"] for item in items),
+            "unpaired_video_ids": sorted(unpaired), "ambiguous_filename_groups": ambiguous_groups,
+            "filename_only_propagation": False,
+            "scope": "Filename pairs are candidates for review, not proof of the same event. This audit never changes decisions.",
+            "items": items}
+
+
 def build_visual_review_report(run_dir, annotations_dir, output_dir, *, project_root):
     """Write a portable assisted-review overlay, leaving analysis immutable."""
     root, run, annotations, output = (Path(p).resolve() for p in (project_root, run_dir, annotations_dir, output_dir))
@@ -599,6 +715,7 @@ def build_visual_review_report(run_dir, annotations_dir, output_dir, *, project_
               "cross_view_transferred_count": sum(r.get("assistance_mode") == "cross_view_ai_review" for r in records),
               "observation_status_counts": dict(Counter(_observation_status(r.get("annotation")) for r in records)),
               "duplicate_conflicts": contradictions, "ground_truth_eligible": False,
+              "filename_pair_audit": audit_filename_pairs(records),
               "automatic_accuracy": None, "independent_human_ground_truth_count": 0,
               "scope": "AI visual assistance over source evidence; not independent ground truth or automatic accuracy.",
               "videos": records}
@@ -649,16 +766,45 @@ def _render_html(report):
 <p>검수자 {esc(annotation.get('reviewer'))} · SHA256 {esc(row['source_sha256'])}</p></details></article>''')
     counts = report["assisted_counts"]
     observations = " · ".join(f'{OBSERVATION_LABELS.get(key, key)} {value}개' for key, value in report.get("observation_status_counts", {}).items())
+    pair_audit = report.get("filename_pair_audit") or {"candidate_pair_count": 0, "counts": {}, "items": []}
+    pair_summary = " · ".join(f'{PAIR_CATEGORY_LABELS[key]} {pair_audit["counts"].get(key, 0)}쌍' for key in PAIR_CATEGORIES)
+    correspondence_labels = {"missing": "사건 대응 검수 누락", "points_to_another_video": "다른 영상과 대응됨",
+                             "rejected": "사건 대응 검증 실패", "not_validated": "사건 대응 검증 대기",
+                             "accepted": "사건 대응 검증 통과", "rejected_different_event": "다른 랠리로 확인",
+                             "examined_not_confirmed": "검수했으나 대응 미확정"}
+    def pair_link(view):
+        return (f'<a class="pair-link" href="#{esc(view["video_id"])}">{esc(view["file"])}</a>'
+                f' ({esc(view["assisted_decision"])})')
+    mixed_rows, all_pair_rows = [], []
+    for pair in pair_audit["items"]:
+        views = " ↔ ".join(pair_link(view) for view in pair["views"])
+        duplicate_note = " · 다른 번호쌍의 영상과 원본 내용 중복" if pair["duplicate_content_across_pairs"] else ""
+        confirmed_note = "사건 대응 검증 통과" if pair["event_correspondence_validated"] else "사건 대응 미확정"
+        all_pair_rows.append(f'<li data-pair-category="{esc(pair["category"])}">{views}<br>'
+                             f'{esc(PAIR_CATEGORY_LABELS[pair["category"]])} · {esc(confirmed_note + duplicate_note)}</li>')
+        if pair["category"] == "one_review_with_decided_partner":
+            correspondence = pair["receiver_correspondence"]
+            status = correspondence_labels.get(correspondence["status"], correspondence["status"])
+            reasons = ", ".join(correspondence.get("reason_codes", []))
+            detail = correspondence.get("rationale") or reasons or "상대 영상의 판정을 사용하기 전에 같은 사건인지 직접 확인해야 합니다."
+            mixed_rows.append(f'<li data-mixed-review="{esc(pair["review_video_id"])}">{views}<br>'
+                              f'<strong>{esc(status + duplicate_note)}</strong><p class="muted">{esc(detail)}</p></li>')
+    mixed = "<ul>" + "".join(mixed_rows) + "</ul>" if mixed_rows else "<p>상대 영상은 판정됐지만 한쪽만 REVIEW인 후보 쌍은 없습니다.</p>"
+    pair_section = f'''<section id="filename-pair-audit"><h2>반대 시점 대조 현황</h2>
+<p>파일명으로 묶은 후보 {pair_audit['candidate_pair_count']}쌍입니다. 같은 번호는 같은 사건의 증거가 아닙니다. 동작 대응 검증을 통과한 경우에만 다른 시점의 판정을 연결합니다.</p>
+<p id="pair-counts">{esc(pair_summary)}</p><h3>상대는 판정됐지만 한쪽만 REVIEW: {pair_audit['counts'].get('one_review_with_decided_partner', 0)}쌍</h3>{mixed}
+<details><summary>후보 쌍 전체와 대응 검증 상태</summary><ul>{''.join(all_pair_rows)}</ul></details></section>'''
     return f'''<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>영상 AI 검수 결과</title><style>
-body{{font-family:system-ui,sans-serif;margin:0;background:#10151c;color:#e8edf4;line-height:1.55}}main{{max-width:1120px;margin:auto;padding:24px}}header,article{{background:#1b2431;border:1px solid #344256;padding:20px;border-radius:12px;margin:16px 0}}h1,h2{{margin-top:0}}h2,p{{overflow-wrap:anywhere}}a{{color:#8fc7ff}}video{{display:block;width:100%;max-height:570px;background:black}}.evidence{{display:flex;gap:10px;overflow:auto;margin-top:14px}}.evidence img{{height:150px;max-width:none}}.muted{{color:#b4c1d3;font-size:.92rem}}.verdict{{font-size:1.15rem}}strong{{color:#9fdfbd}}details{{overflow-wrap:anywhere}}select,button{{font:inherit;background:#253346;color:white;padding:7px;border:1px solid #66809e;border-radius:5px}}button{{cursor:pointer;margin:0 0 10px}}@media(max-width:600px){{main{{padding:10px}}header,article{{padding:12px}}}}
+body{{font-family:system-ui,sans-serif;margin:0;background:#10151c;color:#e8edf4;line-height:1.55}}main{{max-width:1120px;margin:auto;padding:24px}}header,article{{background:#1b2431;border:1px solid #344256;padding:20px;border-radius:12px;margin:16px 0}}h1,h2{{margin-top:0}}h2,p,li{{overflow-wrap:anywhere}}a{{color:#8fc7ff}}video{{display:block;width:100%;max-height:570px;background:black}}.evidence{{display:flex;gap:10px;overflow:auto;margin-top:14px}}.evidence img{{height:150px;max-width:none}}.muted{{color:#b4c1d3;font-size:.92rem}}.verdict{{font-size:1.15rem}}strong{{color:#9fdfbd}}details{{overflow-wrap:anywhere}}#filename-pair-audit{{border:1px solid #61728a;border-radius:8px;padding:16px;margin:16px 0}}#filename-pair-audit h2{{font-size:1.15rem}}#filename-pair-audit h3{{font-size:1rem}}#filename-pair-audit li{{margin-bottom:12px}}select,button{{font:inherit;background:#253346;color:white;padding:7px;border:1px solid #66809e;border-radius:5px}}button{{cursor:pointer;margin:0 0 10px}}@media(max-width:600px){{main{{padding:10px}}header,article{{padding:12px}}#filename-pair-audit{{padding:10px}}}}
 </style><main><header><h1>영상 AI 검수 결과</h1><p>총 {report['video_count']}개 · IN {counts['IN']} · OUT {counts['OUT']} · REVIEW {counts['REVIEW']}</p>
 <p>원본 프레임을 보고 작성한 AI 보조 검수입니다. 사람의 독립 정답 검수나 무보조 자동 모델 정확도로 계산하지 않습니다. 근거가 충분하지 않은 영상은 REVIEW를 유지합니다. 다른 시점의 관측으로 판정한 영상: {report['cross_view_transferred_count']}개.</p>
 <p id="observation-counts" class="muted">{esc(observations)}</p>
+{pair_section}
 <label>표시 <select id="filter"><option value="all">전체</option><option>IN</option><option>OUT</option><option>REVIEW</option></select></label> · <a href="visual-review.json">전체 검수 JSON</a></header>{''.join(cards)}</main>
 <script>
 const filter=document.querySelector('#filter');
 filter.addEventListener('change',e=>{{for(const el of document.querySelectorAll('article'))el.hidden=e.target.value!=='all'&&el.dataset.decision!==e.target.value;}});
 function reveal(id){{const article=document.getElementById(id);if(!article)return null;if(article.hidden){{filter.value='all';filter.dispatchEvent(new Event('change'));}}article.scrollIntoView({{block:'start'}});return article;}}
-document.addEventListener('click',e=>{{const button=e.target.closest('button[data-seek-video]');if(button){{const article=reveal(button.dataset.seekVideo);const video=article?.querySelector('video');if(!video)return;const time=Number(button.dataset.seekTime);const seek=()=>{{video.pause();video.currentTime=Math.min(time,Math.max(0,video.duration-0.001));}};if(video.readyState>=1)seek();else{{video.addEventListener('loadedmetadata',seek,{{once:true}});video.load();}}}}const link=e.target.closest('a.donor-link');if(link)reveal(link.hash.slice(1));}});
+document.addEventListener('click',e=>{{const button=e.target.closest('button[data-seek-video]');if(button){{const article=reveal(button.dataset.seekVideo);const video=article?.querySelector('video');if(!video)return;const time=Number(button.dataset.seekTime);const seek=()=>{{video.pause();video.currentTime=Math.min(time,Math.max(0,video.duration-0.001));}};if(video.readyState>=1)seek();else{{video.addEventListener('loadedmetadata',seek,{{once:true}});video.load();}}}}const link=e.target.closest('a.donor-link, a.pair-link');if(link)reveal(link.hash.slice(1));}});
 </script></html>'''
