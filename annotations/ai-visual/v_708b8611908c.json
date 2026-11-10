@@ -34,8 +34,10 @@
     0,
     4,
     8,
+    10,
     12,
     17,
+    20,
     21,
     25,
     30,
@@ -44,6 +46,7 @@
     36,
     38,
     39,
+    40,
     42,
     43,
     45,
@@ -80,6 +83,7 @@
     76,
     77,
     81,
+    85,
     86,
     90,
     94,
@@ -93,7 +97,16 @@
     "runs/visual-review/v_708b8611908c/pole_native_crop_0069.jpg",
     "runs/visual-review/v_708b8611908c/pole_native_crop_0070.jpg",
     "runs/visual-review/v_708b8611908c/pole_native_crop_0071.jpg",
-    "runs/visual-review/v_708b8611908c/pole_native_crop_0072.jpg"
+    "runs/visual-review/v_708b8611908c/pole_native_crop_0072.jpg",
+    "runs/review-remediation/boundary/v_708b8611908c/overview-0.jpg",
+    "runs/review-remediation/boundary/v_708b8611908c/overview-1.jpg",
+    "runs/review-remediation/boundary/v_708b8611908c/contact-0.jpg",
+    "runs/review-remediation/boundary/v_708b8611908c/contact-1.jpg",
+    "runs/review-remediation/boundary/8k5-cross-view-actions.jpg",
+    "runs/review-remediation/boundary/actions/8k5-A-01.jpg",
+    "runs/review-remediation/boundary/actions/8k5-B-01.jpg",
+    "runs/review-remediation/boundary/actions/8k5-A-02.jpg",
+    "runs/review-remediation/boundary/actions/8k5-B-02.jpg"
   ],
   "rules": {
     "game": "doubles",
@@ -205,5 +218,37 @@
     "explanation": "지주 왼쪽으로 이어지는 먼 반코트 복식 사이드라인 실제 바깥 테두리. 접촉 지지영역이 바깥 테두리에 걸치며 이 선 하나만으로 IN을 입증하지 않는다."
   },
   "detection_labels_verified": false,
-  "detection_labels_verified_by_ai": true
+  "detection_labels_verified_by_ai": true,
+  "remediation_review": {
+    "source": "ai_visual_review",
+    "human_verified": false,
+    "reviewer": "Codex review_boundary",
+    "inspected_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      85,
+      99
+    ],
+    "finding": "A69–71의 먼 코르크 지지영역이 외곽선과 겹친다. B38은 노출·압축 때문에 코르크가 분리되지 않고 B39는 이미 반등했을 가능성이 있어 두 시점이 같은 미관측 순간을 보완하지 못한다.",
+    "next_action": "양 시점의 노출 구간 사이 첫 코르크 접촉을 기록하는 높은 시간 해상도와 짧은 노출이 필요하다. 차영상·초해상도로 원본에 없는 최초 접촉을 확정하지 않는다.",
+    "label_changed": false,
+    "clock_synchronization_claimed": false
+  }
 }

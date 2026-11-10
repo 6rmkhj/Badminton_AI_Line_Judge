@@ -15,7 +15,7 @@
     "height": 1080
   },
   "label": "UNKNOWN",
-  "reviewer": "Codex review_uhdhd",
+  "reviewer": "Codex review_uhd remediation",
   "contact_observed": false,
   "contact_interval_observed": false,
   "contact_frame_index": null,
@@ -25,7 +25,7 @@
   "target_contact_identity_confirmed": false,
   "observation_status": "target_ambiguous",
   "confidence": "unresolved",
-  "rationale": "가까운 검정 선수의 네트 쪽 이동과 종료 동작을 보았으나 대상 셔틀의 접촉 순간을 유일하게 확인하지 못했다. 인접 코트·바닥의 다른 셔틀은 대상 정답으로 사용하지 않았다.",
+  "rationale": "B의 마지막 전위 이동·정지 전후25–68프레임을 원본 ROI로 확인했으나 대상 코르크의 최초 접촉을 고유하게 찾지 못했다. 여러 코트의 밝은 점과 이동 물체를 대상 판정으로 사용하지 않았다.",
   "limitations": [
     "AI 직접 영상 검수이며 독립적인 인간 검증 정답이 아니다.",
     "A/B 동시각이나 같은 파일명만으로 사건 대응을 확정하지 않았다."
@@ -33,15 +33,29 @@
   "inspected_frame_indices": [
     0,
     3,
+    5,
+    6,
     7,
+    9,
     10,
+    12,
     14,
+    15,
+    16,
     17,
+    18,
+    19,
     21,
     24,
+    25,
+    26,
+    27,
     28,
+    29,
     30,
+    31,
     32,
+    33,
     34,
     35,
     36,
@@ -76,10 +90,16 @@
     65,
     66,
     67,
+    68,
+    69,
     70,
     71,
+    72,
     74,
+    75,
+    76,
     78,
+    81,
     82
   ],
   "evidence_paths": [
@@ -90,12 +110,52 @@
     "runs/visual-review/v_ab328b045b84/native-0070.jpg",
     "runs/visual-review/v_ab328b045b84/native-0082.jpg",
     "runs/visual-review/v_ab328b045b84/near-contact.jpg",
-    "runs/visual-review/v_ab328b045b84/overview.jpg"
+    "runs/visual-review/v_ab328b045b84/overview.jpg",
+    "runs/review-remediation/uhd/v_ab328b045b84-overview.jpg",
+    "runs/review-remediation/uhd/v_ab328b045b84-contact-0.jpg",
+    "runs/review-remediation/uhd/v_ab328b045b84-contact-1.jpg",
+    "runs/review-remediation/uhd/v_ab328b045b84-contact-2.jpg",
+    "runs/review-remediation/uhd/v_ab328b045b84-contact-3.jpg",
+    "runs/review-remediation/uhd/a2-b2-proposed-actions-0.jpg",
+    "runs/review-remediation/uhd/a2-b2-proposed-actions-1.jpg",
+    "runs/review-remediation/uhd/b2-far-action-0.jpg",
+    "runs/review-remediation/uhd/b2-far-action-1.jpg"
   ],
   "rules": {
     "game": "doubles",
     "phase": "rally"
   },
   "detection_labels": [],
-  "detection_labels_verified_by_ai": false
+  "detection_labels_verified_by_ai": false,
+  "follow_up_actions": [
+    "실제 두 타격 동작으로 같은 랠리임을 확인했다. 연결 여부보다 최초 목표 셔틀의 지면 접촉 미관측을 해결해야 한다.",
+    "A/B 원본에서 마지막 타격 이후 해당 셔틀을 연속 추적하고, 인접 코트·예비 셔틀을 제외한다.",
+    "접촉이 실제 가려진 경우 해당 바닥을 볼 수 있는 추가 시점 또는 더 긴 원본이 필요하다."
+  ],
+  "review_scope": "Fresh full-span overview plus listed native-source ROI frames. No unique first target-contact point was recovered; UNKNOWN is preserved.",
+  "cross_view_match": {
+    "other_video_id": "v_bb5abec5c6ef",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 9,
+        "other_frame_index": 0,
+        "description": "초록 반바지 검정 상의 선수가 높은 공을 리턴하기 위해 라켓과 반대 손을 머리 옆으로 올리는 동작이 대응한다. 다음 프레임에서 팔을 내리는 타격 후 동작도 같은 순서로 이어진다."
+      },
+      {
+        "frame_index": 30,
+        "other_frame_index": 40,
+        "description": "다음 머리띠 검정 선수가 옆으로 깊게 몸을 기울여 낮은 포핸드 리턴을 하고 반대 팔을 뒤로 길게 벌린다. 붉은 상의 파트너의 준비 자세와 상대 파트너 위치도 대응한다."
+      }
+    ],
+    "rationale": "원본에서 초록 반바지 선수의 높은 공 리턴과 다음 머리띠 선수의 낮은 옆 포핸드라는 별개 두 동작을 대조했다. B-A 클립 시차가 각각0.300000초와0.325289초로 일관된다. 두 영상의 같은 랠리 연결은 확인하지만 어느 시점에서도 최초 접촉이 충분히 관측되지 않아 IN/OUT은 생성하지 않는다.",
+    "evidence_paths": [
+      "runs/review-remediation/uhd/a2-b2-proposed-actions-0.jpg",
+      "runs/review-remediation/uhd/a2-b2-proposed-actions-1.jpg"
+    ],
+    "temporal_alignment": "Approximate AI-reviewed action correspondence, not synchronized clocks.",
+    "reviewers": [
+      "Codex review_uhd remediation"
+    ]
+  }
 }

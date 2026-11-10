@@ -47,15 +47,19 @@
     51,
     54,
     58,
+    60,
     61,
     65,
     68,
+    70,
     72,
     75,
     79
   ],
   "evidence_paths": [
-    "runs/visual-review/v_ad55eefab043/overview.jpg"
+    "runs/visual-review/v_ad55eefab043/overview.jpg",
+    "runs/review-remediation/boundary/v_ad55eefab043/overview-0.jpg",
+    "runs/review-remediation/boundary/v_b0bcd8a881da/overview-0.jpg"
   ],
   "rules": {
     "game": "doubles",
@@ -75,20 +79,39 @@
       {
         "frame_index": 12,
         "other_frame_index": 22,
-        "description": "흰색 선수가 네트 앞에서 허리를 낮춰 타격하고 남색 상대 선수가 낮은 준비 자세"
+        "description": "흰 상의 선수의 낮은 네트 앞 응수와 남색 상대 선수의 낮은 준비 자세"
       },
       {
         "frame_index": 36,
         "other_frame_index": 50,
-        "description": "후방 검은색 선수의 오버헤드 타격 직후 팔로스루와 앞쪽 남색 선수의 고정된 수비 자세"
+        "description": "검은 상의 후방 선수의 오버헤드 타격 후 회복과 남색 파트너의 수비 자세"
       }
     ],
-    "rationale": "각 영상의 중앙 목표 코트에서 같은 검은색/남색 두 선수 및 흰색/연청색 상대의 서로 다른 두 동작이 같은 순서로 이어지는 것을 양쪽 시점의 확대 시퀀스로 직접 대조했다. 두 번째 동작 후 이어지는 동일 랠리의 최초 접촉을 근거 시점에서 판독한다. 파일명만으로 연결한 것이 아니며 두 영상의 시각이 동기화되었다고 주장하지 않는다.",
+    "rationale": "원본 영상에서 동일한 네 선수와 위 두 개의 서로 다른 동작이 같은 순서로 이어지는 것을 대조했다. 사건 대응 확인과 접촉/라인 판정의 충분성은 별도이며, 두 시점 모두 미해결이면 같은 사건 확인만으로 IN/OUT을 만들지 않는다.",
     "evidence_paths": [
-      "runs/visual-review/v_ad55eefab043/cross-view-actions.jpg",
-      "runs/visual-review/v_ad55eefab043/native_seq_0_79_0.jpg",
-      "runs/visual-review/v_b0bcd8a881da/overview.jpg"
+      "runs/review-remediation/boundary/v_b0bcd8a881da/overview-0.jpg",
+      "runs/review-remediation/boundary/v_ad55eefab043/overview-0.jpg"
     ],
+    "clock_synchronization_claimed": false
+  },
+  "remediation_review": {
+    "source": "ai_visual_review",
+    "human_verified": false,
+    "reviewer": "Codex review_boundary",
+    "inspected_frame_indices": [
+      0,
+      6,
+      12,
+      24,
+      36,
+      48,
+      60,
+      70,
+      79
+    ],
+    "finding": "A85의 최초 접촉 전후는 보이지만 코르크의 수직 동작 흐림이 선 바깥 최소 여유보다 크다. B는 먼 반코트 접촉을 독립적으로 분리하지 못한다.",
+    "next_action": "A84–86의 더 짧은 노출 또는 높은 프레임률 원본과 접촉선을 가리지 않는 근접 시점이 필요하다. 반등하여 선 위에 놓인 A87 이후 위치를 최초 접촉으로 쓰지 않는다.",
+    "label_changed": false,
     "clock_synchronization_claimed": false
   }
 }

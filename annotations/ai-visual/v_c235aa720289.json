@@ -15,7 +15,7 @@
     "height": 1080
   },
   "label": "UNKNOWN",
-  "reviewer": "Codex review_uhdhd",
+  "reviewer": "Codex review_uhd remediation",
   "contact_observed": false,
   "contact_interval_observed": false,
   "contact_frame_index": null,
@@ -23,9 +23,9 @@
   "contact_px": null,
   "contact_interval_frames": null,
   "target_contact_identity_confirmed": false,
-  "observation_status": "no_contact_in_clip",
+  "observation_status": "target_ambiguous",
   "confidence": "unresolved",
-  "rationale": "마지막까지 녹색 반바지 선수와 반대쪽 검정 선수가 교환하는 동작이 이어진다. A3의 종료·회수 구간은 이 B3 클립 끝에 포함된 것으로 확인되지 않아 접촉 판정을 보류했다.",
+  "rationale": "원본에서 머리띠 선수의 포핸드, 전위 런지, 상대 초록 반바지 선수의 오버헤드를 A3와 대조했다. A3 최초 접촉은 시간 차를 적용하면 B3 마지막 구간 안에 들어오므로 기존의 접촉 후속 구간 누락 단정은 철회한다. 다만 B3 자체에서는 먼 반코트의 작은 코르크와 바닥 접촉점을 독립적으로 분리하지 못해 직접 판정은 UNKNOWN으로 보존한다.",
   "limitations": [
     "AI 직접 영상 검수이며 독립적인 인간 검증 정답이 아니다.",
     "A/B 동시각이나 같은 파일명만으로 사건 대응을 확정하지 않았다."
@@ -33,22 +33,38 @@
   "inspected_frame_indices": [
     0,
     3,
+    5,
+    6,
     7,
+    9,
     10,
+    11,
+    12,
     14,
+    15,
+    16,
     18,
     21,
+    22,
+    24,
     25,
+    27,
+    28,
     29,
+    30,
     32,
+    33,
     36,
+    39,
     40,
+    42,
     43,
     44,
     45,
     47,
     48,
     49,
+    50,
     51,
     52,
     53,
@@ -64,6 +80,7 @@
     63,
     64,
     65,
+    66,
     67,
     68,
     69,
@@ -73,7 +90,9 @@
     73,
     75,
     76,
+    78,
     80,
+    81,
     84
   ],
   "evidence_paths": [
@@ -82,12 +101,49 @@
     "runs/visual-review/v_c235aa720289/native-0060.jpg",
     "runs/visual-review/v_c235aa720289/native-0070.jpg",
     "runs/visual-review/v_c235aa720289/native-0084.jpg",
-    "runs/visual-review/v_c235aa720289/overview.jpg"
+    "runs/visual-review/v_c235aa720289/overview.jpg",
+    "runs/review-remediation/uhd/v_c235aa720289-far-0.jpg",
+    "runs/review-remediation/uhd/v_c235aa720289-far-1.jpg",
+    "runs/review-remediation/uhd/v_c235aa720289-far-2.jpg",
+    "runs/review-remediation/uhd/a3-b3-correspondence.jpg"
   ],
   "rules": {
     "game": "doubles",
     "phase": "rally"
   },
   "detection_labels": [],
-  "detection_labels_verified_by_ai": false
+  "detection_labels_verified_by_ai": false,
+  "follow_up_actions": [
+    "세 개의 실제 동작으로 연결한 A3의 원본 최초 접촉 IN 근거를 보조 판정에 사용한다.",
+    "B3 자체의 접촉점은 생성하지 않고, 사람의 독립 검수로 사건 대응을 추가 확인한다."
+  ],
+  "cross_view_match": {
+    "other_video_id": "v_7b438544b72b",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 21,
+        "other_frame_index": 18,
+        "description": "머리띠 검정 선수의 첫 포핸드 후 몸통 회전과 붉은 상의 파트너의 옆 스텝이 같은 순서로 대응한다."
+      },
+      {
+        "frame_index": 48,
+        "other_frame_index": 72,
+        "description": "이어지는 머리띠 선수의 깊은 전위 런지와 낮게 뻗은 라켓, 붉은 상의 파트너의 낮춘 준비 자세가 대응한다."
+      },
+      {
+        "frame_index": 63,
+        "other_frame_index": 102,
+        "description": "다음 초록 반바지 검정 선수의 오버헤드 스윙과 점프, 반대편 머리띠 선수의 런지 회복이 대응한다."
+      }
+    ],
+    "rationale": "파일 번호가 아니라 세 개의 별개 타격 동작을 원본 프레임에서 대조했다. B 시각이 A보다 약0.38–0.40초 뒤인 일관된 클립 시차를 보인다. A3에서 직접 재발견한 최초 접촉의 IN을 연결하며, B3에 접촉 좌표를 복제하지 않는다.",
+    "evidence_paths": [
+      "runs/review-remediation/uhd/a3-b3-correspondence.jpg"
+    ],
+    "temporal_alignment": "Approximate AI-reviewed action correspondence, not synchronized camera clocks.",
+    "reviewers": [
+      "Codex review_uhd remediation"
+    ]
+  }
 }

@@ -6,8 +6,8 @@
   "source": "ai_visual_review",
   "status": "reviewed_by_ai",
   "human_verified": false,
-  "reviewer": "Codex review_base_a",
-  "label": "UNKNOWN",
+  "reviewer": "Codex review_target original-source reinspection",
+  "label": "IN",
   "analysis_size": {
     "width": 960,
     "height": 540
@@ -21,43 +21,82 @@
     "phase": "rally"
   },
   "contact_observed": false,
-  "contact_interval_observed": false,
-  "target_contact_identity_confirmed": false,
-  "contact_frame_index": null,
-  "contact_px": null,
-  "time": null,
-  "confidence": "unresolved",
-  "observation_status": "target_ambiguous",
-  "rationale": "남색 상의 선수와 검은 상의 선수의 연속 타구 뒤 두 선수가 오른쪽으로 이동한다. 후반 바닥 확대에서 대상 셔틀의 명확한 최초 접촉을 찾지 못했다.",
+  "contact_interval_observed": true,
+  "target_contact_identity_confirmed": true,
+  "contact_frame_index": 120,
+  "contact_px": [
+    754,
+    307
+  ],
+  "time": 2.024133,
+  "confidence": "moderate",
+  "observation_status": "contact_interval",
+  "rationale": "회색 선수 타구 뒤 주 경기의 검은 선수 오른쪽을 통과하는 이동 셔틀이 f114–119에서 하강한다. f120–121 부근에서 바닥 접촉 및 반동이 있고 f127 이후에만 가까운 베이스라인을 넘는다. 인접 코트와 화면상 겹치는 구간이 있어 전체 마지막 타구 흐름과 접촉 전후를 함께 검토했다.",
   "limitations": [
-    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
-    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+    "AI 시각 보조 판정이며 독립적인 사람 정답이나 자동 모델 성능 검증용 레이블이 아니다.",
+    "움직이는 셔틀은 일부 프레임에서 모션 블러가 있어 단일 코르크 점 대신 첫 접촉 구간과 넉넉한 지지 영역으로 판단했다.",
+    "인접 코트의 선수와 다른 셔틀이 존재하므로 마지막 타구 흐름과 연속 하강·반동 근거를 함께 사용했다."
   ],
   "inspected_frame_indices": [
     0,
     9,
+    10,
     18,
+    20,
     27,
+    30,
     36,
+    40,
     45,
+    50,
     54,
+    60,
     63,
+    70,
     72,
+    80,
     81,
     90,
+    98,
     99,
+    100,
+    102,
+    104,
+    106,
     108,
+    110,
+    112,
+    113,
+    114,
+    115,
+    116,
     117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
     126,
+    127,
+    128,
+    129,
     130,
+    131,
+    132,
     133,
+    134,
     135,
     136,
     139,
+    140,
     142,
     144,
     145,
     148,
+    150,
     151,
     153,
     154,
@@ -67,6 +106,7 @@
     163,
     166,
     169,
+    170,
     171,
     172,
     175,
@@ -78,7 +118,19 @@
   ],
   "evidence_paths": [
     "runs/visual-review/v_fca8558d4a18/overview.jpg",
-    "runs/visual-review/v_fca8558d4a18/detail_130_180_3_preview.jpg"
+    "runs/visual-review/v_fca8558d4a18/detail_130_180_3_preview.jpg",
+    "runs/review-remediation/target/a8-action-0.jpg",
+    "runs/review-remediation/target/a8-action-1.jpg",
+    "runs/review-remediation/target/a8-origin-tight0.jpg",
+    "runs/review-remediation/target/a8-origin-tight1.jpg",
+    "runs/review-remediation/target/a8-origin-page1.jpg",
+    "runs/review-remediation/target/a8-origin-page2.jpg",
+    "runs/review-remediation/target/a8-origin-page3.jpg",
+    "runs/review-remediation/target/a8-descend-native.jpg",
+    "runs/review-remediation/target/a8-trace-page1.jpg",
+    "runs/review-remediation/target/a8-trace-page2.jpg",
+    "runs/review-remediation/target/a8-trace-page3.jpg",
+    "runs/review-remediation/target/a8-full-f120.jpg"
   ],
   "detection_labels_verified_by_ai": true,
   "detection_labels": [
@@ -112,7 +164,158 @@
     }
   ],
   "follow_up_actions": [
-    "최종 랠리와 첫 바닥 접촉이 연속으로 보이는 추가 시점 또는 더 긴 원본을 확보한다.",
-    "선수의 회수 행동만으로 IN/OUT 정답을 만들지 않고 해당 대상 접촉의 식별 근거를 보강한다."
-  ]
+    "A f118–124 원본 연속 확대와 전체 코트 외곽선 근거로 최초 접촉을 재주석한다.",
+    "A/B 두 동작 대응 검증을 접촉 자격 검증과 분리하고 검증된 A 접촉을 B 및 최종 쌍 결과에 연결한다.",
+    "검출 ROI가 실패하면 마지막 타구 이후 원본 고해상도 탐색 구역을 확대하고 바운드 전후를 구분한다."
+  ],
+  "remediation_review": {
+    "original_source_sha256_verified": true,
+    "new_inspected_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      98,
+      100,
+      102,
+      104,
+      106,
+      108,
+      110,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      140,
+      150,
+      160,
+      170
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/a8-action-0.jpg",
+      "runs/review-remediation/target/a8-action-1.jpg",
+      "runs/review-remediation/target/a8-origin-tight0.jpg",
+      "runs/review-remediation/target/a8-origin-tight1.jpg",
+      "runs/review-remediation/target/a8-origin-page1.jpg",
+      "runs/review-remediation/target/a8-origin-page2.jpg",
+      "runs/review-remediation/target/a8-origin-page3.jpg",
+      "runs/review-remediation/target/a8-descend-native.jpg",
+      "runs/review-remediation/target/a8-trace-page1.jpg",
+      "runs/review-remediation/target/a8-trace-page2.jpg",
+      "runs/review-remediation/target/a8-trace-page3.jpg",
+      "runs/review-remediation/target/a8-full-f120.jpg"
+    ],
+    "provenance": "Actual original-source frames visually inspected; not independent human ground truth.",
+    "candidate_pending_integration": true
+  },
+  "contact_interval_frames": [
+    119,
+    121
+  ],
+  "contact_support_px": [
+    [
+      748,
+      302
+    ],
+    [
+      763,
+      302
+    ],
+    [
+      763,
+      311
+    ],
+    [
+      748,
+      311
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "polygon_px": [
+      [
+        144,
+        255
+      ],
+      [
+        497,
+        215
+      ],
+      [
+        823,
+        294
+      ],
+      [
+        369,
+        539
+      ]
+    ],
+    "edge_roles": [
+      "net",
+      "right",
+      "near",
+      "left"
+    ],
+    "contact_uncertainty_px": 2,
+    "boundary_uncertainty_px": 8,
+    "boundary_uncertainty_px_by_edge": [
+      8,
+      8,
+      3,
+      8
+    ],
+    "explanation": "A f120 전체 코트에서 주 경기의 네트 및 양 복식 측면과 가까운 베이스라인 바깥 칠 경계로 가까운 반코트를 표시했다. 원본 확대의 접촉 구간 f119–121에서 코르크 최초 접촉 가능 범위를 직사각형으로 넉넉히 잡았으며 공중 하강이나 f127 이후 바운드 위치는 지면 접촉 지지점에 넣지 않았다. 가까운 베이스라인은 x740–800에서 직접 보이는 두꺼운 파란 칠의 바깥 가장자리이며 접촉 범위와 충분히 떨어져 있다. 선별 오차는 가까운 베이스라인 3px, 멀리 있는 경계 8px, 접촉 추가 오차 2px로 두었다."
+  },
+  "cross_view_match": {
+    "other_video_id": "v_4eaaeb00056f",
+    "same_event_confirmed_by_ai": true,
+    "rationale": "서로 다른 시점에서 같은 선수의 두 개 이상 타구·이동 동작이 순서와 거의 일정한 시간차로 일치한다. 접촉 관측 여부와 독립적으로 랠리 대응만 검증했다.",
+    "matched_actions": [
+      {
+        "frame_index": 20,
+        "other_frame_index": 10,
+        "description": "남색 선수의 점프 오버헤드 타구"
+      },
+      {
+        "frame_index": 80,
+        "other_frame_index": 70,
+        "description": "회색 선수의 측면 이동 후 포핸드 팔로스루"
+      }
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/a8-action-0.jpg",
+      "runs/review-remediation/target/a8-action-1.jpg",
+      "runs/review-remediation/target/b8-action-0.jpg",
+      "runs/review-remediation/target/b8-action-1.jpg"
+    ]
+  }
 }

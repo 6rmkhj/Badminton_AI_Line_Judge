@@ -14,77 +14,219 @@
     "width": 3840,
     "height": 2160
   },
-  "label": "UNKNOWN",
-  "reviewer": "Codex review_uhdhd",
+  "label": "IN",
+  "reviewer": "Codex review_uhd remediation; independently checked by Codex root",
   "contact_observed": false,
-  "contact_interval_observed": false,
-  "contact_frame_index": null,
-  "time": null,
-  "contact_px": null,
-  "contact_interval_frames": null,
-  "target_contact_identity_confirmed": false,
-  "observation_status": "contact_occluded",
-  "confidence": "unresolved",
-  "rationale": "랠리 종료 직전 전경을 지나는 두 사람이 대상 궤적과 예상 낙하 영역을 가린다. 마지막에는 검정 선수가 카메라 쪽 사이드라인 바깥 셔틀을 줍지만 그 정지점만으로 첫 접촉을 판정할 수 없다.",
+  "contact_interval_observed": true,
+  "contact_frame_index": 138,
+  "time": 2.327756,
+  "contact_px": [
+    235,
+    310
+  ],
+  "contact_interval_frames": [
+    137,
+    138
+  ],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "contact_interval",
+  "confidence": "moderate",
+  "rationale": "원본 모든 프레임 간격으로 120–155 구간을 확대하여 이전 검수에서 놓친 최초 접촉을 확인했다. 137 프레임의 하강 다음 138 프레임(2.327756초)에서 코르크가 지면에 닿고 139–140 프레임에서 반등한다. 해당 지면 영역은 왼쪽 복식 외곽선과 단식 선 사이의 유효한 복식 코트 안쪽이다. 이후 148–155 프레임에서 셔틀이 외곽선 방향으로 이동하고 더 늦게 통행자가 가리므로, 나중의 가림·회수 위치를 최초 접촉으로 오인한 기존 해석을 정정한다.",
   "limitations": [
     "AI 직접 영상 검수이며 독립적인 인간 검증 정답이 아니다.",
     "A/B 동시각이나 같은 파일명만으로 사건 대응을 확정하지 않았다."
   ],
   "inspected_frame_indices": [
     0,
+    6,
     10,
+    12,
+    15,
+    18,
     20,
+    24,
     30,
+    31,
+    36,
     40,
+    42,
+    47,
+    48,
     51,
+    54,
+    60,
     61,
+    62,
+    66,
     71,
+    72,
+    78,
     81,
+    84,
+    90,
     91,
+    94,
+    96,
     102,
+    108,
+    109,
     110,
     112,
     114,
     118,
+    120,
+    121,
     122,
+    123,
+    124,
+    125,
     126,
+    127,
+    128,
+    129,
     130,
+    131,
     132,
+    133,
     134,
+    135,
+    136,
+    137,
     138,
+    139,
+    140,
+    141,
     142,
     143,
+    144,
+    145,
     146,
+    147,
+    148,
+    149,
     150,
+    151,
+    152,
     153,
     154,
+    155,
+    156,
     158,
     162,
     163,
     166,
     170,
+    172,
     173,
     174,
     178,
     182,
     183,
     186,
+    188,
     190,
     194,
+    203,
     204,
     214,
+    219,
     224,
     235
   ],
   "evidence_paths": [
     "runs/visual-review/v_7b438544b72b/event-detail.jpg",
     "runs/visual-review/v_7b438544b72b/native-0235.jpg",
-    "runs/visual-review/v_7b438544b72b/overview.jpg"
+    "runs/visual-review/v_7b438544b72b/overview.jpg",
+    "runs/review-remediation/uhd/a3-contact-native-0.png",
+    "runs/review-remediation/uhd/a3-contact-native-1.png",
+    "runs/review-remediation/uhd/a3-contact-native-2.png",
+    "runs/review-remediation/uhd/a3-court-context-f138.jpg",
+    "runs/review-remediation/uhd/a3-reviewed-geometry-f138.jpg",
+    "runs/review-remediation/uhd/a3-b3-correspondence.jpg"
   ],
   "rules": {
     "game": "doubles",
     "phase": "rally"
   },
-  "detection_labels": [],
-  "detection_labels_verified_by_ai": false
+  "detection_labels": [
+    {
+      "frame_index": 138,
+      "x": 235,
+      "y": 310,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 140,
+      "x": 230.5,
+      "y": 308,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 142,
+      "x": 227,
+      "y": 309,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 144,
+      "x": 222,
+      "y": 308,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 146,
+      "x": 219,
+      "y": 312,
+      "label": "shuttle"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "contact_support_px": [
+    [
+      229.5,
+      302.5
+    ],
+    [
+      242.5,
+      302.5
+    ],
+    [
+      242.5,
+      317.5
+    ],
+    [
+      229.5,
+      317.5
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "court_interior",
+    "interior_confirmed": true,
+    "polygon_px": [
+      [
+        218.75,
+        270.0
+      ],
+      [
+        252.5,
+        270.0
+      ],
+      [
+        276.25,
+        345.0
+      ],
+      [
+        210.0,
+        345.0
+      ]
+    ],
+    "contact_uncertainty_px": 2,
+    "boundary_uncertainty_px": 2,
+    "explanation": "원본 전체 코트 문맥과 파란 왼쪽 복식 외곽선/단식 선을 대조하여 두 선 사이의 작은 사변형이 복식 코트 내부임을 확인했다. 다각형은 실제 외곽선 전체를 추정한 것이 아니라 그 안쪽으로 여유를 둔 보수적 부분 영역이다. 원본 접촉 지지 영역 x918..970,y1210..1270 및 위치/영역 오차 각8px(분석좌표 각2px)를 포함해도 모두 이 내부 영역 안에 남는다."
+  },
+  "follow_up_actions": [
+    "동일 동작 대응으로 B3에 A3의 직접 IN 근거를 연결한다.",
+    "사람의 독립 검수로 최초 접촉과 복식 외곽선을 확인한다."
+  ],
+  "review_scope": "AI visual reinterpretation: full-span overview plus listed action frames and contiguous native-resolution frames120–155. Not human ground truth or automatic model inference."
 }

@@ -14,7 +14,7 @@
     "width": 3840,
     "height": 2160
   },
-  "reviewer": "Codex review_base_b",
+  "reviewer": "Codex review_target original-source reinspection",
   "label": "UNKNOWN",
   "contact_observed": false,
   "contact_interval_observed": false,
@@ -35,39 +35,110 @@
   "inspected_frame_indices": [
     0,
     10,
+    12,
     20,
+    24,
     31,
+    36,
     41,
+    48,
     52,
+    60,
     62,
+    72,
     73,
     83,
+    84,
     94,
+    96,
     104,
+    108,
     115,
+    120,
     125,
+    132,
     136,
+    144,
     146,
+    156,
     157,
     167,
+    168,
     178,
+    180,
     188,
+    192,
     199,
+    204,
     209,
     220,
     230,
     241
   ],
   "evidence_paths": [
-    "runs/visual-review/v_d67b0378b667/overview-24.jpg"
+    "runs/visual-review/v_d67b0378b667/overview-24.jpg",
+    "runs/review-remediation/target/b13-action-0.jpg",
+    "runs/review-remediation/target/b13-action-1.jpg"
   ],
   "detection_labels": [],
   "detection_labels_verified_by_ai": false,
-  "observation_status": "contact_out_of_view",
-  "rationale": "흰 상의 선수의 오버헤드와 초록 상의 선수의 네트 방향 대응 후 정지를 확인했다. 가까운 반코트에 관찰되는 최초 접촉은 없고 먼 쪽 접촉은 식별하지 못했다.",
+  "observation_status": "target_ambiguous",
+  "rationale": "초록·흰 선수의 대응 동작은 확인되지만 대상 셔틀의 처음 바닥 접촉과 선 관계를 확정할 영상 근거가 없다.",
   "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
   "follow_up_actions": [
-    "네트 반대편의 해당 랠리 최초 접촉을 볼 수 있는 다른 시점을 실제 타격 순서로 대조한다.",
-    "일치 시점에서도 접촉·경계가 확인되지 않으면 원본 후속 구간 또는 독립 사람 검수가 필요하다."
-  ]
+    "네트 및 시설물 주변을 포함한 원본 고해상도 궤적 재연결과 가림 구간 검사를 적용한다.",
+    "종료 타구부터 바닥 접촉까지 보이는 추가 원본 또는 다른 시점 없이는 이 쌍의 판정을 확정하지 않는다."
+  ],
+  "remediation_review": {
+    "original_source_sha256_verified": true,
+    "new_inspected_frame_indices": [
+      0,
+      12,
+      24,
+      36,
+      48,
+      60,
+      72,
+      84,
+      96,
+      108,
+      120,
+      132,
+      144,
+      156,
+      168,
+      180,
+      192,
+      204
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/b13-action-0.jpg",
+      "runs/review-remediation/target/b13-action-1.jpg"
+    ],
+    "provenance": "Actual original-source frames visually inspected; not independent human ground truth.",
+    "candidate_pending_integration": true
+  },
+  "cross_view_match": {
+    "other_video_id": "v_4cd4530f475a",
+    "same_event_confirmed_by_ai": true,
+    "rationale": "서로 다른 시점에서 같은 선수의 두 개 이상 타구·이동 동작이 순서와 거의 일정한 시간차로 일치한다. 접촉 관측 여부와 독립적으로 랠리 대응만 검증했다.",
+    "matched_actions": [
+      {
+        "frame_index": 84,
+        "other_frame_index": 132,
+        "description": "회색 선수의 포핸드 타구"
+      },
+      {
+        "frame_index": 120,
+        "other_frame_index": 168,
+        "description": "초록 상의 선수의 라켓을 들어 올린 리턴 동작"
+      }
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/a13-action-0.jpg",
+      "runs/review-remediation/target/a13-action-1.jpg",
+      "runs/review-remediation/target/b13-action-0.jpg",
+      "runs/review-remediation/target/b13-action-1.jpg"
+    ]
+  }
 }

@@ -104,7 +104,8 @@
     "runs/visual-review/v_f55dc95fb23e/landing_native_crop_0069.jpg",
     "runs/visual-review/v_f55dc95fb23e/landing_native_crop_0070.jpg",
     "runs/visual-review/v_f55dc95fb23e/landing_native_crop_0071.jpg",
-    "runs/visual-review/v_f55dc95fb23e/court_preview_crop_0070.jpg"
+    "runs/visual-review/v_f55dc95fb23e/court_preview_crop_0070.jpg",
+    "runs/review-remediation/boundary/8k6-cross-view-actions.jpg"
   ],
   "rules": {
     "game": "doubles",
@@ -219,5 +220,30 @@
     "explanation": "원본 전체 코트에서 복식 외곽 사이드라인 및 가까운 베이스라인의 실제 바깥 테두리를 확인했다. 두번째 꼭짓점에서 세번째 꼭짓점으로 이어지는 오른쪽 외곽선은 접촉보다 위쪽이며 안쪽 평행 단식선과 구별된다."
   },
   "detection_labels_verified": false,
-  "detection_labels_verified_by_ai": true
+  "detection_labels_verified_by_ai": true,
+  "cross_view_match": {
+    "other_video_id": "v_4bce45231ca1",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 36,
+        "other_frame_index": 72,
+        "description": "흰 RYDER 상의 선수가 크게 내딛으며 포핸드 타격하고 연청색 파트너가 그 뒤로 교차하는 동작을 양쪽 시점에서 대조했다."
+      },
+      {
+        "frame_index": 56,
+        "other_frame_index": 96,
+        "description": "남색 상의·긴 청색 양말 선수가 머리 위로 라켓을 들어 응수하고 흰색·연청색 상대 두 선수가 다시 수비 자세를 취하는 다음 동작을 대조했다."
+      }
+    ],
+    "rationale": "동일한 네 선수, 두 번의 서로 다른 타격 동작과 연속 순서를 원본 프레임으로 확인했다. A72/B36와 A96/B56의 표시 시각 차이는 약0.90초/0.87초로 일관되며 마지막 접촉 A114/B70의 약0.88초 차이와도 맞는다. 프레임 번호 또는 파일명만으로 연결하지 않았고 시간 동기화나3D좌표 복원을 주장하지 않는다.",
+    "evidence_paths": [
+      "runs/review-remediation/boundary/8k6-cross-view-actions.jpg",
+      "runs/review-remediation/boundary/actions/8k6-A-01.jpg",
+      "runs/review-remediation/boundary/actions/8k6-B-01.jpg",
+      "runs/review-remediation/boundary/actions/8k6-A-02.jpg",
+      "runs/review-remediation/boundary/actions/8k6-B-02.jpg"
+    ],
+    "clock_synchronization_claimed": false
+  }
 }

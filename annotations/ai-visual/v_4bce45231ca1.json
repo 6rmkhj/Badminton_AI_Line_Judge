@@ -45,6 +45,7 @@
     59,
     65,
     70,
+    72,
     76,
     81,
     86,
@@ -94,7 +95,8 @@
     "runs/visual-review/v_4bce45231ca1/far_contact_crop_0114.jpg",
     "runs/visual-review/v_4bce45231ca1/far_court_native_0114.jpg",
     "runs/visual-review/v_4bce45231ca1/confirmed_interior_0114.jpg",
-    "runs/visual-review/v_4bce45231ca1/court_preview_crop_0114.jpg"
+    "runs/visual-review/v_4bce45231ca1/court_preview_crop_0114.jpg",
+    "runs/review-remediation/boundary/8k6-cross-view-actions.jpg"
   ],
   "rules": {
     "game": "doubles",
