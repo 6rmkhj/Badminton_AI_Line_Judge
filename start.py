@@ -40,9 +40,12 @@ def main():
     if not (run / required_index).is_file():
         parser.error(f'분석 결과가 없습니다: {run}. README의 analyze 명령을 먼저 실행하세요.')
     if args.review:
-        from functools import partial
-        from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
-        server = ThreadingHTTPServer(('127.0.0.1', args.port), partial(SimpleHTTPRequestHandler, directory=str(run)))
+        # Load the bundled stdlib-only handler directly, including under Python
+        # -I where this extracted project's directory is absent from sys.path.
+        spec = importlib.util.spec_from_file_location('_badminton_static_review', project / 'badminton' / 'static_review.py')
+        static_review = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(static_review)
+        server = static_review.create_static_review_server(run, port=args.port)
     else:
         from badminton.web import create_server
         server = create_server(run, port=args.port, video_dir=(project / args.video_dir).resolve())

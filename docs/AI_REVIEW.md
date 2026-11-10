@@ -13,6 +13,8 @@
 
 교차 시점 판정은 대상 영상의 접촉 좌표를 새로 만들어내지 않는다. `originating_video_id`와 `donor_contact`에 실제 접촉이 보인 원본 영상·좌표·시각을 보존한다. 실제 상충하는 관측은 보류하고, 정보가 없는 보조 시점이 직접 관측한 결론을 지우지는 않는다.
 
+보고서의 `filename_pair_audit`는 같은 번호의 A/B 후보를 대조해 양쪽 판정 일치, 양쪽 REVIEW, 한쪽만 REVIEW, 판정 충돌을 집계한다. 특히 상대 시점에 판정이 있는데도 REVIEW인 항목은 화면 상단에 대응 검수 누락·실패 사유와 함께 표시한다. 다른 번호 영상과 원본 내용이 중복된 경우도 표시한다. 후보쌍 목록은 누락을 찾는 진단이며, 실제 동작 대응 검증 없이 판정을 변경하지 않는다.
+
 ## 레이블 출처
 
 `source=ai_visual_review`, `status=reviewed_by_ai`, `human_verified=false`를 사용한다. AI가 보조한 판정은 `evaluation_eligible=false`, `ground_truth_eligible=false`다. `UNKNOWN`은 미해결 레이블이며 IN/OUT 정답으로 학습·집계하지 않는다. 탐지용 셔틀/배경 패치는 별도의 `detection_labels_verified_by_ai` 표시와 원본 해시·프레임·좌표를 요구한다. 판정이 UNKNOWN이어도 실제 보이는 셔틀 패치는 탐지 학습에 사용할 수 있다.
@@ -30,6 +32,8 @@
 ## 실행
 
 패키지에서 보고서만 볼 때는 Python 3.11 이상으로 `start-review-windows.bat` 또는 `python3 start.py --review`를 실행한다. 보고서 보기에는 외부 Python 패키지나 원본 영상이 필요하지 않다. 포함된 미리보기와 검수 확대 이미지를 사용한다.
+
+내장 서버는 영상의 바이트 범위 요청을 지원하므로 접촉 시각 이동 버튼과 영상 탐색을 사용할 수 있다. Python의 기본 `http.server`로 대체하면 브라우저에서 영상 탐색이 제한될 수 있으므로 제공된 런처를 사용한다.
 
 원본이 있는 개발 환경에서 보고서를 다시 생성하려면:
 
