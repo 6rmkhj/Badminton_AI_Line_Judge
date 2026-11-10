@@ -6,7 +6,7 @@
   "source": "ai_visual_review",
   "status": "reviewed_by_ai",
   "human_verified": false,
-  "reviewer": "Codex review_base_a",
+  "reviewer": "Codex review_target original-source reinspection",
   "label": "UNKNOWN",
   "analysis_size": {
     "width": 960,
@@ -28,7 +28,7 @@
   "time": null,
   "confidence": "unresolved",
   "observation_status": "line_ambiguous",
-  "rationale": "회색 상의 선수가 회수하는 동일 셔틀의 하강과 반동을 원본 확대에서 확인했다. 최초 접촉이 오른쪽 복식 사이드라인과 인접한 여러 파란 선 주변에서 발생하여 코르크 접촉 범위와 정확한 바깥 칠 경계의 관계를 단정하지 않았다.",
+  "rationale": "f242–258 연속 원본 확대에서 하강 및 반동을 확인하며 접촉은 대략 f250–252 부근으로 좁혀진다. 바깥 칠 경계 역할과 코르크 접촉 범위를 확정하기에는 여러 파란 선 및 모션 블러가 남아 UNKNOWN을 유지한다.",
   "limitations": [
     "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
     "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
@@ -63,17 +63,22 @@
     235,
     239,
     240,
+    242,
     243,
     244,
+    245,
     246,
     247,
     248,
+    249,
     250,
     251,
     252,
+    253,
     254,
     255,
     256,
+    257,
     258,
     259,
     260,
@@ -106,7 +111,10 @@
     "runs/visual-review/v_2107fa6276fa/detail_195_271_4_preview.jpg",
     "runs/visual-review/v_2107fa6276fa/detail_244_280_2_native.jpg",
     "runs/visual-review/v_2107fa6276fa/patch-label-check.png",
-    "runs/visual-review/v_2107fa6276fa/detail_240_310_4_preview.jpg"
+    "runs/visual-review/v_2107fa6276fa/detail_240_310_4_preview.jpg",
+    "runs/review-remediation/target/a16-contact-0.jpg",
+    "runs/review-remediation/target/a16-contact-1.jpg",
+    "runs/review-remediation/target/a16-court-f250.jpg"
   ],
   "detection_labels_verified_by_ai": true,
   "detection_labels": [
@@ -197,7 +205,37 @@
     }
   ],
   "follow_up_actions": [
-    "접촉 코르크와 외곽선이 겹친 원본 구간을 독립 사람 검수자가 확인한다.",
-    "현재 영상만으로 분리되지 않는 경계 접촉은 더 높은 해상도 또는 접촉선을 향한 동기화 카메라로 재촬영한다."
-  ]
+    "동일 번호만으로 연결하지 않고 서로 다른 랠리의 전파 판정을 차단한다.",
+    "A의 f242–258 하강·반동과 전체 코트에서 바깥 칠 경계를 독립 검수하고 B의 가림 전 구간을 확보한다.",
+    "원본 클립 매핑을 바로잡기 전에는 A/B 쌍 판정을 REVIEW로 유지한다."
+  ],
+  "remediation_review": {
+    "original_source_sha256_verified": true,
+    "new_inspected_frame_indices": [
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/a16-contact-0.jpg",
+      "runs/review-remediation/target/a16-contact-1.jpg",
+      "runs/review-remediation/target/a16-court-f250.jpg"
+    ],
+    "provenance": "Actual original-source frames visually inspected; not independent human ground truth.",
+    "candidate_pending_integration": true
+  }
 }

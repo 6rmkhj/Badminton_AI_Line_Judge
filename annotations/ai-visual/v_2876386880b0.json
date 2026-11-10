@@ -6,7 +6,7 @@
   "source": "ai_visual_review",
   "status": "reviewed_by_ai",
   "human_verified": false,
-  "reviewer": "Codex review_base_a",
+  "reviewer": "Codex review_target original-source reinspection",
   "label": "UNKNOWN",
   "analysis_size": {
     "width": 960,
@@ -27,30 +27,51 @@
   "contact_px": null,
   "time": null,
   "confidence": "unresolved",
-  "observation_status": "contact_out_of_view",
-  "rationale": "회색 상의 선수의 오버헤드 타구와 뒤이은 전진을 확인했다. 마지막 사건은 네트 너머에 있으며 이 시점에서 코르크의 최초 바닥 접촉을 관측하지 못했다.",
+  "observation_status": "target_ambiguous",
+  "rationale": "회색 오버헤드 A30, 초록 런지 A90, 회색 후반 포핸드 A170이 B20/B80/B160과 대응한다. 마지막 바닥 접촉은 확인하지 못했다.",
   "limitations": [
     "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
     "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
   ],
   "inspected_frame_indices": [
     0,
+    10,
     13,
+    20,
     26,
+    30,
     39,
+    40,
+    50,
     52,
+    60,
     65,
+    70,
     79,
+    80,
+    90,
     92,
+    100,
     105,
+    110,
     118,
+    120,
+    130,
     131,
+    140,
     144,
+    150,
     158,
+    160,
+    170,
     171,
+    180,
     184,
+    190,
     197,
+    200,
     210,
+    220,
     223,
     237,
     250,
@@ -60,7 +81,10 @@
     303
   ],
   "evidence_paths": [
-    "runs/visual-review/v_2876386880b0/overview.jpg"
+    "runs/visual-review/v_2876386880b0/overview.jpg",
+    "runs/review-remediation/target/a15-action-0.jpg",
+    "runs/review-remediation/target/a15-action-1.jpg",
+    "runs/review-remediation/target/a15-action-2.jpg"
   ],
   "detection_labels_verified_by_ai": true,
   "detection_labels": [
@@ -94,7 +118,70 @@
     }
   ],
   "follow_up_actions": [
-    "최종 랠리와 첫 바닥 접촉이 연속으로 보이는 추가 시점 또는 더 긴 원본을 확보한다.",
-    "선수의 회수 행동만으로 IN/OUT 정답을 만들지 않고 해당 대상 접촉의 식별 근거를 보강한다."
-  ]
+    "클립 초반부터 존재한 정지 셔틀을 배경 대상으로 표시하고 마지막 타구의 이동 궤적과 연결되는 후보만 채택한다.",
+    "선수의 줍기·회수 행동을 접촉 시점 또는 IN/OUT 근거로 사용하지 않는다."
+  ],
+  "remediation_review": {
+    "original_source_sha256_verified": true,
+    "new_inspected_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      110,
+      120,
+      130,
+      140,
+      150,
+      160,
+      170,
+      180,
+      190,
+      200,
+      210,
+      220
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/a15-action-0.jpg",
+      "runs/review-remediation/target/a15-action-1.jpg",
+      "runs/review-remediation/target/a15-action-2.jpg"
+    ],
+    "provenance": "Actual original-source frames visually inspected; not independent human ground truth.",
+    "candidate_pending_integration": true
+  },
+  "cross_view_match": {
+    "other_video_id": "v_0d51ab5ab37b",
+    "same_event_confirmed_by_ai": true,
+    "rationale": "서로 다른 시점에서 같은 선수의 두 개 이상 타구·이동 동작이 순서와 거의 일정한 시간차로 일치한다. 접촉 관측 여부와 독립적으로 랠리 대응만 검증했다.",
+    "matched_actions": [
+      {
+        "frame_index": 30,
+        "other_frame_index": 20,
+        "description": "회색 선수의 초반 오버헤드 타구"
+      },
+      {
+        "frame_index": 90,
+        "other_frame_index": 80,
+        "description": "초록 상의 선수의 전방 런지"
+      },
+      {
+        "frame_index": 170,
+        "other_frame_index": 160,
+        "description": "회색 선수의 후반 포핸드 타구"
+      }
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/a15-action-0.jpg",
+      "runs/review-remediation/target/a15-action-1.jpg",
+      "runs/review-remediation/target/b15-action-0.jpg",
+      "runs/review-remediation/target/b15-action-1.jpg"
+    ]
+  }
 }

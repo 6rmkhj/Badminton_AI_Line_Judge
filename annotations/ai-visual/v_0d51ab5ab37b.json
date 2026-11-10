@@ -14,7 +14,7 @@
     "width": 3840,
     "height": 2160
   },
-  "reviewer": "Codex review_base_b",
+  "reviewer": "Codex review_target original-source reinspection",
   "label": "UNKNOWN",
   "contact_observed": false,
   "contact_interval_observed": false,
@@ -34,16 +34,30 @@
   },
   "inspected_frame_indices": [
     0,
+    10,
     13,
+    20,
     27,
+    30,
+    40,
     41,
+    50,
     55,
+    60,
     69,
+    70,
+    80,
     83,
+    90,
     97,
+    100,
     110,
+    120,
     124,
+    130,
     138,
+    140,
+    150,
     152,
     155,
     160,
@@ -61,8 +75,11 @@
     208,
     210,
     215,
+    220,
     221,
+    230,
     235,
+    240,
     249,
     263,
     277,
@@ -74,15 +91,83 @@
     "runs/visual-review/v_0d51ab5ab37b/overview-24.jpg",
     "runs/visual-review/v_0d51ab5ab37b/detail-155-195-native.jpg",
     "runs/visual-review/v_0d51ab5ab37b/detail-166-235.jpg",
-    "runs/visual-review/v_0d51ab5ab37b/detail-175-215-native.jpg"
+    "runs/visual-review/v_0d51ab5ab37b/detail-175-215-native.jpg",
+    "runs/review-remediation/target/b15-action-0.jpg",
+    "runs/review-remediation/target/b15-action-1.jpg",
+    "runs/review-remediation/target/b15-action-2.jpg"
   ],
   "detection_labels": [],
   "detection_labels_verified_by_ai": false,
   "observation_status": "target_ambiguous",
-  "rationale": "초록 상의 선수의 회수 동작 주변에는 클립 초반부터 여러 개의 정지 셔틀이 존재한다. 확대 연속 프레임에서 회수 위치의 새 최초 접촉을 확인하지 못했다. 이미 놓인 셔틀이나 회수 동작을 랠리 정답으로 오인하지 않는다.",
+  "rationale": "흰 선수의 B190–200 런지 뒤 초록 선수가 회수하는 위치에 여러 셔틀이 이미 클립 시작부터 놓여 있다. 새 대상의 첫 착지가 보이지 않아 회수 위치로 판정하지 않는다.",
   "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
   "follow_up_actions": [
-    "기존 정지 셔틀을 배경으로 제외하고 마지막 유효 타격부터 연속 추적하여 회수 물체와 실제 랠리 셔틀을 구별한다.",
-    "대상 접촉이 보이는 동기화된 반대편 시점 또는 독립 사람 검수가 필요하다."
-  ]
+    "클립 초반부터 존재한 정지 셔틀을 배경 대상으로 표시하고 마지막 타구의 이동 궤적과 연결되는 후보만 채택한다.",
+    "선수의 줍기·회수 행동을 접촉 시점 또는 IN/OUT 근거로 사용하지 않는다."
+  ],
+  "remediation_review": {
+    "original_source_sha256_verified": true,
+    "new_inspected_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      110,
+      120,
+      130,
+      140,
+      150,
+      160,
+      170,
+      180,
+      190,
+      200,
+      210,
+      220,
+      230,
+      240
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/b15-action-0.jpg",
+      "runs/review-remediation/target/b15-action-1.jpg",
+      "runs/review-remediation/target/b15-action-2.jpg"
+    ],
+    "provenance": "Actual original-source frames visually inspected; not independent human ground truth.",
+    "candidate_pending_integration": true
+  },
+  "cross_view_match": {
+    "other_video_id": "v_2876386880b0",
+    "same_event_confirmed_by_ai": true,
+    "rationale": "서로 다른 시점에서 같은 선수의 두 개 이상 타구·이동 동작이 순서와 거의 일정한 시간차로 일치한다. 접촉 관측 여부와 독립적으로 랠리 대응만 검증했다.",
+    "matched_actions": [
+      {
+        "frame_index": 20,
+        "other_frame_index": 30,
+        "description": "회색 선수의 초반 오버헤드 타구"
+      },
+      {
+        "frame_index": 80,
+        "other_frame_index": 90,
+        "description": "초록 상의 선수의 전방 런지"
+      },
+      {
+        "frame_index": 160,
+        "other_frame_index": 170,
+        "description": "회색 선수의 후반 포핸드 타구"
+      }
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/a15-action-0.jpg",
+      "runs/review-remediation/target/a15-action-1.jpg",
+      "runs/review-remediation/target/b15-action-0.jpg",
+      "runs/review-remediation/target/b15-action-1.jpg"
+    ]
+  }
 }

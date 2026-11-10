@@ -59,9 +59,12 @@
     0,
     3,
     7,
+    10,
     11,
     15,
+    16,
     19,
+    20,
     23,
     24,
     26,
@@ -93,11 +96,14 @@
     55,
     56,
     59,
+    60,
     63,
     67,
+    70,
     71,
     75,
     79,
+    80,
     83,
     87,
     91
@@ -108,7 +114,16 @@
     "runs/visual-review/v_e9ea68c3e070/native_crop_0039.jpg",
     "runs/visual-review/v_e9ea68c3e070/preview_crop_0039.jpg",
     "runs/visual-review/v_e9ea68c3e070/enhanced_contact_37_42.jpg",
-    "runs/visual-review/v_708b8611908c/pole_native_seq_46_76_1.jpg"
+    "runs/visual-review/v_708b8611908c/pole_native_seq_46_76_1.jpg",
+    "runs/review-remediation/boundary/v_e9ea68c3e070/overview-0.jpg",
+    "runs/review-remediation/boundary/v_e9ea68c3e070/overview-1.jpg",
+    "runs/review-remediation/boundary/v_e9ea68c3e070/contact-0.jpg",
+    "runs/review-remediation/boundary/v_e9ea68c3e070/contact-1.jpg",
+    "runs/review-remediation/boundary/8k5-cross-view-actions.jpg",
+    "runs/review-remediation/boundary/actions/8k5-A-01.jpg",
+    "runs/review-remediation/boundary/actions/8k5-B-01.jpg",
+    "runs/review-remediation/boundary/actions/8k5-A-02.jpg",
+    "runs/review-remediation/boundary/actions/8k5-B-02.jpg"
   ],
   "rules": {
     "game": "doubles",
@@ -196,5 +211,62 @@
     "첫 코르크 접촉을 노출 흐림 없이 기록한 고속 또는 더 선명한 원본 필요",
     "39프레임의 반등 위치와 마지막 정지 위치로 OUT을 강제하지 않음"
   ],
-  "enhancement_note": "차영상은 탐색 보조 자료이며 원본에 없는 접촉 사실을 생성하거나 증명하지 않는다."
+  "enhancement_note": "차영상은 탐색 보조 자료이며 원본에 없는 접촉 사실을 생성하거나 증명하지 않는다.",
+  "cross_view_match": {
+    "other_video_id": "v_708b8611908c",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 0,
+        "other_frame_index": 20,
+        "description": "연청색 상의 선수의 타격 직후 남색·긴 청색 양말 상대가 라켓을 들어 응수를 준비하고 흰 상의 파트너가 후방에서 기다리는 동작"
+      },
+      {
+        "frame_index": 16,
+        "other_frame_index": 40,
+        "description": "남색 상의·긴 청색 양말 선수의 다음 낮은 포핸드 응수와 연청색·흰색 두 상대의 수비 회복"
+      }
+    ],
+    "rationale": "원본 영상에서 동일한 네 선수와 위 두 개의 서로 다른 동작이 같은 순서로 이어지는 것을 대조했다. 사건 대응 확인과 접촉/라인 판정의 충분성은 별도이며, 두 시점 모두 미해결이면 같은 사건 확인만으로 IN/OUT을 만들지 않는다.",
+    "evidence_paths": [
+      "runs/review-remediation/boundary/8k5-cross-view-actions.jpg",
+      "runs/review-remediation/boundary/actions/8k5-A-01.jpg",
+      "runs/review-remediation/boundary/actions/8k5-B-01.jpg",
+      "runs/review-remediation/boundary/actions/8k5-A-02.jpg",
+      "runs/review-remediation/boundary/actions/8k5-B-02.jpg"
+    ],
+    "clock_synchronization_claimed": false
+  },
+  "remediation_review": {
+    "source": "ai_visual_review",
+    "human_verified": false,
+    "reviewer": "Codex review_boundary",
+    "inspected_frame_indices": [
+      0,
+      10,
+      16,
+      20,
+      30,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      50,
+      60,
+      70,
+      80,
+      91
+    ],
+    "finding": "A69–71의 먼 코르크 지지영역이 외곽선과 겹친다. B38은 노출·압축 때문에 코르크가 분리되지 않고 B39는 이미 반등했을 가능성이 있어 두 시점이 같은 미관측 순간을 보완하지 못한다.",
+    "next_action": "양 시점의 노출 구간 사이 첫 코르크 접촉을 기록하는 높은 시간 해상도와 짧은 노출이 필요하다. 차영상·초해상도로 원본에 없는 최초 접촉을 확정하지 않는다.",
+    "label_changed": false,
+    "clock_synchronization_claimed": false
+  }
 }

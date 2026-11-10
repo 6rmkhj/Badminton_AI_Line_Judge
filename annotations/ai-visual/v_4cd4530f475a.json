@@ -6,7 +6,7 @@
   "source": "ai_visual_review",
   "status": "reviewed_by_ai",
   "human_verified": false,
-  "reviewer": "Codex review_base_a",
+  "reviewer": "Codex review_target original-source reinspection",
   "label": "UNKNOWN",
   "analysis_size": {
     "width": 960,
@@ -27,8 +27,8 @@
   "contact_px": null,
   "time": null,
   "confidence": "unresolved",
-  "observation_status": "contact_out_of_view",
-  "rationale": "회색 상의 선수와 남색 파트너의 교환 뒤 상대 코트에서 랠리가 끝난다. 반대편의 접촉 지점은 네트와 작은 영상 크기로 특정할 수 없다.",
+  "observation_status": "target_ambiguous",
+  "rationale": "회색 포핸드 A132와 초록 리턴 A168이 B84/B120과 대응한다. 종료 궤적은 네트 및 오른쪽 시설물 방향이나 최초 바닥 접촉은 식별되지 않는다.",
   "limitations": [
     "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
     "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
@@ -36,22 +36,39 @@
   "inspected_frame_indices": [
     0,
     11,
+    12,
     23,
+    24,
     35,
+    36,
     47,
+    48,
     59,
+    60,
     70,
+    72,
     82,
+    84,
     94,
+    96,
     106,
+    108,
     118,
+    120,
     130,
+    132,
     141,
+    144,
     153,
+    156,
     165,
+    168,
     177,
+    180,
     189,
+    192,
     201,
+    204,
     212,
     224,
     236,
@@ -60,7 +77,9 @@
     272
   ],
   "evidence_paths": [
-    "runs/visual-review/v_4cd4530f475a/overview.jpg"
+    "runs/visual-review/v_4cd4530f475a/overview.jpg",
+    "runs/review-remediation/target/a13-action-0.jpg",
+    "runs/review-remediation/target/a13-action-1.jpg"
   ],
   "detection_labels_verified_by_ai": true,
   "detection_labels": [
@@ -94,7 +113,59 @@
     }
   ],
   "follow_up_actions": [
-    "최종 랠리와 첫 바닥 접촉이 연속으로 보이는 추가 시점 또는 더 긴 원본을 확보한다.",
-    "선수의 회수 행동만으로 IN/OUT 정답을 만들지 않고 해당 대상 접촉의 식별 근거를 보강한다."
-  ]
+    "네트 및 시설물 주변을 포함한 원본 고해상도 궤적 재연결과 가림 구간 검사를 적용한다.",
+    "종료 타구부터 바닥 접촉까지 보이는 추가 원본 또는 다른 시점 없이는 이 쌍의 판정을 확정하지 않는다."
+  ],
+  "remediation_review": {
+    "original_source_sha256_verified": true,
+    "new_inspected_frame_indices": [
+      0,
+      12,
+      24,
+      36,
+      48,
+      60,
+      72,
+      84,
+      96,
+      108,
+      120,
+      132,
+      144,
+      156,
+      168,
+      180,
+      192,
+      204
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/a13-action-0.jpg",
+      "runs/review-remediation/target/a13-action-1.jpg"
+    ],
+    "provenance": "Actual original-source frames visually inspected; not independent human ground truth.",
+    "candidate_pending_integration": true
+  },
+  "cross_view_match": {
+    "other_video_id": "v_d67b0378b667",
+    "same_event_confirmed_by_ai": true,
+    "rationale": "서로 다른 시점에서 같은 선수의 두 개 이상 타구·이동 동작이 순서와 거의 일정한 시간차로 일치한다. 접촉 관측 여부와 독립적으로 랠리 대응만 검증했다.",
+    "matched_actions": [
+      {
+        "frame_index": 132,
+        "other_frame_index": 84,
+        "description": "회색 선수의 포핸드 타구"
+      },
+      {
+        "frame_index": 168,
+        "other_frame_index": 120,
+        "description": "초록 상의 선수의 라켓을 들어 올린 리턴 동작"
+      }
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/a13-action-0.jpg",
+      "runs/review-remediation/target/a13-action-1.jpg",
+      "runs/review-remediation/target/b13-action-0.jpg",
+      "runs/review-remediation/target/b13-action-1.jpg"
+    ]
+  }
 }

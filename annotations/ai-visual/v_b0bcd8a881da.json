@@ -58,10 +58,12 @@
     0,
     5,
     11,
+    12,
     16,
     22,
     27,
     33,
+    35,
     38,
     44,
     50,
@@ -70,6 +72,7 @@
     61,
     62,
     64,
+    65,
     66,
     68,
     70,
@@ -79,6 +82,7 @@
     77,
     78,
     80,
+    81,
     82,
     83,
     84,
@@ -113,6 +117,7 @@
     113,
     116,
     122,
+    125,
     128
   ],
   "evidence_paths": [
@@ -120,7 +125,12 @@
     "runs/visual-review/v_b0bcd8a881da/native_seq_82_96_0.jpg",
     "runs/visual-review/v_b0bcd8a881da/native_crop_0085.jpg",
     "runs/visual-review/v_b0bcd8a881da/preview_seq_84_113_0.jpg",
-    "runs/visual-review/v_b0bcd8a881da/preview_seq_84_113_1.jpg"
+    "runs/visual-review/v_b0bcd8a881da/preview_seq_84_113_1.jpg",
+    "runs/review-remediation/boundary/v_b0bcd8a881da/overview-0.jpg",
+    "runs/review-remediation/boundary/v_b0bcd8a881da/overview-1.jpg",
+    "runs/review-remediation/boundary/v_b0bcd8a881da/contact-0.jpg",
+    "runs/review-remediation/boundary/v_b0bcd8a881da/contact-1.jpg",
+    "runs/review-remediation/boundary/v_ad55eefab043/overview-0.jpg"
   ],
   "rules": {
     "game": "doubles",
@@ -221,5 +231,35 @@
     "finding": "Prior qualification slack only0.007 analysis px; conservative original-frame recheck by owner",
     "original_source_reviewed_again": true,
     "independent_human_review": false
+  },
+  "remediation_review": {
+    "source": "ai_visual_review",
+    "human_verified": false,
+    "reviewer": "Codex review_boundary",
+    "inspected_frame_indices": [
+      0,
+      12,
+      22,
+      35,
+      50,
+      65,
+      78,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      100,
+      125
+    ],
+    "finding": "A85의 최초 접촉 전후는 보이지만 코르크의 수직 동작 흐림이 선 바깥 최소 여유보다 크다. B는 먼 반코트 접촉을 독립적으로 분리하지 못한다.",
+    "next_action": "A84–86의 더 짧은 노출 또는 높은 프레임률 원본과 접촉선을 가리지 않는 근접 시점이 필요하다. 반등하여 선 위에 놓인 A87 이후 위치를 최초 접촉으로 쓰지 않는다.",
+    "label_changed": false,
+    "clock_synchronization_claimed": false
   }
 }

@@ -14,7 +14,7 @@
     "width": 3840,
     "height": 2160
   },
-  "reviewer": "Codex review_base_b",
+  "reviewer": "Codex review_target original-source reinspection",
   "label": "UNKNOWN",
   "contact_observed": false,
   "contact_interval_observed": false,
@@ -52,20 +52,30 @@
     150,
     158,
     160,
+    162,
     164,
     165,
+    166,
+    168,
     169,
     170,
+    172,
+    174,
     175,
     176,
+    178,
     180,
     182,
+    184,
     185,
+    186,
     188,
     190,
     192,
     194,
     195,
+    196,
+    198,
     200,
     203,
     206,
@@ -81,12 +91,15 @@
     "runs/visual-review/v_447f79f409a6/overview-24.jpg",
     "runs/visual-review/v_447f79f409a6/detail-158-206.jpg",
     "runs/visual-review/v_447f79f409a6/detail-160-200-native.jpg",
-    "runs/visual-review/v_447f79f409a6/detail-60-260-native.jpg"
+    "runs/visual-review/v_447f79f409a6/detail-60-260-native.jpg",
+    "runs/review-remediation/target/b16-contact-0.jpg",
+    "runs/review-remediation/target/b16-contact-1.jpg",
+    "runs/review-remediation/target/b16-contact-2.jpg"
   ],
   "detection_labels": [],
   "detection_labels_verified_by_ai": false,
   "observation_status": "contact_occluded",
-  "rationale": "두 선수가 왼쪽 네트 앞쪽으로 동시에 접근해 낮게 라켓을 뻗는다. 대상 바닥 근처가 라켓·다리·전경 네트 구조물에 가려져 최초 접촉 코르크와 경계 관계를 확인하지 못했다.",
+  "rationale": "f160–200에서 두 선수가 왼쪽 네트 앞에 런지한다. f184 이후 작은 흰 물체가 네트 옆 바닥에 드러나지만 처음 접촉은 네트 구조물과 신체 뒤라 확인되지 않는다. 드러난 뒤 위치로 OUT을 추정하지 않는다.",
   "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
   "pair_match_status": "different_rally",
   "pair_match_other_video_id": "v_2107fa6276fa",
@@ -96,7 +109,41 @@
     "runs/visual-review/v_2107fa6276fa/overview.jpg"
   ],
   "follow_up_actions": [
-    "동일 번호 A16은 다른 랠리이므로 전이에 사용하지 않는다.",
-    "두 선수와 전경 구조물에 가려진 접촉 구간을 볼 수 있는 같은 랠리의 다른 시점을 확보한다."
-  ]
+    "동일 번호만으로 연결하지 않고 서로 다른 랠리의 전파 판정을 차단한다.",
+    "A의 f242–258 하강·반동과 전체 코트에서 바깥 칠 경계를 독립 검수하고 B의 가림 전 구간을 확보한다.",
+    "원본 클립 매핑을 바로잡기 전에는 A/B 쌍 판정을 REVIEW로 유지한다."
+  ],
+  "remediation_review": {
+    "original_source_sha256_verified": true,
+    "new_inspected_frame_indices": [
+      160,
+      162,
+      164,
+      166,
+      168,
+      170,
+      172,
+      174,
+      176,
+      178,
+      180,
+      182,
+      184,
+      186,
+      188,
+      190,
+      192,
+      194,
+      196,
+      198,
+      200
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/b16-contact-0.jpg",
+      "runs/review-remediation/target/b16-contact-1.jpg",
+      "runs/review-remediation/target/b16-contact-2.jpg"
+    ],
+    "provenance": "Actual original-source frames visually inspected; not independent human ground truth.",
+    "candidate_pending_integration": true
+  }
 }
