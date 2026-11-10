@@ -46,6 +46,39 @@ const crypto = require('node:crypto');
     }
     await page.locator('#filter').selectOption('all');
 
+    const expectedPairs = expected.filename_pair_audit;
+    if (expectedPairs) {
+      const pairAudit = page.locator('#filename-pair-audit');
+      assert(await pairAudit.isVisible(), 'Filename-pair follow-up audit must be visible');
+      const rendered = await pairAudit.evaluate(section => {
+        const entries = [...section.querySelectorAll('[data-pair-category]')];
+        const counts = {};
+        for (const entry of entries) counts[entry.dataset.pairCategory] = (counts[entry.dataset.pairCategory] || 0) + 1;
+        return {
+          candidatePairCount: entries.length, counts,
+          mixedPairs: [...section.querySelectorAll('[data-mixed-review]')].map(entry => ({videoId: entry.dataset.mixedReview, text: entry.textContent})),
+          distinguishesCandidatesFromEvents: section.textContent.includes('같은 번호는 같은 사건의 증거가 아닙니다'),
+        };
+      });
+      assert.equal(rendered.candidatePairCount, expectedPairs.candidate_pair_count);
+      for (const [category, count] of Object.entries(expectedPairs.counts)) assert.equal(rendered.counts[category] || 0, count);
+      assert.equal(rendered.mixedPairs.length, expectedPairs.counts.one_review_with_decided_partner);
+      assert(rendered.distinguishesCandidatesFromEvents);
+      checks.filenamePairAudit = {...rendered, navigation: []};
+      const mixedLinks = page.locator('#filename-pair-audit [data-mixed-review] a.pair-link');
+      for (let i = 0; i < await mixedLinks.count(); i++) {
+        // The REVIEW card is initially filtered out; its pair link must reveal it.
+        await page.locator('#filter').selectOption('IN');
+        const link = mixedLinks.nth(i);
+        const target = (await link.getAttribute('href')).slice(1);
+        await link.click();
+        const state = await page.locator(`#${target}`).evaluate(article => ({hidden: article.hidden, top: article.getBoundingClientRect().top}));
+        assert(!state.hidden && Math.abs(state.top) < 5, 'Candidate-pair link must reveal and navigate to its video');
+        checks.filenamePairAudit.navigation.push({target, ...state});
+      }
+      await page.locator('#filter').selectOption('all');
+    }
+
     async function checkVideo(videoId) {
       const selector = `#${videoId} video`;
       const locator = page.locator(selector);
