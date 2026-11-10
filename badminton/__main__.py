@@ -14,10 +14,16 @@ def main():
     batch.add_argument('--config', type=Path)
     batch.add_argument('--limit', type=int)
     batch.add_argument('--no-resume', action='store_true')
+    request = sub.add_parser('judge', help='Analyze an explicit event request and responsible camera views')
+    request.add_argument('request', type=Path)
+    request.add_argument('--video-dir', type=Path, default=Path('video'))
+    request.add_argument('--output', type=Path, default=Path('runs/request'))
+    request.add_argument('--config', type=Path)
     server = sub.add_parser('serve')
     server.add_argument('--run', type=Path, default=Path('runs/latest'))
     server.add_argument('--port', type=int, default=8765)
     server.add_argument('--host', default='127.0.0.1')
+    server.add_argument('--video-dir', type=Path, default=Path('video'), help='Local original videos for portable reanalysis')
     evaluation = sub.add_parser('evaluate')
     evaluation.add_argument('--run', type=Path, default=Path('runs/latest'))
     evaluation.add_argument('--annotations', type=Path)
@@ -35,6 +41,8 @@ def main():
     contact.add_argument('--output', type=Path, default=Path('models/contact-model.pt'))
     contact.add_argument('--epochs', type=int, default=20)
     contact.add_argument('--readiness-only', action='store_true')
+    contact.add_argument('--source-resolution', action='store_true',
+                         help='Train on original-resolution temporal patches')
     args = parser.parse_args()
     if args.command == 'analyze':
         config = json.loads(args.config.read_text()) if args.config else {}
@@ -44,9 +52,15 @@ def main():
             return int(result['status'] != 'completed')
         result = analyze_video(args.input, args.output, config)
         print(json.dumps(result['decision'], ensure_ascii=False))
+    elif args.command == 'judge':
+        from .requests import analyze_request
+        config = json.loads(args.config.read_text(encoding='utf-8')) if args.config else {}
+        result = analyze_request(args.request, args.video_dir, args.output, config)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return int(result.get('status') != 'completed')
     elif args.command == 'serve':
         from .web import serve
-        serve(args.run, args.host, args.port)
+        serve(args.run, args.host, args.port, video_dir=args.video_dir)
     elif args.command == 'evaluate':
         from .evaluation import evaluate_run
         result = evaluate_run(args.run, args.annotations)
@@ -66,7 +80,10 @@ def main():
         if args.readiness_only:
             result = contact_training_readiness(manifest, args.annotations)
         else:
-            result = train_contact_model(manifest, args.annotations, args.video_dir, args.output, epochs=args.epochs)
+            from .contact_model import SOURCE_PREPROCESSING
+            kwargs = {'preprocessing': SOURCE_PREPROCESSING} if args.source_resolution else {}
+            result = train_contact_model(manifest, args.annotations, args.video_dir, args.output,
+                                         epochs=args.epochs, **kwargs)
         print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 

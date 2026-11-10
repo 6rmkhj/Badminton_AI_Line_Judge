@@ -7,7 +7,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import math
 import mimetypes
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import re
 import threading
 from urllib.parse import unquote, urlsplit
@@ -41,8 +41,9 @@ def _finite(value):
 class ReviewServer(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, address, root):
+    def __init__(self, address, root, video_dir=None):
         self.root = Path(root).resolve()
+        self.video_dir = Path(video_dir if video_dir is not None else "video").resolve()
         self.static = Path(__file__).with_name("static")
         self.annotation_lock = threading.Lock()
         self.jobs = {}
@@ -66,6 +67,53 @@ class ReviewServer(ThreadingHTTPServer):
     def result(self, video_id):
         row = self.video(video_id)
         return _read_json(_safe_path(self.root, row.get("result_path", f"videos/{video_id}/result.json")))
+
+    def resolve_original(self, row, result):
+        """Locate the same source after a run is copied to another computer.
+
+        A stored absolute path may remain usable. Otherwise a relative filename
+        is looked up only inside the explicitly configured local video folder.
+        Every accepted file must match the persisted original content hash.
+        """
+        from .media import file_hash
+
+        recorded_hashes = [value for value in (row.get("sha256"), result.get("source_sha256"))
+                           if value is not None]
+        if (not recorded_hashes or any(not isinstance(value, str) or not re.fullmatch(r"[a-fA-F0-9]{64}", value)
+                                       for value in recorded_hashes)):
+            raise RequestError(409, "원본 SHA256 기록이 없어 재분석할 영상을 확인할 수 없습니다. CLI에서 새로 분석하세요.")
+        expected = recorded_hashes[0].lower()
+        if any(value.lower() != expected for value in recorded_hashes):
+            raise RequestError(409, "영상 목록과 분석 결과의 원본 SHA256이 다릅니다. 동일한 실행 결과인지 확인하세요.")
+        name = row.get("file", result.get("file"))
+        fallback = None
+        if name is not None:
+            if (not isinstance(name, str) or not name or "\\" in name or ":" in name or "\x00" in name or
+                    Path(name).is_absolute() or PureWindowsPath(name).drive or ".." in PureWindowsPath(name).parts):
+                raise RequestError(403, "원본 파일 이름은 --video-dir 안의 상대 경로여야 합니다.")
+            fallback = _safe_path(self.video_dir, name)
+        candidates = []
+        original = row.get("source_path", result.get("source_path"))
+        if isinstance(original, str) and "\x00" not in original:
+            path = Path(original)
+            if path.is_absolute():
+                candidates.append(path.resolve())
+        if fallback is not None and fallback not in candidates:
+            candidates.append(fallback)
+        mismatched = False
+        for candidate in candidates:
+            if not candidate.is_file():
+                continue
+            try:
+                digest = file_hash(candidate)
+            except OSError:
+                raise RequestError(403, "원본 영상을 읽을 수 없습니다. 파일 접근 권한을 확인하세요.")
+            if digest == expected:
+                return candidate, expected
+            mismatched = True
+        if mismatched:
+            raise RequestError(409, "찾은 영상의 SHA256이 기존 분석의 원본과 다릅니다. 동일한 원본을 --video-dir 폴더에 넣으세요.")
+        raise RequestError(404, "원본 영상을 찾을 수 없습니다. 원본 파일이 있는 폴더를 serve --video-dir로 지정하세요.")
 
     def annotate(self, video_id, body):
         self.video(video_id)
@@ -402,13 +450,8 @@ class ReviewHandler(BaseHTTPRequestHandler):
         if path.startswith("/api/analyze/"):
             video_id = path.removeprefix("/api/analyze/")
             row = self.server.video(video_id)
-            source = row.get("source_path")
-            if source is None:
-                raise RequestError(409, "이 실행 결과에는 재분석용 원본 경로가 없습니다. CLI에서 분석을 실행하세요.")
-            source = Path(source)
-            if not source.is_file():
-                raise RequestError(404, "원본 영상이 없습니다.")
             existing = self.server.result(video_id)
+            source, expected_source_hash = self.server.resolve_original(row, existing)
             configuration = dict(existing.get("config") or {})
             configuration["video_id"] = video_id
             with self.server.job_lock:
@@ -421,6 +464,9 @@ class ReviewHandler(BaseHTTPRequestHandler):
                     self.server.jobs[job_id]["status"] = "running"
                 try:
                     from .pipeline import analyze_video
+                    from .media import file_hash
+                    if file_hash(source) != expected_source_hash:
+                        raise ValueError("Original video changed after the reanalysis request")
                     analyze_video(source, self.server.root / "videos" / video_id, config=configuration)
                     with self.server.job_lock:
                         self.server.jobs[job_id]["status"] = "completed"
@@ -455,12 +501,12 @@ class ReviewHandler(BaseHTTPRequestHandler):
         self._dispatch(self._post)
 
 
-def create_server(root, host="127.0.0.1", port=8765):
-    return ReviewServer((host, port), root)
+def create_server(root, host="127.0.0.1", port=8765, video_dir=None):
+    return ReviewServer((host, port), root, video_dir=video_dir)
 
 
-def serve(root, host="127.0.0.1", port=8765):
-    server = create_server(root, host, port)
+def serve(root, host="127.0.0.1", port=8765, video_dir=None):
+    server = create_server(root, host, port, video_dir=video_dir)
     print(f"Review UI: http://{host}:{server.server_address[1]}", flush=True)
     try:
         server.serve_forever()
