@@ -85,6 +85,7 @@ def pair_fixture(tmp_path):
             'analysis_size':{'width':960,'height':540},'source_size':{'width':3840,'height':2160},
             'contact_observed':label!='REVIEW','target_contact_identity_confirmed':label!='REVIEW',
             'contact_frame_index':3,'time':.3,'contact_px':[100,100],'rationale':'Reviewed native contact.',
+            'inspected_frame_indices':list(range(20)),
             'boundary_evidence':{'kind':'court_interior','interior_confirmed':True,'polygon_px':[[50,50],[200,50],[200,200],[50,200]],
                 'contact_uncertainty_px':1,'boundary_uncertainty_px':1,
                 'explanation':'All four edges lie safely inside the valid court.'},
@@ -292,8 +293,9 @@ def test_duplicate_hash_upload_does_not_choose_arbitrary_review_identity(pair_fi
 
 def test_fresh_mode_does_not_reuse_verified_ai_event_link(pair_fixture,monkeypatch):
     workspace, _, _ = pair_fixture
-    def fresh(identifier,camera,selected,reuse,catalog):
+    def fresh(identifier,camera,selected,reuse,catalog,refine=False):
         assert reuse is False
+        assert refine is False
         row = catalog[selected['video_id']]['row']
         return source_view('REVIEW', _candidate_ids=[selected['video_id']],
                            source_sha256=row['source_sha256'])
@@ -302,6 +304,48 @@ def test_fresh_mode_does_not_reuse_verified_ai_event_link(pair_fixture,monkeypat
     assert result['same_event_confirmed'] is False
     assert result['event_correspondence_source'] is None
     assert result['matched_actions'] == []
+
+
+def test_event_match_can_be_valid_while_both_contacts_remain_unresolved(pair_fixture):
+    workspace, root, report = pair_fixture
+    report['videos'][0].update(direct_assisted_decision='REVIEW', assisted_decision='REVIEW')
+    report['videos'][1]['cross_view_review'].update(qualified=False, event_correspondence_validated=True)
+    _write(workspace.report_path, report)
+    result = wait_job(workspace, submit_fixture(workspace))['result']
+    assert result['same_event_confirmed'] is True
+    assert result['decision'] == 'REVIEW'
+    assert result['reason_codes'] == ['NO_QUALIFIED_CONTACT']
+    assert result['source_camera_ids'] == []
+
+
+@pytest.mark.parametrize('options', [{'reuse_review':True,'refine_review_regions':True},
+                                     {'reuse_review':False,'refine_review_regions':'yes'}])
+def test_refinement_requires_explicit_boolean_and_fresh_processing(pair_fixture, options):
+    workspace, _, _ = pair_fixture
+    with pytest.raises(PairWorkspaceError) as error:
+        submit_fixture(workspace, **options)
+    assert error.value.status == 400
+
+
+def test_refinement_passes_hints_not_labels_and_marks_assisted_view(pair_fixture, monkeypatch):
+    workspace, _, _ = pair_fixture
+    configs = []
+    monkeypatch.setattr('badminton.media.probe', lambda _: {'frame_count':20,'width':3840,'height':2160})
+    def analyze(source, output, config):
+        configs.append(config)
+        return {'source_sha256':hashlib.sha256(Path(source).read_bytes()).hexdigest(),
+                'decision':{'decision':'REVIEW','reason_codes':['FIRST_CONTACT_NOT_OBSERVED']},
+                'artifacts':{},'timings':{}}
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    result = wait_job(workspace, submit_fixture(workspace,reuse_review=False,refine_review_regions=True))['result']
+    assert result['decision'] == 'REVIEW'
+    guided = [c for c in configs if c.get('detector',{}).get('refinement_regions')]
+    assert len(configs) == 2 and len(guided) == 1
+    assert guided[0]['detector']['include_dark_components']
+    assert all('contact_observed' not in c and 'target_track_id' not in c for c in configs)
+    assert result['views']['A']['processing_mode']=='review_guided_reanalysis'
+    assert result['views']['B']['processing_mode']=='fresh_analysis'
+    assert not any(v['qualified'] for v in result['views'].values())
 
 
 def test_analysis_only_library_has_independent_asset_scope(pair_fixture):
