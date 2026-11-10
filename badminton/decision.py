@@ -208,20 +208,35 @@ def decide(landing: dict, calibration: dict, rules: dict | None = None) -> dict:
             footprint = centre + radius * np.column_stack((np.cos(angles), np.sin(angles)))
         else:
             footprint = centre[None]
-        homogeneous = np.column_stack((footprint, np.ones(len(footprint)))) @ transform.T
+        from .calibration import points_for_homography
+        plane_footprint = points_for_homography(footprint, calibration)
+        homogeneous = np.column_stack((plane_footprint, np.ones(len(plane_footprint)))) @ transform.T
         if (np.abs(homogeneous[:, 2]) < 1e-7).any():
             raise ValueError("projection near horizon")
         projected = homogeneous[:, :2] / homogeneous[:, 2, None]
         # Finite-difference local metric scale, conservative maximum directional
         # displacement, plus a 20 mm line-placement floor for this PoC.
         angles = np.linspace(0, 2*np.pi, 32, endpoint=False)
-        offsets = (error + calibration_error) * np.column_stack((np.cos(angles), np.sin(angles)))
+        rectified = calibration.get('line_fit_error_pixel_space') == 'undistorted_analysis_pixels'
+        offsets = (error if rectified else error + calibration_error) * np.column_stack((np.cos(angles), np.sin(angles)))
         probes = np.vstack((centre, centre + offsets))
+        probes = points_for_homography(probes, calibration)
         hp = np.column_stack((probes, np.ones(len(probes)))) @ transform.T
         if (np.abs(hp[:, 2]) < 1e-7).any():
             raise ValueError("uncertainty crosses horizon")
         metric = hp[:, :2] / hp[:, 2, None]
-        uncertainty = max(0.02, float(np.linalg.norm(metric[1:] - metric[0], axis=1).max()))
+        uncertainty = float(np.linalg.norm(metric[1:] - metric[0], axis=1).max())
+        if rectified:
+            centre_rectified = points_for_homography(centre[None], calibration)[0]
+            line_probes = centre_rectified + calibration_error * np.column_stack((np.cos(angles), np.sin(angles)))
+            line_hp = np.column_stack((line_probes, np.ones(len(line_probes)))) @ transform.T
+            if (np.abs(line_hp[:, 2]) < 1e-7).any():
+                raise ValueError('line uncertainty crosses horizon')
+            line_metric = line_hp[:, :2] / line_hp[:, 2, None]
+            uncertainty += float(np.linalg.norm(line_metric - metric[0], axis=1).max())
+        if not math.isfinite(uncertainty):
+            raise ValueError('non-finite contact uncertainty')
+        uncertainty = max(0.02, uncertainty)
         if not np.isfinite(projected).all() or uncertainty > 1.0:
             return _review(["CONTACT_POSITION_UNCERTAINTY_TOO_LARGE"], rules)
         result = evaluate_contact(projected, rules, uncertainty)
@@ -231,5 +246,5 @@ def decide(landing: dict, calibration: dict, rules: dict | None = None) -> dict:
         result["uncertainty_method"] = "image uncertainty plus line-fit residual, local homography scale, 20 mm minimum; not a validated statistical bound"
         result["reason_codes"] = list(dict.fromkeys(result["reason_codes"]))
         return result
-    except (ValueError, TypeError, cv2.error, IndexError, OverflowError):
+    except (ValueError, TypeError, cv2.error, IndexError, KeyError, OverflowError):
         return _review(["INVALID_CONTACT_GEOMETRY_OR_CALIBRATION"], rules)
