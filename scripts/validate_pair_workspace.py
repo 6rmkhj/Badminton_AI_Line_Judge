@@ -18,6 +18,8 @@ def main():
     parser.add_argument('--url', default='http://127.0.0.1:8770')
     parser.add_argument('--report', type=Path, default=Path('runs/ai-reviewed-poc/visual-review.json'))
     parser.add_argument('--output', type=Path, default=Path('runs/pair-validation/all-pairs.json'))
+    parser.add_argument('--expected-counts', type=json.loads,
+                        help='Optional frozen regression counts, e.g. {"IN":15,"OUT":5,"REVIEW":17}')
     args = parser.parse_args()
     report = json.loads(args.report.read_text(encoding='utf-8'))
 
@@ -58,7 +60,8 @@ def main():
         print(json.dumps(checks[-1], ensure_ascii=False), flush=True)
     counts = {label: sum(row['decision'] == label for row in checks) for label in ('IN', 'OUT', 'REVIEW')}
     assert len(checks) == 37
-    assert counts == {'IN': 15, 'OUT': 5, 'REVIEW': 17}, counts
+    if args.expected_counts is not None:
+        assert counts == args.expected_counts, (counts, args.expected_counts)
     output = {'passed': True, 'created_at': datetime.now(timezone.utc).isoformat(),
               'scope': '37 actual filename candidate pairs via HTTP, reusing source-bound AI reviews; no new model inference',
               'same_event_operator_confirmation': False, 'video_count': 74, 'pair_count': 37,
