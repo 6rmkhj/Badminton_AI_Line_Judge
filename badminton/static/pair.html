@@ -65,6 +65,16 @@
         <div class="result-explanation"><div id="source-cameras" class="source-cameras"></div><ul id="result-reasons"></ul><p id="correspondence-status" class="muted"></p><p id="result-timing" class="muted"></p><a id="result-json" class="secondary" href="#" download>결과 JSON 내려받기 ↗</a></div>
       </div>
       <p class="result-context">두 시점의 관측 근거와 사건 대응을 함께 검토한 결과입니다. 직접 관측과 다른 시점에서 가져온 근거를 구분해 표시합니다.</p>
+      <section id="review-diagnostics" class="review-diagnostics" aria-labelledby="diagnostics-heading" hidden>
+        <div class="section-title"><div><p class="eyebrow">REVIEW DIAGNOSIS</p><h2 id="diagnostics-heading">어떤 근거가 더 필요한가요?</h2></div><span id="diagnostics-count" class="status-pill"></span></div>
+        <p id="diagnostics-summary" class="diagnostics-summary"></p>
+        <div id="diagnostics-issues" class="diagnostic-grid"></div>
+        <div id="refine-panel" class="refine-panel" hidden>
+          <div><h3>접촉 후보를 원본에서 다시 확인</h3><p id="refine-help">기존 AI 검수의 후보 구간을 참고해 원본 해상도로 다시 분석합니다. 판정 확정을 보장하지 않습니다.</p></div>
+          <button id="refine-pair" class="refine-button" type="button" aria-describedby="refine-help">접촉 후보 구간 집중 재분석 ↗</button>
+        </div>
+        <p id="refine-error" class="message error" role="alert" hidden></p>
+      </section>
       <div id="result-views" class="result-grid"></div>
     </section>
 
