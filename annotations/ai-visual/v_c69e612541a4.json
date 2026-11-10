@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "video_id": "v_c69e612541a4",
+  "file": "a시점 18.mp4",
+  "source_sha256": "dd04f1a5a96ce2ba9ad1c14eb750396fbd4537b23cc09749fc065f0b2a260c9d",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "UNKNOWN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "target_contact_identity_confirmed": false,
+  "contact_frame_index": null,
+  "contact_px": null,
+  "time": null,
+  "confidence": "unresolved",
+  "observation_status": "contact_out_of_view",
+  "rationale": "앞부분부터 두 선수가 상대 전위의 낮은 움직임을 지켜보다가 앞으로 걷는다. 반대편 접촉이 작고 가려져 최초 접촉 여부를 확정하지 못했다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    8,
+    16,
+    25,
+    33,
+    42,
+    50,
+    59,
+    67,
+    75,
+    84,
+    92,
+    101,
+    109,
+    118,
+    126,
+    134,
+    143,
+    151,
+    160,
+    168,
+    177,
+    185,
+    194
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_c69e612541a4/overview.jpg"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    }
+  ],
+  "cross_view_candidates": [
+    {
+      "other_video_id": "v_92095687bfab",
+      "status": "different_rally",
+      "same_event_confirmed_by_ai": false,
+      "examined_actions": [
+        {
+          "frame_index": 50,
+          "other_frame_index": 45,
+          "description": "A18의 남색 전위 타구와 B18의 남색 큰 오버헤드는 자세·전후 이동이 다르다."
+        },
+        {
+          "frame_index": 134,
+          "other_frame_index": 137,
+          "description": "A18은 회색·남색 선수가 이미 라켓을 내리고 앞으로 걷는 구간이지만 B18은 회색 선수의 후속 오버헤드 타구 구간이다."
+        }
+      ],
+      "rationale": "B18은 B17과 동일 영상이며 A17과 맞은 오버헤드 두 동작의 흐름이 A18에는 없다. 같은 번호를 근거로 다른 랠리의 IN을 전이하지 않는다.",
+      "evidence_paths": [
+        "runs/visual-review/v_c69e612541a4/overview.jpg",
+        "runs/visual-review/v_92095687bfab/overview-24.jpg",
+        "runs/visual-review/v_05c2b1717b0e/detail-0-194-native.jpg"
+      ]
+    }
+  ],
+  "follow_up_actions": [
+    "최종 랠리와 첫 바닥 접촉이 연속으로 보이는 추가 시점 또는 더 긴 원본을 확보한다.",
+    "선수의 회수 행동만으로 IN/OUT 정답을 만들지 않고 해당 대상 접촉의 식별 근거를 보강한다."
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_4bce45231ca1",
+  "file": "8k 30 4k 24 a시점 6.mp4",
+  "source_sha256": "27714107879be76001ef890bfc82da752912c7bea78bf792b26986b827dcf211",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 7680,
+    "height": 4320
+  },
+  "reviewer": "Codex review_8k",
+  "detection_labels": [],
+  "source_review_sha256": "5fb954baa13ae2b0a80889d1913b7397ec9a47e1999d33320ce3fc624bdcf9f3",
+  "source_review_path": "annotations/ai-visual/v_4bce45231ca1.json"
+}

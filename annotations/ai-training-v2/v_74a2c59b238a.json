@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_74a2c59b238a",
+  "file": "b시점 20.mp4",
+  "source_sha256": "1c16c119d1c9ed26cb7bc1a7185359fea6a56e3c4e50aff8041c2944aa450a25",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "detection_labels": [
+    {
+      "frame_index": 185,
+      "x": 735,
+      "y": 240,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 186,
+      "x": 735,
+      "y": 232,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 187,
+      "x": 735,
+      "y": 227,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 200,
+      "x": 736,
+      "y": 216,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 179,
+      "x": 735,
+      "y": 250,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 180,
+      "x": 745,
+      "y": 250,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 181,
+      "x": 750,
+      "y": 250,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 182,
+      "x": 750,
+      "y": 255,
+      "label": "background",
+      "source": "ai_visual_review"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "cdd0c3c1ac94a42bcc25ba3b3cbd7efa669b0d29217cf30cc1430266d0e57107",
+  "source_review_path": "annotations/ai-visual/v_74a2c59b238a.json"
+}

@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_2107fa6276fa",
+  "file": "a시점 16.mp4",
+  "source_sha256": "ad4cb568e49b98216cce2d45025a3f584a41b7df48ca424bcd1e0133ecc66e03",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_a",
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 252,
+      "x": 671,
+      "y": 246,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    },
+    {
+      "frame_index": 256,
+      "x": 676,
+      "y": 237,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    },
+    {
+      "frame_index": 264,
+      "x": 684,
+      "y": 233,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    },
+    {
+      "frame_index": 276,
+      "x": 688,
+      "y": 258,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "ca28e6c996d52c2a01b071af7855a83ad541119830ba77fb5d193430e7227f28",
+  "source_review_path": "annotations/ai-visual/v_2107fa6276fa.json"
+}

@@ -1,0 +1,233 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_d7de1ab9f6a0",
+  "file": "b-2시점(uhd30 4k30).mp4",
+  "source_sha256": "26c434519a4fdcb2e43e38bf067b8683f67c9346b003e5f7e330f2debe846000",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "IN",
+  "reviewer": "Codex review_uhd4k",
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "contact_frame_index": 136,
+  "time": 4.536667,
+  "contact_px": [
+    634,
+    377
+  ],
+  "target_contact_identity_confirmed": true,
+  "confidence": "high",
+  "limitations": [
+    "AI가 직접 영상 프레임을 해석한 보조 레이블이며 사람이 독립 검수한 정답이 아니다.",
+    "검수한 기존 영상에 대한 해석으로 새로운 경기 영상의 자동 판정 정확도를 입증하지 않는다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    7,
+    14,
+    21,
+    29,
+    36,
+    43,
+    50,
+    58,
+    65,
+    72,
+    79,
+    87,
+    94,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    116,
+    118,
+    120,
+    122,
+    123,
+    124,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133,
+    134,
+    135,
+    136,
+    137,
+    138,
+    139,
+    140,
+    141,
+    142,
+    143,
+    144,
+    145,
+    146,
+    148,
+    150,
+    152,
+    159,
+    162,
+    167
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_d7de1ab9f6a0/overview.jpg",
+    "runs/visual-review/v_d7de1ab9f6a0/frame-end.jpg",
+    "runs/visual-review/v_d7de1ab9f6a0/micro-0.jpg",
+    "runs/visual-review/v_d7de1ab9f6a0/micro-1.jpg",
+    "runs/visual-review/v_d7de1ab9f6a0/geometry-overlay.jpg",
+    "runs/visual-review/v_8edd598d6db4/match-83.jpg",
+    "runs/visual-review/v_d7de1ab9f6a0/match-106.jpg",
+    "runs/visual-review/v_8edd598d6db4/match-136.jpg",
+    "runs/visual-review/v_d7de1ab9f6a0/match-159.jpg"
+  ],
+  "detection_labels": [
+    {
+      "frame_index": 132,
+      "x": 597,
+      "y": 351,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 134,
+      "x": 615,
+      "y": 360,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 136,
+      "x": 632,
+      "y": 375,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 138,
+      "x": 641,
+      "y": 370,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 132,
+      "x": 580,
+      "y": 410,
+      "label": "background"
+    },
+    {
+      "frame_index": 134,
+      "x": 660,
+      "y": 415,
+      "label": "background"
+    },
+    {
+      "frame_index": 136,
+      "x": 590,
+      "y": 400,
+      "label": "background"
+    },
+    {
+      "frame_index": 138,
+      "x": 675,
+      "y": 360,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "contact_support_px": [
+    [
+      625,
+      371
+    ],
+    [
+      639,
+      371
+    ],
+    [
+      639,
+      384
+    ],
+    [
+      625,
+      384
+    ]
+  ],
+  "contact_interval_frames": [
+    135,
+    136
+  ],
+  "observation_status": "contact_interval",
+  "rationale": "132~135 프레임 하강 뒤 136 프레임에 코르크가 바닥에 닿고 137~140 프레임에서 다시 올라간다. 첫 접촉은 복식 후방 외곽선 안쪽이며 이후 143 프레임경 경계선을 넘어 바깥에 정지한다. 최종 정지 위치로 OUT 처리하면 첫 접촉 판정을 뒤집게 된다.",
+  "boundary_evidence": {
+    "kind": "court_interior",
+    "polygon_px": [
+      [
+        193,
+        303
+      ],
+      [
+        469,
+        266
+      ],
+      [
+        758,
+        318
+      ],
+      [
+        485,
+        510
+      ]
+    ],
+    "contact_uncertainty_px": 5,
+    "boundary_uncertainty_px": 4,
+    "explanation": "원본 전체 프레임에서 목표 복식 코트 안쪽임을 확인한 보수적인 내부 영역이다. 일부 변은 실제 외곽선이 아니라 내부를 제한하는 선분이며, 이 영역 밖이라는 이유로 OUT을 판단하지 않는다. 최초 접촉 지지 영역 전체가 내부에 위치하며 좌표·경계 판독 오차를 추가했다.",
+    "interior_confirmed": true
+  },
+  "cross_view_match": {
+    "other_video_id": "v_8edd598d6db4",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 106,
+        "other_frame_index": 83,
+        "description": "검은 옷 선수의 마지막 점프 오버헤드 타격과 빨간 옷 파트너의 준비 자세"
+      },
+      {
+        "frame_index": 159,
+        "other_frame_index": 136,
+        "description": "랠리 종료 뒤 검은 반바지 선수가 흰 반바지 파트너 뒤를 돌아 후방 셔틀 쪽으로 이동"
+      }
+    ],
+    "rationale": "원본 연속 프레임의 마지막 타격 및 별도의 수비/회수 동작을 두 시점에서 비교했다. 동일한 선수 위치·자세·동작 순서로 사건을 확인했으며 파일명만으로 연결하지 않았다. 프레임 번호 차이는 공통 시계 동기화나 정밀3D 복원을 뜻하지 않는다.",
+    "evidence_paths": [
+      "runs/visual-review/v_8edd598d6db4/match-83.jpg",
+      "runs/visual-review/v_d7de1ab9f6a0/match-106.jpg",
+      "runs/visual-review/v_8edd598d6db4/match-136.jpg",
+      "runs/visual-review/v_d7de1ab9f6a0/match-159.jpg"
+    ]
+  }
+}

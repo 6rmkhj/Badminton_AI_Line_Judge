@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "video_id": "v_e668bc74c117",
+  "file": "a시점 4.mp4",
+  "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "UNKNOWN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "target_contact_identity_confirmed": false,
+  "contact_frame_index": null,
+  "contact_px": null,
+  "time": null,
+  "confidence": "unresolved",
+  "observation_status": "contact_occluded",
+  "rationale": "초반 회색 상의 선수의 오버헤드 타구와 반대편 선수의 전위 이동을 확인했다. 전경 통행자와 네트 때문에 마지막 대상 접촉이 연속적으로 확인되지 않는다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    12,
+    24,
+    36,
+    48,
+    60,
+    73,
+    85,
+    97,
+    109,
+    115,
+    120,
+    121,
+    125,
+    130,
+    133,
+    135,
+    140,
+    145,
+    146,
+    150,
+    155,
+    158,
+    160,
+    165,
+    170,
+    175,
+    180,
+    182,
+    194,
+    206,
+    219,
+    231,
+    243,
+    255,
+    267,
+    280
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_e668bc74c117/overview.jpg",
+    "runs/visual-review/v_e668bc74c117/detail_115_181_5_preview.jpg"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    }
+  ],
+  "follow_up_actions": [
+    "가림이 없는 다른 카메라 또는 더 긴 원본에서 같은 랠리의 최초 접촉을 확보한다.",
+    "네트 기둥·선수에 가려진 최초 접촉을 이후 반동 위치로 대체하지 않는다."
+  ]
+}

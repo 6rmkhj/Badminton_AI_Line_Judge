@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_d67b0378b667",
+  "file": "b시점 13.mp4",
+  "source_sha256": "72f6e002daa6f41618b95bba3fc11f727ab713ba48193dba4cffe8c5a8eed233",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "label": "UNKNOWN",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "전체 프레임을 정밀 추적한 사람 검수는 아니며, 나열된 개요·확대 프레임에서 접촉을 확인하지 못했다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    10,
+    20,
+    31,
+    41,
+    52,
+    62,
+    73,
+    83,
+    94,
+    104,
+    115,
+    125,
+    136,
+    146,
+    157,
+    167,
+    178,
+    188,
+    199,
+    209,
+    220,
+    230,
+    241
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_d67b0378b667/overview-24.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "contact_out_of_view",
+  "rationale": "흰 상의 선수의 오버헤드와 초록 상의 선수의 네트 방향 대응 후 정지를 확인했다. 가까운 반코트에 관찰되는 최초 접촉은 없고 먼 쪽 접촉은 식별하지 못했다.",
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "follow_up_actions": [
+    "네트 반대편의 해당 랠리 최초 접촉을 볼 수 있는 다른 시점을 실제 타격 순서로 대조한다.",
+    "일치 시점에서도 접촉·경계가 확인되지 않으면 원본 후속 구간 또는 독립 사람 검수가 필요하다."
+  ]
+}

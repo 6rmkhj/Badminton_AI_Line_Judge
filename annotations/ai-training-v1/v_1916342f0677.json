@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_1916342f0677",
+  "file": "a-3시점(uhd30 4k30).mp4",
+  "source_sha256": "4780ea68e9689f3602bfdc3955cb3bc47c41d2bcbfd78dfa78378dbe47242729",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_uhd4k",
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "source_review_sha256": "2476c6569453cc7b8094e02f1705d6b81f95cada023a1e1232963350692b28a1",
+  "source_review_path": "annotations/ai-visual/v_1916342f0677.json"
+}

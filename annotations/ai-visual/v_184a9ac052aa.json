@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "video_id": "v_184a9ac052aa",
+  "file": "a시점 20.mp4",
+  "source_sha256": "611aaef414d35ab1ee62a670f7145bf285b1a42d8f631cde4791b4a9ef4c7184",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "UNKNOWN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "target_contact_identity_confirmed": false,
+  "contact_frame_index": null,
+  "contact_px": null,
+  "time": null,
+  "confidence": "unresolved",
+  "observation_status": "target_ambiguous",
+  "rationale": "회색·남색 선수의 타구가 이어지고 전경 통행자가 화면 우측을 가린다. 끝부분에 남색 선수가 다시 라켓을 올리므로 단순한 자세 변화만으로 랠리 종료나 최초 접촉을 단정하지 않았다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    10,
+    20,
+    30,
+    40,
+    51,
+    61,
+    71,
+    81,
+    91,
+    102,
+    112,
+    122,
+    132,
+    143,
+    153,
+    163,
+    173,
+    183,
+    194,
+    204,
+    214,
+    224,
+    235
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_184a9ac052aa/overview.jpg"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    }
+  ],
+  "follow_up_actions": [
+    "최종 랠리와 첫 바닥 접촉이 연속으로 보이는 추가 시점 또는 더 긴 원본을 확보한다.",
+    "선수의 회수 행동만으로 IN/OUT 정답을 만들지 않고 해당 대상 접촉의 식별 근거를 보강한다."
+  ]
+}

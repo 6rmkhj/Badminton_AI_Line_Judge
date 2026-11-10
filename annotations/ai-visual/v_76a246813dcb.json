@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_76a246813dcb",
+  "file": "b시점 5.mp4",
+  "source_sha256": "5be39eff715775ffa63f2a9a57512a12d92d0e56bb3296429b7c399b349588de",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "label": "UNKNOWN",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "전체 프레임을 정밀 추적한 사람 검수는 아니며, 나열된 개요·확대 프레임에서 접촉을 확인하지 못했다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    13,
+    27,
+    41,
+    54,
+    68,
+    82,
+    96,
+    109,
+    123,
+    137,
+    151,
+    164,
+    178,
+    192,
+    206,
+    219,
+    233,
+    247,
+    261,
+    274,
+    288,
+    302,
+    316
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_76a246813dcb/overview-24.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "contact_out_of_view",
+  "rationale": "흰 상의 선수가 네트 쪽으로 전진하고 두 선수가 이후 멈추지만 가까운 반코트의 착지 물체를 확인하지 못했다. 선수의 정지만으로 접촉을 추정하지 않는다.",
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "follow_up_actions": [
+    "네트 반대편의 해당 랠리 최초 접촉을 볼 수 있는 다른 시점을 실제 타격 순서로 대조한다.",
+    "일치 시점에서도 접촉·경계가 확인되지 않으면 원본 후속 구간 또는 독립 사람 검수가 필요하다."
+  ]
+}

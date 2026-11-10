@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_e9ea68c3e070",
+  "file": "8k 30 4k 24 b시점 5.mp4",
+  "source_sha256": "7eccb2951dde57a8ab51b6cf1e42671348a7369d62e4ebf3800d536349a48667",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_8k",
+  "detection_labels": [
+    {
+      "frame_index": 40,
+      "x": 821,
+      "y": 293,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 41,
+      "x": 826,
+      "y": 291,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 43,
+      "x": 836,
+      "y": 288,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 45,
+      "x": 841,
+      "y": 287,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 40,
+      "x": 770,
+      "y": 312,
+      "label": "background"
+    },
+    {
+      "frame_index": 40,
+      "x": 875,
+      "y": 344,
+      "label": "background"
+    },
+    {
+      "frame_index": 40,
+      "x": 850,
+      "y": 315,
+      "label": "background"
+    },
+    {
+      "frame_index": 40,
+      "x": 790,
+      "y": 265,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "b01b77ba5c1bfed686066b05bf19463a7be5fbcec194c57f662bae67110cd044",
+  "source_review_path": "annotations/ai-visual/v_e9ea68c3e070.json"
+}

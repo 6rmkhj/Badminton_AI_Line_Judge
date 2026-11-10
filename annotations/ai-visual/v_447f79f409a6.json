@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_447f79f409a6",
+  "file": "b시점 16.mp4",
+  "source_sha256": "cb07d9fccd17c96b351a27dfb3a84242288170ba3ab1c7e3e032f7e0cd4a96dc",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "label": "UNKNOWN",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "전체 프레임을 정밀 추적한 사람 검수는 아니며, 나열된 개요·확대 프레임에서 접촉을 확인하지 못했다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    11,
+    22,
+    33,
+    45,
+    56,
+    60,
+    67,
+    79,
+    90,
+    101,
+    113,
+    120,
+    124,
+    135,
+    146,
+    150,
+    158,
+    160,
+    164,
+    165,
+    169,
+    170,
+    175,
+    176,
+    180,
+    182,
+    185,
+    188,
+    190,
+    192,
+    194,
+    195,
+    200,
+    203,
+    206,
+    210,
+    214,
+    226,
+    237,
+    240,
+    248,
+    260
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_447f79f409a6/overview-24.jpg",
+    "runs/visual-review/v_447f79f409a6/detail-158-206.jpg",
+    "runs/visual-review/v_447f79f409a6/detail-160-200-native.jpg",
+    "runs/visual-review/v_447f79f409a6/detail-60-260-native.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "contact_occluded",
+  "rationale": "두 선수가 왼쪽 네트 앞쪽으로 동시에 접근해 낮게 라켓을 뻗는다. 대상 바닥 근처가 라켓·다리·전경 네트 구조물에 가려져 최초 접촉 코르크와 경계 관계를 확인하지 못했다.",
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "pair_match_status": "different_rally",
+  "pair_match_other_video_id": "v_2107fa6276fa",
+  "pair_match_rationale": "동일 번호 파일명을 근거로 연결하지 않았다. B16은 회색 선수의 f120 오버헤드 뒤 흰·초록 선수가 가까운 네트 앞으로 돌진하고 초록 선수가 f260 회수한다. A16은 회색 f43 타격 뒤 남색 f145의 별도 큰 오버헤드와 회색 선수의 f320 회수로 이어진다. 순차 동작과 마지막 회수 주체가 달라 동일 랠리 전이를 거부했다.",
+  "pair_match_evidence_paths": [
+    "runs/visual-review/v_447f79f409a6/detail-60-260-native.jpg",
+    "runs/visual-review/v_2107fa6276fa/overview.jpg"
+  ],
+  "follow_up_actions": [
+    "동일 번호 A16은 다른 랠리이므로 전이에 사용하지 않는다.",
+    "두 선수와 전경 구조물에 가려진 접촉 구간을 볼 수 있는 같은 랠리의 다른 시점을 확보한다."
+  ]
+}

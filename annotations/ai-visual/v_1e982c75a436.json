@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_1e982c75a436",
+  "file": "b시점 9.mp4",
+  "source_sha256": "c6ccd12306091d7f6305932e4e6a22bfe166c145f432c386aba1838643ea50d4",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "label": "UNKNOWN",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "전체 프레임을 정밀 추적한 사람 검수는 아니며, 나열된 개요·확대 프레임에서 접촉을 확인하지 못했다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    9,
+    19,
+    29,
+    39,
+    49,
+    59,
+    69,
+    79,
+    89,
+    99,
+    109,
+    119,
+    129,
+    139,
+    149,
+    159,
+    169,
+    179,
+    189,
+    199,
+    209,
+    219,
+    229
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_1e982c75a436/overview-24.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "contact_out_of_view",
+  "rationale": "남색 선수의 네트 방향 타격 후 두 선수가 전진한다. 가까운 반코트에 새로 떨어지는 셔틀은 보이지 않으므로 반대편 사건의 판정을 이 영상에서 만들 수 없다.",
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "follow_up_actions": [
+    "네트 반대편의 해당 랠리 최초 접촉을 볼 수 있는 다른 시점을 실제 타격 순서로 대조한다.",
+    "일치 시점에서도 접촉·경계가 확인되지 않으면 원본 후속 구간 또는 독립 사람 검수가 필요하다."
+  ]
+}

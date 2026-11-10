@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "video_id": "v_45241dd65a35",
+  "file": "a시점 7.mp4",
+  "source_sha256": "4547686c4665cb787757ed015253367b6202b9a3c8503ddd08f4de15d2e3c3ef",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "UNKNOWN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "target_contact_identity_confirmed": false,
+  "contact_frame_index": null,
+  "contact_px": null,
+  "time": null,
+  "confidence": "unresolved",
+  "observation_status": "contact_out_of_view",
+  "rationale": "앞 코트 흰 상의 선수와 뒤 남색 선수가 타구한 뒤 앞으로 걸어간다. 마지막 사건은 반대편 코트에 있고 이 시점에서 최초 접촉과 외곽선을 함께 확인할 수 없다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    25,
+    30,
+    31,
+    35,
+    40,
+    41,
+    45,
+    50,
+    51,
+    55,
+    60,
+    62,
+    65,
+    70,
+    72,
+    75,
+    80,
+    83,
+    85,
+    90,
+    93,
+    95,
+    100,
+    103,
+    105,
+    114,
+    124,
+    135,
+    145,
+    155,
+    166,
+    176,
+    187,
+    197,
+    207,
+    218,
+    228,
+    239
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_45241dd65a35/overview.jpg",
+    "runs/visual-review/v_45241dd65a35/detail_0_26_5_native.jpg",
+    "runs/visual-review/v_45241dd65a35/detail_25_106_5_native.jpg"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    }
+  ],
+  "cross_view_match": {
+    "other_video_id": "v_63d6bb9ca96b",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 5,
+        "other_frame_index": 7,
+        "description": "회색 상의 남자가 녹색 상의 전위 파트너 뒤에서 같은 오버헤드 타구를 한다."
+      },
+      {
+        "frame_index": 75,
+        "other_frame_index": 77,
+        "description": "다음 교환에서 회색 남자가 라켓을 들어 올린 뒤 타구하지 않고 뒤로 가는 셔틀을 보내며 녹색 파트너가 앞에서 지켜본다."
+      }
+    ],
+    "rationale": "두 카메라의 원본 확대에서 같은 선수 조합의 오버헤드 타구와 다음 공을 보내는 두 동작을 순서대로 대조했다. 파일명만으로 연결하지 않았고, 프레임 차이는 대략적인 동작 대응이며 정확한 시계 동기화를 주장하지 않는다. A시점에 없는 접촉 픽셀을 만들어 넣지 않는다.",
+    "evidence_paths": [
+      "runs/visual-review/v_45241dd65a35/detail_0_26_5_native.jpg",
+      "runs/visual-review/v_45241dd65a35/detail_25_106_5_native.jpg",
+      "runs/visual-review/v_63d6bb9ca96b/overview-24.jpg"
+    ]
+  },
+  "follow_up_actions": [
+    "실제 동작 대응으로 확인한 다른 시점의 직접 접촉 근거를 보조 판정에 사용한다.",
+    "A시점의 미관측 접촉은 UNKNOWN으로 보존하고 사람 검수 시 동일 사건 연결을 재확인한다."
+  ]
+}

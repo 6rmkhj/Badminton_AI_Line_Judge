@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "video_id": "v_3c33c9503c95",
+  "file": "a시점 5.mp4",
+  "source_sha256": "30749271a785994bce630a4a3c19d24f731454fe14d09080ce5a0f80f89adcd5",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "IN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "target_contact_identity_confirmed": true,
+  "contact_frame_index": 237,
+  "contact_px": [
+    212,
+    281
+  ],
+  "time": 3.997678,
+  "confidence": "moderate",
+  "observation_status": "contact_interval",
+  "rationale": "원본 연속 프레임의 최초 코르크 바닥 접촉과 직후 반동을 확인했다. 닿는 구간은 파란 왼쪽 복식 사이드라인의 바깥 칠 경계보다 코트 안쪽이다. 다른 AI 검수자가 같은 원본을 재검토하고 해당 바깥 칠 경계를 픽셀로 측정했으며, 근접 경계의 오차와 멀리 있는 코트 모서리 오차를 별도로 반영했다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    14,
+    29,
+    44,
+    59,
+    74,
+    88,
+    103,
+    118,
+    133,
+    148,
+    163,
+    177,
+    192,
+    207,
+    222,
+    230,
+    231,
+    232,
+    233,
+    234,
+    235,
+    236,
+    237,
+    238,
+    239,
+    240,
+    241,
+    242,
+    243,
+    244,
+    245,
+    246,
+    247,
+    248,
+    249,
+    250,
+    251,
+    252,
+    253,
+    254,
+    255,
+    256,
+    257,
+    258,
+    259,
+    260,
+    261,
+    262,
+    263,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    270,
+    271,
+    272,
+    273,
+    274,
+    275,
+    276,
+    277,
+    280,
+    281,
+    285,
+    290,
+    295,
+    296,
+    300,
+    311,
+    326,
+    341
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_3c33c9503c95/overview.jpg",
+    "runs/visual-review/v_3c33c9503c95/detail_230_305_5_preview.jpg",
+    "runs/visual-review/v_3c33c9503c95/detail_250_278_1_native.jpg",
+    "runs/visual-review/v_3c33c9503c95/detail_230_251_1_native.jpg",
+    "runs/visual-review/v_3c33c9503c95/detail_235_240_1_native.jpg",
+    "runs/visual-review/v_3c33c9503c95/first-contact-nearest-3x.png",
+    "runs/visual-review/v_3c33c9503c95/patch-label-check.png",
+    "runs/visual-review/v_3c33c9503c95/independent-bounce.jpg"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 244,
+      "x": 206,
+      "y": 262,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 250,
+      "x": 204,
+      "y": 264,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 264,
+      "x": 205,
+      "y": 286,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 270,
+      "x": 205,
+      "y": 282,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    }
+  ],
+  "contact_interval_frames": [
+    236,
+    238
+  ],
+  "contact_support_px": [
+    [
+      210,
+      279
+    ],
+    [
+      214,
+      279
+    ],
+    [
+      214,
+      283
+    ],
+    [
+      210,
+      283
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_px": [
+      [
+        199,
+        250
+      ],
+      [
+        529,
+        219
+      ],
+      [
+        879,
+        315
+      ],
+      [
+        256.2,
+        537
+      ]
+    ],
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "edge_roles": [
+      "net",
+      "right",
+      "near",
+      "left"
+    ],
+    "contact_uncertainty_px": 2,
+    "boundary_uncertainty_px": 8,
+    "boundary_uncertainty_px_by_edge": [
+      8,
+      8,
+      8,
+      1
+    ],
+    "explanation": "가까운 왼쪽 외곽선 바깥 칠 경계를 원본에서 측정: y279의x204.88, y281의x205.17, y283의x205.53. 그 선의 국소 오차는1px, 다른 네트/오른쪽/뒤쪽 모서리는8px로 별도 보수적으로 반영했다. 내부 단식선이나 서비스라인을 바깥선으로 쓰지 않았다."
+  },
+  "additional_ai_review": {
+    "reviewer": "Codex review_uhdhd",
+    "assessment": "같은 원본 확대에서 접촉과 바깥 칠 경계 재확인",
+    "independent_human_ground_truth": false
+  },
+  "follow_up_actions": [
+    "독립된 사람 검수자가 같은 첫 접촉 구간과 코트 외곽선 근거를 확인해 별도 정답 레이블을 확정한다.",
+    "현재 레이블은 AI 보조 검수로 보존하고 독립 테스트 정확도로 계산하지 않는다."
+  ]
+}

@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_4bce45231ca1",
+  "file": "8k 30 4k 24 a시점 6.mp4",
+  "source_sha256": "27714107879be76001ef890bfc82da752912c7bea78bf792b26986b827dcf211",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 7680,
+    "height": 4320
+  },
+  "label": "IN",
+  "reviewer": "Codex review_8k",
+  "contact_observed": true,
+  "contact_frame_index": 114,
+  "time": 3.799833,
+  "contact_px": [
+    272.5,
+    212.5
+  ],
+  "confidence": "medium",
+  "rationale": "추가 원본 8K 검수로 마지막 랠리 셔틀의 하강(103~113), 최초 바닥 접촉(114 부근), 반등(115~119)을 확인했다. 접촉은 먼 반코트의 유효 내부에 있으며, 명확하게 코트 안인 작은 보수적 영역 전체가 접촉 지지영역을 포함한다. 이 영역은 실제 코트 외곽을 대체한 전체 코트가 아니라 IN만 입증하는 내부 부분영역이다.",
+  "limitations": [
+    "30fps 노출 흐림으로 접촉을 113~115프레임 구간으로 기록",
+    "먼 반코트 전체 외곽선 좌표를 추측하지 않고 확인된 내부 영역만 사용",
+    "AI 시각 검수이며 독립된 사람 정답이 아님"
+  ],
+  "inspected_frame_indices": [
+    0,
+    5,
+    10,
+    16,
+    21,
+    27,
+    32,
+    38,
+    43,
+    48,
+    54,
+    59,
+    65,
+    70,
+    76,
+    81,
+    86,
+    90,
+    92,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_4bce45231ca1/overview.jpg",
+    "runs/visual-review/v_4bce45231ca1/far_native_seq_90_125_0.jpg",
+    "runs/visual-review/v_4bce45231ca1/players_native_seq_94_125_0.jpg",
+    "runs/visual-review/v_4bce45231ca1/players_native_seq_94_125_1.jpg",
+    "runs/visual-review/v_4bce45231ca1/endfloor_native_seq_104_125_0.jpg",
+    "runs/visual-review/v_4bce45231ca1/endfloor_native_seq_104_125_1.jpg",
+    "runs/visual-review/v_4bce45231ca1/far_contact_100_125.jpg",
+    "runs/visual-review/v_4bce45231ca1/far_contact_crop_0114.jpg",
+    "runs/visual-review/v_4bce45231ca1/far_court_native_0114.jpg",
+    "runs/visual-review/v_4bce45231ca1/confirmed_interior_0114.jpg",
+    "runs/visual-review/v_4bce45231ca1/court_preview_crop_0114.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "detection_labels": [
+    {
+      "frame_index": 110,
+      "x": 280.9,
+      "y": 196,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 113,
+      "x": 274.9,
+      "y": 206.6,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 116,
+      "x": 270.1,
+      "y": 208.9,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 119,
+      "x": 265.3,
+      "y": 205.6,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 110,
+      "x": 305,
+      "y": 219,
+      "label": "background"
+    },
+    {
+      "frame_index": 113,
+      "x": 305,
+      "y": 219,
+      "label": "background"
+    },
+    {
+      "frame_index": 116,
+      "x": 305,
+      "y": 219,
+      "label": "background"
+    },
+    {
+      "frame_index": 119,
+      "x": 305,
+      "y": 219,
+      "label": "background"
+    }
+  ],
+  "follow_up": [],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "contact_interval",
+  "contact_interval_observed": true,
+  "contact_interval_frames": [
+    113,
+    115
+  ],
+  "contact_support_px": [
+    [
+      269.5,
+      210.5
+    ],
+    [
+      275,
+      210.5
+    ],
+    [
+      275,
+      215
+    ],
+    [
+      269.5,
+      215
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "court_interior",
+    "polygon_px": [
+      [
+        255,
+        204
+      ],
+      [
+        310,
+        202
+      ],
+      [
+        310,
+        224
+      ],
+      [
+        255,
+        229
+      ]
+    ],
+    "interior_confirmed": true,
+    "contact_uncertainty_px": 1.5,
+    "boundary_uncertainty_px": 2,
+    "explanation": "전체 원본에서 확인: 부분영역은 먼 반코트 복식 왼쪽 사이드라인 오른쪽, 관중석 쪽 베이스라인 앞, 네트 지상면 교차점 뒤, 오른쪽 사이드라인 왼쪽에 모두 놓인다. 파란 단식/서비스 내부 선을 지나는 부분은 복식 유효구역이다. 원본 확대 그림에 부분영역과 접촉 좌표를 표시해 재확인했다. 이 도형을 실제 외곽선 또는 OUT 근거로 사용하지 않는다."
+  },
+  "detection_labels_verified": false,
+  "detection_labels_verified_by_ai": true,
+  "secondary_review": {
+    "reviewer": "Codex root",
+    "assessment": "Agrees descent to contact114 and rebound; far-court interior confirmed with conservative inner patch",
+    "independent_human_review": false
+  }
+}

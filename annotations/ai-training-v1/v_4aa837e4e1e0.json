@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_4aa837e4e1e0",
+  "file": "b-4시점(uhd30 4k30).mp4",
+  "source_sha256": "018caa9ed0179b56a2e672ee32d84c5d08db3f51b51b3b1b83dea19b561ab729",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_uhd4k",
+  "detection_labels": [
+    {
+      "frame_index": 90,
+      "x": 589,
+      "y": 358,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 92,
+      "x": 605,
+      "y": 365,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 94,
+      "x": 620,
+      "y": 377,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 96,
+      "x": 636,
+      "y": 388,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 90,
+      "x": 580,
+      "y": 410,
+      "label": "background"
+    },
+    {
+      "frame_index": 92,
+      "x": 660,
+      "y": 415,
+      "label": "background"
+    },
+    {
+      "frame_index": 94,
+      "x": 590,
+      "y": 400,
+      "label": "background"
+    },
+    {
+      "frame_index": 96,
+      "x": 675,
+      "y": 360,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "0e9cab1e0a9b0fcdbe312bea9249627671e8b43740f804931820a4f0a63ac795",
+  "source_review_path": "annotations/ai-visual/v_4aa837e4e1e0.json"
+}

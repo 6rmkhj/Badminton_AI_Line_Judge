@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_248b1672f38d",
+  "file": "8k 30 4k 24 b시점 4.mp4",
+  "source_sha256": "ae1db2f945a14c7e0c2b11d00be7085ed8c7f69b431ee621cc1d0b9efc1411c6",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "IN",
+  "reviewer": "Codex review_8k",
+  "contact_observed": true,
+  "contact_interval_observed": true,
+  "contact_frame_index": 59,
+  "contact_interval_frames": [
+    58,
+    60
+  ],
+  "time": 2.459056,
+  "contact_px": [
+    471,
+    358
+  ],
+  "contact_support_px": [
+    [
+      465,
+      350
+    ],
+    [
+      477,
+      350
+    ],
+    [
+      477,
+      365
+    ],
+    [
+      465,
+      365
+    ]
+  ],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "contact_interval",
+  "confidence": "high_for_binary_label",
+  "rationale": "58~60프레임에서 목표 셔틀의 하강과 바닥 접촉 뒤 반등을 확인했다. 61~66프레임에서 같은 셔틀이 다시 올라온다. 접촉 구간은 가까운 반코트 안쪽으로 베이스라인 및 양 사이드라인에서 떨어져 있어 IN이다.",
+  "limitations": [
+    "영상의 프레임 간격과 동작 흐림 때문에 정확한 접촉 밀리초는 확정할 수 없음",
+    "AI 직접 시각 검수이며 독립된 사람 정답이 아님"
+  ],
+  "inspected_frame_indices": [
+    0,
+    3,
+    4,
+    7,
+    10,
+    14,
+    17,
+    21,
+    24,
+    28,
+    31,
+    32,
+    35,
+    38,
+    42,
+    44,
+    45,
+    46,
+    48,
+    49,
+    50,
+    52,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    68,
+    70,
+    73,
+    77,
+    81
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_248b1672f38d/overview.jpg",
+    "runs/visual-review/v_248b1672f38d/native_seq_54_66_0.jpg",
+    "runs/visual-review/v_248b1672f38d/native_crop_0059.jpg",
+    "runs/visual-review/v_248b1672f38d/native_crop_0060.jpg",
+    "runs/visual-review/v_248b1672f38d/preview_crop_0059.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_px": [
+      [
+        207,
+        247
+      ],
+      [
+        537,
+        232
+      ],
+      [
+        883,
+        319
+      ],
+      [
+        356,
+        502
+      ]
+    ],
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "edge_roles": [
+      "net",
+      "right",
+      "near",
+      "left"
+    ],
+    "contact_uncertainty_px": 3,
+    "boundary_uncertainty_px": 4,
+    "explanation": "가까운 코트의 양쪽 네트 기둥 바닥과 바깥 복식 사이드라인·맨 뒤 베이스라인. 바닥에 겹쳐 보이는 다른 경기 선이나 안쪽 서비스선을 외곽으로 쓰지 않았다."
+  },
+  "detection_labels": [
+    {
+      "frame_index": 60,
+      "x": 470,
+      "y": 348,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 62,
+      "x": 474,
+      "y": 335,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 64,
+      "x": 476,
+      "y": 330,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 66,
+      "x": 480,
+      "y": 329,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 60,
+      "x": 433,
+      "y": 344,
+      "label": "background"
+    },
+    {
+      "frame_index": 60,
+      "x": 543,
+      "y": 372,
+      "label": "background"
+    },
+    {
+      "frame_index": 60,
+      "x": 451,
+      "y": 400,
+      "label": "background"
+    },
+    {
+      "frame_index": 60,
+      "x": 519,
+      "y": 316,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified": false,
+  "detection_labels_verified_by_ai": true
+}
