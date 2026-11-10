@@ -31,6 +31,46 @@ def validate_contact_modes(config=None):
         raise ValueError("Choose either contact_model_path or source_contact_model_path, not both preprocessing modes")
 
 
+def review_refinement_regions(config, analysis_size, frame_count):
+    """Use the detector's same strict pixel/frame contract for review guidance."""
+    from .detection import _refinement_regions
+    width, height = analysis_size
+    return _refinement_regions({"refinement_regions": (config or {}).get("review_refinement_regions", [])},
+                               (height, width), frame_count)
+
+
+def review_region_indices(candidate, regions):
+    """Return matching hints, without treating a hint as contact or identity."""
+    frame, point = candidate.get("frame_index"), candidate.get("candidate_px")
+    if (not isinstance(frame, int) or isinstance(frame, bool)
+            or not isinstance(point, (list, tuple)) or len(point) != 2
+            or any(not isinstance(value, (int, float)) or isinstance(value, bool)
+                   or not math.isfinite(value) for value in point)):
+        return []
+    return [i for i, region in enumerate(regions)
+            if region["frame_start"] <= frame <= region["frame_end"]
+            and region["bbox"][0] <= point[0] < region["bbox"][0] + region["bbox"][2]
+            and region["bbox"][1] <= point[1] < region["bbox"][1] + region["bbox"][3]]
+
+
+def prioritize_review_candidates(candidates, regions, *, identity_first=False):
+    """Order the finite evidence budget; retain every supplied candidate/score."""
+    def key(candidate):
+        scores = (-_value(candidate, "identity_confidence"), -_value(candidate, "confidence"))
+        if not identity_first:
+            scores = (scores[1],)
+        return (not bool(review_region_indices(candidate, regions)), *scores)
+    return sorted(candidates, key=key)
+
+
+def _mark_review_guidance(candidate, regions):
+    if regions:
+        candidate["review_refinement"] = {"matched_region_indices": review_region_indices(candidate, regions),
+                                           "prioritization_only": True}
+        candidate["assistance_used"] = True
+        candidate["evaluation_eligible"] = False
+
+
 def _target_support(observations, calibration):
     polygon = calibration.get("polygon_px") if isinstance(calibration, dict) else None
     if polygon is None or len(polygon) < 3:
@@ -77,6 +117,11 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
     """
     cfg = dict(config or {})
     validate_contact_modes(cfg)
+    regions = []
+    if cfg.get("review_refinement_regions") != [] and "review_refinement_regions" in cfg:
+        if not frames or frames[0] is None:
+            raise ValueError("Review refinement requires analysis image bounds")
+        regions = review_refinement_regions(cfg, (frames[0].shape[1], frames[0].shape[0]), len(timestamps))
     min_observations = max(3, int(cfg.get("min_observations", 5)))
     min_speed = max(0.0, float(cfg.get("min_motion_speed_px_s", 25.0)))
     stationary_speed = max(0.0, float(cfg.get("stationary_speed_px_s", 18.0)))
@@ -212,6 +257,12 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
                 "method": "offline_motion_and_tracklet_candidate_search",
             })
     candidates.sort(key=lambda item: (-item["confidence"], -item["identity_confidence"], item["time"]))
+    # The global cap must not discard a reviewed region before the later native
+    # evidence budget can see it. The cap and physical qualification stay intact.
+    if regions:
+        candidates = prioritize_review_candidates(candidates, regions)
+        for candidate in candidates:
+            _mark_review_guidance(candidate, regions)
     candidates = candidates[:max_candidates]
     if cfg.get("contact_model_path"):
         for candidate in candidates:
@@ -312,11 +363,14 @@ def refine_source_contacts(landings, source_frames, timestamps, analysis_size, c
             or not isinstance(maximum, int) or isinstance(maximum, bool) or not 0 <= maximum <= 64):
         raise ValueError("Native contact patch size must be even 24..256; candidate limit must be 0..64")
     results = copy.deepcopy(landings)
+    regions = review_refinement_regions(cfg, (width, height), len(times))
     for candidate in results:
+        _mark_review_guidance(candidate, regions)
         candidate["source_contact_evidence"] = {"status": "not_requested", "contact_observed": False,
                                                  "reason": "native_candidate_budget", "frames": []}
-    selected = sorted(range(len(results)), key=lambda i: (-float(results[i].get("identity_confidence", 0)),
-                                                          -float(results[i].get("confidence", 0)), i))[:maximum]
+    positions = {id(candidate): i for i, candidate in enumerate(results)}
+    selected = [positions[id(candidate)] for candidate in
+                prioritize_review_candidates(results, regions, identity_first=True)[:maximum]]
     checkpoint = cfg.get("source_contact_model_path")
     model_metadata, model_error = None, None
     if checkpoint:
@@ -335,6 +389,10 @@ def refine_source_contacts(landings, source_frames, timestamps, analysis_size, c
                     "analysis_size": {"width": width, "height": height}, "patch_size": patch_size,
                     "frames": [], "contact_observed": False,
                     "note": "Native-pixel temporal observations; neither image brightness nor a stop verifies cork/floor contact."}
+        if regions:
+            evidence.update(review_region_indices=review_region_indices(candidate, regions),
+                            selection_reason="explicit_review_region" if review_region_indices(candidate, regions)
+                            else "candidate_score_fallback", assistance_used=True, evaluation_eligible=False)
         candidate["source_contact_evidence"] = evidence
         if (not isinstance(index, int) or isinstance(index, bool) or not 0 <= index < len(times)
                 or not isinstance(point, (list, tuple)) or len(point) != 2
