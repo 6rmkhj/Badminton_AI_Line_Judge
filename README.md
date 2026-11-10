@@ -6,6 +6,8 @@
 
 원본 74개에 대한 [AI 직접 검수와 보조 판정](docs/AI_REVIEW.md)을 추가했습니다. 최초 바운스의 원본 확대 근거, 라인별 불확실성, 실제 동작을 대조한 교차 시점 판정, AI 패치 감독학습을 지원합니다. `annotations/ai-visual/`은 AI 검수 레이블이며 사람이 독립 확인한 정답이 아닙니다. 최종 결과는 [AI 검수 실행 보고서](docs/AI_REVIEW_RESULTS.md)에 기록합니다.
 
+**A/B 영상을 함께 입력하고 하나의 결과 받기:** `start-pair-windows.bat` 또는 `python3 start.py --pair`를 실행합니다. A와 B에 기존 영상을 선택하거나 새 영상 파일을 각각 올리고 `A/B 연결 분석`을 누릅니다. [A/B 통합 판정 안내](docs/PAIR_WORKSPACE.md)에 연결 기준과 실행 범위를 설명합니다. 기존 검수 화면에서도 `A/B 통합 판정`으로 이동할 수 있습니다.
+
 **새 검수 패키지 보기:** Python 3.11 이상 설치 후 `start-review-windows.bat` 또는 `python3 start.py --review`를 실행합니다. 포함된 영상·근거를 보는 데 추가 패키지 설치가 필요하지 않습니다. 미해결 영상은 사유와 함께 REVIEW로 남습니다.
 
 ## 빠른 실행
