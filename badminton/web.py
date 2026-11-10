@@ -49,11 +49,26 @@ class ReviewServer(ThreadingHTTPServer):
         self.jobs = {}
         self.job_lock = threading.Lock()
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="review-analysis")
+        self.pair_workspace = None
+        self.pair_workspace_lock = threading.Lock()
         super().__init__(address, ReviewHandler)
 
     def server_close(self):
         self.executor.shutdown(wait=False, cancel_futures=True)
+        if self.pair_workspace is not None:
+            self.pair_workspace.close()
         super().server_close()
+
+    def get_pair_workspace(self):
+        """Keep paired jobs and uploads separate from the historical analysis."""
+        with self.pair_workspace_lock:
+            if self.pair_workspace is None:
+                from .pair_workspace import PairWorkspace
+                project = Path(__file__).resolve().parents[1]
+                library = self.root if (self.root / "index.json").is_file() else project / "runs/integrated-poc"
+                self.pair_workspace = PairWorkspace(project_root=project,
+                    workspace_root=self.root / "paired", library_root=library)
+            return self.pair_workspace
 
     def video(self, video_id):
         if not re.fullmatch(r"[\w.-]{1,140}", video_id) or video_id in (".", ".."):
@@ -274,7 +289,7 @@ class ReviewHandler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("Cache-Control", "no-store")
-        self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
+        self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
         if length is not None:
             self.send_header("Content-Length", str(length))
         for key, value in (extra or {}).items():
@@ -330,12 +345,15 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 self.wfile.write(chunk)
                 remaining -= len(chunk)
 
-    def _write_body(self):
+    def _check_write_origin(self):
         origin = self.headers.get("Origin")
         if origin and urlsplit(origin).netloc.lower() != self.headers.get("Host", "").lower():
             raise RequestError(403, "다른 사이트에서의 저장 요청은 허용되지 않습니다.")
         if self.headers.get("Sec-Fetch-Site") == "cross-site":
             raise RequestError(403, "다른 사이트에서의 저장 요청은 허용되지 않습니다.")
+
+    def _write_body(self):
+        self._check_write_origin()
         if self.headers.get_content_type() != "application/json":
             raise RequestError(415, "JSON 요청만 허용됩니다.")
         try:
@@ -354,6 +372,22 @@ class ReviewHandler(BaseHTTPRequestHandler):
 
     def _get(self):
         path = unquote(urlsplit(self.path).path)
+        if path in ("/pair", "/pair/", "/pair.html"):
+            return self._file(self.server.static / "pair.html")
+        if path in ("/pair.js", "/pair.css"):
+            return self._file(self.server.static / path[1:])
+        if path == "/api/pair-library":
+            return self._json(self.server.get_pair_workspace().library())
+        if path == "/api/pair-jobs":
+            return self._json(self.server.get_pair_workspace().list_jobs())
+        if path.startswith("/api/pair-jobs/"):
+            return self._json(self.server.get_pair_workspace().get_job(path.removeprefix("/api/pair-jobs/")))
+        if path.startswith("/pair-media/"):
+            return self._file(self.server.get_pair_workspace().asset_path(path.removeprefix("/pair-media/")))
+        if path.startswith("/pair-review-assets/"):
+            return self._file(self.server.get_pair_workspace().review_asset_path(path.removeprefix("/pair-review-assets/")))
+        if path.startswith("/pair-library-assets/"):
+            return self._file(self.server.get_pair_workspace().library_asset_path(path.removeprefix("/pair-library-assets/")))
         if path in ("/", "/index.html"):
             return self._file(self.server.static / "index.html")
         if path in ("/app.js", "/style.css"):
@@ -398,8 +432,25 @@ class ReviewHandler(BaseHTTPRequestHandler):
         raise RequestError(404, "경로를 찾을 수 없습니다.")
 
     def _post(self):
-        body = self._write_body()
         path = unquote(urlsplit(self.path).path)
+        if path == "/api/pair-uploads":
+            self._check_write_origin()
+            if self.headers.get_content_type() != "application/octet-stream":
+                raise RequestError(415, "영상 파일을 application/octet-stream 형식으로 전송하세요.")
+            if self.headers.get("Transfer-Encoding") or self.headers.get("Content-Encoding"):
+                raise RequestError(400, "압축하지 않은 파일과 정확한 Content-Length가 필요합니다.")
+            value = self.headers.get("Content-Length", "")
+            if not re.fullmatch(r"[0-9]+", value):
+                raise RequestError(400, "정확한 파일 크기(Content-Length)가 필요합니다.")
+            length = int(value)
+            if length < 1 or length > 1024 * 1024 * 1024:
+                raise RequestError(413, "영상 한 개의 크기는 1바이트 이상 1GiB 이하여야 합니다.")
+            filename = unquote(self.headers.get("X-Filename", ""))
+            self.connection.settimeout(60)
+            return self._json(self.server.get_pair_workspace().stage_upload(self.rfile, length, filename), 201)
+        body = self._write_body()
+        if path == "/api/pair-jobs":
+            return self._json(self.server.get_pair_workspace().submit(body), 202)
         if path.startswith("/api/annotations/"):
             return self._json(self.server.annotate(path.removeprefix("/api/annotations/"), body))
         match = re.fullmatch(r"/api/pairs/(\d+)/sync", path)
@@ -478,6 +529,7 @@ class ReviewHandler(BaseHTTPRequestHandler):
         raise RequestError(404, "경로를 찾을 수 없습니다.")
 
     def _dispatch(self, callback):
+        from .pair_workspace import PairWorkspaceError
         try:
             hostname = urlsplit("http://" + self.headers.get("Host", "")).hostname
             allowed_hosts = {"127.0.0.1", "localhost", "::1", self.server.server_address[0]}
@@ -485,6 +537,8 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 raise RequestError(403, "로컬 서버 주소로 접속하세요.")
             callback()
         except RequestError as error:
+            self._json({"error": error.message}, error.status)
+        except PairWorkspaceError as error:
             self._json({"error": error.message}, error.status)
         except (BrokenPipeError, ConnectionResetError):
             pass
