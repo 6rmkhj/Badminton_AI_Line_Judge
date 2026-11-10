@@ -313,7 +313,13 @@ class _NativeRoiDetector:
             bright = cv2.inRange(hsv, np.array([0, 0, int(self.config.get("min_brightness", 155))], np.uint8),
                                  np.array([179, int(self.config.get("max_saturation", 115)), 255], np.uint8))
             local_base = cv2.GaussianBlur(gray, (0, 0), max(1.0, min(12.0, 4 * sw / 1280)))
-            contrast = cv2.subtract(gray, local_base)
+            contrast = (cv2.absdiff(gray, local_base) if self.config.get('include_dark_components')
+                        else cv2.subtract(gray, local_base))
+            if self.config.get('include_dark_components'):
+                # The cork is often darker than the wooden floor at impact.
+                # These remain motion proposals; a dark component is not contact evidence.
+                dark = ((cv2.subtract(local_base, gray) >= 18) & (hsv[:, :, 1] <= 115))
+                bright = np.maximum(bright, dark.astype(np.uint8) * 255)
             cue = ((temporal >= float(self.config.get("motion_threshold", 16)))
                    & (foreground >= float(self.config.get("background_threshold", 8)))
                    & (contrast >= float(self.config.get("contrast_threshold", 8))))
@@ -428,6 +434,7 @@ def detect_sequence(frames, timestamps, config=None):
         "backend": "opencv_candidates", "trained_model": False,
         "method": "bright_small_components_with_background_and_temporal_difference",
         "confidence_kind": "heuristic_rank_not_probability",
+        "include_dark_components": bool(config.get('include_dark_components')),
     }
     min_area = float(config.get("min_area", max(1.0, 2 * scale * scale)))
     max_area = float(config.get("max_area", max(40.0, 180 * scale * scale)))
@@ -508,7 +515,11 @@ def detect_sequence(frames, timestamps, config=None):
             excluded_white = np.isin(white_labels, large_labels).astype(np.uint8) * 255 if len(large_labels) else np.zeros_like(gray)
             excluded_white = cv2.dilate(excluded_white, np.ones((3, 3), np.uint8))
             local_base = cv2.GaussianBlur(gray, (0, 0), max(1.0, 4 * scale))
-            contrast = cv2.subtract(gray, local_base)
+            contrast = (cv2.absdiff(gray, local_base) if config.get('include_dark_components')
+                        else cv2.subtract(gray, local_base))
+            if config.get('include_dark_components'):
+                dark = ((cv2.subtract(local_base, gray) >= 18) & (hsv[:, :, 1] <= 115))
+                bright = np.maximum(bright, dark.astype(np.uint8) * 255)
             cue = ((motion >= float(config.get("motion_threshold", 16)))
                    & (foreground >= float(config.get("background_threshold", 8)))
                    & (contrast >= float(config.get("contrast_threshold", 8))))
@@ -544,7 +555,9 @@ def detect_sequence(frames, timestamps, config=None):
                                    "local_contrast": round(local_contrast, 3),
                                    "possible_occluder_overlap": overlaps})
             proposal_count = len(detections)
-            detections = _nms(detections, max(1.0, 3 * scale), max_candidates)
+            # Give the learned scorer a bounded proposal pool before the final
+            # cutoff, otherwise discarded target proposals can never be rescued.
+            detections = _nms(detections, max(1.0, 3 * scale), 512 if scorer else max_candidates)
         if native_detector is not None:
             native, high_resolution = native_detector.detect(source_frames[index], detections, index, camera_motion)
             for item in native:
@@ -556,7 +569,7 @@ def detect_sequence(frames, timestamps, config=None):
             global_count = len(detections)
             detections = _merge_native(detections, native, max(1.0, 3 * scale))
             proposal_count += max(0, len(detections) - global_count)
-            detections = _nms(detections, max(1.0, 3 * scale), max_candidates)
+            detections = _nms(detections, max(1.0, 3 * scale), 512 if scorer else max_candidates)
         if scorer:
             rescored = scorer.score(frame, detections, preprocessing=config.get("frame_preprocessing"))
             for old, new in zip(detections, rescored):

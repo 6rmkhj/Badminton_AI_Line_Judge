@@ -25,10 +25,12 @@ def _load_manifest(manifest):
     return json.loads(Path(manifest).read_text()) if isinstance(manifest, (str, Path)) else manifest
 
 
-def _collect_labels(manifest, annotations_dir):
+def _collect_labels(manifest, annotations_dir, label_source='human_review'):
+    if label_source not in {'human_review', 'ai_visual_review'}:
+        raise ValueError('label_source must be human_review or ai_visual_review')
     records, excluded = [], Counter()
     videos = manifest.get("videos", [])
-    errors, seen_ids = [], set()
+    errors, seen_ids, content_points = [], set(), {}
     for video in videos:
         video_id = video.get("id")
         if not video_id or video_id in seen_ids:
@@ -44,9 +46,14 @@ def _collect_labels(manifest, annotations_dir):
         except (ValueError, OSError):
             excluded["invalid_annotation"] += 1
             continue
-        reviewed = (annotation.get("source") == "human_review"
-                    and bool(str(annotation.get("reviewer", "")).strip())
-                    and annotation.get("detection_labels_verified") is True)
+        reviewed = (annotation.get("source") == label_source
+                    and bool(str(annotation.get("reviewer", "")).strip()))
+        if label_source == 'ai_visual_review':
+            reviewed = (reviewed and annotation.get('status') == 'reviewed_by_ai'
+                        and annotation.get('human_verified') is False
+                        and annotation.get('detection_labels_verified_by_ai') is True)
+        else:
+            reviewed = reviewed and annotation.get("detection_labels_verified") is True
         if not reviewed or annotation.get("video_id", video_id) != video_id:
             excluded["unverified_annotation"] += 1
             continue
@@ -85,20 +92,28 @@ def _collect_labels(manifest, annotations_dir):
                 excluded["duplicate_patch_label"] += 1
                 continue
             seen_points[identity] = label["label"]
+            content_identity = (video['sha256'], *identity)
+            if content_identity in content_points:
+                if content_points[content_identity] != label['label']:
+                    errors.append('Contradictory labels for duplicate video content')
+                excluded['duplicate_content_patch_label'] += 1
+                continue
+            content_points[content_identity] = label['label']
             records.append({"video_id": video_id, "file": video.get("file"),
                             "path": video.get("path"), "sha256": video.get("sha256"),
                             "group_id": video.get("group_id"), "split": video.get("split"),
                             "frame_index": frame_index, "x": float(x), "y": float(y),
                             "analysis_width": width, "analysis_height": height,
                             "label": LABELS[label["label"]], "label_name": label["label"],
-                            "reviewer": annotation["reviewer"]})
+                            "reviewer": annotation["reviewer"], "label_source": label_source})
     return records, dict(excluded), errors
 
 
-def training_readiness(manifest, annotations_dir, min_train_per_class=4, min_eval_per_class=2):
+def training_readiness(manifest, annotations_dir, min_train_per_class=4, min_eval_per_class=2,
+                       label_source='human_review'):
     """Report missing data honestly; draft suggestions never become labels."""
     manifest = _load_manifest(manifest)
-    records, excluded, errors = _collect_labels(manifest, annotations_dir)
+    records, excluded, errors = _collect_labels(manifest, annotations_dir, label_source)
     if min_train_per_class < 1 or min_eval_per_class < 1:
         raise ValueError("Minimum class counts must be positive")
     counts = {split: {name: 0 for name in LABELS} for split in ("train", "val", "test")}
@@ -129,12 +144,14 @@ def training_readiness(manifest, annotations_dir, min_train_per_class=4, min_eva
             if count < minimum:
                 errors.append(f"{split} needs at least {minimum} verified {name} patches; found {count}")
     return {"ready": not errors, "dataset_kind": manifest.get("dataset_kind", "real_video"),
+            "label_source": label_source, "independent_human_ground_truth": label_source == 'human_review',
             "model_available": False, "trained": False, "verified_patch_count": len(records),
             "counts": counts, "excluded": excluded, "reasons": sorted(set(errors)),
             "requirements": {"train_min_per_class": min_train_per_class,
                              "heldout_min_per_class": min_eval_per_class},
             "scope": "Candidate patch classification only; not shuttle recall or IN/OUT accuracy",
-            "notes": ["Explicit human-reviewed shuttle/background labels are required.",
+            "notes": ["Explicit reviewed shuttle/background labels of the selected source are required.",
+                      "AI-reviewed labels are provisional supervision; agreement with them is not human ground-truth accuracy.",
                       "Verdicts, automated candidate suggestions and unreviewed points are not training labels.",
                       "Validation selects the checkpoint; test data is evaluated once after selection.",
                       "These minimum counts are execution prerequisites, not statistical adequacy."]}
@@ -153,7 +170,7 @@ def _patch(frame, x, y, size):
 
 
 def prepare_training_samples(manifest, annotations_dir, video_dir=None, patch_size=32,
-                             min_train_per_class=4, min_eval_per_class=2):
+                             min_train_per_class=4, min_eval_per_class=2, label_source='human_review'):
     """Extract reviewed patches by sequential frame index after MP4 edit lists.
 
     Returned ``patches`` is an N,H,W,3 uint8 array; ``report`` and ``samples`` are
@@ -162,10 +179,10 @@ def prepare_training_samples(manifest, annotations_dir, video_dir=None, patch_si
     if patch_size < 16 or patch_size > 128 or patch_size % 2:
         raise ValueError("patch_size must be an even number from 16 to 128")
     manifest = _load_manifest(manifest)
-    report = training_readiness(manifest, annotations_dir, min_train_per_class, min_eval_per_class)
+    report = training_readiness(manifest, annotations_dir, min_train_per_class, min_eval_per_class, label_source)
     if not report["ready"]:
         raise ValueError("Training data not ready: " + "; ".join(report["reasons"]))
-    records, _, _ = _collect_labels(manifest, annotations_dir)
+    records, _, _ = _collect_labels(manifest, annotations_dir, label_source)
     by_video = defaultdict(list)
     for index, record in enumerate(records):
         by_video[record["video_id"]].append((index, record))
@@ -173,6 +190,12 @@ def prepare_training_samples(manifest, annotations_dir, video_dir=None, patch_si
     for video_id, indexed in by_video.items():
         record = indexed[0][1]
         path = Path(record["path"]) if record.get("path") else Path(video_dir or ".") / record["file"]
+        if not path.is_file() and video_dir is not None:
+            local_root = Path(video_dir).resolve()
+            local = (local_root / record['file']).resolve()
+            if not local.is_relative_to(local_root):
+                raise ValueError('Manifest relative video path escapes video_dir')
+            path = local
         if not path.is_file():
             raise ValueError(f"Missing video for {video_id}: {path}")
         digest = hashlib.sha256()
@@ -189,11 +212,15 @@ def prepare_training_samples(manifest, annotations_dir, video_dir=None, patch_si
             if not capture.isOpened():
                 raise ValueError(f"Cannot decode video: {video_id}")
             for frame_index in range(max(requested) + 1):
-                ok, frame = capture.read()
-                if not ok:
+                # Decode sequentially to preserve edit-list/frame identity, but
+                # convert native 4K/8K pixels to BGR only for reviewed samples.
+                if not capture.grab():
                     raise ValueError(f"Reviewed frame {frame_index} unavailable in {video_id}")
                 if frame_index not in requested:
                     continue
+                ok, frame = capture.retrieve()
+                if not ok:
+                    raise ValueError(f"Reviewed frame {frame_index} unavailable in {video_id}")
                 cached_resizes = {}
                 for index, sample in requested[frame_index]:
                     dimensions = (sample["analysis_width"], sample["analysis_height"])
@@ -230,7 +257,7 @@ def _metrics(labels, probabilities):
 
 def train_candidate_scorer(manifest, annotations_dir, video_dir, output_path, epochs=20,
                            learning_rate=0.002, patch_size=32, min_train_per_class=4,
-                           min_eval_per_class=2, seed=42):
+                           min_eval_per_class=2, seed=42, label_source='human_review'):
     """Train on verified patches; never manufacture weights when labels are absent."""
     import torch
     if not isinstance(epochs, int) or not 1 <= epochs <= 1000:
@@ -238,7 +265,7 @@ def train_candidate_scorer(manifest, annotations_dir, video_dir, output_path, ep
     if not 0 < learning_rate <= 0.1:
         raise ValueError("learning_rate must be positive and no greater than 0.1")
     prepared = prepare_training_samples(manifest, annotations_dir, video_dir, patch_size,
-                                         min_train_per_class, min_eval_per_class)
+                                         min_train_per_class, min_eval_per_class, label_source)
     torch.manual_seed(seed)
     model = _network()
     inputs = torch.from_numpy(prepared["patches"].transpose(0, 3, 1, 2).copy()).float() / 255
@@ -278,7 +305,14 @@ def train_candidate_scorer(manifest, annotations_dir, video_dir, output_path, ep
     metadata = {"architecture": ARCHITECTURE, "patch_size": patch_size,
                 "preprocessing": PREPROCESSING,
                 "analysis_sizes": sorted({(r["analysis_width"], r["analysis_height"]) for r in prepared["samples"]}),
-                "dataset_kind": prepared["report"]["dataset_kind"], "label_source": "explicit_human_review",
+                "dataset_kind": prepared["report"]["dataset_kind"],
+                "label_source": 'explicit_human_review' if label_source == 'human_review' else 'ai_visual_review',
+                "independent_human_ground_truth": label_source == 'human_review',
+                "metric_interpretation": 'heldout human-label patch agreement' if label_source == 'human_review' else 'heldout AI-label patch agreement, not verified accuracy',
+                "dataset_fingerprint": _load_manifest(manifest).get('dataset_fingerprint'),
+                "label_manifest_sha256": hashlib.sha256(json.dumps(
+                    [{key: r[key] for key in ('sha256', 'group_id', 'split', 'frame_index', 'x', 'y', 'label', 'label_source')}
+                     for r in prepared['samples']], sort_keys=True).encode()).hexdigest(),
                 "scope": "Candidate patch scorer; not full-frame detection or line-judging accuracy",
                 "probabilities_calibrated": False, "seed": seed, "epochs": epochs,
                 "selected_epoch": best_epoch, "selection_metric": "validation_binary_cross_entropy",
