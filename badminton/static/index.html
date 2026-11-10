@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Court Review · 배드민턴 판정 검수</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="/"><svg viewBox="0 0 32 38" aria-hidden="true"><path d="M3 3h26v32H3zM3 19h26M9 3v32M23 3v32M3 10h26M3 28h26M16 3v7M16 28v7"/></svg><span>COURT<span class="brand-sub">REVIEW</span></span></a>
+  <div class="workspace-label">분석 워크스페이스 <span class="small-dot"></span></div>
+  <h2 class="sidebar-heading">영상 라이브러리 <span id="video-count">0</span></h2>
+  <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="영상 이름 검색" aria-label="영상 이름 검색"></label>
+  <div class="filters" role="group" aria-label="영상 필터"><button class="active" data-filter="all">전체</button><button data-filter="review">검토 필요</button><button data-filter="verified">검수 완료</button></div>
+  <nav id="video-list" aria-label="영상 목록"><div class="list-empty">영상 목록을 불러오는 중입니다.</div></nav>
+  <div class="sidebar-bottom"><span class="status-dot"></span> 로컬 워크스페이스 <button id="refresh" title="목록 새로고침" aria-label="목록 새로고침">↻</button><div id="run-id">분석 실행 대기</div></div>
+</aside>
+<main>
+  <header class="topbar"><div><span class="eyebrow">EVIDENCE WORKSPACE</span><h1>장면을 확인하고, 근거를 남기세요.</h1></div><div class="validation-badge"><span></span>성능 검증 전</div></header>
+  <section class="scope-notice"><span class="notice-icon">i</span><p><strong>검토를 위한 기초 분석 결과입니다.</strong> 자동 선·셔틀콕 후보는 정답이 아닙니다. 최초 접촉이 보이지 않으면 <b>확인 불가</b>로 기록하세요.</p><span class="notice-tag">HUMAN REVIEW</span></section>
+  <div id="empty-state" class="empty-state" hidden><div class="empty-court">＋</div><h2>아직 분석된 영상이 없습니다</h2><p>분석 명령을 실행하면 영상과 검토용 결과가 여기에 나타납니다.</p><button id="empty-refresh" class="primary">결과 새로고침</button></div>
+  <section id="workspace" hidden>
+    <div class="video-title-row"><div><div class="eyebrow">선택한 영상 <span id="selected-number"></span></div><h2 id="video-title"></h2><div id="video-meta" class="meta"></div></div><div class="title-actions"><button id="analyze" class="secondary">다시 분석</button><a id="result-link" class="secondary link-button" download>JSON 내려받기 ↗</a></div></div>
+    <div class="workspace-grid">
+      <section class="evidence-panel">
+        <div class="panel-bar"><span>영상 근거</span><div class="overlay-options"><label><input id="show-court" type="checkbox" checked> 코트</label><label><input id="show-tracks" type="checkbox" checked> 궤적</label><label><input id="show-contact" type="checkbox" checked> 접촉점</label></div></div>
+        <div id="video-stage" class="video-stage"><video id="player" preload="metadata" playsinline></video><canvas id="overlay" aria-label="접촉 지점 선택 영역"></canvas><div id="video-placeholder" class="video-placeholder">미리보기 영상을 불러오는 중입니다.</div><div id="point-mode-label" class="point-mode-label" hidden>실제 최초 접촉 위치를 클릭하세요</div><div class="frame-overlay"><span id="frame-readout">FRAME —</span><span id="resolution-readout"></span></div></div>
+        <div class="player-controls"><button id="previous-frame" title="이전 프레임 (←)" aria-label="이전 프레임">|‹</button><button id="play" class="play-button" aria-label="재생">▶</button><button id="next-frame" title="다음 프레임 (→)" aria-label="다음 프레임">›|</button><span id="time-readout">0.000 / 0.000 s</span><select id="speed" aria-label="재생 속도"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option></select><button id="select-point" class="point-button">⌖ 접촉점 선택</button></div>
+        <div class="timeline"><input id="timeline" type="range" min="0" max="1" step="1" value="0" aria-label="영상 프레임 이동"><div id="event-markers" class="event-markers"></div></div>
+        <div class="evidence-bottom"><span><i class="legend-dot"></i> 관측 궤적</span><span><i class="legend-dot court-dot"></i> 코트 후보</span><span><i class="legend-dot point-dot"></i> 검수 접촉점</span><span class="keyboard-tip">← → 프레임 이동 · Space 재생</span></div>
+        <div class="analysis-summary"><div class="summary-heading"><h3>분석 근거</h3><span id="decision-tag" class="tag">REVIEW</span></div><div id="reason-codes" class="reasons"></div><div class="module-metrics"><div><span>코트 보정</span><strong id="calibration-status">—</strong></div><div><span>추적 후보</span><strong id="track-count">—</strong></div><div><span>착지 후보</span><strong id="landing-count">—</strong></div><div><span>처리 시간</span><strong id="analysis-time">—</strong></div></div><div id="quality-warning" class="quality-warning" hidden></div></div>
+        <div class="events-section"><div class="summary-heading"><h3>확인할 장면</h3><span class="muted">후보를 선택하면 해당 시점으로 이동합니다.</span></div><div id="events" class="events"></div></div>
+        <div class="evidence-images"><div class="summary-heading"><h3>선택 장면의 정밀 근거</h3><span class="muted">이미지를 누르면 원본 크기로 열립니다.</span></div><div id="evidence-gallery" class="evidence-gallery"></div><p class="field-help">주석과 확대 이미지는 검토를 위한 후보 근거입니다. 코르크의 최초 바닥 접촉이 실제로 보이는지 별도로 확인하세요.</p></div>
+        <details class="sync-details"><summary>두 시점의 시간 정렬</summary><div id="sync-info"></div></details>
+      </section>
+      <aside class="annotation-panel">
+        <div class="annotation-heading"><div><span class="eyebrow">GROUND TRUTH</span><h3>정답 검수</h3></div><span id="annotation-status" class="tag neutral">검수 필요</span></div>
+        <p class="annotation-intro">화면에서 직접 확인한 사실만 기록합니다. 초안은 성능 평가의 정답으로 사용되지 않습니다.</p>
+        <form id="annotation-form">
+          <fieldset><legend>사람이 확인한 판정</legend><div class="verdict-options"><label class="verdict in"><input type="radio" name="label" value="IN"><span>IN</span><small>라인 포함 안쪽</small></label><label class="verdict out"><input type="radio" name="label" value="OUT"><span>OUT</span><small>명확한 바깥쪽</small></label><label class="verdict unknown"><input type="radio" name="label" value="UNKNOWN" checked><span>확인 불가</span><small>관측 근거 부족</small></label></div></fieldset>
+          <label class="check-row"><input id="contact-observed" type="checkbox"><span>최초로 바닥에 닿는 순간을 직접 확인했습니다.</span></label>
+          <div class="field-row"><label>접촉 시각 <span class="unit">초</span><input id="contact-time" type="number" min="0" step="0.001" placeholder="미지정"></label><button id="use-current-time" type="button" class="compact-button">현재 시각 사용</button></div>
+          <div class="field-row"><label>접촉 위치 <span class="unit">분석 영상 px</span><input id="contact-position" readonly placeholder="영상에서 지점 선택"></label><button id="clear-point" type="button" class="compact-button">지우기</button></div>
+          <details class="patch-labels"><summary>접촉 근거로 규칙 적용</summary><p class="field-help">자동 분석과 별도로, 사람이 확인한 접촉 근거를 규칙 엔진에 적용합니다. 코트 보정이 불확실하면 REVIEW가 유지됩니다.</p><label class="check-row"><input id="target-identity-confirmed" type="checkbox"><span>대상 코트의 셔틀콕임을 확인했습니다.</span></label><div class="field-row two-fields"><label>접촉 반경 (px)<input id="contact-radius" type="number" min="0" step="0.1" placeholder="미확인"></label><label>위치 오차 (px)<input id="contact-uncertainty" type="number" min="0" step="0.1" placeholder="미확인"></label></div><p id="assisted-decision" class="field-help">확인된 접촉 근거를 저장하면 별도 규칙 적용 결과를 표시합니다.</p></details>
+          <label>대상 코트<input id="court-id" type="text" placeholder="예: 3번 코트" maxlength="160"></label>
+          <div class="field-row two-fields"><label>검수자<input id="reviewer" type="text" placeholder="검수자 이름" maxlength="120" autocomplete="name"></label><label>라인 거리 <span class="unit">m · 선택</span><input id="line-distance" type="number" min="0" step="0.001" placeholder="미확인"></label></div>
+          <label>독립 관측 근거 <span class="unit">선택</span><input id="independent-evidence" type="text" placeholder="고속 촬영 파일·추가 관측 기록 등"></label><p class="field-help">라인 5cm 이내 판정은 독립 관측 근거가 필요합니다.</p>
+          <label>검수 메모<textarea id="notes" rows="3" placeholder="가림, 인접 코트 혼동, 접촉 순간 누락 등을 기록하세요." maxlength="8000"></textarea></label>
+          <details class="patch-labels"><summary>탐지 학습용 라벨 <span id="patch-count">0개</span></summary><p class="field-help">현재 프레임에서 명확한 셔틀콕 또는 오탐 배경을 클릭합니다. 판정 정답과는 별도로 검수합니다.</p><div class="patch-buttons"><button type="button" id="mark-shuttle" class="compact-button">＋ 셔틀콕</button><button type="button" id="mark-background" class="compact-button">＋ 배경·오탐</button></div><div id="patch-list"></div><label class="check-row"><input id="detection-verified" type="checkbox"><span>탐지 라벨을 직접 검수했습니다.</span></label></details>
+          <details class="patch-labels"><summary>착지 시계열 학습 라벨 <span id="sequence-count">0개</span></summary><p class="field-help">각 프레임의 셔틀콕 위치와 상태를 직접 지정합니다. 최초 접촉이 보이지 않으면 해당 라벨을 만들지 마세요.</p><div class="patch-buttons"><button type="button" id="mark-airborne" class="compact-button">공중</button><button type="button" id="mark-first_contact" class="compact-button">최초 접촉</button><button type="button" id="mark-after_contact" class="compact-button">접촉 후</button></div><label class="check-row"><input id="sequence-contact-observed" type="checkbox"><span>현재 프레임의 최초 접촉을 직접 관측했습니다.</span></label><div id="sequence-list"></div><label class="check-row"><input id="sequences-verified" type="checkbox"><span>착지 시계열 라벨을 직접 검수했습니다.</span></label><p class="field-help">독립 관측 근거가 입력돼 있으면 추가하는 라벨에 함께 기록됩니다.</p></details>
+          <label class="check-row confirmation"><input id="confirmed" type="checkbox"><span>입력 내용을 검토했습니다.<small>확인 불가 판정은 검수 후에도 평가 정답에서 제외됩니다.</small></span></label>
+          <button type="submit" class="primary save-button" id="save">검수 기록 저장 <span>↗</span></button>
+          <p id="save-status" class="save-status" role="status">아직 저장된 사람 검수 기록이 없습니다.</p>
+        </form>
+      </aside>
+    </div>
+  </section>
+  <footer><span>COURT REVIEW <span class="footer-separator">/</span> Evidence before decisions.</span><span>자동 판정 성능은 아직 입증되지 않았습니다.</span></footer>
+</main>
+<div id="toast" class="toast" role="status" hidden></div>
+</body></html>
