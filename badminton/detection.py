@@ -52,13 +52,103 @@ def _roi_mask(shape, config):
 
 
 def _nms(detections, distance=3.0, limit=64):
+    # Bucket accepted centres so a larger proposal pool does not require an
+    # all-pairs scan. The suppression radius is at most this cell width, so the
+    # nine neighbouring cells are exactly equivalent to the old linear test.
+    cell = max(float(distance), max((float(item["radius"]) for item in detections), default=0), 1e-9)
+    cells = {}
     accepted = []
     for item in sorted(detections, key=lambda d: (-d["confidence"], d["x"], d["y"])):
-        if not any(math.hypot(item["x"] - old["x"], item["y"] - old["y"]) <= max(distance, min(item["radius"], old["radius"])) for old in accepted):
+        key = (math.floor(item["x"] / cell), math.floor(item["y"] / cell))
+        neighbours = (old for dx in (-1, 0, 1) for dy in (-1, 0, 1)
+                      for old in cells.get((key[0] + dx, key[1] + dy), ()))
+        if not any(math.hypot(item["x"] - old["x"], item["y"] - old["y"])
+                   <= max(distance, min(item["radius"], old["radius"])) for old in neighbours):
             accepted.append(item)
+            cells.setdefault(key, []).append(item)
         if len(accepted) >= limit:
             break
     return accepted
+
+
+def _candidate_budget(detections, shape, limit, *, mode="ranked", distance=3.0):
+    """Preserve spatially separated proposals under the same finite budget.
+
+    Spatial mode takes the best remaining observation from each image cell per
+    pass. It changes proposal ranking only, never identity/contact confidence.
+    Use it explicitly for difficult clips; broad spatial coverage is not a
+    substitute for an independently validated detector.
+    """
+    if mode not in {"ranked", "spatial"}:
+        raise ValueError("candidate_selection must be ranked or spatial")
+    if mode == "ranked":
+        return _nms(detections, distance, limit)
+    height, width = shape[:2]
+    pool = _nms(detections, distance, 512)
+    cells = {}
+    for item in pool:
+        key = (min(7, max(0, int(item["x"] * 8 / width))),
+               min(4, max(0, int(item["y"] * 5 / height))))
+        cells.setdefault(key, []).append(item)
+    selected = []
+    for level in range(max((len(group) for group in cells.values()), default=0)):
+        tier = sorted((group[level] for group in cells.values() if len(group) > level),
+                      key=lambda item: (-item["confidence"], item["x"], item["y"]))
+        selected.extend(tier[:limit - len(selected)])
+        if len(selected) >= limit:
+            break
+    return selected
+
+
+def _refinement_regions(config, shape, frame_count):
+    regions = config.get("refinement_regions", [])
+    if not isinstance(regions, list) or len(regions) > 16:
+        raise ValueError("refinement_regions must be a list of at most 16 regions")
+    height, width = shape[:2]
+    parsed = []
+    for region in regions:
+        if not isinstance(region, dict):
+            raise ValueError("each refinement region must be an object")
+        first, last, box = region.get("frame_start"), region.get("frame_end"), region.get("bbox")
+        if (any(not isinstance(value, int) or isinstance(value, bool) for value in (first, last))
+                or not 0 <= first <= last < frame_count):
+            raise ValueError("refinement frame bounds must be inclusive indices within the video")
+        if (not isinstance(box, (list, tuple)) or len(box) != 4
+                or any(not isinstance(value, (int, float)) or isinstance(value, bool)
+                       or not math.isfinite(value) for value in box)):
+            raise ValueError("refinement bbox must contain four finite analysis-pixel coordinates")
+        x, y, w, h = map(float, box)
+        if x < 0 or y < 0 or w < 1 or h < 1 or x + w > width or y + h > height:
+            raise ValueError("refinement bbox must lie inside the analysis image")
+        parsed.append({"frame_start": first, "frame_end": last, "bbox": [x, y, w, h]})
+    return parsed
+
+
+def _inside_refinement(item, regions):
+    return any(x <= item["x"] <= x + w and y <= item["y"] <= y + h
+               for x, y, w, h in (region["bbox"] for region in regions))
+
+
+def _refined_budget(detections, shape, limit, mode, distance, regions):
+    if not regions:
+        return _candidate_budget(detections, shape, limit, mode=mode, distance=distance), 0
+    # Reserve part, not all, of the finite candidate budget for the explicitly
+    # selected region. Do not manufacture candidates or increase their scores.
+    preferred = _candidate_budget([item for item in detections if _inside_refinement(item, regions)],
+                                  shape, max(1, limit // 4), mode=mode, distance=distance)
+    ordinary = _candidate_budget(detections, shape, min(512, limit + len(preferred)),
+                                mode=mode, distance=distance)
+    result = list(preferred)
+    if len(result) >= limit:
+        return result[:limit], min(limit, len(preferred))
+    for item in ordinary:
+        if any(math.hypot(item["x"] - old["x"], item["y"] - old["y"])
+               <= max(distance, min(item["radius"], old["radius"])) for old in result):
+            continue
+        result.append(item)
+        if len(result) >= limit:
+            break
+    return result, len(preferred)
 
 
 class _OnnxDetector:
@@ -225,7 +315,7 @@ class _NativeRoiDetector:
         self.recent = []
         self.source_shape = None
 
-    def _boxes(self, detections, shape, index):
+    def _boxes(self, detections, shape, index, regions=()):
         height, width = shape[:2]
         sx, sy = width / self.width, height / self.height
         boxes = []
@@ -246,10 +336,32 @@ class _NativeRoiDetector:
                 return
             boxes.append({"bbox": box, "origin": origin})
 
-        proposal_budget = self.budget - self.explore
+        focus_budget = min(self.budget, max(1, self.budget // 2)) if regions else 0
+        # Start at each reviewed region's centre before rotating across larger
+        # regions. These are search windows, not observations or contact labels.
+        for region in regions:
+            x, y, w, h = region["bbox"]
+            append((x + w / 2) * sx, (y + h / 2) * sy, "review_refinement_region")
+            if len(boxes) >= focus_budget:
+                break
+        for region in regions:
+            if len(boxes) >= focus_budget:
+                break
+            x, y, w, h = region["bbox"]
+            columns, rows = max(1, math.ceil(w * sx / self.size)), max(1, math.ceil(h * sy / self.size))
+            grid = [(x + w * (col + .5) / columns, y + h * (row + .5) / rows)
+                    for row in range(rows) for col in range(columns)]
+            for offset in range(len(grid)):
+                cx, cy = grid[(index - region["frame_start"] + offset) % len(grid)]
+                append(cx * sx, cy * sy, "review_refinement_region")
+                if len(boxes) >= focus_budget:
+                    break
+        proposal_budget = max(len(boxes), self.budget - self.explore)
         # Alternate global and previous-native proposals so neither monopolizes
         # the entire bounded native-resolution budget.
-        ranked = sorted(detections, key=lambda item: -item["confidence"])
+        ranked = (_candidate_budget(detections, (self.height, self.width), 512, mode="spatial")
+                  if self.config.get("candidate_selection") == "spatial"
+                  else sorted(detections, key=lambda item: -item["confidence"]))
         for position in range(max(len(ranked), len(self.recent))):
             for proposals, origin in ((ranked, "global_candidate"), (self.recent, "previous_native_candidate")):
                 if len(boxes) >= proposal_budget:
@@ -274,7 +386,7 @@ class _NativeRoiDetector:
             append(x, y, "rotating_exploration")
         return boxes
 
-    def detect(self, raw_source, detections, index, camera_motion):
+    def detect(self, raw_source, detections, index, camera_motion, regions=()):
         if (not isinstance(raw_source, np.ndarray) or raw_source.dtype != np.uint8
                 or raw_source.ndim not in (2, 3) or not raw_source.size
                 or raw_source.ndim == 3 and raw_source.shape[2] != 3):
@@ -289,7 +401,7 @@ class _NativeRoiDetector:
             return [], {"status": "not_higher_resolution", "source_size": [sw, sh], "rois": []}
         if abs(sx / sy - 1) > .03:
             raise ValueError("source_frames and analysis frames must have the same displayed aspect ratio")
-        windows = self._boxes(detections, source.shape, index)
+        windows = self._boxes(detections, source.shape, index, regions)
         native = []
         area_limit = self.max_area * sx * sy
         for window in windows:
@@ -315,6 +427,15 @@ class _NativeRoiDetector:
             local_base = cv2.GaussianBlur(gray, (0, 0), max(1.0, min(12.0, 4 * sw / 1280)))
             contrast = (cv2.absdiff(gray, local_base) if self.config.get('include_dark_components')
                         else cv2.subtract(gray, local_base))
+            local_components = self.config.get("native_local_components", bool(self.config.get("refinement_regions")))
+            if local_components:
+                # Bright wooden flooring may meet the colour threshold too.
+                # Without local structure segmentation, adding a dark cork to
+                # that mask joins it to the entire floor and the area filter
+                # rejects both. Preserve local objects before testing motion.
+                bright = cv2.bitwise_and(bright, np.where(
+                    cv2.subtract(gray, local_base) >= float(self.config.get("contrast_threshold", 8)),
+                    255, 0).astype(np.uint8))
             if self.config.get('include_dark_components'):
                 # The cork is often darker than the wooden floor at impact.
                 # These remain motion proposals; a dark component is not contact evidence.
@@ -368,11 +489,15 @@ class _NativeRoiDetector:
                                "foreground_difference": round(motion, 3), "local_contrast": round(local_contrast, 3)})
         self.previous = source  # one additional original frame, never the whole clip
         native = _nms(native, max(.5, self.width / 1280), 512)
-        self.recent = native[:16]
+        self.recent = (_candidate_budget(native, (self.height, self.width), 16, mode="spatial",
+                                        distance=max(.5, self.width / 1280))
+                       if self.config.get("candidate_selection") == "spatial" else native[:16])
         return native, {"status": "analyzed", "source_size": [sw, sh], "rois": windows,
                         "roi_count": len(windows), "proposal_count": len(native),
                         "pixels_examined": sum(row["bbox"][2] * row["bbox"][3] for row in windows),
-                        "full_source_scan": False, "score_kind": "heuristic_rank_not_probability"}
+                        "full_source_scan": False, "score_kind": "heuristic_rank_not_probability",
+                        "local_component_segmentation": bool(self.config.get(
+                            "native_local_components", bool(self.config.get("refinement_regions"))))}
 
 
 def _merge_native(global_candidates, native_candidates, distance):
@@ -419,6 +544,10 @@ def detect_sequence(frames, timestamps, config=None):
     max_candidates = int(config.get("max_candidates", 64))
     if not 1 <= max_candidates <= 512:
         raise ValueError("max_candidates must be between 1 and 512")
+    selection = config.get("candidate_selection", "ranked")
+    if selection not in {"ranked", "spatial"}:
+        raise ValueError("candidate_selection must be ranked or spatial")
+    regions = _refinement_regions(config, frames[0].shape, len(frames))
     sample_ids = np.unique(np.linspace(0, len(frames) - 1, min(len(frames), 9), dtype=int))
     background = np.median(np.stack([cv2.cvtColor(_bgr(frames[i]), cv2.COLOR_BGR2GRAY) for i in sample_ids]), axis=0).astype(np.uint8)
     onnx = _OnnxDetector(config) if backend == "onnx" else None
@@ -436,6 +565,9 @@ def detect_sequence(frames, timestamps, config=None):
         "confidence_kind": "heuristic_rank_not_probability",
         "include_dark_components": bool(config.get('include_dark_components')),
     }
+    provenance.update(candidate_selection=selection, refinement_region_count=len(regions),
+                      refinement_region_source="operator_or_review_supplied" if regions else None,
+                      refinement_provides_contact_evidence=False)
     min_area = float(config.get("min_area", max(1.0, 2 * scale * scale)))
     max_area = float(config.get("max_area", max(40.0, 180 * scale * scale)))
     if not math.isfinite(min_area) or not math.isfinite(max_area) or min_area <= 0 or max_area < min_area:
@@ -452,6 +584,7 @@ def detect_sequence(frames, timestamps, config=None):
                                    and cv2.contourArea(cv2.convexHull(texture_points)) >= width * height * 0.2)
     records = []
     for index, (raw_frame, timestamp) in enumerate(zip(frames, timestamps)):
+        active_regions = [region for region in regions if region["frame_start"] <= index <= region["frame_end"]]
         frame = _bgr(raw_frame)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # A one-pixel range tolerates codec noise and minor geometric jitter at
@@ -557,9 +690,10 @@ def detect_sequence(frames, timestamps, config=None):
             proposal_count = len(detections)
             # Give the learned scorer a bounded proposal pool before the final
             # cutoff, otherwise discarded target proposals can never be rescued.
-            detections = _nms(detections, max(1.0, 3 * scale), 512 if scorer else max_candidates)
+            detections = _nms(detections, max(1.0, 3 * scale),
+                              512 if scorer or active_regions or selection == "spatial" else max_candidates)
         if native_detector is not None:
-            native, high_resolution = native_detector.detect(source_frames[index], detections, index, camera_motion)
+            native, high_resolution = native_detector.detect(source_frames[index], detections, index, camera_motion, active_regions)
             for item in native:
                 item["possible_occluder_overlap"] = any(
                     b[0] <= item["x"] <= b[0] + b[2] and b[1] <= item["y"] <= b[1] + b[3]
@@ -569,7 +703,8 @@ def detect_sequence(frames, timestamps, config=None):
             global_count = len(detections)
             detections = _merge_native(detections, native, max(1.0, 3 * scale))
             proposal_count += max(0, len(detections) - global_count)
-            detections = _nms(detections, max(1.0, 3 * scale), 512 if scorer else max_candidates)
+            detections = _nms(detections, max(1.0, 3 * scale),
+                              512 if scorer or active_regions or selection == "spatial" else max_candidates)
         if scorer:
             rescored = scorer.score(frame, detections, preprocessing=config.get("frame_preprocessing"))
             for old, new in zip(detections, rescored):
@@ -579,12 +714,17 @@ def detect_sequence(frames, timestamps, config=None):
                     new["confidence_kind"] = "learned_score_not_calibrated"
                 else:
                     new["confidence"] = old["confidence"]
-            detections = _nms(rescored, max(1.0, 3 * scale), max_candidates)
+            detections = rescored
+        detections, preferred_count = _refined_budget(detections, frame.shape, max_candidates,
+                                                       selection, max(1.0, 3 * scale), active_regions)
         record = {"frame_index": index, "time": float(timestamp), "detections": detections,
                   "occlusion_regions": occlusion_regions, "detector": dict(provenance),
                   "person_detector": person_diagnostics, "high_resolution": high_resolution,
                   "camera_motion": camera_motion, "proposal_count_before_limit": proposal_count,
-                  "candidate_limit_reached": proposal_count > max_candidates}
+                  "candidate_limit_reached": proposal_count > max_candidates,
+                  "refinement": {"active_regions": active_regions, "preferred_candidates": preferred_count,
+                                 "assistance_used": bool(active_regions), "coordinate_system": "analysis_pixels",
+                                 "provides_contact_evidence": False, "provides_target_identity": False}}
         if scorer:
             record["candidate_scorer"] = getattr(scorer, "provenance", {"path": str(config["scorer_path"])})
         records.append(record)
