@@ -5,7 +5,7 @@ const cameras = ['A', 'B'];
 const state = {
   videos: [], limits: {max_upload_bytes: 1024 ** 3}, busy: false,
   sources: {A: {mode: 'library'}, B: {mode: 'library'}},
-  jobId: null, pollTimer: null, pollGeneration: 0,
+  jobId: null, currentJob: null, pollTimer: null, pollGeneration: 0,
 };
 const statusNames = {
   queued: '분석 대기', pending: '대기', running: '분석 중', analyzing: '영상 분석 중',
@@ -14,13 +14,37 @@ const statusNames = {
   reused: '기존 근거 연결 완료', stored_ai_review: '기존 AI 검수 연결', fresh_analysis: '새 영상 분석',
 };
 const terminal = new Set(['completed', 'completed_with_errors', 'failed', 'interrupted']);
-const modeNames = {stored_ai_review: '기존 AI 검수', fresh_analysis: '새 분석', stored_automatic: '기존 자동 분석', failed: '처리 실패'};
+const modeNames = {stored_ai_review: '기존 AI 검수', fresh_analysis: '새 분석', stored_automatic: '기존 자동 분석', review_guided_reanalysis: '원본 집중 재분석', failed: '처리 실패'};
 const correspondenceNames = {
   ai_visual_review: '저장된 AI 검수의 동작 대응', reviewed_actions: '검수된 동작 대응',
   stored_ai_review: '저장된 AI 검수의 동작 대응', operator_selection: '사용자가 확인한 사건 대응',
   user_selection: '사용자가 확인한 사건 대응', operator_request: '사용자가 확인한 사건 대응',
   verified_ai_action_correspondence: '저장된 AI 검수의 동작 대응',
   operator_pair_selection: '사용자가 확인한 사건 대응',
+};
+const observationNames = {
+  line_ambiguous: '접촉과 라인 관계 불명확', contact_occluded: '접촉 구간 가림',
+  contact_out_of_view: '접촉 위치 관측 불가', no_contact_in_clip: '클립에 접촉 구간 없음',
+  target_ambiguous: '대상 셔틀 식별 불명확', contact_observed: '접촉 관측',
+  observed: '접촉 관측', contact_confirmed: '접촉 확인', contact_interval: '최초 접촉 구간 관측',
+  automatic_unresolved: '자동 접촉 검증 미완료', failed: '영상 처리 실패',
+};
+const requirementNames = {
+  same_event: '같은 착지 사건의 시점 대응', event_correspondence: '같은 착지 사건의 시점 대응',
+  contact_observed: '최초 바닥 접촉 관측', first_contact: '최초 바닥 접촉 관측',
+  target_identity: '해당 랠리의 셔틀 식별', target_contact_identity_confirmed: '해당 랠리의 셔틀 식별',
+  boundary_evidence: '접촉점과 실제 라인 경계의 관계', boundary: '접촉점과 실제 라인 경계의 관계',
+  source_integrity: '원본 영상 일치 확인',
+};
+const fallbackIssues = {
+  SAME_EVENT_UNCONFIRMED: ['A/B 사건 대응 미확인', '두 영상이 같은 랠리의 같은 착지 사건인지 확인되지 않았습니다.', '양쪽에서 같은 타격과 후속 동작을 대조하세요. 확인한 경우에만 같은 사건 항목을 선택하고 다시 제출하세요.'],
+  KNOWN_DIFFERENT_RALLY: ['서로 다른 랠리', '기존 동작 검수에서 서로 다른 랠리로 확인된 입력입니다.', '한쪽 영상을 같은 착지 사건이 담긴 올바른 반대 시점 영상으로 교체하세요.'],
+  DUPLICATE_SOURCE: ['동일 영상 중복 입력', 'A와 B의 영상 내용이 같습니다. 두 입력이 다른 시점의 관측을 제공하지 않습니다.', '같은 사건을 다른 위치에서 촬영한 영상을 선택하세요.'],
+  NO_QUALIFIED_CONTACT: ['유효한 최초 접촉 근거 부족', '양쪽 모두 최초 접촉과 라인 관계를 확정할 근거가 부족합니다.', '아래 시점별 관측 사유와 연속 프레임 근거를 확인하세요. 최초 접촉이 촬영되지 않았다면 해당 구간이 보이는 원본이 필요합니다.'],
+  CONFLICTING_VIEW_DECISIONS: ['시점별 판정 충돌', '두 시점의 직접 판정이 서로 다릅니다.', '같은 착지 사건을 판단했는지 확인하고 접촉점·라인 경계·적용 규칙을 다시 검토하세요.'],
+  VIEW_ANALYSIS_FAILED: ['영상 처리 실패', '한쪽 영상의 분석을 완료하지 못했습니다.', '아래 시점의 오류를 확인하고 입력 파일이나 실행 환경을 수정한 뒤 다시 분석하세요.'],
+  SOURCE_CHANGED: ['원본 일치 확인 실패', '현재 입력과 저장된 근거의 원본 일치를 확인하지 못했습니다.', '올바른 원본을 선택하거나 기존 검수 활용을 끄고 새로 분석하세요.'],
+  RULES_MISMATCH: ['경기 규칙 불일치', '두 시점에 적용된 경기 규칙이 다릅니다.', '단식·복식 및 서비스·랠리 구분을 확인하고 같은 규칙으로 다시 검토하세요.'],
 };
 const fmt = (value, digits = 2) => Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : '—';
 function el(tag, className, text) {
@@ -61,6 +85,7 @@ function setBusy(busy) {
   state.busy = busy;
   document.querySelectorAll('#pair-form button, #pair-form input, #pair-form select').forEach(node => { node.disabled = busy; });
   $('submit-pair').querySelector('span').textContent = busy ? 'A/B 작업 진행 중' : 'A/B 연결 분석';
+  $('refine-pair').disabled = busy;
 }
 function setPreview(camera, url) {
   const key = camera.toLowerCase(), player = $('preview-' + key);
@@ -188,7 +213,56 @@ function seek(player, seconds) {
   else { player.addEventListener('loadedmetadata', apply, {once: true}); player.load(); }
   player.scrollIntoView({block: 'center', behavior: 'auto'});
 }
-function renderView(camera, view) {
+function textItems(value) {
+  const items = Array.isArray(value) ? value : value ? [value] : [];
+  return items.map(item => {
+    if (typeof item === 'string') return requirementNames[item] || item;
+    if (item && typeof item === 'object') return item.detail || item.title || item.message || requirementNames[item.code] || item.code || '';
+    return '';
+  }).filter(item => typeof item === 'string' && item.trim());
+}
+function appendTextList(parent, label, values, className = '') {
+  const items = textItems(values);
+  if (!items.length) return;
+  const group = el('div', className);
+  group.append(el('strong', 'diagnostic-label', label));
+  const list = el('ul');
+  items.forEach(item => list.append(el('li', '', item)));
+  group.append(list); parent.append(group);
+}
+function renderDiagnostics(result) {
+  const panel = $('review-diagnostics'), grid = $('diagnostics-issues');
+  panel.hidden = result.decision !== 'REVIEW'; grid.replaceChildren();
+  $('refine-panel').hidden = panel.hidden || result.refinement_available !== true;
+  $('refine-error').hidden = true;
+  if (panel.hidden) return;
+  const diagnostics = result.review_diagnostics || {};
+  let issues = Array.isArray(diagnostics.issues) ? diagnostics.issues.filter(issue => issue && typeof issue === 'object') : [];
+  if (!issues.length) {
+    issues = (Array.isArray(result.reason_codes) ? result.reason_codes : []).map(code => {
+      const entry = fallbackIssues[code];
+      return entry ? {code, title: entry[0], detail: entry[1], remediation: entry[2], camera_ids: cameras} : null;
+    }).filter(Boolean);
+  }
+  $('diagnostics-count').textContent = issues.length ? `${issues.length}개 확인 항목` : '시점별 근거 확인';
+  $('diagnostics-summary').textContent = typeof diagnostics.summary === 'string' && diagnostics.summary
+    ? diagnostics.summary : '최종 판정을 보류한 이유와 필요한 후속 조치를 구분했습니다. 같은 사건 확인만으로 접촉·라인 근거가 생기지는 않습니다.';
+  issues.forEach(issue => {
+    const card = el('article', 'diagnostic-issue');
+    if (typeof issue.code === 'string') card.dataset.issueCode = issue.code;
+    const header = el('div', 'diagnostic-issue-heading');
+    header.append(el('h3', '', typeof issue.title === 'string' ? issue.title : '추가 확인 필요'));
+    const cameraIds = Array.isArray(issue.camera_ids) ? issue.camera_ids.filter(camera => cameras.includes(camera)) : [];
+    if (cameraIds.length) header.append(el('span', 'diagnostic-cameras', cameraIds.join(' / ') + ' 시점'));
+    card.append(header);
+    textItems(issue.detail).forEach(detail => card.append(el('p', 'diagnostic-detail', detail)));
+    appendTextList(card, '다음 조치', issue.remediation, 'diagnostic-remediation');
+    if (issue.resolvable_with_existing_inputs === true) card.append(el('p', 'diagnostic-availability', '기존 영상에서 추가 검토할 수 있는 항목입니다.'));
+    if (issue.resolvable_with_existing_inputs === false) card.append(el('p', 'diagnostic-availability', '현재 입력 외의 추가 관측·자료가 필요합니다.'));
+    grid.append(card);
+  });
+}
+function renderView(camera, view, diagnostics) {
   const card = el('article', 'result-view');
   card.id = 'result-view-' + camera.toLowerCase();
   const header = el('div', 'result-view-header');
@@ -198,7 +272,8 @@ function renderView(camera, view) {
   header.append(title, el('span', 'processing-label', modeNames[view.processing_mode] || '결과 확인'));
   card.append(header);
   const verdicts = el('div', 'view-verdicts');
-  for (const [label, value] of [['자동 분석', view.automatic_decision], ['직접 관측 근거', view.direct_decision], ['시점 보조 판정', view.assisted_decision]]) {
+  const analysisLabel = view.processing_mode === 'review_guided_reanalysis' ? '후보 구간 재분석' : '자동 분석';
+  for (const [label, value] of [[analysisLabel, view.automatic_decision], ['직접 관측 근거', view.direct_decision], ['시점 보조 판정', view.assisted_decision]]) {
     const cell = el('div');
     cell.append(el('span', '', label), el('strong', '', value || 'REVIEW'));
     verdicts.append(cell);
@@ -215,7 +290,20 @@ function renderView(camera, view) {
   const body = el('div', 'view-body');
   if (view.error) body.append(el('p', 'message error', view.error));
   if (view.rationale) body.append(el('p', 'rationale', view.rationale));
-  if (player && typeof view.contact_time_seconds === 'number' && Number.isFinite(view.contact_time_seconds) && view.contact_time_seconds >= 0) {
+  if (diagnostics && typeof diagnostics === 'object') {
+    const observation = diagnostics.observation_status;
+    const information = el('div', 'view-diagnosis');
+    const observationLabel = typeof diagnostics.observation_label === 'string' ? diagnostics.observation_label : observationNames[observation];
+    if (observationLabel || (typeof observation === 'string' && observation)) information.append(el('p', 'observation-status', observationLabel || '관측 상태 추가 확인 필요'));
+    appendTextList(information, '빠진 근거', diagnostics.missing_requirements);
+    appendTextList(information, '이 시점의 후속 조치', diagnostics.follow_up_actions);
+    if (information.childNodes.length) body.append(information);
+  }
+  if (player && typeof diagnostics?.focus_time_seconds === 'number' && Number.isFinite(diagnostics.focus_time_seconds) && diagnostics.focus_time_seconds >= 0) {
+    const button = el('button', 'seek-button', `검토 구간 ${fmt(diagnostics.focus_time_seconds, 3)}초로 이동`);
+    button.type = 'button'; button.dataset.reviewSeekCamera = camera;
+    button.addEventListener('click', () => seek(player, diagnostics.focus_time_seconds)); body.append(button);
+  } else if (player && typeof view.contact_time_seconds === 'number' && Number.isFinite(view.contact_time_seconds) && view.contact_time_seconds >= 0) {
     const button = el('button', 'seek-button', `이 시점의 접촉 ${fmt(view.contact_time_seconds, 3)}초로 이동`);
     button.type = 'button'; button.dataset.seekCamera = camera;
     button.addEventListener('click', () => seek(player, view.contact_time_seconds)); body.append(button);
@@ -231,7 +319,8 @@ function renderView(camera, view) {
   }
   const details = el('details', 'provenance-details');
   details.append(el('summary', '', '판정 출처와 원본 확인'));
-  details.append(el('p', '', `검수 출처: ${view.review_source === 'ai_visual_review' ? 'AI 시각 검수' : view.review_source || '자동 분석'}`));
+  const reviewSource = {ai_visual_review: 'AI 시각 검수', ai_review_guided_search: 'AI 검수의 후보 구간을 참고한 재분석', automatic: '자동 분석'}[view.review_source] || view.review_source || '자동 분석';
+  details.append(el('p', '', `검수 출처: ${reviewSource}`));
   if (view.source_sha256) details.append(el('p', '', '원본 SHA256: ' + view.source_sha256));
   if (Array.isArray(view.reason_codes) && view.reason_codes.length) details.append(el('p', '', view.reason_codes.join(' · ')));
   body.append(details); card.append(body); return card;
@@ -239,15 +328,24 @@ function renderView(camera, view) {
 function renderResult(job) {
   const result = job.result;
   if (!result || !['IN', 'OUT', 'REVIEW'].includes(result.decision)) throw new Error('최종 판정 응답 형식이 올바르지 않습니다.');
+  state.currentJob = job;
   $('pair-result').hidden = false;
   $('result-banner').dataset.verdict = result.decision;
   $('final-verdict').textContent = result.decision;
   const views = result.views || {};
   const aiUsed = cameras.some(camera => views[camera]?.processing_mode === 'stored_ai_review');
-  $('result-provenance').textContent = aiUsed ? '기존 AI 검수 근거를 활용한 보조 결과' : '두 시점의 분석·대응 검토 결과';
+  const refinedCameras = Array.isArray(result.refinement_applied_camera_ids)
+    ? result.refinement_applied_camera_ids.filter(camera => cameras.includes(camera))
+    : cameras.filter(camera => views[camera]?.processing_mode === 'review_guided_reanalysis');
+  $('result-provenance').textContent = refinedCameras.length
+    ? `AI 검수의 후보 구간을 참고한 원본 집중 재분석 · ${refinedCameras.join('/')} 시점`
+    : (result.refinement_requested === true || job.request?.refine_review_regions === true)
+      ? '두 시점 새 분석 · 적용된 AI 후보 구간 없음'
+      : aiUsed ? '기존 AI 검수 근거를 활용한 보조 결과' : '두 시점의 분석·대응 검토 결과';
   const sources = $('source-cameras'); sources.replaceChildren();
   const sourceIds = Array.isArray(result.source_camera_ids) ? result.source_camera_ids.filter(id => cameras.includes(id)) : [];
-  sources.append(el('span', '', sourceIds.length ? '최종 판정의 접촉 근거' : '확인된 접촉 근거 추가 필요'));
+  const hasDirectEvidence = cameras.some(camera => views[camera]?.qualified === true && ['IN', 'OUT'].includes(views[camera]?.direct_decision));
+  sources.append(el('span', '', sourceIds.length ? '최종 판정의 접촉 근거' : hasDirectEvidence ? '시점별 접촉 근거 있음 · 연결 조건 확인 필요' : '확인된 접촉 근거 추가 필요'));
   sourceIds.forEach(camera => { const link = el('a', 'source-link', camera + ' 시점 보기 ↓'); link.href = '#result-view-' + camera.toLowerCase(); sources.append(link); });
   const reasons = $('result-reasons'); reasons.replaceChildren();
   const messages = Array.isArray(result.reasons) ? result.reasons : [];
@@ -257,8 +355,9 @@ function renderResult(job) {
   $('result-timing').textContent = typeof result.elapsed_seconds === 'number' ? `이번 작업 ${fmt(result.elapsed_seconds, 1)}초${aiUsed ? ' · 기존 검수 시간은 포함하지 않습니다.' : ''}` : '';
   $('result-json').href = jobUrl(job.job_id);
   $('result-json').download = 'pair-' + job.job_id + '.json';
+  renderDiagnostics(result);
   const grid = $('result-views'); grid.replaceChildren();
-  cameras.forEach(camera => grid.append(renderView(camera, views[camera] || {})));
+  cameras.forEach(camera => grid.append(renderView(camera, views[camera] || {}, result.decision === 'REVIEW' ? result.review_diagnostics?.views?.[camera] : null)));
 }
 async function pollJob(id, generation) {
   if (generation !== state.pollGeneration) return;
@@ -283,7 +382,7 @@ async function pollJob(id, generation) {
 }
 function openJob(id, push = false) {
   if (!/^[a-zA-Z0-9_-]{1,128}$/.test(id)) { showError('잘못된 작업 ID입니다.'); return; }
-  clearTimeout(state.pollTimer); state.pollGeneration += 1; state.jobId = id;
+  clearTimeout(state.pollTimer); state.pollGeneration += 1; state.jobId = id; state.currentJob = null;
   $('pair-result').hidden = true; $('job-progress').hidden = false;
   $('progress-heading').textContent = '작업 상태를 불러오고 있습니다.';
   $('progress-a').textContent = '확인 중'; $('progress-b').textContent = '확인 중';
@@ -351,6 +450,30 @@ $('pair-form').addEventListener('submit', async event => {
   } catch (error) { showError(error.message); setBusy(false); loadHistory(); }
 });
 $('retry-poll').addEventListener('click', () => { if (state.jobId) { $('retry-poll').hidden = true; pollJob(state.jobId, state.pollGeneration); } });
+$('refine-pair').addEventListener('click', async () => {
+  const job = state.currentJob;
+  if (state.busy || !job || job.result?.decision !== 'REVIEW' || job.result.refinement_available !== true) return;
+  const views = {};
+  for (const camera of cameras) {
+    const source = job.request?.views?.[camera];
+    if (typeof source?.upload_id === 'string') views[camera] = {upload_id: source.upload_id};
+    else if (typeof source?.video_id === 'string') views[camera] = {video_id: source.video_id};
+    else {
+      $('refine-error').textContent = '저장된 작업의 입력 정보를 읽지 못했습니다. A/B 영상을 다시 선택해 주세요.';
+      $('refine-error').hidden = false; return;
+    }
+  }
+  setBusy(true); $('refine-error').hidden = true;
+  try {
+    const created = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, same_event_confirmed: job.request?.same_event_confirmed === true, reuse_review: false, refine_review_regions: true})});
+    if (!created.job_id) throw new Error('재분석 작업 ID가 응답에 없습니다. 최근 작업 목록을 확인해 주세요.');
+    openJob(created.job_id, true);
+    $('job-progress').scrollIntoView({block: 'start', behavior: 'auto'});
+    loadHistory();
+  } catch (error) {
+    $('refine-error').textContent = error.message; $('refine-error').hidden = false; setBusy(false);
+  }
+});
 $('refresh-history').addEventListener('click', loadHistory);
 window.addEventListener('popstate', () => {
   const id = new URLSearchParams(location.search).get('job');
