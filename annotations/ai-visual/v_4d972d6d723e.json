@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "video_id": "v_4d972d6d723e",
+  "file": "a시점 2.mp4",
+  "source_sha256": "f064fde8fa78f53ad667a5f1977bcb6daaddb8e5912150593b384fb17dcd69cd",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "UNKNOWN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "target_contact_identity_confirmed": false,
+  "contact_frame_index": null,
+  "contact_px": null,
+  "time": null,
+  "confidence": "unresolved",
+  "observation_status": "contact_occluded",
+  "rationale": "회색 상의 선수가 오른쪽 전위로 이동한 뒤 녹색 상의 선수와 멈춘다. 대상 예상 구간을 원본 확대했지만 선수의 몸과 여러 연습용 셔틀이 겹쳐 해당 랠리 최초 바닥 접촉을 특정하지 못했다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    10,
+    21,
+    32,
+    43,
+    54,
+    65,
+    76,
+    86,
+    90,
+    95,
+    97,
+    98,
+    100,
+    101,
+    104,
+    105,
+    107,
+    108,
+    110,
+    113,
+    115,
+    116,
+    119,
+    120,
+    122,
+    125,
+    128,
+    130,
+    131,
+    134,
+    135,
+    137,
+    140,
+    141,
+    142,
+    143,
+    144,
+    145,
+    146,
+    148,
+    150,
+    152,
+    154,
+    155,
+    156,
+    158,
+    160,
+    163,
+    173,
+    184,
+    195,
+    206,
+    217,
+    228,
+    239,
+    250
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_4d972d6d723e/overview.jpg",
+    "runs/visual-review/v_4d972d6d723e/detail_90_161_5_preview.jpg",
+    "runs/visual-review/v_4d972d6d723e/detail_95_145_3_native.jpg",
+    "runs/visual-review/v_4d972d6d723e/detail_140_160_2_native.jpg",
+    "runs/visual-review/v_4d972d6d723e/patch-label-check.png"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 140,
+      "x": 597,
+      "y": 230,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 회색 선수 왼쪽/뒤로 드러나는 실제 셔틀; 최초 접촉은 가림으로 미확인"
+    },
+    {
+      "frame_index": 142,
+      "x": 597,
+      "y": 229,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 회색 선수 왼쪽/뒤로 드러나는 실제 셔틀; 최초 접촉은 가림으로 미확인"
+    },
+    {
+      "frame_index": 144,
+      "x": 597,
+      "y": 231,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 회색 선수 왼쪽/뒤로 드러나는 실제 셔틀; 최초 접촉은 가림으로 미확인"
+    },
+    {
+      "frame_index": 150,
+      "x": 597,
+      "y": 243,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 회색 선수 왼쪽/뒤로 드러나는 실제 셔틀; 최초 접촉은 가림으로 미확인"
+    }
+  ],
+  "follow_up_actions": [
+    "가림이 없는 다른 카메라 또는 더 긴 원본에서 같은 랠리의 최초 접촉을 확보한다.",
+    "네트 기둥·선수에 가려진 최초 접촉을 이후 반동 위치로 대체하지 않는다."
+  ]
+}

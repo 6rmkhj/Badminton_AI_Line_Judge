@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "video_id": "v_d34d163ba7b9",
+  "file": "a시점 10.mp4",
+  "source_sha256": "8f947b002a05d9c32ee65e06fdc49b5193ed985d60f9284bc078ae9221284fbd",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "UNKNOWN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "target_contact_identity_confirmed": false,
+  "contact_frame_index": null,
+  "contact_px": null,
+  "time": null,
+  "confidence": "unresolved",
+  "observation_status": "contact_out_of_view",
+  "rationale": "남색·검은 상의 선수의 여러 차례 교환 뒤 반대편에서 사건이 끝나고 두 선수가 서로 다가간다. 마지막 최초 바닥 접촉을 이 시점에서 확인하지 못했다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    14,
+    29,
+    43,
+    58,
+    72,
+    87,
+    101,
+    116,
+    130,
+    145,
+    159,
+    174,
+    188,
+    203,
+    217,
+    232,
+    246,
+    261,
+    275,
+    290,
+    304,
+    319,
+    334
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_d34d163ba7b9/overview.jpg"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    }
+  ],
+  "cross_view_match": {
+    "other_video_id": "v_748f9ee5d5a8",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 43,
+        "other_frame_index": 31,
+        "description": "검은 상의 전위 선수가 앞으로 이동하며 같은 포핸드 타구를 하고 남색 파트너는 뒤에서 기다린다."
+      },
+      {
+        "frame_index": 203,
+        "other_frame_index": 186,
+        "description": "뒤이은 교환에서 같은 검은 상의 선수가 오버헤드 타구를 하고 남색 파트너가 옆에서 대기한다."
+      }
+    ],
+    "rationale": "양 시점의 검은 상의 전위 포핸드와 뒤이은 오버헤드 타구를 별도 대조했고, 중간 남색 파트너의 후위 타구도 같은 순서로 보인다. 약12–17프레임의 동작 대응이며 정확한 시계 동기화로 사용하지 않는다. A영상에 보이지 않는 접촉 좌표는 만들지 않고 B의 직접 접촉 근거를 참조한다.",
+    "evidence_paths": [
+      "runs/visual-review/v_d34d163ba7b9/overview.jpg",
+      "runs/visual-review/v_748f9ee5d5a8/detail-31-248-native.jpg"
+    ]
+  },
+  "follow_up_actions": [
+    "실제 동작 대응으로 확인한 다른 시점의 직접 접촉 근거를 보조 판정에 사용한다.",
+    "A시점의 미관측 접촉은 UNKNOWN으로 보존하고 사람 검수 시 동일 사건 연결을 재확인한다."
+  ]
+}

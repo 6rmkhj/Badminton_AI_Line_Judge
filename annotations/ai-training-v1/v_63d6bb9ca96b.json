@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_63d6bb9ca96b",
+  "file": "b시점 7.mp4",
+  "source_sha256": "27050156feb5987b60dbe4e0d42eb0f59e61b5679c95f6efd2d39901a9208d1c",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "detection_labels": [
+    {
+      "frame_index": 112,
+      "x": 273,
+      "y": 421,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 113,
+      "x": 274,
+      "y": 432,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 114,
+      "x": 274,
+      "y": 438,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 115,
+      "x": 274,
+      "y": 432,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 116,
+      "x": 275,
+      "y": 428,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 125,
+      "x": 277,
+      "y": 404,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 107,
+      "x": 250,
+      "y": 440,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 107,
+      "x": 300,
+      "y": 440,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 109,
+      "x": 300,
+      "y": 450,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 111,
+      "x": 245,
+      "y": 450,
+      "label": "background",
+      "source": "ai_visual_review"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "0dbe5d74b8eec7465a433807b8c3b629dcec4fd5199574247a6dd787c449047f",
+  "source_review_path": "annotations/ai-visual/v_63d6bb9ca96b.json"
+}

@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_92095687bfab",
+  "file": "b시점 18.mp4",
+  "source_sha256": "c2b3e5cd92940e93598163c454c831c0a25df07dd347c1f9b67f5e27acd0d831",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "detection_labels": [
+    {
+      "frame_index": 186,
+      "x": 349,
+      "y": 312,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 187,
+      "x": 350,
+      "y": 310,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 188,
+      "x": 349,
+      "y": 305,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 189,
+      "x": 349,
+      "y": 301,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 190,
+      "x": 349,
+      "y": 298,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 195,
+      "x": 350,
+      "y": 289,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 200,
+      "x": 352,
+      "y": 284,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 182,
+      "x": 350,
+      "y": 310,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 183,
+      "x": 365,
+      "y": 315,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 184,
+      "x": 340,
+      "y": 320,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 185,
+      "x": 365,
+      "y": 320,
+      "label": "background",
+      "source": "ai_visual_review"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "3e1a181364d599661a703a018d58919f1a90b97bb58db8da6be79b3798429623",
+  "source_review_path": "annotations/ai-visual/v_92095687bfab.json"
+}

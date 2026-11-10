@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_a66517188046",
+  "file": "b시점(uhd30 hd30) 5.mp4",
+  "source_sha256": "e09374a98ab6839216c2ec4baab9a90fd18b3c76bdbbd3df90005248de8b8476",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 1920,
+    "height": 1080
+  },
+  "label": "UNKNOWN",
+  "reviewer": "Codex review_uhdhd",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "observation_status": "target_ambiguous",
+  "confidence": "unresolved",
+  "rationale": "반대편 검정 헤드밴드 선수의 수비 뒤 작은 접촉점은 이 시점에서 직접 분리하지 못했다. A의 두 동작이 B보다 약0.21초 먼저 보이며 동작 순서와 자세가 일치한다. B 마지막 구간에도 A의 접촉 사건이 포함되나 접촉점이 멀고 작아 직접 분리하지 못했다.",
+  "limitations": [
+    "AI 직접 영상 검수이며 독립적인 인간 검증 정답이 아니다.",
+    "A/B 동시각이나 같은 파일명만으로 사건 대응을 확정하지 않았다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    3,
+    7,
+    11,
+    14,
+    18,
+    22,
+    26,
+    29,
+    33,
+    37,
+    38,
+    41,
+    44,
+    47,
+    48,
+    50,
+    52,
+    53,
+    56,
+    59,
+    62,
+    63,
+    65,
+    67,
+    68,
+    70,
+    71,
+    72,
+    74,
+    77,
+    78,
+    80,
+    82,
+    83,
+    86
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_a66517188046/event-detail.jpg",
+    "runs/visual-review/v_a66517188046/frame-0062.jpg",
+    "runs/visual-review/v_a66517188046/frame-0072.jpg",
+    "runs/visual-review/v_a66517188046/frame-0080.jpg",
+    "runs/visual-review/v_a66517188046/native-0070.jpg",
+    "runs/visual-review/v_a66517188046/native-0086.jpg",
+    "runs/visual-review/v_a66517188046/overview.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "cross_view_match": {
+    "other_video_id": "v_1d7ea8851789",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 62,
+        "other_frame_index": 110,
+        "description": "녹색 반바지 선수의 높은 오버헤드 타격과 맞은편 검정 헤드밴드 선수의 수비 준비"
+      },
+      {
+        "frame_index": 72,
+        "other_frame_index": 130,
+        "description": "검정 헤드밴드 선수가 라켓을 낮춰 수비하고 적색 선수가 옆에서 지켜보는 동작"
+      }
+    ],
+    "rationale": "A의 두 동작이 B보다 약0.21초 먼저 보이며 동작 순서와 자세가 일치한다. B 마지막 구간에도 A의 접촉 사건이 포함되나 접촉점이 멀고 작아 직접 분리하지 못했다.",
+    "evidence_paths": [
+      "runs/visual-review/v_1d7ea8851789/pair-check-b5.jpg"
+    ]
+  }
+}

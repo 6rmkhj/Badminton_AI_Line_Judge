@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_df42bfbec5cd",
+  "file": "b-1시점(uhd30 4k30).mp4",
+  "source_sha256": "3f3f685323bc7c4a81c850e89624cc7b2fe635b99f037938b28e6fb5beb558f7",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "IN",
+  "reviewer": "Codex review_uhd4k",
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "contact_frame_index": 109,
+  "time": 3.635,
+  "contact_px": [
+    473,
+    351
+  ],
+  "target_contact_identity_confirmed": true,
+  "confidence": "high",
+  "limitations": [
+    "AI가 직접 영상 프레임을 해석한 보조 레이블이며 사람이 독립 검수한 정답이 아니다.",
+    "검수한 기존 영상에 대한 해석으로 새로운 경기 영상의 자동 판정 정확도를 입증하지 않는다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    6,
+    13,
+    20,
+    26,
+    33,
+    40,
+    47,
+    53,
+    54,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    67,
+    68,
+    70,
+    72,
+    74,
+    76,
+    78,
+    80,
+    82,
+    84,
+    86,
+    87,
+    88,
+    90,
+    92,
+    94,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    121,
+    128,
+    134,
+    141,
+    148,
+    155
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_df42bfbec5cd/overview.jpg",
+    "runs/visual-review/v_df42bfbec5cd/frame-end.jpg",
+    "runs/visual-review/v_df42bfbec5cd/micro-0.jpg",
+    "runs/visual-review/v_df42bfbec5cd/micro-1.jpg",
+    "runs/visual-review/v_9cd1b53ebec6/match-88.jpg",
+    "runs/visual-review/v_df42bfbec5cd/match-92.jpg",
+    "runs/visual-review/v_9cd1b53ebec6/match-106.jpg",
+    "runs/visual-review/v_df42bfbec5cd/match-110.jpg",
+    "runs/visual-review/v_df42bfbec5cd/geometry-overlay.jpg"
+  ],
+  "detection_labels": [
+    {
+      "frame_index": 109,
+      "x": 471,
+      "y": 347,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 110,
+      "x": 477,
+      "y": 348,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 112,
+      "x": 494,
+      "y": 347,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 113,
+      "x": 502,
+      "y": 348,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 109,
+      "x": 440,
+      "y": 390,
+      "label": "background"
+    },
+    {
+      "frame_index": 110,
+      "x": 480,
+      "y": 405,
+      "label": "background"
+    },
+    {
+      "frame_index": 112,
+      "x": 440,
+      "y": 370,
+      "label": "background"
+    },
+    {
+      "frame_index": 113,
+      "x": 520,
+      "y": 400,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "contact_support_px": [
+    [
+      468,
+      346
+    ],
+    [
+      478,
+      346
+    ],
+    [
+      478,
+      356
+    ],
+    [
+      468,
+      356
+    ]
+  ],
+  "contact_interval_frames": [
+    108,
+    109
+  ],
+  "observation_status": "contact_interval",
+  "rationale": "마지막 오버헤드 타격(A1 88/B1 92 프레임 교차 확인) 뒤 셔틀이 선수 발 앞에 하강하고 109 프레임에 코르크가 바닥에 닿은 후 튄다. 첫 접촉 영역은 외곽선에서 충분히 안쪽이다. 110 이후 라켓으로 회수하는 동작은 접촉 이후다.",
+  "boundary_evidence": {
+    "kind": "court_interior",
+    "polygon_px": [
+      [
+        193,
+        303
+      ],
+      [
+        469,
+        266
+      ],
+      [
+        758,
+        318
+      ],
+      [
+        485,
+        510
+      ]
+    ],
+    "contact_uncertainty_px": 5,
+    "boundary_uncertainty_px": 4,
+    "explanation": "원본 전체 프레임에서 목표 복식 코트 안쪽임을 확인한 보수적인 내부 영역이다. 일부 변은 실제 외곽선이 아니라 내부를 제한하는 선분이며, 이 영역 밖이라는 이유로 OUT을 판단하지 않는다. 최초 접촉 지지 영역 전체가 내부에 위치하며 좌표·경계 판독 오차를 추가했다.",
+    "interior_confirmed": true
+  },
+  "cross_view_match": {
+    "other_video_id": "v_9cd1b53ebec6",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 92,
+        "other_frame_index": 88,
+        "description": "검은 옷 선수의 마지막 공중 오버헤드 타격"
+      },
+      {
+        "frame_index": 110,
+        "other_frame_index": 106,
+        "description": "검은 반바지 상대 선수의 회수 자세와 흰 반바지 파트너의 이동"
+      }
+    ],
+    "rationale": "서로 다른 두 동작(마지막 점프 타격, 상대의 접촉 뒤 회수)을 선수와 상대 위치로 교차 확인했다. 파일명만으로 동일 사건을 가정하지 않았다.",
+    "evidence_paths": [
+      "runs/visual-review/v_9cd1b53ebec6/match-88.jpg",
+      "runs/visual-review/v_df42bfbec5cd/match-92.jpg",
+      "runs/visual-review/v_9cd1b53ebec6/match-106.jpg",
+      "runs/visual-review/v_df42bfbec5cd/match-110.jpg"
+    ]
+  }
+}

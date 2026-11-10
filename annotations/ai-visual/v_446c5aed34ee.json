@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "video_id": "v_446c5aed34ee",
+  "file": "a시점 1.mp4",
+  "source_sha256": "aa5e23a6400121849b7994664fd9dc942c9034b9e34180117a8973f10d83be76",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "OUT",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "target_contact_identity_confirmed": true,
+  "contact_frame_index": 159,
+  "contact_px": [
+    208,
+    334
+  ],
+  "time": 2.681978,
+  "confidence": "high",
+  "observation_status": "contact_interval",
+  "rationale": "네트 가까운 왼쪽 복식 사이드라인 바깥으로 내려오는 셔틀의 최초 바닥 접촉과 두 번의 반동을 원본 확대 연속 프레임으로 확인했다. 녹색 상의 선수가 이후 같은 셔틀을 집는다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    9,
+    19,
+    29,
+    39,
+    49,
+    59,
+    69,
+    79,
+    89,
+    99,
+    109,
+    118,
+    128,
+    138,
+    148,
+    149,
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189,
+    190,
+    191,
+    192,
+    193,
+    194,
+    195,
+    196,
+    197,
+    198,
+    199,
+    200,
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    211,
+    214,
+    217,
+    218,
+    220,
+    223,
+    226,
+    228
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_446c5aed34ee/overview.jpg",
+    "runs/visual-review/v_446c5aed34ee/detail_178_229_3_preview.jpg",
+    "runs/visual-review/v_446c5aed34ee/detail_188_209_1_native.jpg",
+    "runs/visual-review/v_446c5aed34ee/detail_162_189_1_native.jpg",
+    "runs/visual-review/v_446c5aed34ee/detail_148_167_1_native.jpg",
+    "runs/visual-review/v_446c5aed34ee/patch-label-check.png"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 159,
+      "x": 208,
+      "y": 333,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 166,
+      "x": 201,
+      "y": 309,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 175,
+      "x": 190,
+      "y": 313,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 200,
+      "x": 183,
+      "y": 350,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    }
+  ],
+  "contact_interval_frames": [
+    158,
+    160
+  ],
+  "contact_support_px": [
+    [
+      206,
+      332
+    ],
+    [
+      210,
+      332
+    ],
+    [
+      210,
+      336
+    ],
+    [
+      206,
+      336
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "local_boundary",
+    "boundaries": [
+      {
+        "role": "left",
+        "line_px": [
+          [
+            202,
+            265
+          ],
+          [
+            218,
+            350
+          ]
+        ],
+        "inside_point_px": [
+          300,
+          330
+        ],
+        "role_confirmed": true
+      }
+    ],
+    "contact_uncertainty_px": 2,
+    "boundary_uncertainty_px": 1,
+    "explanation": "대상 코트 왼쪽 복식 사이드라인의 파란 칠 바깥 가장자리. x=202,y=265에서 x=218,y=350으로 이어지며 유효 코트는 오른쪽이다."
+  },
+  "follow_up_actions": [
+    "독립된 사람 검수자가 같은 첫 접촉 구간과 코트 외곽선 근거를 확인해 별도 정답 레이블을 확정한다.",
+    "현재 레이블은 AI 보조 검수로 보존하고 독립 테스트 정확도로 계산하지 않는다."
+  ]
+}

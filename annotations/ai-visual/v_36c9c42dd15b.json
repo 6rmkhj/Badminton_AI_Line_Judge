@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_36c9c42dd15b",
+  "file": "b시점 3.mp4",
+  "source_sha256": "4251e17f0ff5ea2c88cda6d61199f5c9db243283574019cf8fbda9846875bd28",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "label": "UNKNOWN",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "전체 프레임을 정밀 추적한 사람 검수는 아니며, 나열된 개요·확대 프레임에서 접촉을 확인하지 못했다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    11,
+    22,
+    33,
+    45,
+    56,
+    67,
+    78,
+    90,
+    101,
+    112,
+    123,
+    135,
+    146,
+    157,
+    168,
+    180,
+    191,
+    202,
+    213,
+    225,
+    236,
+    247,
+    259
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_36c9c42dd15b/overview-24.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "no_contact_in_clip",
+  "rationale": "흰 상의 선수의 오버헤드 타격 뒤 남색 선수가 오른쪽으로 움직여 마지막 프레임까지 라켓을 뻗는다. 그 뒤의 최초 바닥 접촉은 이 발췌 구간에서 확인되지 않는다.",
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "follow_up_actions": [
+    "동일 랠리의 마지막 타격 이후 원본 후속 구간을 확보하여 최초 바닥 접촉까지 연장한다.",
+    "접촉 전 잘린 현재 클립만으로는 이진 정답을 생성하지 않는다."
+  ]
+}

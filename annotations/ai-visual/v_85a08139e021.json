@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_85a08139e021",
+  "file": "a시점(uhd30 hd30) 4.mp4",
+  "source_sha256": "c143093bc59937dcd50343a6c09628a031d71c726e313a6f1330c6a6c04c06d6",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "UNKNOWN",
+  "reviewer": "Codex review_uhdhd",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "observation_status": "target_ambiguous",
+  "confidence": "unresolved",
+  "rationale": "A 시점에서 반대 코트 선수의 회수 동작과 랠리 종료는 보이나 접촉 직전 셔틀을 선수·네트·목재 바닥에서 일관되게 분리하지 못했다. 두 독립 동작이 A에서 B보다 약0.13초 먼저 나타난다. A에서 작고 네트에 겹치는 접촉을 B에서 확인한 동일 랠리로 연결했다.",
+  "limitations": [
+    "AI 직접 영상 검수이며 독립적인 인간 검증 정답이 아니다.",
+    "A/B 동시각이나 같은 파일명만으로 사건 대응을 확정하지 않았다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    8,
+    16,
+    24,
+    33,
+    41,
+    49,
+    58,
+    66,
+    74,
+    83,
+    91,
+    99,
+    100,
+    104,
+    107,
+    108,
+    112,
+    116,
+    120,
+    124,
+    125,
+    127,
+    128,
+    129,
+    131,
+    132,
+    133,
+    135,
+    136,
+    137,
+    139,
+    140,
+    141,
+    143,
+    144,
+    145,
+    147,
+    148,
+    149,
+    151,
+    152,
+    153,
+    155,
+    156,
+    157,
+    159,
+    160,
+    161,
+    163,
+    164,
+    165,
+    166,
+    168,
+    172,
+    174,
+    176,
+    180,
+    182,
+    184,
+    188,
+    191
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_85a08139e021/event-detail.jpg",
+    "runs/visual-review/v_85a08139e021/far-native.jpg",
+    "runs/visual-review/v_85a08139e021/frame-0083.jpg",
+    "runs/visual-review/v_85a08139e021/frame-0116.jpg",
+    "runs/visual-review/v_85a08139e021/frame-0145.jpg",
+    "runs/visual-review/v_85a08139e021/native-0191.jpg",
+    "runs/visual-review/v_85a08139e021/overview.jpg",
+    "runs/visual-review/v_85a08139e021/pair-check-b4.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "cross_view_match": {
+    "other_video_id": "v_9041a7c4e6ea",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 83,
+        "other_frame_index": 46,
+        "description": "적색 선수가 네트 쪽으로 깊게 숙여 리턴하며 녹색 반바지 선수가 앞쪽으로 나오는 동작"
+      },
+      {
+        "frame_index": 116,
+        "other_frame_index": 63,
+        "description": "적색 선수가 낮은 자세를 유지하고 녹색 반바지 선수가 네트 옆에서 착지하여 라켓을 내리는 동작"
+      }
+    ],
+    "rationale": "두 독립 동작이 A에서 B보다 약0.13초 먼저 나타난다. A에서 작고 네트에 겹치는 접촉을 B에서 확인한 동일 랠리로 연결했다.",
+    "evidence_paths": [
+      "runs/visual-review/v_85a08139e021/pair-check-b4.jpg"
+    ]
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_b0bcd8a881da",
+  "file": "8k 30 4k 24 a시점 2.mp4",
+  "source_sha256": "311b814ee7f7347dfa244e56d6c5f3b9d94be8fc4de29dada2adc89858167492",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 7680,
+    "height": 4320
+  },
+  "reviewer": "Codex review_8k",
+  "detection_labels": [
+    {
+      "frame_index": 85,
+      "x": 284,
+      "y": 359,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 87,
+      "x": 279,
+      "y": 345,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 89,
+      "x": 280,
+      "y": 337,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 91,
+      "x": 278,
+      "y": 331,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 85,
+      "x": 253,
+      "y": 344,
+      "label": "background"
+    },
+    {
+      "frame_index": 85,
+      "x": 303,
+      "y": 360,
+      "label": "background"
+    },
+    {
+      "frame_index": 85,
+      "x": 289,
+      "y": 390,
+      "label": "background"
+    },
+    {
+      "frame_index": 85,
+      "x": 260,
+      "y": 385,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "efa3065814a8d99e3b280b385229c9d8cf1f62e6306513a9502af10b63dd83f1",
+  "source_review_path": "annotations/ai-visual/v_b0bcd8a881da.json"
+}

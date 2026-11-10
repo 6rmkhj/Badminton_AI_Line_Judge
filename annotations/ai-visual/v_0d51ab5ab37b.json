@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_0d51ab5ab37b",
+  "file": "b시점 15.mp4",
+  "source_sha256": "4ead3f22413cb779e33d3f2dd243093b61d7d838211c91f46d7d38b2240dc0a2",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "label": "UNKNOWN",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "전체 프레임을 정밀 추적한 사람 검수는 아니며, 나열된 개요·확대 프레임에서 접촉을 확인하지 못했다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    13,
+    27,
+    41,
+    55,
+    69,
+    83,
+    97,
+    110,
+    124,
+    138,
+    152,
+    155,
+    160,
+    165,
+    166,
+    170,
+    175,
+    180,
+    185,
+    190,
+    194,
+    195,
+    200,
+    205,
+    208,
+    210,
+    215,
+    221,
+    235,
+    249,
+    263,
+    277,
+    291,
+    305,
+    319
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_0d51ab5ab37b/overview-24.jpg",
+    "runs/visual-review/v_0d51ab5ab37b/detail-155-195-native.jpg",
+    "runs/visual-review/v_0d51ab5ab37b/detail-166-235.jpg",
+    "runs/visual-review/v_0d51ab5ab37b/detail-175-215-native.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "target_ambiguous",
+  "rationale": "초록 상의 선수의 회수 동작 주변에는 클립 초반부터 여러 개의 정지 셔틀이 존재한다. 확대 연속 프레임에서 회수 위치의 새 최초 접촉을 확인하지 못했다. 이미 놓인 셔틀이나 회수 동작을 랠리 정답으로 오인하지 않는다.",
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "follow_up_actions": [
+    "기존 정지 셔틀을 배경으로 제외하고 마지막 유효 타격부터 연속 추적하여 회수 물체와 실제 랠리 셔틀을 구별한다.",
+    "대상 접촉이 보이는 동기화된 반대편 시점 또는 독립 사람 검수가 필요하다."
+  ]
+}

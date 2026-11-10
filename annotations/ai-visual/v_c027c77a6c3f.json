@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "video_id": "v_c027c77a6c3f",
+  "file": "a시점 6.mp4",
+  "source_sha256": "dc7534fbf1d566678be7d729db83e2a5ce15bf059619e2c96cb8a08cb14cc20c",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "UNKNOWN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "target_contact_identity_confirmed": false,
+  "contact_frame_index": null,
+  "contact_px": null,
+  "time": null,
+  "confidence": "unresolved",
+  "observation_status": "contact_occluded",
+  "rationale": "흰 상의 선수의 왼쪽 전위 런지 이후 셔틀이 네트 지주 바로 옆으로 내려오는 것을 원본 확대에서 확인했다. 지주 받침과 셔틀이 겹치는 182–188 프레임 부근에서 최초 바닥 접촉 또는 받침 접촉을 구별할 수 없어 확정 판정을 보류했다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    10,
+    20,
+    30,
+    40,
+    51,
+    61,
+    71,
+    81,
+    91,
+    102,
+    112,
+    122,
+    132,
+    140,
+    143,
+    144,
+    148,
+    152,
+    153,
+    156,
+    160,
+    163,
+    164,
+    166,
+    168,
+    170,
+    172,
+    173,
+    174,
+    176,
+    178,
+    180,
+    182,
+    183,
+    184,
+    186,
+    188,
+    190,
+    192,
+    194,
+    196,
+    198,
+    200,
+    202,
+    204,
+    208,
+    212,
+    214,
+    216,
+    220,
+    224,
+    235
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_c027c77a6c3f/overview.jpg",
+    "runs/visual-review/v_c027c77a6c3f/detail_140_221_4_preview.jpg",
+    "runs/visual-review/v_c027c77a6c3f/detail_172_205_2_native.jpg",
+    "runs/visual-review/v_c027c77a6c3f/detail_166_201_2_native.jpg"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    }
+  ],
+  "follow_up_actions": [
+    "가림이 없는 다른 카메라 또는 더 긴 원본에서 같은 랠리의 최초 접촉을 확보한다.",
+    "네트 기둥·선수에 가려진 최초 접촉을 이후 반동 위치로 대체하지 않는다."
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "video_id": "v_25fffcc2ef5d",
+  "file": "a시점 12.mp4",
+  "source_sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "UNKNOWN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "target_contact_identity_confirmed": false,
+  "contact_frame_index": null,
+  "contact_px": null,
+  "time": null,
+  "confidence": "unresolved",
+  "observation_status": "contact_out_of_view",
+  "rationale": "회색 상의 선수가 전위에서 타구한 뒤 남색 상의 파트너와 멈춘다. 네트 건너 상대의 낮은 움직임은 보이지만 최초 바닥 접촉은 이 시점에서 확인되지 않는다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    11,
+    23,
+    35,
+    47,
+    59,
+    70,
+    71,
+    75,
+    80,
+    83,
+    85,
+    90,
+    94,
+    95,
+    100,
+    105,
+    106,
+    110,
+    115,
+    118,
+    120,
+    125,
+    130,
+    135,
+    140,
+    142,
+    145,
+    150,
+    154,
+    166,
+    178,
+    189,
+    201,
+    213,
+    225,
+    237,
+    249,
+    261,
+    273
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_25fffcc2ef5d/overview.jpg",
+    "runs/visual-review/v_25fffcc2ef5d/detail_70_155_5_native.jpg"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    }
+  ],
+  "cross_view_match": {
+    "other_video_id": "v_995308b9fb54",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 95,
+        "other_frame_index": 139,
+        "description": "회색 상의 전위 남자가 포핸드 타구를 마치며 준비 자세로 회복하고 녹색 상대가 타구 방향으로 반응한다."
+      },
+      {
+        "frame_index": 125,
+        "other_frame_index": 170,
+        "description": "같은 녹색 상의 여자가 네트 앞쪽으로 크게 런지해 낮게 라켓을 뻗고 흰 상의 파트너가 뒤에서 지켜본다."
+      }
+    ],
+    "rationale": "두 시점의 원본 확대에서 회색 선수의 전위 타구 및 녹색 선수의 낮은 전방 런지를 별도로 맞췄다. 두 대응의 차이는 약44–45프레임이지만 이를 정확한 시간 동기화로 사용하지 않는다. 해당 사건의 직접 접촉 근거는 B시점에만 있다.",
+    "evidence_paths": [
+      "runs/visual-review/v_25fffcc2ef5d/detail_70_155_5_native.jpg",
+      "runs/visual-review/v_995308b9fb54/detail-123-170-native.jpg"
+    ]
+  },
+  "follow_up_actions": [
+    "실제 동작 대응으로 확인한 다른 시점의 직접 접촉 근거를 보조 판정에 사용한다.",
+    "A시점의 미관측 접촉은 UNKNOWN으로 보존하고 사람 검수 시 동일 사건 연결을 재확인한다."
+  ]
+}

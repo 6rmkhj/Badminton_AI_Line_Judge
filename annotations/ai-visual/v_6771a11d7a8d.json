@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_6771a11d7a8d",
+  "file": "8k 30 4k 24 a시점 7.mp4",
+  "source_sha256": "cf9ad62b3e429094f325404e1347adf646eaa3a2439bf37d258463b154a9f02f",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 7680,
+    "height": 4320
+  },
+  "label": "IN",
+  "reviewer": "Codex review_8k",
+  "contact_observed": true,
+  "contact_interval_observed": true,
+  "contact_frame_index": 78,
+  "contact_interval_frames": [
+    77,
+    79
+  ],
+  "time": 2.599889,
+  "contact_px": [
+    292,
+    294
+  ],
+  "contact_support_px": [
+    [
+      288,
+      289
+    ],
+    [
+      298,
+      289
+    ],
+    [
+      298,
+      298
+    ],
+    [
+      288,
+      298
+    ]
+  ],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "contact_interval",
+  "confidence": "high_for_binary_label",
+  "rationale": "77프레임에서 하강하고 78프레임 부근에서 바닥에 닿은 뒤 79~83프레임에서 반등하는 셔틀을 확인했다. 접촉 영역은 바깥 복식 사이드라인과 안쪽 단식선 사이의 복식 유효 구역이며 네트와 베이스라인 안쪽이다.",
+  "limitations": [
+    "영상의 프레임 간격과 동작 흐림 때문에 정확한 접촉 밀리초는 확정할 수 없음",
+    "AI 직접 시각 검수이며 독립된 사람 정답이 아님"
+  ],
+  "inspected_frame_indices": [
+    0,
+    5,
+    10,
+    16,
+    21,
+    27,
+    32,
+    38,
+    43,
+    49,
+    54,
+    60,
+    62,
+    64,
+    65,
+    66,
+    68,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    93,
+    98,
+    104,
+    109,
+    115,
+    120,
+    126
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_6771a11d7a8d/overview.jpg",
+    "runs/visual-review/v_6771a11d7a8d/native_seq_72_78_0.jpg",
+    "runs/visual-review/v_6771a11d7a8d/native_seq_78_90_0.jpg",
+    "runs/visual-review/v_6771a11d7a8d/native_crop_0077.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_px": [
+      [
+        239,
+        241
+      ],
+      [
+        518,
+        242
+      ],
+      [
+        817,
+        295
+      ],
+      [
+        342,
+        502
+      ]
+    ],
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "edge_roles": [
+      "net",
+      "right",
+      "near",
+      "left"
+    ],
+    "contact_uncertainty_px": 3,
+    "boundary_uncertainty_px": 4,
+    "explanation": "네트 바닥부터 바깥 복식 사이드라인과 베이스라인으로 둘러싸인 가까운 반코트. 단식 사이드라인 바깥도 복식 랠리에서는 유효하다."
+  },
+  "detection_labels": [
+    {
+      "frame_index": 78,
+      "x": 291,
+      "y": 289,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 80,
+      "x": 288,
+      "y": 284,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 82,
+      "x": 285,
+      "y": 283,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 84,
+      "x": 282,
+      "y": 284,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 78,
+      "x": 250,
+      "y": 285,
+      "label": "background"
+    },
+    {
+      "frame_index": 78,
+      "x": 305,
+      "y": 305,
+      "label": "background"
+    },
+    {
+      "frame_index": 78,
+      "x": 270,
+      "y": 245,
+      "label": "background"
+    },
+    {
+      "frame_index": 78,
+      "x": 318,
+      "y": 275,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified": false,
+  "detection_labels_verified_by_ai": true
+}

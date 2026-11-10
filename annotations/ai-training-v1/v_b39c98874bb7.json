@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_b39c98874bb7",
+  "file": "a시점 3.mp4",
+  "source_sha256": "3b9c7a4a7203d319fc3d5cd92f9dc7a5e307840392a7fe749a8d3f461f8d5da8",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_a",
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 130,
+      "x": 198,
+      "y": 195,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 네트 지주 옆으로 내려오는 깃털과 코르크를 확인; 지주로 접촉점 일부 가림"
+    },
+    {
+      "frame_index": 140,
+      "x": 190,
+      "y": 214,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 네트 지주 옆으로 내려오는 깃털과 코르크를 확인; 지주로 접촉점 일부 가림"
+    },
+    {
+      "frame_index": 142,
+      "x": 189,
+      "y": 225,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 네트 지주 옆으로 내려오는 깃털과 코르크를 확인; 지주로 접촉점 일부 가림"
+    },
+    {
+      "frame_index": 144,
+      "x": 187,
+      "y": 223,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 네트 지주 옆으로 내려오는 깃털과 코르크를 확인; 지주로 접촉점 일부 가림"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "f6cf7a82af3ca06a5ea1baa5e7f0db597b824e9b33d46a3dae205df156660a6f",
+  "source_review_path": "annotations/ai-visual/v_b39c98874bb7.json"
+}

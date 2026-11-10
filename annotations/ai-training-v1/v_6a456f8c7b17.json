@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_6a456f8c7b17",
+  "file": "a시점 11.mp4",
+  "source_sha256": "5492684ede8735d3eb7b7399c1baffa7b9aea92bde159bc8e8b2d9a6e2a49493",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_a",
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 175,
+      "x": 406,
+      "y": 389,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 176,
+      "x": 406,
+      "y": 383,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 180,
+      "x": 406,
+      "y": 363,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 183,
+      "x": 409,
+      "y": 352,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "dd18163e5d90ecfaf04da8fb7bc59d93195665016ea6411115d8059a0796c96c",
+  "source_review_path": "annotations/ai-visual/v_6a456f8c7b17.json"
+}

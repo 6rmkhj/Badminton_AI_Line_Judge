@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_9cd1b53ebec6",
+  "file": "a-1시점(uhd30 4k30).mp4",
+  "source_sha256": "5d96da4c41da8ea61969423563930cf2a593026b2d687b0a460a3148e048f597",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "UNKNOWN",
+  "reviewer": "Codex review_uhd4k",
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI가 직접 영상 프레임을 해석한 보조 레이블이며 사람이 독립 검수한 정답이 아니다.",
+    "검수한 기존 영상에 대한 해석으로 새로운 경기 영상의 자동 판정 정확도를 입증하지 않는다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    5,
+    11,
+    16,
+    22,
+    27,
+    33,
+    38,
+    44,
+    49,
+    55,
+    60,
+    66,
+    71,
+    77,
+    80,
+    82,
+    84,
+    86,
+    88,
+    90,
+    92,
+    93,
+    94,
+    96,
+    98,
+    99,
+    100,
+    102,
+    104,
+    106,
+    108,
+    110,
+    112,
+    114,
+    115,
+    116,
+    118,
+    120,
+    121,
+    122,
+    124,
+    126,
+    127
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_9cd1b53ebec6/overview.jpg",
+    "runs/visual-review/v_9cd1b53ebec6/frame-end.jpg",
+    "runs/visual-review/v_9cd1b53ebec6/far-0.jpg",
+    "runs/visual-review/v_9cd1b53ebec6/far-1.jpg",
+    "runs/visual-review/v_9cd1b53ebec6/far-2.jpg",
+    "runs/visual-review/v_9cd1b53ebec6/match-88.jpg",
+    "runs/visual-review/v_df42bfbec5cd/match-92.jpg",
+    "runs/visual-review/v_9cd1b53ebec6/match-106.jpg",
+    "runs/visual-review/v_df42bfbec5cd/match-110.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "contact_occluded",
+  "rationale": "마지막 타격 및 상대의 회수 동작은 관찰되지만 이 시점의 최초 바닥 접촉은 먼 선수들의 몸과 다리에 겹친다. 반대 B1 영상의 타격·회수 동작 두 지점을 교차 확인했으며 B1의 직접 접촉 관측을 별도 참조할 수 있다.",
+  "cross_view_match": {
+    "other_video_id": "v_df42bfbec5cd",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 88,
+        "other_frame_index": 92,
+        "description": "검은 옷 선수의 마지막 공중 오버헤드 타격"
+      },
+      {
+        "frame_index": 106,
+        "other_frame_index": 110,
+        "description": "검은 반바지 상대 선수의 회수 자세와 흰 반바지 파트너의 이동"
+      }
+    ],
+    "rationale": "서로 다른 두 동작(마지막 점프 타격, 상대의 접촉 뒤 회수)을 선수와 상대 위치로 교차 확인했다. 파일명만으로 동일 사건을 가정하지 않았다.",
+    "evidence_paths": [
+      "runs/visual-review/v_9cd1b53ebec6/match-88.jpg",
+      "runs/visual-review/v_df42bfbec5cd/match-92.jpg",
+      "runs/visual-review/v_9cd1b53ebec6/match-106.jpg",
+      "runs/visual-review/v_df42bfbec5cd/match-110.jpg"
+    ]
+  }
+}

@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_748f9ee5d5a8",
+  "file": "b시점 10.mp4",
+  "source_sha256": "1ac3e9e68f42567a4da64342d1392448af1bd8ed94e0face19671739553206cc",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "label": "OUT",
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "contact_frame_index": 249,
+  "time": 4.151244,
+  "contact_px": [
+    748,
+    477
+  ],
+  "contact_interval_frames": [
+    248,
+    250
+  ],
+  "target_contact_identity_confirmed": true,
+  "confidence": "high",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "최초 접촉은 프레임 사이 구간으로 표기하며 불확실성 영역 밖의 정밀 mm 위치를 주장하지 않는다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    15,
+    31,
+    46,
+    62,
+    77,
+    93,
+    108,
+    124,
+    139,
+    155,
+    170,
+    186,
+    201,
+    217,
+    230,
+    232,
+    234,
+    236,
+    238,
+    240,
+    242,
+    244,
+    246,
+    247,
+    248,
+    249,
+    250,
+    251,
+    252,
+    254,
+    256,
+    258,
+    260,
+    262,
+    263,
+    264,
+    279,
+    294,
+    310,
+    325,
+    341,
+    357
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_748f9ee5d5a8/overview-24.jpg",
+    "runs/visual-review/v_748f9ee5d5a8/detail-186-263.jpg",
+    "runs/visual-review/v_748f9ee5d5a8/detail-217-248-native.jpg",
+    "runs/visual-review/v_748f9ee5d5a8/detail-230-252-native.jpg",
+    "runs/visual-review/v_748f9ee5d5a8/detail-246-252-native.jpg",
+    "runs/visual-review/v_748f9ee5d5a8/detail-248-264-native.jpg",
+    "runs/visual-review/v_748f9ee5d5a8/detail-31-248-native.jpg"
+  ],
+  "detection_labels": [
+    {
+      "frame_index": 246,
+      "x": 730,
+      "y": 453,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 248,
+      "x": 742,
+      "y": 470,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 249,
+      "x": 748,
+      "y": 477,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 250,
+      "x": 754,
+      "y": 476,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 251,
+      "x": 761,
+      "y": 476,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 252,
+      "x": 767,
+      "y": 476,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 230,
+      "x": 750,
+      "y": 460,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 232,
+      "x": 780,
+      "y": 490,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 234,
+      "x": 760,
+      "y": 490,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 236,
+      "x": 780,
+      "y": 490,
+      "label": "background",
+      "source": "ai_visual_review"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "observation_status": "contact_interval",
+  "contact_support_px": [
+    [
+      742,
+      473
+    ],
+    [
+      758,
+      481
+    ]
+  ],
+  "rationale": "코르크가 바깥쪽으로 내려오다 원본 248~250 프레임 사이에 바닥과 접촉하고 자세가 바뀌는 연속 영상을 확인했다. 접촉은 청색 뒤 경계선보다 카메라 쪽으로 크게 벗어나 있으며 빨간 다른 종목 선에 닿기 전 첫 접촉 위치를 사용했다.",
+  "boundary_evidence": {
+    "kind": "local_boundary",
+    "boundaries": [
+      {
+        "role": "near",
+        "line_px": [
+          [
+            340,
+            520
+          ],
+          [
+            880,
+            320
+          ]
+        ],
+        "inside_point_px": [
+          500,
+          300
+        ],
+        "role_confirmed": true
+      }
+    ],
+    "contact_uncertainty_px": 5,
+    "boundary_uncertainty_px": 5,
+    "explanation": "가까운 청색 복식 베이스라인이며 안쪽의 평행한 서비스선을 사용하지 않았다. 빨간 선은 배드민턴 경계가 아니다."
+  },
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "follow_up_actions": [
+    "독립 사람 검수자가 제시된 접촉 구간과 경계 불확실성을 재검증한 뒤에만 정답 평가용 레이블로 승격한다."
+  ]
+}

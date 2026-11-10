@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_4d972d6d723e",
+  "file": "a시점 2.mp4",
+  "source_sha256": "f064fde8fa78f53ad667a5f1977bcb6daaddb8e5912150593b384fb17dcd69cd",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_a",
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 140,
+      "x": 597,
+      "y": 230,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 회색 선수 왼쪽/뒤로 드러나는 실제 셔틀; 최초 접촉은 가림으로 미확인"
+    },
+    {
+      "frame_index": 142,
+      "x": 597,
+      "y": 229,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 회색 선수 왼쪽/뒤로 드러나는 실제 셔틀; 최초 접촉은 가림으로 미확인"
+    },
+    {
+      "frame_index": 144,
+      "x": 597,
+      "y": 231,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 회색 선수 왼쪽/뒤로 드러나는 실제 셔틀; 최초 접촉은 가림으로 미확인"
+    },
+    {
+      "frame_index": 150,
+      "x": 597,
+      "y": 243,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 회색 선수 왼쪽/뒤로 드러나는 실제 셔틀; 최초 접촉은 가림으로 미확인"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "4704cfbac7d0649cca1b1a4842b2a80959a554f48655fb23ee54ab95ea6a865a",
+  "source_review_path": "annotations/ai-visual/v_4d972d6d723e.json"
+}

@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_71ca73a85ef2",
+  "file": "a시점(uhd30 hd30) 1.mp4",
+  "source_sha256": "8c41d422456f4d9103667fc61b91b208327a03639f9281b1c654c4cb05127771",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "IN",
+  "reviewer": "Codex review_uhdhd",
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "contact_frame_index": 196,
+  "time": 3.306089,
+  "contact_px": [
+    686,
+    350
+  ],
+  "contact_interval_frames": [
+    195,
+    196
+  ],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "contact_interval",
+  "confidence": "high",
+  "rationale": "원본 f192~200 확대에서 셔틀이 f195~196에 지면과 닿은 뒤 다시 떠오른다. 최초 접촉은 복식 외곽 사이드라인 안쪽이다. f285 최종 정지 위치는 라인 밖이지만 최초 접촉과 구별했다.",
+  "limitations": [
+    "AI 직접 영상 검수이며 독립적인 인간 검증 정답이 아니다.",
+    "A/B 동시각이나 같은 파일명만으로 사건 대응을 확정하지 않았다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    12,
+    24,
+    37,
+    49,
+    61,
+    74,
+    86,
+    99,
+    111,
+    123,
+    136,
+    140,
+    148,
+    160,
+    161,
+    173,
+    180,
+    185,
+    190,
+    192,
+    193,
+    194,
+    195,
+    196,
+    197,
+    198,
+    199,
+    200,
+    202,
+    204,
+    206,
+    208,
+    210,
+    212,
+    214,
+    220,
+    223,
+    235,
+    247,
+    260,
+    272,
+    285
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_71ca73a85ef2/bounce-native.jpg",
+    "runs/visual-review/v_71ca73a85ef2/contact-native.jpg",
+    "runs/visual-review/v_71ca73a85ef2/frame-0111.jpg",
+    "runs/visual-review/v_71ca73a85ef2/frame-0140.jpg",
+    "runs/visual-review/v_71ca73a85ef2/frame-0160.jpg",
+    "runs/visual-review/v_71ca73a85ef2/frame-0195.jpg",
+    "runs/visual-review/v_71ca73a85ef2/native-0140.jpg",
+    "runs/visual-review/v_71ca73a85ef2/native-0160.jpg",
+    "runs/visual-review/v_71ca73a85ef2/native-0180.jpg",
+    "runs/visual-review/v_71ca73a85ef2/native-0200.jpg",
+    "runs/visual-review/v_71ca73a85ef2/native-0220.jpg",
+    "runs/visual-review/v_71ca73a85ef2/native-0285.jpg",
+    "runs/visual-review/v_71ca73a85ef2/overview.jpg",
+    "runs/visual-review/v_71ca73a85ef2/pair-check-b1.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "detection_labels": [
+    {
+      "frame_index": 196,
+      "x": 687,
+      "y": 345,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 198,
+      "x": 691,
+      "y": 341,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 200,
+      "x": 700,
+      "y": 338,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 220,
+      "x": 760,
+      "y": 360,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 285,
+      "x": 782,
+      "y": 362,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 196,
+      "x": 660,
+      "y": 320,
+      "label": "background"
+    },
+    {
+      "frame_index": 200,
+      "x": 675,
+      "y": 370,
+      "label": "background"
+    },
+    {
+      "frame_index": 285,
+      "x": 710,
+      "y": 390,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "contact_support_px": [
+    [
+      683,
+      348
+    ],
+    [
+      687,
+      348
+    ],
+    [
+      687,
+      352
+    ],
+    [
+      683,
+      352
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_px": [
+      [
+        194,
+        518
+      ],
+      [
+        914,
+        289
+      ],
+      [
+        560,
+        190
+      ],
+      [
+        215,
+        221
+      ]
+    ],
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "edge_roles": [
+      "near",
+      "right",
+      "net",
+      "left"
+    ],
+    "contact_uncertainty_px": 2.0,
+    "boundary_uncertainty_px": 2.0,
+    "explanation": "수신측 반코트의 관측된 복식 외곽선과 네트 교차를 원근 사각형으로 기록했다. 접촉은 카메라 쪽 외곽 사이드라인 안쪽에 있고, 최초 바운스 뒤 셔틀이 밖으로 넘어간다."
+  }
+}

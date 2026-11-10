@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_9041a7c4e6ea",
+  "file": "b시점(uhd30 hd30) 4.mp4",
+  "source_sha256": "10c84268a2aedd469fdbe91048bd3ee7bd3f6d1b9002a803552d1d37ea1c2c52",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 1920,
+    "height": 1080
+  },
+  "label": "IN",
+  "reviewer": "Codex review_uhdhd",
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "contact_frame_index": 77,
+  "time": 2.568333,
+  "contact_px": [
+    547,
+    333
+  ],
+  "contact_interval_frames": [
+    76,
+    77
+  ],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "contact_interval",
+  "confidence": "high",
+  "rationale": "원본 연속 f70~86에서 셔틀이 가까운 검정 선수 앞으로 하강하여 f76~77에 첫 접촉 후 낮게 튀는 것을 확인했다. 접촉은 수신측 반코트 내부이며 이후 선수의 라켓 회수와 별개로 기록했다.",
+  "limitations": [
+    "AI 직접 영상 검수이며 독립적인 인간 검증 정답이 아니다.",
+    "A/B 동시각이나 같은 파일명만으로 사건 대응을 확정하지 않았다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    4,
+    9,
+    13,
+    18,
+    23,
+    27,
+    32,
+    37,
+    41,
+    46,
+    51,
+    55,
+    60,
+    63,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    93,
+    96,
+    97,
+    99,
+    102,
+    105,
+    107
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_9041a7c4e6ea/bounce-native.jpg",
+    "runs/visual-review/v_9041a7c4e6ea/event-detail.jpg",
+    "runs/visual-review/v_9041a7c4e6ea/frame-0046.jpg",
+    "runs/visual-review/v_9041a7c4e6ea/frame-0063.jpg",
+    "runs/visual-review/v_9041a7c4e6ea/frame-0077.jpg",
+    "runs/visual-review/v_9041a7c4e6ea/native-0090.jpg",
+    "runs/visual-review/v_9041a7c4e6ea/native-0107.jpg",
+    "runs/visual-review/v_9041a7c4e6ea/near-contact.jpg",
+    "runs/visual-review/v_9041a7c4e6ea/overview.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "detection_labels": [
+    {
+      "frame_index": 77,
+      "x": 547,
+      "y": 333,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 79,
+      "x": 552,
+      "y": 329,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 81,
+      "x": 554,
+      "y": 327,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 85,
+      "x": 557,
+      "y": 333,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 88,
+      "x": 560,
+      "y": 338,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 77,
+      "x": 520,
+      "y": 310,
+      "label": "background"
+    },
+    {
+      "frame_index": 81,
+      "x": 525,
+      "y": 340,
+      "label": "background"
+    },
+    {
+      "frame_index": 85,
+      "x": 520,
+      "y": 320,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "contact_support_px": [
+    [
+      544,
+      331
+    ],
+    [
+      550,
+      331
+    ],
+    [
+      550,
+      336
+    ],
+    [
+      544,
+      336
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_px": [
+      [
+        248,
+        322
+      ],
+      [
+        514,
+        295
+      ],
+      [
+        820,
+        356
+      ],
+      [
+        518,
+        527
+      ]
+    ],
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "edge_roles": [
+      "net",
+      "right",
+      "near",
+      "left"
+    ],
+    "contact_uncertainty_px": 3.0,
+    "boundary_uncertainty_px": 2.0,
+    "explanation": "수신측 반코트의 보이는 복식 외곽선과 네트 바닥 교차를 원근 사각형으로 기록했다. 하강-접촉-재상승 시퀀스의 가능한 접촉 위치 전체가 사각형 안에 있다."
+  }
+}
