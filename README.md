@@ -4,11 +4,15 @@
 
 **현재 기본 실행은 OpenCV 후보 생성 방식입니다. 독립 데이터로 성능을 검증한 셔틀콕 모델 가중치는 제공되지 않습니다.** 기하 보정, 셔틀콕 식별 또는 최초 접촉 증거가 부족하면 `REVIEW`를 반환합니다. 실행 성공, 테스트 통과, 합성 영상의 성과를 실제 판정 정확도로 취급하지 않습니다.
 
+원본 74개에 대한 [AI 직접 검수와 보조 판정](docs/AI_REVIEW.md)을 추가했습니다. 최초 바운스의 원본 확대 근거, 라인별 불확실성, 실제 동작을 대조한 교차 시점 판정, AI 패치 감독학습을 지원합니다. `annotations/ai-visual/`은 AI 검수 레이블이며 사람이 독립 확인한 정답이 아닙니다. 최종 결과는 [AI 검수 실행 보고서](docs/AI_REVIEW_RESULTS.md)에 기록합니다.
+
+**새 검수 패키지 보기:** Python 3.11 이상 설치 후 `start-review-windows.bat` 또는 `python3 start.py --review`를 실행합니다. 포함된 영상·근거를 보는 데 추가 패키지 설치가 필요하지 않습니다. 미해결 영상은 사유와 함께 REVIEW로 남습니다.
+
 ## 빠른 실행
 
 Python 3.11 이상과 `ffmpeg`, `ffprobe`가 필요합니다.
 
-분석 결과가 포함된 패키지는 Windows에서 `start-windows.bat`, macOS/Linux에서 `python3 start.py`로 검수 화면을 열 수 있습니다. 처음 실행 시 기본 Python 의존성이 없으면 프로젝트 안의 가상환경에 설치합니다. 이미 생성된 결과를 열람하는 데에는 FFmpeg나 학습용 PyTorch가 필요하지 않습니다. 새 영상 분석에는 아래 도구와 원본 영상이 필요합니다.
+기존 자동 분석 폴더 `runs/integrated-poc`가 있는 환경에서는 Windows의 `start-windows.bat`, macOS/Linux의 `python3 start.py`로 자동 분석 검수 화면을 엽니다. 처음 실행 시 기본 Python 의존성이 없으면 프로젝트 안의 가상환경에 설치합니다. 새 AI 검수 전용 패키지는 위의 `start-review-windows.bat` 또는 `python3 start.py --review`를 사용합니다. 이미 생성된 결과 열람에는 FFmpeg나 학습용 PyTorch가 필요하지 않습니다. 새 영상 분석에는 아래 도구와 원본 영상이 필요합니다.
 
 Windows 명령 프롬프트에서 직접 분석 명령을 실행할 때는 `python -X utf8 -m badminton ...` 형식으로 실행해 한국어 파일명·JSON 인코딩을 통일하세요. 제공한 실행 파일은 UTF-8 모드를 자동 적용합니다.
 

@@ -14,7 +14,8 @@ import webbrowser
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--run', default='runs/integrated-poc')
+    parser.add_argument('--run')
+    parser.add_argument('--review', action='store_true', help='Open the portable AI visual review report')
     parser.add_argument('--video-dir', default='video')
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--no-browser', action='store_true')
@@ -25,7 +26,7 @@ def main():
     project = Path(__file__).resolve().parent
     if sys.version_info < (3, 11):
         parser.error('Python 3.11 이상이 필요합니다.')
-    if not all(importlib.util.find_spec(name) for name in ('numpy', 'cv2', 'scipy', 'filelock')):
+    if not args.review and not all(importlib.util.find_spec(name) for name in ('numpy', 'cv2', 'scipy', 'filelock')):
         environment = project / '.venv'
         python = environment / ('Scripts/python.exe' if sys.platform == 'win32' else 'bin/python')
         if not python.is_file():
@@ -34,11 +35,17 @@ def main():
         print('처음 실행에 필요한 기본 패키지를 설치합니다.', flush=True)
         subprocess.run([str(python), '-m', 'pip', 'install', '-e', str(project)], check=True)
         return subprocess.call([str(python), str(Path(__file__).resolve()), *sys.argv[1:]])
-    run = (project / args.run).resolve()
-    if not (run / 'index.json').is_file():
+    run = (project / (args.run or ('runs/ai-reviewed-poc' if args.review else 'runs/integrated-poc'))).resolve()
+    required_index = 'index.html' if args.review else 'index.json'
+    if not (run / required_index).is_file():
         parser.error(f'분석 결과가 없습니다: {run}. README의 analyze 명령을 먼저 실행하세요.')
-    from badminton.web import create_server
-    server = create_server(run, port=args.port, video_dir=(project / args.video_dir).resolve())
+    if args.review:
+        from functools import partial
+        from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+        server = ThreadingHTTPServer(('127.0.0.1', args.port), partial(SimpleHTTPRequestHandler, directory=str(run)))
+    else:
+        from badminton.web import create_server
+        server = create_server(run, port=args.port, video_dir=(project / args.video_dir).resolve())
     url = f'http://127.0.0.1:{server.server_address[1]}'
     print(f'검수 화면: {url}\n종료: Ctrl+C', flush=True)
     if not args.no_browser:
