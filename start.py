@@ -15,7 +15,9 @@ import webbrowser
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run')
-    parser.add_argument('--review', action='store_true', help='Open the portable AI visual review report')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--review', action='store_true', help='Open the portable AI visual review report')
+    mode.add_argument('--pair', action='store_true', help='Open the A/B input and combined verdict workspace')
     parser.add_argument('--video-dir', default='video')
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--no-browser', action='store_true')
@@ -35,10 +37,13 @@ def main():
         print('처음 실행에 필요한 기본 패키지를 설치합니다.', flush=True)
         subprocess.run([str(python), '-m', 'pip', 'install', '-e', str(project)], check=True)
         return subprocess.call([str(python), str(Path(__file__).resolve()), *sys.argv[1:]])
-    run = (project / (args.run or ('runs/ai-reviewed-poc' if args.review else 'runs/integrated-poc'))).resolve()
+    default_run = 'runs/ai-reviewed-poc' if args.review else 'runs/pair-workspace' if args.pair else 'runs/integrated-poc'
+    run = (project / (args.run or default_run)).resolve()
     required_index = 'index.html' if args.review else 'index.json'
-    if not (run / required_index).is_file():
+    if not args.pair and not (run / required_index).is_file():
         parser.error(f'분석 결과가 없습니다: {run}. README의 analyze 명령을 먼저 실행하세요.')
+    if args.pair:
+        run.mkdir(parents=True, exist_ok=True)
     if args.review:
         # Load the bundled stdlib-only handler directly, including under Python
         # -I where this extracted project's directory is absent from sys.path.
@@ -49,7 +54,7 @@ def main():
     else:
         from badminton.web import create_server
         server = create_server(run, port=args.port, video_dir=(project / args.video_dir).resolve())
-    url = f'http://127.0.0.1:{server.server_address[1]}'
+    url = f'http://127.0.0.1:{server.server_address[1]}' + ('/pair' if args.pair else '')
     print(f'검수 화면: {url}\n종료: Ctrl+C', flush=True)
     if not args.no_browser:
         timer = threading.Timer(.5, lambda: webbrowser.open(url))

@@ -23,8 +23,9 @@ SOURCE_DIRS = (
     "badminton", "configs", "docs", "examples", "scripts", "tests",
     "annotations/ai-visual", "annotations/ai-training-v1", "annotations/ai-training-v2",
 )
+OPTIONAL_DIRS = ("runs/pair-validation",)
 REQUIRED_FILES = (
-    "README.md", "pyproject.toml", "start.py", "start-review-windows.bat",
+    "README.md", "pyproject.toml", "start.py", "start-review-windows.bat", "start-pair-windows.bat",
     "models/ai-candidate-v1.pt", "models/ai-candidate-v1.pt.json",
     "models/ai-candidate-v2.pt", "models/ai-candidate-v2.pt.json",
     "runs/inspection/input-manifest-before.json",
@@ -160,7 +161,8 @@ def collect_files(root: Path, report_relative: str) -> list[Path]:
         raise ValueError("The original development-plan PDF is required")
     for pdf in pdfs:
         add(pdf)
-    for relative in (*SOURCE_DIRS, report_relative):
+    optional = tuple(relative for relative in OPTIONAL_DIRS if safe_path(root, relative).exists())
+    for relative in (*SOURCE_DIRS, report_relative, *optional):
         directory = safe_path(root, relative)
         if not directory.is_dir():
             raise ValueError(f"Required directory is missing: {relative}")
@@ -226,6 +228,13 @@ def start_here(report: dict, report_relative: str) -> str:
     counts = report["assisted_counts"]
     return f"""배드민턴 AI 시각 검수 통합 PoC — 먼저 읽어 주세요
 
+새 A/B 입력·통합 판정 화면:
+Windows: start-pair-windows.bat
+macOS/Linux: python3 start.py --pair
+A와 B를 함께 선택하거나 새 파일을 올린 뒤 하나의 최종 보조 판정을 확인합니다.
+처음에는 기본 Python 의존성을 설치할 수 있으며, 새 영상 분석에는 FFmpeg/ffprobe가 필요합니다.
+저장된 검수 활용과 새 자동 분석은 구분됩니다. 자세한 사용법은 docs/PAIR_WORKSPACE.md를 보세요.
+
 1. ZIP을 폴더에 모두 압축 해제하고 Python 3.11 이상을 설치하세요.
 2. Windows: start-review-windows.bat 파일을 더블클릭하세요.
    macOS/Linux: 이 폴더에서 python3 start.py --review 를 실행하세요.
@@ -242,6 +251,7 @@ AI 검수 라벨과 같은 랠리의 다른 시점에서 전이한 보조 결과
 
 포함: 소스, 문서, 설정, 예제, 테스트, 스크립트, 원본 개발계획서 PDF,
 AI 검수 라벨, v1/v2 학습 라벨·후보 분류 모델과 메타데이터, 최종 보고서 전체 및 assets.
+A/B 실행 검증 기록이 있으면 runs/pair-validation/에 함께 포함됩니다.
 미포함: 원본 video/ 영상과 과거의 대용량 분석 결과. 미리보기는 원본 영상의 대체 원본이 아닙니다.
 
 보고서의 미리보기·근거 링크는 assets/ 상대 경로로 복사되어 함께 이동합니다.
@@ -282,7 +292,7 @@ def package(root: Path, report_relative: str, output: Path, *, rehash_sources: b
         return {"status": "validated_without_packaging", **summary}
     if output in files or output.is_symlink():
         raise ValueError("The output must not replace a package input or symlink")
-    if any(output.is_relative_to(root / relative) for relative in (*SOURCE_DIRS, report_relative)):
+    if any(output.is_relative_to(root / relative) for relative in (*SOURCE_DIRS, report_relative, *OPTIONAL_DIRS)):
         raise ValueError("Place the output outside the selected source and report directories")
     for parent in output.parents:
         if parent.is_symlink():
