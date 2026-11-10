@@ -34,6 +34,13 @@ def main():
     training.add_argument('--output', type=Path, default=Path('models/candidate-scorer.pt'))
     training.add_argument('--epochs', type=int, default=20)
     training.add_argument('--readiness-only', action='store_true')
+    training.add_argument('--label-source', choices=['human_review', 'ai_visual_review'], default='human_review',
+                          help='AI review is provisional supervision, never independent human ground truth')
+    visual = sub.add_parser('review-labels', help='Validate source-bound AI visual labels and produce an assisted review report')
+    visual.add_argument('--run', type=Path, default=Path('runs/integrated-poc'))
+    visual.add_argument('--annotations', type=Path, default=Path('annotations/ai-visual'))
+    visual.add_argument('--output', type=Path, default=Path('runs/ai-reviewed-poc'))
+    visual.add_argument('--project-root', type=Path, default=Path('.'))
     contact = sub.add_parser('train-contact')
     contact.add_argument('--manifest', type=Path, required=True)
     contact.add_argument('--annotations', type=Path, required=True)
@@ -70,10 +77,15 @@ def main():
         from .learning import training_readiness, train_candidate_scorer
         manifest = json.loads(args.manifest.read_text())
         if args.readiness_only:
-            result = training_readiness(manifest, args.annotations)
+            result = training_readiness(manifest, args.annotations, label_source=args.label_source)
         else:
-            result = train_candidate_scorer(manifest, args.annotations, args.video_dir, args.output, epochs=args.epochs)
+            result = train_candidate_scorer(manifest, args.annotations, args.video_dir, args.output, epochs=args.epochs,
+                                            label_source=args.label_source)
         print(json.dumps(result, ensure_ascii=False, indent=2))
+    elif args.command == 'review-labels':
+        from .visual_review import build_visual_review_report
+        result = build_visual_review_report(args.run, args.annotations, args.output, project_root=args.project_root)
+        print(json.dumps({k: v for k, v in result.items() if k != 'videos'}, ensure_ascii=False, indent=2))
     elif args.command == 'train-contact':
         from .contact_model import contact_training_readiness, train_contact_model
         manifest = json.loads(args.manifest.read_text())
