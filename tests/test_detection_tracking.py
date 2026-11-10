@@ -158,3 +158,21 @@ def test_scorer_domain_errors_are_not_hidden_or_silently_ranked(monkeypatch):
     assert any(record["detections"] for record in result)
     assert all(item["confidence"] == 0.1 and item["confidence_kind"] == "learned_score_not_calibrated"
                for record in result for item in record["detections"])
+
+
+def test_dark_cork_proposals_are_opt_in_and_ignore_static_dark_lines():
+    frames = []
+    for i in range(10):
+        frame = np.full((180, 320, 3), 175, dtype=np.uint8)
+        cv2.line(frame, (0, 150), (319, 150), (60, 60, 60), 2)
+        cv2.circle(frame, (30 + 20*i, 60), 3, (45, 45, 45), -1)
+        frames.append(frame)
+    stamps = [i/30 for i in range(10)]
+    baseline = detect_sequence(frames, stamps, {'person_backend': 'none'})
+    improved = detect_sequence(frames, stamps, {'person_backend': 'none', 'include_dark_components': True})
+    assert not any(r['detections'] for r in baseline)
+    for i, record in enumerate(improved):
+        assert any(abs(d['x']-(30+20*i)) < 3 and abs(d['y']-60) < 3 for d in record['detections'])
+        assert not any(abs(d['y']-150) < 3 for d in record['detections'])
+        assert record['detector']['trained_model'] is False
+        assert record['detector']['include_dark_components'] is True

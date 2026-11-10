@@ -157,3 +157,56 @@ def test_verified_verdict_does_not_verify_unchecked_detection_labels(tmp_path):
     annotation.update(status="verified", verdict="IN", detection_labels_verified=False)
     file.write_text(json.dumps(annotation))
     assert not training_readiness(manifest, annotations)["ready"]
+
+
+def test_ai_visual_supervision_requires_explicit_opt_in_and_keeps_provenance(tmp_path):
+    manifest, annotations = fixture_dataset(tmp_path)
+    for path in annotations.glob('*.json'):
+        data = json.loads(path.read_text())
+        data.update(source='ai_visual_review', status='reviewed_by_ai', human_verified=False,
+                    detection_labels_verified_by_ai=True)
+        path.write_text(json.dumps(data))
+    assert not training_readiness(manifest, annotations)['ready']
+    report = training_readiness(manifest, annotations, label_source='ai_visual_review')
+    assert report['ready'] and report['label_source'] == 'ai_visual_review'
+    assert report['independent_human_ground_truth'] is False
+    torch.set_num_threads(1)
+    model = train_candidate_scorer(manifest, annotations, tmp_path, tmp_path/'ai.pt',
+                                   epochs=1, label_source='ai_visual_review')
+    assert model['label_source'] == 'ai_visual_review'
+    assert model['independent_human_ground_truth'] is False
+    assert 'not verified accuracy' in model['metric_interpretation']
+    data = json.loads((annotations/'clip_0.json').read_text())
+    data['human_verified'] = True
+    (annotations/'clip_0.json').write_text(json.dumps(data))
+    assert not training_readiness(manifest, annotations, label_source='ai_visual_review')['ready']
+
+
+def test_duplicate_content_patches_are_not_double_weighted(tmp_path):
+    manifest, annotations = fixture_dataset(tmp_path)
+    original = manifest['videos'][0]
+    manifest['videos'].append({**original, 'id': 'same_bytes'})
+    data = json.loads((annotations/'clip_0.json').read_text())
+    data['video_id'] = 'same_bytes'
+    (annotations/'same_bytes.json').write_text(json.dumps(data))
+    report = training_readiness(manifest, annotations)
+    assert report['ready']
+    assert report['verified_patch_count'] == 48
+    assert report['excluded']['duplicate_content_patch_label'] == 16
+    data['detection_labels'][0]['label'] = 'background'
+    (annotations/'same_bytes.json').write_text(json.dumps(data))
+    report = training_readiness(manifest, annotations)
+    assert not report['ready']
+    assert 'Contradictory labels for duplicate video content' in report['reasons']
+
+
+def test_portable_training_rebases_stale_source_paths_and_checks_bytes(tmp_path):
+    manifest, annotations = fixture_dataset(tmp_path)
+    for video in manifest['videos']:
+        video['path'] = str(tmp_path/'missing-original-machine'/video['file'])
+    prepared = prepare_training_samples(manifest, annotations, tmp_path)
+    assert prepared['patches'].shape == (48, 32, 32, 3)
+    with (tmp_path/manifest['videos'][0]['file']).open('ab') as handle:
+        handle.write(b'changed')
+    with pytest.raises(ValueError, match='content changed'):
+        prepare_training_samples(manifest, annotations, tmp_path)
