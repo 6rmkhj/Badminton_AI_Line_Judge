@@ -23,7 +23,12 @@ SOURCE_DIRS = (
     "badminton", "configs", "docs", "examples", "scripts", "tests",
     "annotations/ai-visual", "annotations/ai-training-v1", "annotations/ai-training-v2",
 )
-OPTIONAL_DIRS = ("runs/pair-validation",)
+OPTIONAL_DIRS = ("runs/pair-validation", "runs/review-remediation/verification",
+                 "runs/review-remediation/pipeline", "runs/review-remediation/browser",
+                 "runs/review-remediation/baseline")
+OPTIONAL_FILES = tuple(f"runs/review-remediation/{name}/inspection.json"
+                       for name in ("boundary", "occlusion", "target", "uhd")) + (
+    "runs/review-remediation/guided-evidence/fresh-validation.json",)
 REQUIRED_FILES = (
     "README.md", "pyproject.toml", "start.py", "start-review-windows.bat", "start-pair-windows.bat",
     "models/ai-candidate-v1.pt", "models/ai-candidate-v1.pt.json",
@@ -154,6 +159,10 @@ def collect_files(root: Path, report_relative: str) -> list[Path]:
 
     for relative in REQUIRED_FILES:
         add(safe_path(root, relative))
+    for relative in OPTIONAL_FILES:
+        path = safe_path(root, relative)
+        if path.exists():
+            add(path)
     for version in ("v1", "v2"):
         read_json(root / f"models/ai-candidate-{version}.pt.json")
     pdfs = sorted(root.glob("*.pdf"))
@@ -234,6 +243,8 @@ macOS/Linux: python3 start.py --pair
 A와 B를 함께 선택하거나 새 파일을 올린 뒤 하나의 최종 보조 판정을 확인합니다.
 처음에는 기본 Python 의존성을 설치할 수 있으며, 새 영상 분석에는 FFmpeg/ffprobe가 필요합니다.
 저장된 검수 활용과 새 자동 분석은 구분됩니다. 자세한 사용법은 docs/PAIR_WORKSPACE.md를 보세요.
+0.5.0의 REVIEW 원인·집중 재분석 개선과 15쌍 재검수 결과는 docs/REVIEW_REMEDIATION.md에 있습니다.
+원본 없는 이 패키지에서 집중 재분석을 하려면 해당 A/B 원본 파일을 업로드하세요.
 
 1. ZIP을 폴더에 모두 압축 해제하고 Python 3.11 이상을 설치하세요.
 2. Windows: start-review-windows.bat 파일을 더블클릭하세요.
