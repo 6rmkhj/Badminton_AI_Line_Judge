@@ -1,0 +1,254 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_708b8611908c",
+  "file": "8k 30 4k 24 a시점 5.mp4",
+  "source_sha256": "2030ff7b0e2e51039bbb48db6c40a7be2ca44e06cbba77c6b31b8f7aee08e0b9",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 7680,
+    "height": 4320
+  },
+  "label": "UNKNOWN",
+  "reviewer": "Codex review_8k",
+  "contact_observed": true,
+  "contact_frame_index": 70,
+  "time": 2.333233,
+  "contact_px": [
+    233,
+    209.5
+  ],
+  "confidence": "insufficient_near_line_margin",
+  "rationale": "원본 8K를 추가 확대해 남색 선수의 마지막 타격 이후 목표 셔틀의 하강(52~54프레임), 지주 뒤 가림(55~61), 재출현과 하강(62~68), 바닥 접촉 및 반등(69~74)을 확인했다. 먼 반코트의 복식 사이드라인 외곽과 코르크 최초 접촉 지지영역이 겹치므로 IN/OUT을 확정할 수 없다. B5의 근접 시점도 접촉 직전 누락과 근소한 라인 간격 때문에 같은 불확실성을 해소하지 못한다.",
+  "limitations": [
+    "지주 가림 이후 최초 접촉은 관측되나 축소 좌표 약 1px 수준의 선 겹침이 남음",
+    "30fps의 노출 흐림과 먼 코르크 크기를 고려해야 함",
+    "AI 시각 검수이며 독립된 사람 정답이 아님"
+  ],
+  "inspected_frame_indices": [
+    0,
+    4,
+    8,
+    10,
+    12,
+    17,
+    20,
+    21,
+    25,
+    30,
+    33,
+    34,
+    36,
+    38,
+    39,
+    40,
+    42,
+    43,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    81,
+    85,
+    86,
+    90,
+    94,
+    99
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_708b8611908c/overview.jpg",
+    "runs/visual-review/v_708b8611908c/far_native_seq_30_75_0.jpg",
+    "runs/visual-review/v_708b8611908c/pole_native_seq_46_76_0.jpg",
+    "runs/visual-review/v_708b8611908c/pole_native_seq_46_76_1.jpg",
+    "runs/visual-review/v_708b8611908c/pole_native_crop_0069.jpg",
+    "runs/visual-review/v_708b8611908c/pole_native_crop_0070.jpg",
+    "runs/visual-review/v_708b8611908c/pole_native_crop_0071.jpg",
+    "runs/visual-review/v_708b8611908c/pole_native_crop_0072.jpg",
+    "runs/review-remediation/boundary/v_708b8611908c/overview-0.jpg",
+    "runs/review-remediation/boundary/v_708b8611908c/overview-1.jpg",
+    "runs/review-remediation/boundary/v_708b8611908c/contact-0.jpg",
+    "runs/review-remediation/boundary/v_708b8611908c/contact-1.jpg",
+    "runs/review-remediation/boundary/8k5-cross-view-actions.jpg",
+    "runs/review-remediation/boundary/actions/8k5-A-01.jpg",
+    "runs/review-remediation/boundary/actions/8k5-B-01.jpg",
+    "runs/review-remediation/boundary/actions/8k5-A-02.jpg",
+    "runs/review-remediation/boundary/actions/8k5-B-02.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "detection_labels": [
+    {
+      "frame_index": 52,
+      "x": 244.4,
+      "y": 190.5,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 54,
+      "x": 242.4,
+      "y": 198.5,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 70,
+      "x": 233.4,
+      "y": 208.4,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 74,
+      "x": 230.9,
+      "y": 208.4,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 52,
+      "x": 260,
+      "y": 230,
+      "label": "background"
+    },
+    {
+      "frame_index": 54,
+      "x": 260,
+      "y": 230,
+      "label": "background"
+    },
+    {
+      "frame_index": 70,
+      "x": 260,
+      "y": 230,
+      "label": "background"
+    },
+    {
+      "frame_index": 74,
+      "x": 260,
+      "y": 230,
+      "label": "background"
+    }
+  ],
+  "follow_up": [
+    "양 시점의 최초 코르크 접촉이 선 위인지 바깥인지 구분할 수 있는 고속 촬영 또는 더 선명한 원본이 필요",
+    "정지 위치 및 반등 후 위치를 최초 접촉으로 대체하지 않음"
+  ],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "line_ambiguous",
+  "contact_interval_observed": true,
+  "contact_interval_frames": [
+    69,
+    71
+  ],
+  "contact_support_px": [
+    [
+      231.5,
+      208.5
+    ],
+    [
+      234.5,
+      208.5
+    ],
+    [
+      234.5,
+      211
+    ],
+    [
+      231.5,
+      211
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "local_boundary",
+    "boundaries": [
+      {
+        "role": "left",
+        "line_px": [
+          [
+            231.7,
+            208
+          ],
+          [
+            240,
+            240
+          ]
+        ],
+        "inside_point_px": [
+          260,
+          220
+        ],
+        "role_confirmed": true
+      }
+    ],
+    "contact_uncertainty_px": 1.5,
+    "boundary_uncertainty_px": 1.0,
+    "explanation": "지주 왼쪽으로 이어지는 먼 반코트 복식 사이드라인 실제 바깥 테두리. 접촉 지지영역이 바깥 테두리에 걸치며 이 선 하나만으로 IN을 입증하지 않는다."
+  },
+  "detection_labels_verified": false,
+  "detection_labels_verified_by_ai": true,
+  "remediation_review": {
+    "source": "ai_visual_review",
+    "human_verified": false,
+    "reviewer": "Codex review_boundary",
+    "inspected_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      85,
+      99
+    ],
+    "finding": "A69–71의 먼 코르크 지지영역이 외곽선과 겹친다. B38은 노출·압축 때문에 코르크가 분리되지 않고 B39는 이미 반등했을 가능성이 있어 두 시점이 같은 미관측 순간을 보완하지 못한다.",
+    "next_action": "양 시점의 노출 구간 사이 첫 코르크 접촉을 기록하는 높은 시간 해상도와 짧은 노출이 필요하다. 차영상·초해상도로 원본에 없는 최초 접촉을 확정하지 않는다.",
+    "label_changed": false,
+    "clock_synchronization_claimed": false
+  }
+}

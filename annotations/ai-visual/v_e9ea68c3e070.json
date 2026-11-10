@@ -1,0 +1,272 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_e9ea68c3e070",
+  "file": "8k 30 4k 24 b시점 5.mp4",
+  "source_sha256": "7eccb2951dde57a8ab51b6cf1e42671348a7369d62e4ebf3800d536349a48667",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "UNKNOWN",
+  "suggested_label": "OUT",
+  "reviewer": "Codex review_8k",
+  "contact_observed": true,
+  "contact_interval_observed": true,
+  "contact_frame_index": 39,
+  "contact_interval_frames": [
+    38,
+    40
+  ],
+  "time": 1.625489,
+  "contact_px": [
+    818,
+    301
+  ],
+  "contact_support_px": [
+    [
+      814,
+      297
+    ],
+    [
+      822,
+      297
+    ],
+    [
+      822,
+      305
+    ],
+    [
+      814,
+      305
+    ]
+  ],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "line_ambiguous",
+  "confidence": "insufficient_near_line_margin",
+  "rationale": "원본 4K의 37프레임은 하강 중 흐릿한 셔틀, 38프레임은 코르크를 구분하기 어려운 노출/압축 구간, 39프레임은 바닥 근처 코르크, 40~45프레임은 반등을 보여 준다. 39프레임의 선 바깥 간격은 약 2.5 축소px이고 이미 반등했을 수 있다. A5 원본 8K의 반대편 관측도 최초 접촉 지지영역이 복식 사이드라인 외곽에 걸쳐, 두 시점으로도 선 위/바깥을 분리하지 못했다. OUT 추정은 확정 레이블로 사용하지 않는다.",
+  "limitations": [
+    "23.99fps와 동작 흐림으로 최초 접촉/라인 겹침 불확실",
+    "AI 검수 OUT 추정은 정답 아님"
+  ],
+  "inspected_frame_indices": [
+    0,
+    3,
+    7,
+    10,
+    11,
+    15,
+    16,
+    19,
+    20,
+    23,
+    24,
+    26,
+    27,
+    28,
+    30,
+    31,
+    32,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    54,
+    55,
+    56,
+    59,
+    60,
+    63,
+    67,
+    70,
+    71,
+    75,
+    79,
+    80,
+    83,
+    87,
+    91
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_e9ea68c3e070/overview.jpg",
+    "runs/visual-review/v_e9ea68c3e070/native_seq_37_49_0.jpg",
+    "runs/visual-review/v_e9ea68c3e070/native_crop_0039.jpg",
+    "runs/visual-review/v_e9ea68c3e070/preview_crop_0039.jpg",
+    "runs/visual-review/v_e9ea68c3e070/enhanced_contact_37_42.jpg",
+    "runs/visual-review/v_708b8611908c/pole_native_seq_46_76_1.jpg",
+    "runs/review-remediation/boundary/v_e9ea68c3e070/overview-0.jpg",
+    "runs/review-remediation/boundary/v_e9ea68c3e070/overview-1.jpg",
+    "runs/review-remediation/boundary/v_e9ea68c3e070/contact-0.jpg",
+    "runs/review-remediation/boundary/v_e9ea68c3e070/contact-1.jpg",
+    "runs/review-remediation/boundary/8k5-cross-view-actions.jpg",
+    "runs/review-remediation/boundary/actions/8k5-A-01.jpg",
+    "runs/review-remediation/boundary/actions/8k5-B-01.jpg",
+    "runs/review-remediation/boundary/actions/8k5-A-02.jpg",
+    "runs/review-remediation/boundary/actions/8k5-B-02.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "boundary_evidence": {
+    "kind": "local_boundary",
+    "boundaries": [
+      {
+        "role": "right",
+        "line_px": [
+          [
+            760,
+            288.5
+          ],
+          [
+            885,
+            317.75
+          ]
+        ],
+        "inside_point_px": [
+          800,
+          345
+        ],
+        "role_confirmed": true
+      }
+    ],
+    "contact_uncertainty_px": 2,
+    "boundary_uncertainty_px": 1,
+    "explanation": "베이스라인 오른쪽 꼭짓점에 연결되는 복식 외곽 사이드라인. 다른 평행 바닥선과 구분. 접촉 지지영역이 선을 가로질러 확정할 수 없다."
+  },
+  "detection_labels": [
+    {
+      "frame_index": 40,
+      "x": 821,
+      "y": 293,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 41,
+      "x": 826,
+      "y": 291,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 43,
+      "x": 836,
+      "y": 288,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 45,
+      "x": 841,
+      "y": 287,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 40,
+      "x": 770,
+      "y": 312,
+      "label": "background"
+    },
+    {
+      "frame_index": 40,
+      "x": 875,
+      "y": 344,
+      "label": "background"
+    },
+    {
+      "frame_index": 40,
+      "x": 850,
+      "y": 315,
+      "label": "background"
+    },
+    {
+      "frame_index": 40,
+      "x": 790,
+      "y": 265,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified": false,
+  "detection_labels_verified_by_ai": true,
+  "follow_up": [
+    "첫 코르크 접촉을 노출 흐림 없이 기록한 고속 또는 더 선명한 원본 필요",
+    "39프레임의 반등 위치와 마지막 정지 위치로 OUT을 강제하지 않음"
+  ],
+  "enhancement_note": "차영상은 탐색 보조 자료이며 원본에 없는 접촉 사실을 생성하거나 증명하지 않는다.",
+  "cross_view_match": {
+    "other_video_id": "v_708b8611908c",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 0,
+        "other_frame_index": 20,
+        "description": "연청색 상의 선수의 타격 직후 남색·긴 청색 양말 상대가 라켓을 들어 응수를 준비하고 흰 상의 파트너가 후방에서 기다리는 동작"
+      },
+      {
+        "frame_index": 16,
+        "other_frame_index": 40,
+        "description": "남색 상의·긴 청색 양말 선수의 다음 낮은 포핸드 응수와 연청색·흰색 두 상대의 수비 회복"
+      }
+    ],
+    "rationale": "원본 영상에서 동일한 네 선수와 위 두 개의 서로 다른 동작이 같은 순서로 이어지는 것을 대조했다. 사건 대응 확인과 접촉/라인 판정의 충분성은 별도이며, 두 시점 모두 미해결이면 같은 사건 확인만으로 IN/OUT을 만들지 않는다.",
+    "evidence_paths": [
+      "runs/review-remediation/boundary/8k5-cross-view-actions.jpg",
+      "runs/review-remediation/boundary/actions/8k5-A-01.jpg",
+      "runs/review-remediation/boundary/actions/8k5-B-01.jpg",
+      "runs/review-remediation/boundary/actions/8k5-A-02.jpg",
+      "runs/review-remediation/boundary/actions/8k5-B-02.jpg"
+    ],
+    "clock_synchronization_claimed": false
+  },
+  "remediation_review": {
+    "source": "ai_visual_review",
+    "human_verified": false,
+    "reviewer": "Codex review_boundary",
+    "inspected_frame_indices": [
+      0,
+      10,
+      16,
+      20,
+      30,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      50,
+      60,
+      70,
+      80,
+      91
+    ],
+    "finding": "A69–71의 먼 코르크 지지영역이 외곽선과 겹친다. B38은 노출·압축 때문에 코르크가 분리되지 않고 B39는 이미 반등했을 가능성이 있어 두 시점이 같은 미관측 순간을 보완하지 못한다.",
+    "next_action": "양 시점의 노출 구간 사이 첫 코르크 접촉을 기록하는 높은 시간 해상도와 짧은 노출이 필요하다. 차영상·초해상도로 원본에 없는 최초 접촉을 확정하지 않는다.",
+    "label_changed": false,
+    "clock_synchronization_claimed": false
+  }
+}

@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_39c259d9aedc",
+  "file": "8k 30 4k 24 a시점 8.mp4",
+  "source_sha256": "2b92998ee4e26eb15debe0b4318572c62e6fa00e273316d9a560323b603f0fa8",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 7680,
+    "height": 4320
+  },
+  "label": "OUT",
+  "reviewer": "Codex review_8k",
+  "contact_observed": true,
+  "contact_interval_observed": true,
+  "contact_frame_index": 51,
+  "contact_interval_frames": [
+    50,
+    52
+  ],
+  "time": 1.699933,
+  "contact_px": [
+    262,
+    310
+  ],
+  "contact_support_px": [
+    [
+      260.5,
+      308
+    ],
+    [
+      264.5,
+      308
+    ],
+    [
+      264.5,
+      312
+    ],
+    [
+      260.5,
+      312
+    ]
+  ],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "contact_interval",
+  "confidence": "medium",
+  "rationale": "50~51프레임에 하강하는 셔틀의 코르크가 바깥 복식 사이드라인 왼쪽 목재에서 접촉한 뒤 52~54프레임에 반등한다. 선수의 라켓 응수가 닿지 않은 뒤 발생한 목표 랠리 접촉이며, 반등 후 선 위에 떠 있는 셔틀 위치와 구분했다.",
+  "limitations": [
+    "영상의 프레임 간격과 동작 흐림 때문에 정확한 접촉 밀리초는 확정할 수 없음",
+    "AI 직접 시각 검수이며 독립된 사람 정답이 아님"
+  ],
+  "inspected_frame_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    24,
+    29,
+    34,
+    38,
+    40,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    60,
+    62,
+    63,
+    64,
+    68,
+    73,
+    77,
+    82,
+    87,
+    92,
+    97,
+    102,
+    107,
+    112
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_39c259d9aedc/overview.jpg",
+    "runs/visual-review/v_39c259d9aedc/native_seq_43_57_0.jpg",
+    "runs/visual-review/v_39c259d9aedc/native_crop_0051.jpg",
+    "runs/visual-review/v_39c259d9aedc/native_crop_0052.jpg",
+    "runs/visual-review/v_e96fe986d56d/cross-view-actions.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "boundary_evidence": {
+    "kind": "local_boundary",
+    "boundaries": [
+      {
+        "role": "left",
+        "line_px": [
+          [
+            246,
+            248
+          ],
+          [
+            272.4,
+            320
+          ]
+        ],
+        "inside_point_px": [
+          300,
+          300
+        ],
+        "role_confirmed": true
+      }
+    ],
+    "contact_uncertainty_px": 1.5,
+    "boundary_uncertainty_px": 0.75,
+    "explanation": "가장 왼쪽 두꺼운 파란 복식 사이드라인의 목재 쪽 바깥 가장자리. 원본에서 코르크 접촉은 그 선의 바깥이며 안쪽 얇은 단식선과 구분했다."
+  },
+  "detection_labels": [
+    {
+      "frame_index": 51,
+      "x": 262,
+      "y": 305,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 52,
+      "x": 262,
+      "y": 300,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 53,
+      "x": 262,
+      "y": 297,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 54,
+      "x": 261,
+      "y": 296,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 51,
+      "x": 248,
+      "y": 290,
+      "label": "background"
+    },
+    {
+      "frame_index": 51,
+      "x": 281,
+      "y": 300,
+      "label": "background"
+    },
+    {
+      "frame_index": 51,
+      "x": 300,
+      "y": 309,
+      "label": "background"
+    },
+    {
+      "frame_index": 51,
+      "x": 310,
+      "y": 276,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified": false,
+  "detection_labels_verified_by_ai": true,
+  "secondary_review": {
+    "reviewer": "Codex root",
+    "assessment": "agrees with source-frame OUT interpretation",
+    "independent_human_review": false,
+    "evidence_paths": [
+      "runs/visual-review/v_39c259d9aedc/native_crop_0051.jpg"
+    ]
+  }
+}

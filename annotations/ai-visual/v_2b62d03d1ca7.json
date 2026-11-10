@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_2b62d03d1ca7",
+  "file": "8k 30 4k 24 a시점 1.mp4",
+  "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 7680,
+    "height": 4320
+  },
+  "label": "IN",
+  "reviewer": "Codex review_8k",
+  "contact_observed": true,
+  "contact_frame_index": 49,
+  "time": 1.633267,
+  "contact_px": [
+    361,
+    444
+  ],
+  "contact_support_px": [
+    [
+      350,
+      435
+    ],
+    [
+      370,
+      435
+    ],
+    [
+      370,
+      455
+    ],
+    [
+      350,
+      455
+    ]
+  ],
+  "contact_interval_frames": [
+    48,
+    50
+  ],
+  "contact_interval_observed": true,
+  "confidence": "high_for_IN_OUT_interval_not_exact_millisecond",
+  "rationale": "48프레임의 하강 흔적 뒤 49프레임에서 코르크와 바닥 그림자가 가까워지고, 50~52프레임에서 반등한다. 최초 접촉 구간은 복식 좌측 사이드라인과 베이스라인 안쪽에 충분히 들어간다. 정지 위치가 아니라 하강·반등 시퀀스를 판독했다.",
+  "limitations": [
+    "30fps이므로 정확한 접촉 순간은 프레임 사이일 수 있음",
+    "AI 직접 시각 검수이며 독립된 사람 정답이 아님"
+  ],
+  "inspected_frame_indices": [
+    0,
+    4,
+    9,
+    13,
+    18,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    60,
+    65,
+    69,
+    74,
+    79,
+    83,
+    88,
+    93,
+    97,
+    102,
+    107
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_2b62d03d1ca7/overview.jpg",
+    "runs/visual-review/v_2b62d03d1ca7/native_seq_40_56_0.jpg",
+    "runs/visual-review/v_2b62d03d1ca7/native_crop_0049.jpg",
+    "runs/visual-review/v_2b62d03d1ca7/preview_crop_0049.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_px": [
+      [
+        239,
+        241
+      ],
+      [
+        518,
+        242
+      ],
+      [
+        817,
+        295
+      ],
+      [
+        342,
+        502
+      ]
+    ],
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "contact_uncertainty_px": 3,
+    "boundary_uncertainty_px": 4,
+    "explanation": "왼쪽 네트 기둥의 바닥 부근에서 시작하는 바깥 복식 사이드라인과 맨 뒤 파란 베이스라인을 포함한 관측 반코트. 안쪽 평행선은 단식 사이드라인/복식 서비스선이므로 외곽 경계로 쓰지 않았다."
+  },
+  "detection_labels": [
+    {
+      "frame_index": 49,
+      "x": 360.5,
+      "y": 435.5,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 50,
+      "x": 361.5,
+      "y": 428.0,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 51,
+      "x": 362.5,
+      "y": 421.5,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 52,
+      "x": 363.5,
+      "y": 417.5,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 49,
+      "x": 398,
+      "y": 456,
+      "label": "background"
+    },
+    {
+      "frame_index": 49,
+      "x": 323,
+      "y": 430,
+      "label": "background"
+    },
+    {
+      "frame_index": 49,
+      "x": 370,
+      "y": 490,
+      "label": "background"
+    },
+    {
+      "frame_index": 49,
+      "x": 420,
+      "y": 415,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified": false,
+  "detection_labels_ai_reviewed": true,
+  "detection_labels_verified_by_ai": true,
+  "target_contact_identity_confirmed": true,
+  "observation_status": "contact_interval"
+}

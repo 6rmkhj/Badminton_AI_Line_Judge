@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_85a08139e021",
+  "file": "a시점(uhd30 hd30) 4.mp4",
+  "source_sha256": "c143093bc59937dcd50343a6c09628a031d71c726e313a6f1330c6a6c04c06d6",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_uhdhd",
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "source_review_sha256": "280fc6e57b4102184e1b81d1f63f30218fe29ad6f6676beff2c6a426185f32ea",
+  "source_review_path": "annotations/ai-visual/v_85a08139e021.json"
+}

@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import math
 import copy
+from collections import defaultdict
 from datetime import datetime, timezone
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -20,6 +22,53 @@ def _value(observation, name, default=0.0):
         return value if math.isfinite(value) else float(default)
     except (TypeError, ValueError):
         return float(default)
+
+
+def validate_contact_modes(config=None):
+    """Prevent one observation's geometry from inheriting another model's proof."""
+    config = config or {}
+    if config.get("contact_model_path") and config.get("source_contact_model_path"):
+        raise ValueError("Choose either contact_model_path or source_contact_model_path, not both preprocessing modes")
+
+
+def review_refinement_regions(config, analysis_size, frame_count):
+    """Use the detector's same strict pixel/frame contract for review guidance."""
+    from .detection import _refinement_regions
+    width, height = analysis_size
+    return _refinement_regions({"refinement_regions": (config or {}).get("review_refinement_regions", [])},
+                               (height, width), frame_count)
+
+
+def review_region_indices(candidate, regions):
+    """Return matching hints, without treating a hint as contact or identity."""
+    frame, point = candidate.get("frame_index"), candidate.get("candidate_px")
+    if (not isinstance(frame, int) or isinstance(frame, bool)
+            or not isinstance(point, (list, tuple)) or len(point) != 2
+            or any(not isinstance(value, (int, float)) or isinstance(value, bool)
+                   or not math.isfinite(value) for value in point)):
+        return []
+    return [i for i, region in enumerate(regions)
+            if region["frame_start"] <= frame <= region["frame_end"]
+            and region["bbox"][0] <= point[0] < region["bbox"][0] + region["bbox"][2]
+            and region["bbox"][1] <= point[1] < region["bbox"][1] + region["bbox"][3]]
+
+
+def prioritize_review_candidates(candidates, regions, *, identity_first=False):
+    """Order the finite evidence budget; retain every supplied candidate/score."""
+    def key(candidate):
+        scores = (-_value(candidate, "identity_confidence"), -_value(candidate, "confidence"))
+        if not identity_first:
+            scores = (scores[1],)
+        return (not bool(review_region_indices(candidate, regions)), *scores)
+    return sorted(candidates, key=key)
+
+
+def _mark_review_guidance(candidate, regions):
+    if regions:
+        candidate["review_refinement"] = {"matched_region_indices": review_region_indices(candidate, regions),
+                                           "prioritization_only": True}
+        candidate["assistance_used"] = True
+        candidate["evaluation_eligible"] = False
 
 
 def _target_support(observations, calibration):
@@ -67,11 +116,23 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
     ``target_track_id`` can identify the requested track but does not prove contact.
     """
     cfg = dict(config or {})
+    validate_contact_modes(cfg)
+    regions = []
+    if cfg.get("review_refinement_regions") != [] and "review_refinement_regions" in cfg:
+        if not frames or frames[0] is None:
+            raise ValueError("Review refinement requires analysis image bounds")
+        regions = review_refinement_regions(cfg, (frames[0].shape[1], frames[0].shape[0]), len(timestamps))
     min_observations = max(3, int(cfg.get("min_observations", 5)))
     min_speed = max(0.0, float(cfg.get("min_motion_speed_px_s", 25.0)))
     stationary_speed = max(0.0, float(cfg.get("stationary_speed_px_s", 18.0)))
     max_candidates = max(0, int(cfg.get("max_candidates", 12)))
     selected_track = cfg.get("target_track_id")
+    event_window = cfg.get("event_window_seconds")
+    if event_window is not None:
+        if (not isinstance(event_window, (list, tuple)) or len(event_window) != 2
+                or not all(isinstance(value, (int, float)) and not isinstance(value, bool) for value in event_window)
+                or not np.isfinite(event_window).all() or event_window[0] < 0 or event_window[1] < event_window[0]):
+            raise ValueError("event_window_seconds must be a finite ordered [start, end] interval")
     all_times = np.asarray(timestamps, dtype=float)
     positive_steps = np.diff(all_times)
     positive_steps = positive_steps[np.isfinite(positive_steps) & (positive_steps > 0)]
@@ -124,6 +185,8 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
         accepted_times = []
         for index, motion_score, cue in sorted(hypotheses, key=lambda entry: -entry[1]):
             observation = observations[index]
+            if event_window is not None and not event_window[0] <= observation["time"] <= event_window[1]:
+                continue
             if any(abs(observation["time"] - t) < 0.2 for t in accepted_times):
                 continue
             accepted_times.append(observation["time"])
@@ -170,6 +233,11 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
             frame_index = observation["frame_index"]
             evidence_indices = sorted({o["frame_index"] for o in local
                                        if 0 <= o["frame_index"] < len(frames)})
+            contiguous_start, contiguous_end = index, index
+            while contiguous_start > 0 and times[contiguous_start] - times[contiguous_start - 1] <= nominal_step * 2.5:
+                contiguous_start -= 1
+            while contiguous_end < len(times) - 1 and times[contiguous_end + 1] - times[contiguous_end] <= nominal_step * 2.5:
+                contiguous_end += 1
             candidates.append({
                 "track_id": track.get("track_id"), "frame_index": frame_index,
                 "time": observation["time"], "candidate_px": [observation["x"], observation["y"]],
@@ -182,11 +250,19 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
                 "backtrack_frame_indices": [o["frame_index"] for o in observations[max(0, index - 20):index + 1]],
                 "observed_before_seconds": round(observation["time"] - observations[0]["time"], 4),
                 "observed_after_seconds": round(observations[-1]["time"] - observation["time"], 4),
+                "contiguous_observed_before_seconds": round(observation["time"] - times[contiguous_start], 4),
+                "contiguous_observed_after_seconds": round(times[contiguous_end] - observation["time"], 4),
                 "temporal_gap_seconds": round(largest_gap, 6),
                 "appearance_evidence": _patch_evidence(frames, frame_index, observation["x"], observation["y"], radius),
                 "method": "offline_motion_and_tracklet_candidate_search",
             })
     candidates.sort(key=lambda item: (-item["confidence"], -item["identity_confidence"], item["time"]))
+    # The global cap must not discard a reviewed region before the later native
+    # evidence budget can see it. The cap and physical qualification stay intact.
+    if regions:
+        candidates = prioritize_review_candidates(candidates, regions)
+        for candidate in candidates:
+            _mark_review_guidance(candidate, regions)
     candidates = candidates[:max_candidates]
     if cfg.get("contact_model_path"):
         for candidate in candidates:
@@ -207,6 +283,12 @@ def _apply_contact_model(candidate, frames, timestamps, checkpoint, preprocessin
         candidate["contact_model"] = {"status": "failed", "error": str(error)[:1000]}
         candidate["reason_codes"].append("CONTACT_MODEL_ERROR")
         return
+    height, width = frames[candidate["frame_index"]].shape[:2]
+    _apply_contact_prediction(candidate, prediction, (width, height), preprocessing)
+
+
+def _apply_contact_prediction(candidate, prediction, image_size, preprocessing):
+    from .contact_model import SUPPORTED_PREPROCESSING
     candidate["contact_model"] = prediction
     candidate["model_origin"] = prediction.get("model_origin", "learned_temporal_contact")
     candidate["model_proposed_contact_px"] = prediction.get("proposed_contact_px")
@@ -214,7 +296,7 @@ def _apply_contact_model(candidate, frames, timestamps, checkpoint, preprocessin
     if not isinstance(reasons, list) or not all(isinstance(reason, str) for reason in reasons):
         reasons = ["CONTACT_MODEL_INVALID_REASON_CODES"]
     provenance = prediction.get("provenance")
-    preprocessing_matches = (preprocessing == "opencv_source_bgr_area_v1"
+    preprocessing_matches = (preprocessing in SUPPORTED_PREPROCESSING
                              and isinstance(provenance, dict)
                              and provenance.get("preprocessing") == preprocessing
                              and provenance.get("runtime_preprocessing") == preprocessing)
@@ -233,7 +315,7 @@ def _apply_contact_model(candidate, frames, timestamps, checkpoint, preprocessin
         radius = float(prediction["contact_radius_px"])
         uncertainty = float(prediction["uncertainty_px"])
         score = float(prediction["confidence"])
-        height, width = frames[candidate["frame_index"]].shape[:2]
+        width, height = image_size
         valid_point = (len(point) == 2 and all(math.isfinite(value) for value in point)
                        and 0 <= point[0] < width and 0 <= point[1] < height)
         valid_values = all(math.isfinite(value) and value >= 0 for value in (radius, uncertainty, score)) and score <= 1
@@ -254,6 +336,171 @@ def _apply_contact_model(candidate, frames, timestamps, checkpoint, preprocessin
     resolved = {"FIRST_CONTACT_NOT_OBSERVED", "CORK_CONTACT_REGION_UNRESOLVED"}
     candidate["reason_codes"] = [reason for reason in candidate["reason_codes"] if reason not in resolved]
     candidate["reason_codes"].append("QUALIFIED_LEARNED_CONTACT_OBSERVATION")
+
+
+def refine_source_contacts(landings, source_frames, timestamps, analysis_size, config=None, output_dir=None):
+    """Inspect native temporal ROIs and optionally run a native contact model.
+
+    The fixed five-frame window preserves the original display frame indices.
+    Source frames are requested in increasing order exactly once, and only
+    bounded patches are retained. A strip or motion/appearance measurement is
+    never evidence of observed first contact by itself. Native model outputs
+    must pass the same held-out, domain, and provenance gates as legacy models.
+    All geometry returned to the decision engine stays in analysis pixels.
+    """
+    from .contact_model import (SOURCE_PREPROCESSING, contact_checkpoint_metadata,
+                                infer_contact_patches, native_contact_patch)
+    cfg = dict(config or {})
+    validate_contact_modes(cfg)
+    width, height = map(int, analysis_size)
+    times = np.asarray(timestamps, dtype=float)
+    if (min(width, height) <= 0 or times.ndim != 1 or len(times) != len(source_frames)
+            or not np.isfinite(times).all() or np.any(np.diff(times) <= 0)):
+        raise ValueError("Native contact analysis requires matching, ordered source timestamps and image bounds")
+    patch_size = cfg.get("source_contact_patch_size", 96)
+    maximum = cfg.get("source_contact_max_candidates", 6)
+    if (not isinstance(patch_size, int) or isinstance(patch_size, bool) or not 24 <= patch_size <= 256 or patch_size % 2
+            or not isinstance(maximum, int) or isinstance(maximum, bool) or not 0 <= maximum <= 64):
+        raise ValueError("Native contact patch size must be even 24..256; candidate limit must be 0..64")
+    results = copy.deepcopy(landings)
+    regions = review_refinement_regions(cfg, (width, height), len(times))
+    for candidate in results:
+        _mark_review_guidance(candidate, regions)
+        candidate["source_contact_evidence"] = {"status": "not_requested", "contact_observed": False,
+                                                 "reason": "native_candidate_budget", "frames": []}
+    positions = {id(candidate): i for i, candidate in enumerate(results)}
+    selected = [positions[id(candidate)] for candidate in
+                prioritize_review_candidates(results, regions, identity_first=True)[:maximum]]
+    checkpoint = cfg.get("source_contact_model_path")
+    model_metadata, model_error = None, None
+    if checkpoint:
+        try:
+            model_metadata = contact_checkpoint_metadata(checkpoint)
+            if model_metadata.get("preprocessing") != SOURCE_PREPROCESSING:
+                raise ValueError("Native contact inference requires a native-source checkpoint; legacy crops are not interchangeable")
+        except (ImportError, OSError, ValueError, RuntimeError, KeyError, TypeError) as error:
+            model_error = str(error)[:1000]
+            model_metadata = None
+    requested, patches, model_patches = defaultdict(list), {}, {}
+    for candidate_index in selected:
+        candidate = results[candidate_index]
+        index, point = candidate.get("frame_index"), candidate.get("candidate_px")
+        evidence = {"status": "unavailable", "coordinate_system": "source_pixels",
+                    "analysis_size": {"width": width, "height": height}, "patch_size": patch_size,
+                    "frames": [], "contact_observed": False,
+                    "note": "Native-pixel temporal observations; neither image brightness nor a stop verifies cork/floor contact."}
+        if regions:
+            evidence.update(review_region_indices=review_region_indices(candidate, regions),
+                            selection_reason="explicit_review_region" if review_region_indices(candidate, regions)
+                            else "candidate_score_fallback", assistance_used=True, evaluation_eligible=False)
+        candidate["source_contact_evidence"] = evidence
+        if (not isinstance(index, int) or isinstance(index, bool) or not 0 <= index < len(times)
+                or not isinstance(point, (list, tuple)) or len(point) != 2
+                or not all(isinstance(value, (int, float)) for value in point) or not np.isfinite(point).all()
+                or not 0 <= point[0] < width or not 0 <= point[1] < height):
+            evidence["reason"] = "invalid_candidate_location_or_frame"
+            continue
+        indices = list(range(max(0, index - 2), min(len(times), index + 3)))
+        evidence.update(frame_indices=indices, times=[float(times[i]) for i in indices])
+        patches[candidate_index], model_patches[candidate_index] = [], []
+        for frame_index in indices:
+            requested[frame_index].append(candidate_index)
+    source_size, source_error = None, None
+    for frame_index in sorted(requested):
+        try:
+            source = source_frames[frame_index]
+            if source is None or source.ndim != 3 or source.shape[2] != 3 or source.dtype != np.uint8:
+                raise ValueError("Source decoder did not return a uint8 BGR frame")
+            sh, sw = source.shape[:2]
+            if source_size is not None and source_size != (sw, sh):
+                raise ValueError("Source dimensions changed inside the temporal interval")
+            source_size = (sw, sh)
+            scale = np.array([sw / width, sh / height])
+            for candidate_index in requested[frame_index]:
+                candidate = results[candidate_index]
+                evidence = candidate["source_contact_evidence"]
+                point = np.asarray(candidate["candidate_px"]) * scale
+                patch = native_contact_patch(source, *point, patch_size)
+                patches[candidate_index].append(patch)
+                left, top = int(round(float(point[0]))) - patch_size // 2, int(round(float(point[1]))) - patch_size // 2
+                roi = [max(0, left), max(0, top), min(sw, left + patch_size), min(sh, top + patch_size)]
+                visible = (roi[2] - roi[0]) * (roi[3] - roi[1]) / patch_size ** 2
+                gray = cv2.cvtColor(patch, cv2.COLOR_RGB2GRAY)
+                evidence.update(source_size={"width": sw, "height": sh}, scale_xy=scale.tolist(),
+                                candidate_source_px=point.tolist())
+                evidence["frames"].append({"frame_index": frame_index, "time": float(times[frame_index]),
+                                           "source_roi": roi, "crop_origin_px": [left, top],
+                                           "visible_fraction": round(float(visible), 6),
+                                           "contrast_std": round(float(gray.std()), 4),
+                                           "sharpness_laplacian_variance": round(float(cv2.Laplacian(gray, cv2.CV_64F).var()), 4)})
+                if model_metadata is not None:
+                    model_patches[candidate_index].append(native_contact_patch(source, *point, model_metadata["patch_size"]))
+        except (ValueError, TypeError, RuntimeError, OSError, IndexError, cv2.error) as error:
+            source_error = str(error)[:1000]
+            break
+    for candidate_index in selected:
+        candidate = results[candidate_index]
+        evidence = candidate["source_contact_evidence"]
+        crops = patches.get(candidate_index, [])
+        if not crops:
+            evidence.setdefault("reason", "source_frames_unavailable")
+            if source_error:
+                evidence["error"] = source_error
+            continue
+        complete = len(crops) == 5 and len(evidence["frame_indices"]) == 5
+        steps = np.diff(evidence["times"])
+        continuous = len(steps) == 4 and float(max(steps)) <= float(np.median(steps)) * 1.75
+        evidence["status"] = "complete" if complete and continuous else "incomplete"
+        if not complete:
+            evidence["reason"] = "first_contact_window_truncated_or_unavailable"
+        elif not continuous:
+            evidence["reason"] = "timestamp_discontinuity"
+        if source_error and not complete:
+            evidence["error"] = source_error
+        if output_dir is not None:
+            relative = f"evidence/source-contact-{candidate_index:03d}.jpg"
+            destination = Path(output_dir) / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            strip = np.zeros((patch_size + 32, patch_size * len(crops), 3), np.uint8)
+            for i, (crop, row) in enumerate(zip(crops, evidence["frames"])):
+                strip[:patch_size, i*patch_size:(i+1)*patch_size] = cv2.cvtColor(crop, cv2.COLOR_RGB2BGR)
+                cv2.putText(strip, f"f{row['frame_index']}", (i*patch_size + 3, patch_size + 13),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.35, (240, 240, 240), 1)
+                cv2.putText(strip, f"{row['time']:.3f}s", (i*patch_size + 3, patch_size + 27),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.32, (240, 240, 240), 1)
+            if cv2.imwrite(str(destination), strip):
+                evidence["image"] = relative
+            else:
+                evidence["image_error"] = "cannot_write_source_temporal_strip"
+        if not checkpoint:
+            continue
+        if model_error:
+            candidate["source_contact_model"] = {"status": "failed", "error": model_error}
+            candidate["reason_codes"] = list(dict.fromkeys(candidate.get("reason_codes", []) + ["SOURCE_CONTACT_MODEL_ERROR"]))
+            continue
+        if evidence["status"] != "complete":
+            candidate["source_contact_model"] = {"status": "incomplete_window", "contact_observed": False}
+            continue
+        try:
+            native_candidate = {"frame_index": candidate["frame_index"], "candidate_px": evidence["candidate_source_px"]}
+            prediction = infer_contact_patches(model_patches[candidate_index], evidence["times"], native_candidate,
+                                                checkpoint, image_size=source_size, preprocessing=SOURCE_PREPROCESSING)
+            candidate["source_contact_model"] = {**copy.deepcopy(prediction), "coordinate_system": "source_pixels"}
+            scale = np.asarray(evidence["scale_xy"])
+            mapped = copy.deepcopy(prediction)
+            for key in ("contact_px", "proposed_contact_px"):
+                if mapped.get(key) is not None:
+                    mapped[key] = (np.asarray(mapped[key]) / scale).tolist()
+            for key in ("contact_radius_px", "uncertainty_px"):
+                if mapped.get(key) is not None:
+                    mapped[key] = float(mapped[key]) / float(min(scale))
+            mapped["coordinate_system"] = "analysis_pixels"
+            mapped["source_to_analysis_scale_xy"] = (1 / scale).tolist()
+            _apply_contact_prediction(candidate, mapped, (width, height), SOURCE_PREPROCESSING)
+        except (ImportError, OSError, ValueError, RuntimeError, KeyError, TypeError) as error:
+            candidate["source_contact_model"] = {"status": "failed", "error": str(error)[:1000]}
+            candidate["reason_codes"] = list(dict.fromkeys(candidate.get("reason_codes", []) + ["SOURCE_CONTACT_MODEL_ERROR"]))
+    return results
 
 
 def apply_contact_evidence(candidate, evidence, *, video_id, duration_seconds, image_size, timestamps=None):

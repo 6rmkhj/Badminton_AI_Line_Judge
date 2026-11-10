@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "request_id": "example-near-baseline-review",
+  "rules": {"game": "doubles", "phase": "rally"},
+  "requested_boundary": "near",
+  "same_event_confirmed": false,
+  "same_court_coordinate_system_confirmed": false,
+  "views": [
+    {
+      "camera_id": "A",
+      "video": "8k 30 4k 24 a시점 1.mp4",
+      "event_window_seconds": [0.0, 0.5],
+      "responsible_boundaries": ["near", "left"],
+      "hit_anchors": []
+    },
+    {
+      "camera_id": "B",
+      "video": "8k 30 4k 24 b시점 1.mp4",
+      "event_window_seconds": [0.0, 0.5],
+      "responsible_boundaries": ["far", "right"],
+      "hit_anchors": []
+    }
+  ]
+}

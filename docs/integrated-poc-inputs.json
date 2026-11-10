@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "scope": "Source inventory and independent packet metadata; not inference accuracy or synchronization validation.",
+  "source_commit": "03a4c10837076fef667cfc1cad3b32efe9f75743",
+  "dataset_fingerprint": "a4d6fcb50e44f1d5249a9db5780bc94677026e0c68164c317872a50fd386e021",
+  "video_count": 74,
+  "unique_content_count": 73,
+  "total_source_bytes": 2426102179,
+  "resolution_counts": {
+    "7680x4320": 8,
+    "3840x2160": 61,
+    "1920x1080": 5
+  },
+  "presentation_cadence_fps_counts": {
+    "30.0": 21,
+    "23.99": 8,
+    "59.29": 25,
+    "60.0": 20
+  },
+  "presented_frame_count": 15017,
+  "duration_seconds": {
+    "sum": 310.157756,
+    "min": 2.761979,
+    "max": 5.965511
+  },
+  "discard_preroll_packets": 113,
+  "edit_list_excluded_packets": 15,
+  "edit_list_excluded_files": [
+    "b-3시점(uhd30 4k30).mp4"
+  ],
+  "presentation_gap_files": [
+    "8k 30 4k 24 b시점 1.mp4"
+  ],
+  "duplicate_groups": [
+    {
+      "sha256": "c2b3e5cd92940e93598163c454c831c0a25df07dd347c1f9b67f5e27acd0d831",
+      "video_ids": [
+        "v_05c2b1717b0e",
+        "v_92095687bfab"
+      ],
+      "files": [
+        "b시점 17.mp4",
+        "b시점 18.mp4"
+      ],
+      "group_id": "g_ecb609cb1ff9"
+    }
+  ],
+  "split_group_counts": {
+    "train": 26,
+    "val": 5,
+    "test": 5
+  },
+  "candidate_camera_pairs": 37,
+  "candidate_pairs_duration_difference_gt_0_5_seconds": 21,
+  "max_candidate_pair_duration_difference_seconds": 1.441733,
+  "event_correspondence_verified": false,
+  "ground_truth_labels_created": false,
+  "independent_capture_domains_verified": false,
+  "source_artifacts": {
+    "input_manifest": "runs/inspection/input-manifest-before.json",
+    "timing_audit": "runs/inspection/timing_audit.json",
+    "representative_frames": "runs/inspection/representative_frames.jpg"
+  }
+}

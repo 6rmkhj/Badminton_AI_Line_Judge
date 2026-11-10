@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_4eaaeb00056f",
+  "file": "b시점 8.mp4",
+  "source_sha256": "d2423aed70b1ad6275422348d43878bb2841a8333b4f68ad3e68cd114683ff6d",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_target original-source reinspection",
+  "label": "UNKNOWN",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "전체 프레임을 정밀 추적한 사람 검수는 아니며, 나열된 개요·확대 프레임에서 접촉을 확인하지 못했다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    8,
+    10,
+    17,
+    20,
+    26,
+    30,
+    34,
+    40,
+    43,
+    50,
+    52,
+    60,
+    61,
+    69,
+    70,
+    78,
+    80,
+    87,
+    90,
+    96,
+    100,
+    104,
+    110,
+    113,
+    120,
+    122,
+    130,
+    131,
+    139,
+    140,
+    148,
+    150,
+    157,
+    160,
+    166,
+    170,
+    174,
+    183,
+    192,
+    201
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_4eaaeb00056f/overview-24.jpg",
+    "runs/review-remediation/target/b8-action-0.jpg",
+    "runs/review-remediation/target/b8-action-1.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "contact_out_of_view",
+  "rationale": "남색 오버헤드와 회색 포핸드가 A의 동일 순서 동작과 일치한다. B 자체의 최초 바닥 접촉은 식별하지 못하므로 직접 접촉 주석은 UNKNOWN을 유지한다.",
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "follow_up_actions": [
+    "A f118–124 원본 연속 확대와 전체 코트 외곽선 근거로 최초 접촉을 재주석한다.",
+    "A/B 두 동작 대응 검증을 접촉 자격 검증과 분리하고 검증된 A 접촉을 B 및 최종 쌍 결과에 연결한다.",
+    "검출 ROI가 실패하면 마지막 타구 이후 원본 고해상도 탐색 구역을 확대하고 바운드 전후를 구분한다."
+  ],
+  "remediation_review": {
+    "original_source_sha256_verified": true,
+    "new_inspected_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      110,
+      120,
+      130,
+      140,
+      150,
+      160,
+      170
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/b8-action-0.jpg",
+      "runs/review-remediation/target/b8-action-1.jpg"
+    ],
+    "provenance": "Actual original-source frames visually inspected; not independent human ground truth.",
+    "candidate_pending_integration": true
+  },
+  "cross_view_match": {
+    "other_video_id": "v_fca8558d4a18",
+    "same_event_confirmed_by_ai": true,
+    "rationale": "서로 다른 시점에서 같은 선수의 두 개 이상 타구·이동 동작이 순서와 거의 일정한 시간차로 일치한다. 접촉 관측 여부와 독립적으로 랠리 대응만 검증했다.",
+    "matched_actions": [
+      {
+        "frame_index": 10,
+        "other_frame_index": 20,
+        "description": "남색 선수의 점프 오버헤드 타구"
+      },
+      {
+        "frame_index": 70,
+        "other_frame_index": 80,
+        "description": "회색 선수의 측면 이동 후 포핸드 팔로스루"
+      }
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/a8-action-0.jpg",
+      "runs/review-remediation/target/a8-action-1.jpg",
+      "runs/review-remediation/target/b8-action-0.jpg",
+      "runs/review-remediation/target/b8-action-1.jpg"
+    ]
+  }
+}

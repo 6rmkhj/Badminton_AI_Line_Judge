@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_23a020d3d99b",
+  "file": "a시점 14.mp4",
+  "source_sha256": "d67337c445efe538d056eedbbc3246112dbac5475b30e4a75477d0d797b9ac02",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_a",
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 170,
+      "x": 753,
+      "y": 300,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 하강과 첫 반동 중 동일 셔틀 형태 확인"
+    },
+    {
+      "frame_index": 173,
+      "x": 760,
+      "y": 294,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 하강과 첫 반동 중 동일 셔틀 형태 확인"
+    },
+    {
+      "frame_index": 181,
+      "x": 782,
+      "y": 285,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 하강과 첫 반동 중 동일 셔틀 형태 확인"
+    },
+    {
+      "frame_index": 191,
+      "x": 804,
+      "y": 302,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 하강과 첫 반동 중 동일 셔틀 형태 확인"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "42e9a86874d870bcf076586e4c37b3b02427cafcb8b13e045269a46b28a80ebc",
+  "source_review_path": "annotations/ai-visual/v_23a020d3d99b.json"
+}

@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_748f9ee5d5a8",
+  "file": "b시점 10.mp4",
+  "source_sha256": "1ac3e9e68f42567a4da64342d1392448af1bd8ed94e0face19671739553206cc",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "detection_labels": [
+    {
+      "frame_index": 246,
+      "x": 730,
+      "y": 453,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 248,
+      "x": 742,
+      "y": 470,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 249,
+      "x": 748,
+      "y": 477,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 250,
+      "x": 754,
+      "y": 476,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 251,
+      "x": 761,
+      "y": 476,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 252,
+      "x": 767,
+      "y": 476,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 230,
+      "x": 750,
+      "y": 460,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 232,
+      "x": 780,
+      "y": 490,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 234,
+      "x": 760,
+      "y": 490,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 236,
+      "x": 780,
+      "y": 490,
+      "label": "background",
+      "source": "ai_visual_review"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "e2bb33fa2f85d2cc5b47a5363fa9dbd35c0e02a28de3c50d03cf753cfed24184",
+  "source_review_path": "annotations/ai-visual/v_748f9ee5d5a8.json"
+}

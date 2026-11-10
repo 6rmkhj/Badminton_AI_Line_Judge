@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "video_id": "v_44105d7a1812",
+  "file": "a시점 19.mp4",
+  "source_sha256": "38a6caa571616cc83c28d37013bf0258db783fbdc9861a75bacc3e8dc2d71261",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "OUT",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "target_contact_identity_confirmed": true,
+  "contact_frame_index": 153,
+  "contact_px": [
+    815,
+    280
+  ],
+  "time": 2.580778,
+  "confidence": "moderate",
+  "observation_status": "contact_interval",
+  "rationale": "회색 선수가 회수하는 대상 셔틀이 오른쪽 복식 사이드라인 바깥에 먼저 닿고 반동하는 것을 원본 연속 프레임으로 확인했다. 전체 코트에서 해당 외곽선의 역할을 확인한 뒤, 서비스라인 끝과 뒤 코너를 잇는 바깥 칠 경계의 원본 픽셀 측정과 접촉 범위를 비교했다. 여러 평행선 중 이웃 코트선을 경계로 오인하지 않았다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    9,
+    19,
+    29,
+    38,
+    48,
+    58,
+    67,
+    77,
+    87,
+    96,
+    106,
+    115,
+    116,
+    119,
+    123,
+    126,
+    127,
+    131,
+    135,
+    139,
+    143,
+    145,
+    147,
+    148,
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    162,
+    163,
+    164,
+    166,
+    167,
+    168,
+    170,
+    171,
+    172,
+    174,
+    175,
+    176,
+    179,
+    184,
+    193,
+    203,
+    213,
+    223
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_44105d7a1812/overview.jpg",
+    "runs/visual-review/v_44105d7a1812/detail_115_181_4_preview.jpg",
+    "runs/visual-review/v_44105d7a1812/detail_148_178_2_native.jpg",
+    "runs/visual-review/v_44105d7a1812/patch-label-check.png",
+    "runs/visual-review/v_44105d7a1812/independent-bounce.jpg",
+    "runs/visual-review/v_44105d7a1812/native-0000.jpg"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 154,
+      "x": 817,
+      "y": 279,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    },
+    {
+      "frame_index": 158,
+      "x": 826,
+      "y": 282,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    },
+    {
+      "frame_index": 164,
+      "x": 841,
+      "y": 287,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    },
+    {
+      "frame_index": 174,
+      "x": 858,
+      "y": 287,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    }
+  ],
+  "contact_interval_frames": [
+    152,
+    154
+  ],
+  "contact_support_px": [
+    [
+      813,
+      279
+    ],
+    [
+      818,
+      279
+    ],
+    [
+      818,
+      282
+    ],
+    [
+      813,
+      282
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "local_boundary",
+    "boundaries": [
+      {
+        "role": "right",
+        "line_px": [
+          [
+            795,
+            282.5
+          ],
+          [
+            835,
+            291.5
+          ]
+        ],
+        "inside_point_px": [
+          800,
+          310
+        ],
+        "role_confirmed": true
+      }
+    ],
+    "contact_uncertainty_px": 2,
+    "boundary_uncertainty_px": 1,
+    "explanation": "전체 코트 영상에서 복식 오른쪽 외곽선은 서비스라인 끝[806,286]과 뒤 코너[883,303]를 연결한다. 원본 측정한 바깥 칠 윗변은 [795,282.5]에서[835,291.5]이며 유효 코트는 그 아래쪽이다."
+  },
+  "additional_ai_review": {
+    "reviewer": "Codex review_uhdhd",
+    "assessment": "같은 원본 연속 확대와 전체 코트로 접촉·외곽선 재확인",
+    "independent_human_ground_truth": false
+  },
+  "follow_up_actions": [
+    "독립된 사람 검수자가 같은 첫 접촉 구간과 코트 외곽선 근거를 확인해 별도 정답 레이블을 확정한다.",
+    "현재 레이블은 AI 보조 검수로 보존하고 독립 테스트 정확도로 계산하지 않는다."
+  ]
+}

@@ -1,0 +1,298 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_52fd1d4fab89",
+  "file": "b-3시점(uhd30 4k30).mp4",
+  "source_sha256": "1469100923fd649976a9ebb3ffff518018c7a6ad660f036fd35d007443ae54c5",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "UNKNOWN",
+  "reviewer": "Codex review_uhd4k",
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "contact_frame_index": 81,
+  "time": 2.701667,
+  "contact_px": [
+    719.5,
+    314.5
+  ],
+  "target_contact_identity_confirmed": true,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI가 직접 영상 프레임을 해석한 보조 레이블이며 사람이 독립 검수한 정답이 아니다.",
+    "검수한 기존 영상에 대한 해석으로 새로운 경기 영상의 자동 판정 정확도를 입증하지 않는다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    4,
+    5,
+    8,
+    10,
+    12,
+    15,
+    16,
+    20,
+    21,
+    22,
+    25,
+    29,
+    30,
+    33,
+    35,
+    37,
+    40,
+    42,
+    45,
+    46,
+    50,
+    52,
+    54,
+    55,
+    56,
+    58,
+    59,
+    60,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_52fd1d4fab89/overview.jpg",
+    "runs/visual-review/v_52fd1d4fab89/frame-end.jpg",
+    "runs/visual-review/v_52fd1d4fab89/terminal-0.jpg",
+    "runs/visual-review/v_52fd1d4fab89/terminal-1.jpg",
+    "runs/visual-review/v_52fd1d4fab89/outer-0.jpg",
+    "runs/visual-review/v_52fd1d4fab89/outer-1.jpg",
+    "runs/visual-review/v_52fd1d4fab89/outer-2.jpg",
+    "runs/visual-review/v_52fd1d4fab89/outer-3.jpg",
+    "runs/visual-review/v_52fd1d4fab89/micro-0.jpg",
+    "runs/visual-review/v_52fd1d4fab89/micro-1.jpg",
+    "runs/visual-review/v_52fd1d4fab89/micro-2.jpg",
+    "runs/visual-review/v_52fd1d4fab89/right-boundary-frame80.jpg",
+    "runs/review-remediation/boundary/v_52fd1d4fab89/overview-0.jpg",
+    "runs/review-remediation/boundary/v_52fd1d4fab89/overview-1.jpg",
+    "runs/review-remediation/boundary/v_52fd1d4fab89/overview-2.jpg",
+    "runs/review-remediation/boundary/v_52fd1d4fab89/contact-0.jpg",
+    "runs/review-remediation/boundary/v_52fd1d4fab89/contact-1.jpg",
+    "runs/review-remediation/boundary/uhd3-check/sheet-0.png",
+    "runs/review-remediation/boundary/uhd3-check/sheet-7.png",
+    "runs/review-remediation/boundary/uhd3-cross-view-actions.jpg",
+    "runs/review-remediation/boundary/actions/uhd3-A-02.jpg",
+    "runs/review-remediation/boundary/actions/uhd3-B-02.jpg",
+    "runs/review-remediation/boundary/actions/uhd3-A-03.jpg",
+    "runs/review-remediation/boundary/actions/uhd3-B-03.jpg"
+  ],
+  "detection_labels": [
+    {
+      "frame_index": 79,
+      "x": 706,
+      "y": 316,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 81,
+      "x": 719,
+      "y": 314,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 82,
+      "x": 724,
+      "y": 311,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 84,
+      "x": 733,
+      "y": 313,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 79,
+      "x": 700,
+      "y": 350,
+      "label": "background"
+    },
+    {
+      "frame_index": 81,
+      "x": 780,
+      "y": 350,
+      "label": "background"
+    },
+    {
+      "frame_index": 82,
+      "x": 780,
+      "y": 300,
+      "label": "background"
+    },
+    {
+      "frame_index": 84,
+      "x": 700,
+      "y": 300,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "observation_status": "line_ambiguous",
+  "rationale": "원본 우측 확대에서 79~81 프레임 하강, 81 프레임 부근 최초 접촉, 82~83 프레임 반동이 보인다. 이후 선을 넘어 밖에서 정지한다. 최초 접촉은 분석 좌표 약(720,315)이며 여러 가는 청색 선과 겹쳐 목표 코트의 정확한 우측 외곽선 및 접촉 오차를 분리하지 못했다. 마지막 정지 위치를 OUT 정답으로 사용하지 않았다.",
+  "contact_interval_frames": [
+    80,
+    81
+  ],
+  "contact_support_px": [
+    [
+      716,
+      311
+    ],
+    [
+      724,
+      311
+    ],
+    [
+      724,
+      319
+    ],
+    [
+      716,
+      319
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "court_interior",
+    "interior_confirmed": true,
+    "polygon_px": [
+      [
+        193,
+        303
+      ],
+      [
+        469,
+        266
+      ],
+      [
+        758,
+        318
+      ],
+      [
+        485,
+        510
+      ]
+    ],
+    "contact_uncertainty_px": 4,
+    "boundary_uncertainty_px": 4,
+    "explanation": "B1/B2/B4에서 확인한 보수적인 코트 내부 영역을 표시했다. B3 최초 접촉은 이 내부 영역의 우측 제한 선분과 너무 가까워 실제 외곽선과의 관계를 확정할 수 없다. 제한 영역 밖을 OUT으로 해석하지 않는다."
+  },
+  "cross_view_match": {
+    "other_video_id": "v_1916342f0677",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 22,
+        "other_frame_index": 42,
+        "description": "검은 상의·검은 반바지 상대의 앞쪽 타격과 붉은 상의 선수의 넓은 수비 스텝"
+      },
+      {
+        "frame_index": 50,
+        "other_frame_index": 70,
+        "description": "붉은 상의 파트너 뒤 검은 상의 선수가 점프하여 머리 위 타격을 수행하는 다음 동작"
+      }
+    ],
+    "rationale": "원본 영상에서 동일한 네 선수와 위 두 개의 서로 다른 동작이 같은 순서로 이어지는 것을 대조했다. 사건 대응 확인과 접촉/라인 판정의 충분성은 별도이며, 두 시점 모두 미해결이면 같은 사건 확인만으로 IN/OUT을 만들지 않는다.",
+    "evidence_paths": [
+      "runs/review-remediation/boundary/uhd3-cross-view-actions.jpg",
+      "runs/review-remediation/boundary/actions/uhd3-A-02.jpg",
+      "runs/review-remediation/boundary/actions/uhd3-B-02.jpg",
+      "runs/review-remediation/boundary/actions/uhd3-A-03.jpg",
+      "runs/review-remediation/boundary/actions/uhd3-B-03.jpg"
+    ],
+    "clock_synchronization_claimed": false
+  },
+  "remediation_review": {
+    "source": "ai_visual_review",
+    "human_verified": false,
+    "reviewer": "Codex review_boundary",
+    "inspected_frame_indices": [
+      0,
+      5,
+      10,
+      15,
+      20,
+      22,
+      25,
+      30,
+      35,
+      40,
+      45,
+      50,
+      55,
+      60,
+      65,
+      70,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      90,
+      95
+    ],
+    "finding": "A의 마지막 착지는 가까운 선수 몸과 먼 선수에 겹친다. B 원본73–86 재검수에서79의 낮은 흐릿한 물체 이후80–83 상승이 보이므로81 한 프레임을 확정 최초 접촉으로 고정할 수 없다. 코르크·그림자·노출 흐림과 실제 외곽선의 보수적 관계가 남는다.",
+    "next_action": "B78–81을 연속 최초 접촉 후보 구간으로 다시 확인하고, 선명한 코르크 바닥 접촉이 있는 고속/짧은 노출 원본을 확보한다. B84 이후 바깥 정지점을 OUT 근거로 바꾸지 않는다.",
+    "label_changed": false,
+    "clock_synchronization_claimed": false,
+    "first_contact_timing_note": "원본79프레임에 이미 바닥 가까운 물체가 있으며80–83은 상승한다. 기존 contact_frame_index81은 확정 최초 접촉으로 해석하지 않으며 contact_observed=false를 유지한다. 새 확정 접촉점은 만들지 않았다."
+  }
+}

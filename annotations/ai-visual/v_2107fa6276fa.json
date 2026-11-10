@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "video_id": "v_2107fa6276fa",
+  "file": "a시점 16.mp4",
+  "source_sha256": "ad4cb568e49b98216cce2d45025a3f584a41b7df48ca424bcd1e0133ecc66e03",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_target original-source reinspection",
+  "label": "UNKNOWN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "target_contact_identity_confirmed": true,
+  "contact_frame_index": null,
+  "contact_px": null,
+  "time": null,
+  "confidence": "unresolved",
+  "observation_status": "line_ambiguous",
+  "rationale": "f242–258 연속 원본 확대에서 하강 및 반동을 확인하며 접촉은 대략 f250–252 부근으로 좁혀진다. 바깥 칠 경계 역할과 코르크 접촉 범위를 확정하기에는 여러 파란 선 및 모션 블러가 남아 UNKNOWN을 유지한다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    14,
+    29,
+    43,
+    58,
+    72,
+    87,
+    101,
+    116,
+    131,
+    145,
+    160,
+    174,
+    189,
+    195,
+    199,
+    203,
+    207,
+    211,
+    215,
+    218,
+    219,
+    223,
+    227,
+    231,
+    233,
+    235,
+    239,
+    240,
+    242,
+    243,
+    244,
+    245,
+    246,
+    247,
+    248,
+    249,
+    250,
+    251,
+    252,
+    253,
+    254,
+    255,
+    256,
+    257,
+    258,
+    259,
+    260,
+    262,
+    263,
+    264,
+    266,
+    267,
+    268,
+    270,
+    272,
+    274,
+    276,
+    278,
+    280,
+    284,
+    288,
+    291,
+    292,
+    296,
+    300,
+    304,
+    305,
+    308,
+    320,
+    335
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_2107fa6276fa/overview.jpg",
+    "runs/visual-review/v_2107fa6276fa/detail_195_271_4_preview.jpg",
+    "runs/visual-review/v_2107fa6276fa/detail_244_280_2_native.jpg",
+    "runs/visual-review/v_2107fa6276fa/patch-label-check.png",
+    "runs/visual-review/v_2107fa6276fa/detail_240_310_4_preview.jpg",
+    "runs/review-remediation/target/a16-contact-0.jpg",
+    "runs/review-remediation/target/a16-contact-1.jpg",
+    "runs/review-remediation/target/a16-court-f250.jpg"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 252,
+      "x": 671,
+      "y": 246,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    },
+    {
+      "frame_index": 256,
+      "x": 676,
+      "y": 237,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    },
+    {
+      "frame_index": 264,
+      "x": 684,
+      "y": 233,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    },
+    {
+      "frame_index": 276,
+      "x": 688,
+      "y": 245,
+      "label": "shuttle",
+      "evidence": "원본 연속 확대에서 움직이는 대상 셔틀 확인; 근접 라인 판정은 보류"
+    }
+  ],
+  "cross_view_candidates": [
+    {
+      "other_video_id": "v_447f79f409a6",
+      "status": "different_rally",
+      "same_event_confirmed_by_ai": false,
+      "examined_actions": [
+        {
+          "frame_index": 43,
+          "other_frame_index": 120,
+          "description": "회색 선수의 오버헤드는 겉으로 유사하지만 이후 타구 순서가 다르다."
+        },
+        {
+          "frame_index": 145,
+          "other_frame_index": 210,
+          "description": "A는 이후 남색 선수의 큰 오버헤드 타구가 있으나 B는 이미 녹색·흰색 선수가 앞쪽으로 움직이며 랠리를 마친 상태다."
+        },
+        {
+          "frame_index": 320,
+          "other_frame_index": 260,
+          "description": "A 마지막은 회색 선수가 자기 쪽 오른쪽 바닥의 셔틀을 회수하고 B 마지막은 녹색 선수가 반대쪽 앞 바닥에서 회수한다."
+        }
+      ],
+      "rationale": "같은 번호라도 독립 동작의 순서와 마지막 접촉/회수 대상이 다르다. 동일 사건으로 확정하지 않고 라벨 전이를 거절했다.",
+      "evidence_paths": [
+        "runs/visual-review/v_2107fa6276fa/overview.jpg",
+        "runs/visual-review/v_447f79f409a6/detail-60-260-native.jpg"
+      ]
+    }
+  ],
+  "follow_up_actions": [
+    "동일 번호만으로 연결하지 않고 서로 다른 랠리의 전파 판정을 차단한다.",
+    "A의 f242–258 하강·반동과 전체 코트에서 바깥 칠 경계를 독립 검수하고 B의 가림 전 구간을 확보한다.",
+    "원본 클립 매핑을 바로잡기 전에는 A/B 쌍 판정을 REVIEW로 유지한다."
+  ],
+  "remediation_review": {
+    "original_source_sha256_verified": true,
+    "new_inspected_frame_indices": [
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258
+    ],
+    "evidence_paths": [
+      "runs/review-remediation/target/a16-contact-0.jpg",
+      "runs/review-remediation/target/a16-contact-1.jpg",
+      "runs/review-remediation/target/a16-court-f250.jpg"
+    ],
+    "provenance": "Actual original-source frames visually inspected; not independent human ground truth.",
+    "candidate_pending_integration": true
+  }
+}

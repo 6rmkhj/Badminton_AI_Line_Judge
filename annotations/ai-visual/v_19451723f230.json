@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_19451723f230",
+  "file": "b시점 1.mp4",
+  "source_sha256": "cc576acd32f449a02d2b3c5de6a85ed25b2f380a008d83a98a243f782156c330",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "label": "UNKNOWN",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "전체 프레임을 정밀 추적한 사람 검수는 아니며, 나열된 개요·확대 프레임에서 접촉을 확인하지 못했다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    8,
+    16,
+    25,
+    33,
+    41,
+    50,
+    58,
+    66,
+    75,
+    83,
+    91,
+    100,
+    108,
+    116,
+    125,
+    133,
+    141,
+    150,
+    158,
+    166,
+    175,
+    183,
+    192
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_19451723f230/overview-24.jpg",
+    "runs/visual-review/v_19451723f230/detail-100-166.jpg",
+    "runs/visual-review/v_19451723f230/detail-100-192-native.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "contact_out_of_view",
+  "rationale": "흰 상의와 남색 상의 두 선수가 네트 반대편을 바라보며 교환하는 구간이다. 가까운 반코트의 바닥 접촉은 관찰되지 않았고, 네트 반대편의 종결 접촉 위치는 이 영상에서 특정하지 못했다.",
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "cross_view_match": {
+    "other_video_id": "v_446c5aed34ee",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 150,
+        "other_frame_index": 158,
+        "description": "초록 상의 선수의 네트 앞 큰 런지: B에서는 오른쪽, A에서는 왼쪽으로 같은 동작이 보인다."
+      },
+      {
+        "frame_index": 175,
+        "other_frame_index": 188,
+        "description": "같은 선수가 런지 후 일어나 떨어진 셔틀 쪽으로 전진하고 회색 파트너는 자세를 푼다."
+      }
+    ],
+    "rationale": "양쪽 검수자가 선수 조합, 연속 타격·런지·회복 동작을 실제 영상으로 대조했다. 사건 대응을 확인한 것으로 프레임 단위 시계 동기화나 이 시점의 접촉 관측을 주장하지 않는다.",
+    "evidence_paths": [
+      "runs/visual-review/v_19451723f230/detail-100-192-native.jpg",
+      "runs/visual-review/v_446c5aed34ee/overview.jpg"
+    ],
+    "temporal_alignment": "approximate action correspondence; not synchronized clocks",
+    "reviewers": [
+      "Codex review_base_a",
+      "Codex review_base_b"
+    ]
+  },
+  "follow_up_actions": [
+    "실제 두 동작으로 대조한 다른 시점의 직접 접촉 판정을 보조 결과로 사용한다. 이 시점의 관측 누락은 유지한다.",
+    "독립 사람 검수로 사건 대응과 다른 시점의 접촉·경계를 확인한다."
+  ]
+}

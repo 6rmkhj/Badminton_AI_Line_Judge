@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_a165cc1d1093",
+  "file": "b시점 14.mp4",
+  "source_sha256": "4008faa38993702012f65b506e698b24d526394b5e5e984b04a7f8464ce37d39",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "label": "UNKNOWN",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "전체 프레임을 정밀 추적한 사람 검수는 아니며, 나열된 개요·확대 프레임에서 접촉을 확인하지 못했다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    12,
+    24,
+    36,
+    48,
+    60,
+    72,
+    84,
+    90,
+    96,
+    108,
+    120,
+    132,
+    144,
+    150,
+    156,
+    168,
+    180,
+    192,
+    204,
+    210,
+    216,
+    228,
+    240,
+    252,
+    264,
+    270,
+    277
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_a165cc1d1093/overview-24.jpg",
+    "runs/visual-review/v_a165cc1d1093/detail-60-270-native.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "contact_out_of_view",
+  "rationale": "흰 상의 선수와 초록 상의 선수가 교환 후 마지막 오버헤드 동작을 한다. 가까운 쪽 착지 근거가 없어 반대편 사건은 별도 시점 확인이 필요하다.",
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "cross_view_match": {
+    "other_video_id": "v_23a020d3d99b",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 120,
+        "other_frame_index": 89,
+        "description": "회색 상의 선수의 오버헤드 타격과 몸통 회전이 두 시점에서 대응한다."
+      },
+      {
+        "frame_index": 180,
+        "other_frame_index": 153,
+        "description": "남색 상의 선수가 옆으로 크게 벌리며 포핸드를 뻗는 마지막 리턴 시도가 대응한다."
+      }
+    ],
+    "rationale": "양쪽 AI 검수자가 원본 확대 및 개요 프레임의 두 연속 타격 동작을 비교하여 같은 랠리를 확인했다. 이 시점의 바닥 접촉이나 정밀 시계 동기화는 확인한 것으로 간주하지 않는다.",
+    "evidence_paths": [
+      "runs/visual-review/v_a165cc1d1093/detail-60-270-native.jpg",
+      "runs/visual-review/v_23a020d3d99b/overview.jpg"
+    ],
+    "temporal_alignment": "approximate action correspondence; not synchronized clocks",
+    "reviewers": [
+      "Codex review_base_a",
+      "Codex review_base_b"
+    ]
+  },
+  "follow_up_actions": [
+    "실제 두 동작으로 대조한 다른 시점의 직접 접촉 판정을 보조 결과로 사용한다. 이 시점의 관측 누락은 유지한다.",
+    "독립 사람 검수로 사건 대응과 다른 시점의 접촉·경계를 확인한다."
+  ]
+}

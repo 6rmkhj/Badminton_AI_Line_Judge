@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Court Review · A/B 통합 판정</title>
+  <link rel="stylesheet" href="/pair.css">
+  <script src="/pair.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/pair" aria-label="Court Review A/B 통합 판정"><svg viewBox="0 0 32 38" aria-hidden="true"><path d="M3 3h26v32H3zM3 19h26M9 3v32M23 3v32M3 10h26M3 28h26M16 3v7M16 28v7"/></svg><span>COURT <span>REVIEW</span></span></a>
+    <nav aria-label="주요 화면"><a href="/">개별 영상 검수</a><a class="current" href="/pair" aria-current="page">A/B 통합 판정</a></nav>
+    <span class="local-status"><i></i> 로컬 워크스페이스</span>
+  </header>
+  <main>
+    <div class="heading-row">
+      <div><p class="eyebrow">TWO VIEWS · ONE RESULT</p><h1>A/B 영상을 연결해 판정합니다.</h1><p class="intro">같은 랠리의 두 영상을 입력하면, 각 시점의 접촉 근거를 모아 하나의 결과를 보여줍니다.</p></div>
+      <span id="library-count" class="library-count">라이브러리 확인 중</span>
+    </div>
+
+    <form id="pair-form" novalidate>
+      <div class="input-grid">
+        <section class="source-card" aria-labelledby="source-a-heading">
+          <div class="card-heading"><div class="view-title"><span class="camera-mark">A</span><div><p class="eyebrow">CAMERA A</p><h2 id="source-a-heading">A 시점</h2></div></div><span class="source-state" id="source-a-state">입력 대기</span></div>
+          <div class="source-tabs" role="group" aria-label="A 시점 입력 방식"><button type="button" class="selected" data-view="A" data-mode="library" aria-pressed="true">기존 영상 선택</button><button type="button" data-view="A" data-mode="upload" aria-pressed="false">새 영상 업로드</button></div>
+          <div id="library-a-panel" class="source-panel"><label for="library-a">라이브러리 영상</label><select id="library-a" aria-describedby="source-a-meta"><option value="">A 시점 영상을 선택하세요</option></select></div>
+          <div id="upload-a-panel" class="source-panel" hidden><label class="file-picker" for="file-a"><span class="upload-icon" aria-hidden="true">↥</span><strong>영상 파일 선택</strong><span id="file-a-name">MP4 · MOV · MKV · AVI · WEBM</span><input id="file-a" type="file" accept=".mp4,.mov,.mkv,.avi,.webm,video/*"></label></div>
+          <div class="input-preview"><video id="preview-a" controls preload="metadata" playsinline hidden aria-label="선택한 A 시점 미리보기"></video><div class="preview-empty" id="empty-a"><span aria-hidden="true">A</span><p>첫 번째 시점의 영상을 선택하세요.</p></div></div>
+          <p id="source-a-meta" class="source-meta">기존 영상의 검수 근거도 함께 불러올 수 있습니다.</p>
+          <p class="preview-error" id="preview-a-error" hidden>이 브라우저에서 원본 미리보기를 재생할 수 없습니다. 분석 후 변환된 미리보기를 제공합니다.</p>
+          <div class="upload-progress" id="upload-a-progress" hidden><progress max="100" value="0" aria-label="A 시점 업로드 진행률"></progress><span></span></div>
+        </section>
+        <section class="source-card" aria-labelledby="source-b-heading">
+          <div class="card-heading"><div class="view-title"><span class="camera-mark camera-b">B</span><div><p class="eyebrow">CAMERA B</p><h2 id="source-b-heading">B 시점</h2></div></div><span class="source-state" id="source-b-state">입력 대기</span></div>
+          <div class="source-tabs" role="group" aria-label="B 시점 입력 방식"><button type="button" class="selected" data-view="B" data-mode="library" aria-pressed="true">기존 영상 선택</button><button type="button" data-view="B" data-mode="upload" aria-pressed="false">새 영상 업로드</button></div>
+          <div id="library-b-panel" class="source-panel"><label for="library-b">라이브러리 영상</label><select id="library-b" aria-describedby="source-b-meta"><option value="">B 시점 영상을 선택하세요</option></select></div>
+          <div id="upload-b-panel" class="source-panel" hidden><label class="file-picker" for="file-b"><span class="upload-icon" aria-hidden="true">↥</span><strong>영상 파일 선택</strong><span id="file-b-name">MP4 · MOV · MKV · AVI · WEBM</span><input id="file-b" type="file" accept=".mp4,.mov,.mkv,.avi,.webm,video/*"></label></div>
+          <div class="input-preview"><video id="preview-b" controls preload="metadata" playsinline hidden aria-label="선택한 B 시점 미리보기"></video><div class="preview-empty" id="empty-b"><span aria-hidden="true">B</span><p>반대 시점의 영상을 선택하세요.</p></div></div>
+          <p id="source-b-meta" class="source-meta">A 시점과 촬영 시작 시각이 달라도 입력할 수 있습니다.</p>
+          <p class="preview-error" id="preview-b-error" hidden>이 브라우저에서 원본 미리보기를 재생할 수 없습니다. 분석 후 변환된 미리보기를 제공합니다.</p>
+          <div class="upload-progress" id="upload-b-progress" hidden><progress max="100" value="0" aria-label="B 시점 업로드 진행률"></progress><span></span></div>
+        </section>
+      </div>
+      <div class="submit-panel">
+        <div class="options">
+          <label class="check-option"><input type="checkbox" id="same-event"><span><strong>두 영상이 같은 랠리의 같은 착지 사건임을 확인했습니다.</strong><small>확인하지 않으면 저장된 시점 대응 근거를 사용합니다. 대응이 미확정이면 REVIEW로 남습니다.</small></span></label>
+          <label class="check-option"><input type="checkbox" id="reuse-review" checked><span><strong>기존 검수 근거 활용</strong><small>동일 원본의 AI 검수 기록이 있으면 재사용합니다. 끄면 두 영상을 새로 분석합니다.</small></span></label>
+        </div>
+        <div class="submit-action"><button id="submit-pair" class="primary" type="submit"><span>A/B 연결 분석</span><span aria-hidden="true">↗</span></button><p>같은 작업에 두 영상을 함께 입력합니다.</p></div>
+      </div>
+      <div id="form-error" class="message error" role="alert" hidden></div>
+    </form>
+
+    <section id="job-progress" class="job-progress" aria-labelledby="progress-heading" aria-live="polite" hidden>
+      <div class="section-title"><div><p class="eyebrow">ANALYSIS PROGRESS</p><h2 id="progress-heading">두 시점의 근거를 확인하고 있습니다.</h2></div><span id="job-status" class="status-pill"></span></div>
+      <div class="progress-views"><div><span class="mini-camera">A</span><span id="progress-a">대기</span></div><div><span class="mini-camera camera-b">B</span><span id="progress-b">대기</span></div></div>
+      <p id="progress-message" class="muted">새 영상은 프레임 분석과 근거 영상 생성에 시간이 필요합니다.</p>
+      <div class="job-links"><a id="job-permalink" href="/pair">이 작업 다시 열기</a><a href="/pair">새 A/B 입력</a><button type="button" id="retry-poll" class="text-button" hidden>상태 다시 확인</button></div>
+    </section>
+
+    <section id="pair-result" aria-labelledby="result-heading" hidden>
+      <div class="result-banner" id="result-banner">
+        <div class="result-heading"><p class="eyebrow">A/B LINKED RESULT</p><h2 id="result-heading">A/B 최종 보조 판정</h2><div id="final-verdict" class="final-verdict">—</div><p id="result-provenance" class="result-provenance"></p></div>
+        <div class="result-explanation"><div id="source-cameras" class="source-cameras"></div><ul id="result-reasons"></ul><p id="correspondence-status" class="muted"></p><p id="result-timing" class="muted"></p><a id="result-json" class="secondary" href="#" download>결과 JSON 내려받기 ↗</a></div>
+      </div>
+      <p class="result-context">두 시점의 관측 근거와 사건 대응을 함께 검토한 결과입니다. 직접 관측과 다른 시점에서 가져온 근거를 구분해 표시합니다.</p>
+      <section id="review-diagnostics" class="review-diagnostics" aria-labelledby="diagnostics-heading" hidden>
+        <div class="section-title"><div><p class="eyebrow">REVIEW DIAGNOSIS</p><h2 id="diagnostics-heading">어떤 근거가 더 필요한가요?</h2></div><span id="diagnostics-count" class="status-pill"></span></div>
+        <p id="diagnostics-summary" class="diagnostics-summary"></p>
+        <div id="diagnostics-issues" class="diagnostic-grid"></div>
+        <div id="refine-panel" class="refine-panel" hidden>
+          <div><h3>접촉 후보를 원본에서 다시 확인</h3><p id="refine-help">기존 AI 검수의 후보 구간을 참고해 원본 해상도로 다시 분석합니다. 판정 확정을 보장하지 않습니다.</p></div>
+          <button id="refine-pair" class="refine-button" type="button" aria-describedby="refine-help">접촉 후보 구간 집중 재분석 ↗</button>
+        </div>
+        <p id="refine-error" class="message error" role="alert" hidden></p>
+      </section>
+      <div id="result-views" class="result-grid"></div>
+    </section>
+
+    <section class="history-section" aria-labelledby="history-heading"><div class="section-title"><div><p class="eyebrow">RECENT PAIRS</p><h2 id="history-heading">최근 A/B 작업</h2></div><button id="refresh-history" type="button" class="text-button">새로고침 ↻</button></div><div id="job-history" class="history-list"><p class="muted">이 화면에서 만든 A/B 작업을 다시 열 수 있습니다.</p></div></section>
+    <footer><span>COURT REVIEW <span class="footer-dot">/</span> A/B 통합 검수</span><span>두 영상은 각자의 시각으로 재생됩니다.</span></footer>
+  </main>
+</body>
+</html>

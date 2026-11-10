@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_a66517188046",
+  "file": "b시점(uhd30 hd30) 5.mp4",
+  "source_sha256": "e09374a98ab6839216c2ec4baab9a90fd18b3c76bdbbd3df90005248de8b8476",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 1920,
+    "height": 1080
+  },
+  "reviewer": "Codex review_uhdhd",
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "source_review_sha256": "f94257cd6a3e4fd28df10e0cfad4da895ecb7f7a819f3c63aa7d3432d06c97f4",
+  "source_review_path": "annotations/ai-visual/v_a66517188046.json"
+}

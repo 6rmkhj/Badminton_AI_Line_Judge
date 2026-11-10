@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "scope": "Integrated PoC software execution, artifact integrity and source provenance; not ground-truth accuracy or competition readiness.",
+  "run_id": "integrated-poc",
+  "source_commit": "03a4c10837076fef667cfc1cad3b32efe9f75743",
+  "dataset_fingerprint": "a4d6fcb50e44f1d5249a9db5780bc94677026e0c68164c317872a50fd386e021",
+  "configuration": "configs/poc.json",
+  "software_integrity_passed": true,
+  "input_videos": 74,
+  "completed_videos": 74,
+  "failed_videos": 0,
+  "unchanged_source_videos": 74,
+  "source_presented_frames": 15017,
+  "independently_decoded_preview_frames": 15017,
+  "source_decode_independently_repeated_in_audit": false,
+  "analysis_frames": 15017,
+  "high_resolution": {
+    "frame_records": 15017,
+    "roi_count": 120136,
+    "examined_pixels": 4428693504,
+    "source_contact_candidates": 444,
+    "source_contact_frame_count": 2220
+  },
+  "annotated_clips": 74,
+  "person_detector_sampled_frames": 974,
+  "decisions": {
+    "IN": 0,
+    "OUT": 0,
+    "REVIEW": 74
+  },
+  "calibration": {
+    "status_counts": {
+      "review": 74
+    },
+    "reason_counts": {
+      "PARTIAL_LINES_NO_UNIQUE_COURT_PLANE": 36,
+      "COURT_TEMPLATE_SUPPORT_INSUFFICIENT": 38,
+      "PARTIAL_COURT_VISIBLE": 22,
+      "CAMERA_STABILITY_UNOBSERVABLE": 3,
+      "MULTIPLE_COURT_FITS_AMBIGUOUS": 17
+    },
+    "camera_stability_counts": {
+      "ok": 71,
+      "review": 3
+    }
+  },
+  "candidate_budget_hit_frames": 13958,
+  "tracks": 93665,
+  "identity_ambiguous_tracks": 93047,
+  "candidate_quality_note": "Proposal counts, budget saturation and identity ambiguity are diagnostics, not labeled detection precision, recall or improvement over TrackNetV3.",
+  "learned_shuttle_or_contact_weights_used": false,
+  "eligible_ground_truth_count": 0,
+  "automatic_accuracy": null,
+  "automatic_accuracy_wilson_95ci": null,
+  "camera_pairs": 37,
+  "automatic_sync_accepted": 0,
+  "requests": [
+    {
+      "request_id": "example-near-baseline-review",
+      "views": 2,
+      "status": "completed",
+      "decision": "REVIEW",
+      "audit_errors": []
+    }
+  ],
+  "implementation_provenance": {
+    "current_implementation_fingerprint": "ad7a12b7fe29b3ea633b64caa1f94f23d6d6539b7ebc9005f0b771633b6e0d31",
+    "implementation_fingerprint_counts": {
+      "ad7a12b7fe29b3ea633b64caa1f94f23d6d6539b7ebc9005f0b771633b6e0d31": 74
+    }
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "platform": "Linux",
+    "cpu_quota": "400000 100000",
+    "memory_limit_bytes": 17179869184,
+    "batch_started_at": "2026-11-10T17:02:26.990440+09:00",
+    "batch_started_unix": 1794297746.99044,
+    "timing_method": "process start from proc uptime and clock ticks",
+    "config": "configs/poc.json",
+    "packages": {
+      "numpy": "2.2.6",
+      "scipy": "1.16.3",
+      "opencv-python-headless": "4.12.0.88",
+      "filelock": "4.2.4",
+      "torch": "2.10.0+cpu",
+      "pytest": "8.4.2"
+    },
+    "batch_completed_at": "2026-11-10T17:50:48.828717+09:00",
+    "batch_wall_seconds": 2901.84
+  },
+  "summed_clip_analysis_seconds": 5481.359931414001,
+  "software_tests": {
+    "full_suite_passed": 257,
+    "audit_suite_passed": 13,
+    "note": "The audit suite overlaps the full suite; these counts must not be added."
+  },
+  "browser": {
+    "listed_videos": 74,
+    "native_sequence_visible": true,
+    "last_frame_selected": 86,
+    "last_frame_index": 86,
+    "desktop_overflow": false,
+    "mobile_overflow": false,
+    "errors": []
+  },
+  "artifacts": {
+    "full_audit": "runs/integrated-poc/integrated-validation.json",
+    "audit_log": "runs/integrated-poc/integrated-validation.log",
+    "report": "runs/integrated-poc/summary.html",
+    "request_report": "runs/integrated-request/request-summary.html"
+  }
+}

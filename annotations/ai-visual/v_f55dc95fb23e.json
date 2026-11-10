@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_f55dc95fb23e",
+  "file": "8k 30 4k 24 b시점 6.mp4",
+  "source_sha256": "b9a6a2d33f0b0596d56309b342a1097087eb089251b14aafd950e663afb1d062",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "IN",
+  "reviewer": "Codex review_8k",
+  "contact_observed": true,
+  "contact_frame_index": 70,
+  "time": 2.917544,
+  "contact_px": [
+    721.5,
+    287.5
+  ],
+  "confidence": "medium",
+  "rationale": "원본 4K에서 마지막 셔틀이 하강해 69프레임 바닥 부근에 도달하고 70프레임 코르크가 최저점에 닿은 뒤 71~74프레임 반등하는 것을 확인했다. 접촉은 오른쪽 복식 사이드라인 안쪽이다. 바로 옆의 여러 가는 평행선은 단식/다른 코트의 내부 표시이며 실제 외곽선은 가까운 베이스라인 오른쪽 꼭짓점에 연결되는 선으로 구별했다.",
+  "limitations": [
+    "23.99fps 노출 흐림을 포함해 69~71프레임 접촉 구간과 지지영역 사용",
+    "AI 시각 검수이며 독립된 사람 정답이 아님"
+  ],
+  "inspected_frame_indices": [
+    0,
+    3,
+    7,
+    10,
+    14,
+    17,
+    21,
+    24,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_f55dc95fb23e/overview.jpg",
+    "runs/visual-review/v_f55dc95fb23e/detail_native_seq_44_81_0.jpg",
+    "runs/visual-review/v_f55dc95fb23e/detail_native_seq_44_81_1.jpg",
+    "runs/visual-review/v_f55dc95fb23e/last_native_seq_28_80_0.jpg",
+    "runs/visual-review/v_f55dc95fb23e/last_native_seq_28_80_1.jpg",
+    "runs/visual-review/v_f55dc95fb23e/last_native_seq_28_80_2.jpg",
+    "runs/visual-review/v_f55dc95fb23e/landing_64_76.jpg",
+    "runs/visual-review/v_f55dc95fb23e/landing_native_crop_0069.jpg",
+    "runs/visual-review/v_f55dc95fb23e/landing_native_crop_0070.jpg",
+    "runs/visual-review/v_f55dc95fb23e/landing_native_crop_0071.jpg",
+    "runs/visual-review/v_f55dc95fb23e/court_preview_crop_0070.jpg",
+    "runs/review-remediation/boundary/8k6-cross-view-actions.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "detection_labels": [
+    {
+      "frame_index": 69,
+      "x": 713.8,
+      "y": 285,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 71,
+      "x": 729,
+      "y": 281.5,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 72,
+      "x": 734,
+      "y": 281,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 75,
+      "x": 754,
+      "y": 290.5,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 69,
+      "x": 650,
+      "y": 310,
+      "label": "background"
+    },
+    {
+      "frame_index": 71,
+      "x": 650,
+      "y": 310,
+      "label": "background"
+    },
+    {
+      "frame_index": 72,
+      "x": 650,
+      "y": 310,
+      "label": "background"
+    },
+    {
+      "frame_index": 75,
+      "x": 650,
+      "y": 310,
+      "label": "background"
+    }
+  ],
+  "follow_up": [],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "contact_interval",
+  "contact_interval_observed": true,
+  "contact_interval_frames": [
+    69,
+    71
+  ],
+  "contact_support_px": [
+    [
+      718,
+      285
+    ],
+    [
+      725,
+      285
+    ],
+    [
+      725,
+      291
+    ],
+    [
+      718,
+      291
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_px": [
+      [
+        207,
+        247
+      ],
+      [
+        537,
+        232
+      ],
+      [
+        883,
+        319
+      ],
+      [
+        356,
+        502
+      ]
+    ],
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "edge_roles": [
+      "net",
+      "right",
+      "near",
+      "left"
+    ],
+    "contact_uncertainty_px": 2,
+    "boundary_uncertainty_px": 1.5,
+    "explanation": "원본 전체 코트에서 복식 외곽 사이드라인 및 가까운 베이스라인의 실제 바깥 테두리를 확인했다. 두번째 꼭짓점에서 세번째 꼭짓점으로 이어지는 오른쪽 외곽선은 접촉보다 위쪽이며 안쪽 평행 단식선과 구별된다."
+  },
+  "detection_labels_verified": false,
+  "detection_labels_verified_by_ai": true,
+  "cross_view_match": {
+    "other_video_id": "v_4bce45231ca1",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 36,
+        "other_frame_index": 72,
+        "description": "흰 RYDER 상의 선수가 크게 내딛으며 포핸드 타격하고 연청색 파트너가 그 뒤로 교차하는 동작을 양쪽 시점에서 대조했다."
+      },
+      {
+        "frame_index": 56,
+        "other_frame_index": 96,
+        "description": "남색 상의·긴 청색 양말 선수가 머리 위로 라켓을 들어 응수하고 흰색·연청색 상대 두 선수가 다시 수비 자세를 취하는 다음 동작을 대조했다."
+      }
+    ],
+    "rationale": "동일한 네 선수, 두 번의 서로 다른 타격 동작과 연속 순서를 원본 프레임으로 확인했다. A72/B36와 A96/B56의 표시 시각 차이는 약0.90초/0.87초로 일관되며 마지막 접촉 A114/B70의 약0.88초 차이와도 맞는다. 프레임 번호 또는 파일명만으로 연결하지 않았고 시간 동기화나3D좌표 복원을 주장하지 않는다.",
+    "evidence_paths": [
+      "runs/review-remediation/boundary/8k6-cross-view-actions.jpg",
+      "runs/review-remediation/boundary/actions/8k6-A-01.jpg",
+      "runs/review-remediation/boundary/actions/8k6-B-01.jpg",
+      "runs/review-remediation/boundary/actions/8k6-A-02.jpg",
+      "runs/review-remediation/boundary/actions/8k6-B-02.jpg"
+    ],
+    "clock_synchronization_claimed": false
+  }
+}

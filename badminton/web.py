@@ -7,7 +7,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import math
 import mimetypes
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import re
 import threading
 from urllib.parse import unquote, urlsplit
@@ -41,18 +41,34 @@ def _finite(value):
 class ReviewServer(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, address, root):
+    def __init__(self, address, root, video_dir=None):
         self.root = Path(root).resolve()
+        self.video_dir = Path(video_dir if video_dir is not None else "video").resolve()
         self.static = Path(__file__).with_name("static")
         self.annotation_lock = threading.Lock()
         self.jobs = {}
         self.job_lock = threading.Lock()
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="review-analysis")
+        self.pair_workspace = None
+        self.pair_workspace_lock = threading.Lock()
         super().__init__(address, ReviewHandler)
 
     def server_close(self):
         self.executor.shutdown(wait=False, cancel_futures=True)
+        if self.pair_workspace is not None:
+            self.pair_workspace.close()
         super().server_close()
+
+    def get_pair_workspace(self):
+        """Keep paired jobs and uploads separate from the historical analysis."""
+        with self.pair_workspace_lock:
+            if self.pair_workspace is None:
+                from .pair_workspace import PairWorkspace
+                project = Path(__file__).resolve().parents[1]
+                library = self.root if (self.root / "index.json").is_file() else project / "runs/integrated-poc"
+                self.pair_workspace = PairWorkspace(project_root=project,
+                    workspace_root=self.root / "paired", library_root=library)
+            return self.pair_workspace
 
     def video(self, video_id):
         if not re.fullmatch(r"[\w.-]{1,140}", video_id) or video_id in (".", ".."):
@@ -66,6 +82,53 @@ class ReviewServer(ThreadingHTTPServer):
     def result(self, video_id):
         row = self.video(video_id)
         return _read_json(_safe_path(self.root, row.get("result_path", f"videos/{video_id}/result.json")))
+
+    def resolve_original(self, row, result):
+        """Locate the same source after a run is copied to another computer.
+
+        A stored absolute path may remain usable. Otherwise a relative filename
+        is looked up only inside the explicitly configured local video folder.
+        Every accepted file must match the persisted original content hash.
+        """
+        from .media import file_hash
+
+        recorded_hashes = [value for value in (row.get("sha256"), result.get("source_sha256"))
+                           if value is not None]
+        if (not recorded_hashes or any(not isinstance(value, str) or not re.fullmatch(r"[a-fA-F0-9]{64}", value)
+                                       for value in recorded_hashes)):
+            raise RequestError(409, "원본 SHA256 기록이 없어 재분석할 영상을 확인할 수 없습니다. CLI에서 새로 분석하세요.")
+        expected = recorded_hashes[0].lower()
+        if any(value.lower() != expected for value in recorded_hashes):
+            raise RequestError(409, "영상 목록과 분석 결과의 원본 SHA256이 다릅니다. 동일한 실행 결과인지 확인하세요.")
+        name = row.get("file", result.get("file"))
+        fallback = None
+        if name is not None:
+            if (not isinstance(name, str) or not name or "\\" in name or ":" in name or "\x00" in name or
+                    Path(name).is_absolute() or PureWindowsPath(name).drive or ".." in PureWindowsPath(name).parts):
+                raise RequestError(403, "원본 파일 이름은 --video-dir 안의 상대 경로여야 합니다.")
+            fallback = _safe_path(self.video_dir, name)
+        candidates = []
+        original = row.get("source_path", result.get("source_path"))
+        if isinstance(original, str) and "\x00" not in original:
+            path = Path(original)
+            if path.is_absolute():
+                candidates.append(path.resolve())
+        if fallback is not None and fallback not in candidates:
+            candidates.append(fallback)
+        mismatched = False
+        for candidate in candidates:
+            if not candidate.is_file():
+                continue
+            try:
+                digest = file_hash(candidate)
+            except OSError:
+                raise RequestError(403, "원본 영상을 읽을 수 없습니다. 파일 접근 권한을 확인하세요.")
+            if digest == expected:
+                return candidate, expected
+            mismatched = True
+        if mismatched:
+            raise RequestError(409, "찾은 영상의 SHA256이 기존 분석의 원본과 다릅니다. 동일한 원본을 --video-dir 폴더에 넣으세요.")
+        raise RequestError(404, "원본 영상을 찾을 수 없습니다. 원본 파일이 있는 폴더를 serve --video-dir로 지정하세요.")
 
     def annotate(self, video_id, body):
         self.video(video_id)
@@ -226,7 +289,7 @@ class ReviewHandler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("Cache-Control", "no-store")
-        self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
+        self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
         if length is not None:
             self.send_header("Content-Length", str(length))
         for key, value in (extra or {}).items():
@@ -282,12 +345,15 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 self.wfile.write(chunk)
                 remaining -= len(chunk)
 
-    def _write_body(self):
+    def _check_write_origin(self):
         origin = self.headers.get("Origin")
         if origin and urlsplit(origin).netloc.lower() != self.headers.get("Host", "").lower():
             raise RequestError(403, "다른 사이트에서의 저장 요청은 허용되지 않습니다.")
         if self.headers.get("Sec-Fetch-Site") == "cross-site":
             raise RequestError(403, "다른 사이트에서의 저장 요청은 허용되지 않습니다.")
+
+    def _write_body(self):
+        self._check_write_origin()
         if self.headers.get_content_type() != "application/json":
             raise RequestError(415, "JSON 요청만 허용됩니다.")
         try:
@@ -306,6 +372,22 @@ class ReviewHandler(BaseHTTPRequestHandler):
 
     def _get(self):
         path = unquote(urlsplit(self.path).path)
+        if path in ("/pair", "/pair/", "/pair.html"):
+            return self._file(self.server.static / "pair.html")
+        if path in ("/pair.js", "/pair.css"):
+            return self._file(self.server.static / path[1:])
+        if path == "/api/pair-library":
+            return self._json(self.server.get_pair_workspace().library())
+        if path == "/api/pair-jobs":
+            return self._json(self.server.get_pair_workspace().list_jobs())
+        if path.startswith("/api/pair-jobs/"):
+            return self._json(self.server.get_pair_workspace().get_job(path.removeprefix("/api/pair-jobs/")))
+        if path.startswith("/pair-media/"):
+            return self._file(self.server.get_pair_workspace().asset_path(path.removeprefix("/pair-media/")))
+        if path.startswith("/pair-review-assets/"):
+            return self._file(self.server.get_pair_workspace().review_asset_path(path.removeprefix("/pair-review-assets/")))
+        if path.startswith("/pair-library-assets/"):
+            return self._file(self.server.get_pair_workspace().library_asset_path(path.removeprefix("/pair-library-assets/")))
         if path in ("/", "/index.html"):
             return self._file(self.server.static / "index.html")
         if path in ("/app.js", "/style.css"):
@@ -350,8 +432,25 @@ class ReviewHandler(BaseHTTPRequestHandler):
         raise RequestError(404, "경로를 찾을 수 없습니다.")
 
     def _post(self):
-        body = self._write_body()
         path = unquote(urlsplit(self.path).path)
+        if path == "/api/pair-uploads":
+            self._check_write_origin()
+            if self.headers.get_content_type() != "application/octet-stream":
+                raise RequestError(415, "영상 파일을 application/octet-stream 형식으로 전송하세요.")
+            if self.headers.get("Transfer-Encoding") or self.headers.get("Content-Encoding"):
+                raise RequestError(400, "압축하지 않은 파일과 정확한 Content-Length가 필요합니다.")
+            value = self.headers.get("Content-Length", "")
+            if not re.fullmatch(r"[0-9]+", value):
+                raise RequestError(400, "정확한 파일 크기(Content-Length)가 필요합니다.")
+            length = int(value)
+            if length < 1 or length > 1024 * 1024 * 1024:
+                raise RequestError(413, "영상 한 개의 크기는 1바이트 이상 1GiB 이하여야 합니다.")
+            filename = unquote(self.headers.get("X-Filename", ""))
+            self.connection.settimeout(60)
+            return self._json(self.server.get_pair_workspace().stage_upload(self.rfile, length, filename), 201)
+        body = self._write_body()
+        if path == "/api/pair-jobs":
+            return self._json(self.server.get_pair_workspace().submit(body), 202)
         if path.startswith("/api/annotations/"):
             return self._json(self.server.annotate(path.removeprefix("/api/annotations/"), body))
         match = re.fullmatch(r"/api/pairs/(\d+)/sync", path)
@@ -402,13 +501,8 @@ class ReviewHandler(BaseHTTPRequestHandler):
         if path.startswith("/api/analyze/"):
             video_id = path.removeprefix("/api/analyze/")
             row = self.server.video(video_id)
-            source = row.get("source_path")
-            if source is None:
-                raise RequestError(409, "이 실행 결과에는 재분석용 원본 경로가 없습니다. CLI에서 분석을 실행하세요.")
-            source = Path(source)
-            if not source.is_file():
-                raise RequestError(404, "원본 영상이 없습니다.")
             existing = self.server.result(video_id)
+            source, expected_source_hash = self.server.resolve_original(row, existing)
             configuration = dict(existing.get("config") or {})
             configuration["video_id"] = video_id
             with self.server.job_lock:
@@ -421,6 +515,9 @@ class ReviewHandler(BaseHTTPRequestHandler):
                     self.server.jobs[job_id]["status"] = "running"
                 try:
                     from .pipeline import analyze_video
+                    from .media import file_hash
+                    if file_hash(source) != expected_source_hash:
+                        raise ValueError("Original video changed after the reanalysis request")
                     analyze_video(source, self.server.root / "videos" / video_id, config=configuration)
                     with self.server.job_lock:
                         self.server.jobs[job_id]["status"] = "completed"
@@ -432,6 +529,7 @@ class ReviewHandler(BaseHTTPRequestHandler):
         raise RequestError(404, "경로를 찾을 수 없습니다.")
 
     def _dispatch(self, callback):
+        from .pair_workspace import PairWorkspaceError
         try:
             hostname = urlsplit("http://" + self.headers.get("Host", "")).hostname
             allowed_hosts = {"127.0.0.1", "localhost", "::1", self.server.server_address[0]}
@@ -439,6 +537,8 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 raise RequestError(403, "로컬 서버 주소로 접속하세요.")
             callback()
         except RequestError as error:
+            self._json({"error": error.message}, error.status)
+        except PairWorkspaceError as error:
             self._json({"error": error.message}, error.status)
         except (BrokenPipeError, ConnectionResetError):
             pass
@@ -455,12 +555,12 @@ class ReviewHandler(BaseHTTPRequestHandler):
         self._dispatch(self._post)
 
 
-def create_server(root, host="127.0.0.1", port=8765):
-    return ReviewServer((host, port), root)
+def create_server(root, host="127.0.0.1", port=8765, video_dir=None):
+    return ReviewServer((host, port), root, video_dir=video_dir)
 
 
-def serve(root, host="127.0.0.1", port=8765):
-    server = create_server(root, host, port)
+def serve(root, host="127.0.0.1", port=8765, video_dir=None):
+    server = create_server(root, host, port, video_dir=video_dir)
     print(f"Review UI: http://{host}:{server.server_address[1]}", flush=True)
     try:
         server.serve_forever()

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_36c9c42dd15b",
+  "file": "b시점 3.mp4",
+  "source_sha256": "4251e17f0ff5ea2c88cda6d61199f5c9db243283574019cf8fbda9846875bd28",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "source_review_sha256": "1f563ae9f8442c5e67a6cb4134f98e108968e5cf27d99a212146c8e927b9335d",
+  "source_review_path": "annotations/ai-visual/v_36c9c42dd15b.json"
+}

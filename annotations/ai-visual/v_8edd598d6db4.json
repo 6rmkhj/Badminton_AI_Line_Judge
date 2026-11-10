@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_8edd598d6db4",
+  "file": "a-2시점(uhd30 4k30).mp4",
+  "source_sha256": "4e42f1c0996825312f6782fa94168c21789fe2d22cac9b7e43e05c5a7461c4ee",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "UNKNOWN",
+  "reviewer": "Codex review_uhd4k",
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI가 직접 영상 프레임을 해석한 보조 레이블이며 사람이 독립 검수한 정답이 아니다.",
+    "검수한 기존 영상에 대한 해석으로 새로운 경기 영상의 자동 판정 정확도를 입증하지 않는다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    6,
+    12,
+    18,
+    25,
+    31,
+    37,
+    43,
+    50,
+    56,
+    62,
+    68,
+    75,
+    81,
+    83,
+    87,
+    90,
+    92,
+    93,
+    94,
+    96,
+    98,
+    100,
+    102,
+    104,
+    106,
+    108,
+    110,
+    112,
+    114,
+    116,
+    118,
+    120,
+    122,
+    124,
+    125,
+    126,
+    128,
+    130,
+    131,
+    132,
+    134,
+    136,
+    137,
+    138,
+    140,
+    142,
+    144
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_8edd598d6db4/overview.jpg",
+    "runs/visual-review/v_8edd598d6db4/frame-end.jpg",
+    "runs/visual-review/v_8edd598d6db4/far-0.jpg",
+    "runs/visual-review/v_8edd598d6db4/far-1.jpg",
+    "runs/visual-review/v_8edd598d6db4/far-2.jpg",
+    "runs/visual-review/v_8edd598d6db4/far-3.jpg",
+    "runs/visual-review/v_8edd598d6db4/match-83.jpg",
+    "runs/visual-review/v_d7de1ab9f6a0/match-106.jpg",
+    "runs/visual-review/v_8edd598d6db4/match-136.jpg",
+    "runs/visual-review/v_d7de1ab9f6a0/match-159.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "contact_out_of_view",
+  "rationale": "마지막 타격 이후 반대편 선수들이 오른쪽 후방을 보며 회수하러 이동한다. 이 시점에서는 접촉 영역이 화면의 먼 오른쪽에 작고 일부 가려져 코르크의 최초 접촉 및 선 관계를 직접 확정하지 못했다. 반대 시점의 마지막 타격과 별도 수비/회수 동작을 교차 확인했으므로 해당 B 영상의 직접 관측 판정을 사건 단위로 참조할 수 있다.",
+  "cross_view_match": {
+    "other_video_id": "v_d7de1ab9f6a0",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 83,
+        "other_frame_index": 106,
+        "description": "검은 옷 선수의 마지막 점프 오버헤드 타격과 빨간 옷 파트너의 준비 자세"
+      },
+      {
+        "frame_index": 136,
+        "other_frame_index": 159,
+        "description": "랠리 종료 뒤 검은 반바지 선수가 흰 반바지 파트너 뒤를 돌아 후방 셔틀 쪽으로 이동"
+      }
+    ],
+    "rationale": "원본 연속 프레임의 마지막 타격 및 별도의 수비/회수 동작을 두 시점에서 비교했다. 동일한 선수 위치·자세·동작 순서로 사건을 확인했으며 파일명만으로 연결하지 않았다. 프레임 번호 차이는 공통 시계 동기화나 정밀3D 복원을 뜻하지 않는다.",
+    "evidence_paths": [
+      "runs/visual-review/v_8edd598d6db4/match-83.jpg",
+      "runs/visual-review/v_d7de1ab9f6a0/match-106.jpg",
+      "runs/visual-review/v_8edd598d6db4/match-136.jpg",
+      "runs/visual-review/v_d7de1ab9f6a0/match-159.jpg"
+    ]
+  }
+}

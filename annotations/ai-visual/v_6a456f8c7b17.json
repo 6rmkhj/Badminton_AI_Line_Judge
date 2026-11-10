@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "video_id": "v_6a456f8c7b17",
+  "file": "a시점 11.mp4",
+  "source_sha256": "5492684ede8735d3eb7b7399c1baffa7b9aea92bde159bc8e8b2d9a6e2a49493",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "IN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "target_contact_identity_confirmed": true,
+  "contact_frame_index": 175,
+  "contact_px": [
+    406,
+    391
+  ],
+  "time": 2.951867,
+  "confidence": "high",
+  "observation_status": "contact_interval",
+  "rationale": "녹색 상의 선수가 뒤쪽으로 달려오지만 도착하기 전 셔틀이 근측 코트 안에 먼저 닿고 반동한다. 원본 연속 프레임에서 최초 접촉과 이후 회수를 확인했고 모든 관련 외곽선에서 충분히 안쪽이다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    12,
+    24,
+    37,
+    49,
+    61,
+    74,
+    86,
+    98,
+    111,
+    123,
+    135,
+    148,
+    150,
+    154,
+    158,
+    160,
+    162,
+    166,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    190,
+    194,
+    197,
+    198,
+    202,
+    206,
+    209,
+    210,
+    214,
+    218,
+    222,
+    226,
+    230,
+    234,
+    246,
+    259,
+    271,
+    284
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_6a456f8c7b17/overview.jpg",
+    "runs/visual-review/v_6a456f8c7b17/detail_150_235_4_preview.jpg",
+    "runs/visual-review/v_6a456f8c7b17/detail_174_185_1_native.jpg",
+    "runs/visual-review/v_6a456f8c7b17/detail_171_175_1_native.jpg",
+    "runs/visual-review/v_6a456f8c7b17/patch-label-check.png"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 175,
+      "x": 406,
+      "y": 389,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 176,
+      "x": 406,
+      "y": 383,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 180,
+      "x": 406,
+      "y": 363,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    },
+    {
+      "frame_index": 183,
+      "x": 409,
+      "y": 352,
+      "label": "shuttle",
+      "evidence": "원본 확대 연속 프레임에서 코르크와 깃털 형태를 직접 확인"
+    }
+  ],
+  "contact_interval_frames": [
+    174,
+    175
+  ],
+  "contact_support_px": [
+    [
+      403,
+      386
+    ],
+    [
+      410,
+      386
+    ],
+    [
+      410,
+      395
+    ],
+    [
+      403,
+      395
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_px": [
+      [
+        239,
+        253
+      ],
+      [
+        550,
+        253
+      ],
+      [
+        930,
+        341
+      ],
+      [
+        314,
+        530
+      ]
+    ],
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "edge_roles": [
+      "net",
+      "right",
+      "near",
+      "left"
+    ],
+    "contact_uncertainty_px": 4,
+    "boundary_uncertainty_px": 8,
+    "explanation": "근측 코트의 두 복식 사이드라인과 뒤 베이스라인의 바깥 칠 경계, 네트 지주 바닥을 연결한 반 코트. 렌즈 원근과 수동 모서리 선택 오차를 8px로 포함했다."
+  },
+  "follow_up_actions": [
+    "독립된 사람 검수자가 같은 첫 접촉 구간과 코트 외곽선 근거를 확인해 별도 정답 레이블을 확정한다.",
+    "현재 레이블은 AI 보조 검수로 보존하고 독립 테스트 정확도로 계산하지 않는다."
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_45241dd65a35",
+  "file": "a시점 7.mp4",
+  "source_sha256": "4547686c4665cb787757ed015253367b6202b9a3c8503ddd08f4de15d2e3c3ef",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_a",
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "a5e22b6cae54a989c791ea481e66563bf09b6f5be4f5558ed90b92535068b74d",
+  "source_review_path": "annotations/ai-visual/v_45241dd65a35.json"
+}

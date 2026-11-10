@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_4d648bd40ab0",
+  "file": "8k 30 4k 24 b시점 1.mp4",
+  "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_8k",
+  "detection_labels": [],
+  "source_review_sha256": "21a12defcfbc8abfdc3c5d1eb80de68fff75746ff60f6770cfe7028568ec0bca",
+  "source_review_path": "annotations/ai-visual/v_4d648bd40ab0.json"
+}

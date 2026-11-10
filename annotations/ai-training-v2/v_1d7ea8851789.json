@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_1d7ea8851789",
+  "file": "a시점(uhd30 hd30) 5.mp4",
+  "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_uhdhd",
+  "detection_labels": [
+    {
+      "frame_index": 145,
+      "x": 734,
+      "y": 306,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 146,
+      "x": 739,
+      "y": 306,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 148,
+      "x": 748,
+      "y": 306,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 150,
+      "x": 755,
+      "y": 308,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 215,
+      "x": 853,
+      "y": 340,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 145,
+      "x": 715,
+      "y": 280,
+      "label": "background"
+    },
+    {
+      "frame_index": 150,
+      "x": 715,
+      "y": 320,
+      "label": "background"
+    },
+    {
+      "frame_index": 215,
+      "x": 790,
+      "y": 380,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "source_review_sha256": "c480fa224984c799a8dd196ce1b570acb475d5b28de58dda2fab329cdb23ad0a",
+  "source_review_path": "annotations/ai-visual/v_1d7ea8851789.json"
+}

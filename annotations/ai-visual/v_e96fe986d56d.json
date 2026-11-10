@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_e96fe986d56d",
+  "file": "8k 30 4k 24 b시점 8.mp4",
+  "source_sha256": "3f2d8be14921c03187e923501e98750db28980ebf0a33ec51c57f07d294f1668",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "UNKNOWN",
+  "reviewer": "Codex review_8k",
+  "contact_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "confidence": "insufficient_evidence",
+  "rationale": "흰색/연청색 선수들이 전진 응수한 후 멈춘다. 먼쪽 선수가 셔틀을 줍는 정황은 있으나 이 영상에서 최초 접촉점은 네트와 거리 때문에 식별되지 않는다. 별도 cross_view_match에 반대 시점과 대조한 두 동작을 기록했다. 이 시점의 미관측 접촉 좌표를 만들어 넣지는 않았다.",
+  "limitations": [
+    "최초 접촉과 외곽 라인의 관계를 확인하지 못함",
+    "AI 시각 검수이며 독립된 사람 정답이 아님"
+  ],
+  "inspected_frame_indices": [
+    0,
+    3,
+    6,
+    8,
+    10,
+    12,
+    13,
+    16,
+    17,
+    20,
+    24,
+    27,
+    30,
+    34,
+    37,
+    41,
+    44,
+    48,
+    51,
+    54,
+    58,
+    61,
+    65,
+    68,
+    72,
+    75,
+    79
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_e96fe986d56d/overview.jpg",
+    "runs/visual-review/v_e96fe986d56d/cross-view-actions.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "detection_labels": [],
+  "follow_up": [
+    "해당 랠리의 반대편 영상과 사건/시간 대응 확인",
+    "접촉이 클립 밖이면 더 긴 원본 확보; 정지 위치나 선수 반응으로 IN/OUT을 강제하지 않음"
+  ],
+  "target_contact_identity_confirmed": false,
+  "observation_status": "contact_out_of_view",
+  "cross_view_match": {
+    "other_video_id": "v_39c259d9aedc",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 16,
+        "other_frame_index": 9,
+        "description": "검정 선수의 이전 오버헤드 이후 남색 선수가 바깥쪽 발을 뻗어 split-step 착지하는 동일 동작 위상. 검정 선수의 라켓은 내려온 상태."
+      },
+      {
+        "frame_index": 48,
+        "other_frame_index": 49,
+        "description": "마지막 네트 방향 런지에서 검정 선수의 앞발은 깊게 착지하고 뒷다리는 길게 뻗으며 남색 선수와 교차한다."
+      }
+    ],
+    "rationale": "동일 복장/코트뿐 아니라 남색 선수 split-step 착지와 검정 선수 마지막 깊은 런지라는 두 별도 동작의 위상을 원본 B 및 A 연속 프레임으로 대응했다. 이전 오버헤드 앵커는 A 클립 시작 전 사건이므로 폐기했다. 두 대응의 PTS 오프셋은 모두 약 0.367초이며 절대 시계 동기화는 주장하지 않는다.",
+    "evidence_paths": [
+      "runs/visual-review/v_e96fe986d56d/cross-view-actions.jpg",
+      "runs/visual-review/v_e96fe986d56d/native_seq_0_79_0.jpg",
+      "runs/visual-review/v_39c259d9aedc/overview.jpg"
+    ],
+    "clock_synchronization_claimed": false
+  }
+}

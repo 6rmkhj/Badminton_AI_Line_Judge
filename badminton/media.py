@@ -151,7 +151,11 @@ def load_frames(path, expected_count=None, max_frames=3000, resize_to=None):
 
 
 class SourceFrameSequence:
-    """Decode original-resolution ONNX tiles with a one-frame memory cache."""
+    """Decode displayed original frames in order with a one-frame memory cache.
+
+    OpenCV applies the file's rotation and edit list, matching ``load_frames``.
+    Rewinding reopens the stream instead of using imprecise keyframe seeking.
+    """
     def __init__(self, path, count):
         self.path, self.count = str(path), int(count)
         self.capture = None
@@ -163,15 +167,19 @@ class SourceFrameSequence:
     def __getitem__(self, index):
         if not isinstance(index, int) or not 0 <= index < self.count:
             raise IndexError(index)
+        if index == self.index and self.frame is not None:
+            return self.frame
         if self.capture is None or index < self.index:
             self.close()
             self.capture = cv2.VideoCapture(self.path, cv2.CAP_FFMPEG, [cv2.CAP_PROP_N_THREADS, 2])
             self.index = -1
         while self.index < index:
-            ok, self.frame = self.capture.read()
-            if not ok:
+            if not self.capture.grab():
                 raise ValueError(f'Original-resolution frame {index} is unavailable')
             self.index += 1
+        ok, self.frame = self.capture.retrieve()
+        if not ok or self.frame is None:
+            raise ValueError(f'Original-resolution frame {index} is unavailable')
         return self.frame
 
     def close(self):
@@ -179,6 +187,13 @@ class SourceFrameSequence:
             self.capture.release()
         self.capture = None
         self.frame = None
+        self.index = -1
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
 
 
 def source_crop(source, time_seconds, center_px, output_path, radius=192, frame_index=None):

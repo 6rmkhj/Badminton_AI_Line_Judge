@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_4aa837e4e1e0",
+  "file": "b-4시점(uhd30 4k30).mp4",
+  "source_sha256": "018caa9ed0179b56a2e672ee32d84c5d08db3f51b51b3b1b83dea19b561ab729",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "IN",
+  "reviewer": "Codex review_uhd4k",
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "contact_frame_index": 94,
+  "time": 3.135,
+  "contact_px": [
+    623,
+    378
+  ],
+  "target_contact_identity_confirmed": true,
+  "confidence": "high",
+  "limitations": [
+    "AI가 직접 영상 프레임을 해석한 보조 레이블이며 사람이 독립 검수한 정답이 아니다.",
+    "검수한 기존 영상에 대한 해석으로 새로운 경기 영상의 자동 판정 정확도를 입증하지 않는다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    5,
+    10,
+    16,
+    21,
+    27,
+    32,
+    38,
+    43,
+    49,
+    54,
+    60,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    76,
+    82,
+    84,
+    86,
+    87,
+    88,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    104,
+    109,
+    110,
+    115,
+    120,
+    126
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_4aa837e4e1e0/overview.jpg",
+    "runs/visual-review/v_4aa837e4e1e0/frame-end.jpg",
+    "runs/visual-review/v_4aa837e4e1e0/micro-0.jpg",
+    "runs/visual-review/v_4aa837e4e1e0/micro-1.jpg",
+    "runs/visual-review/v_4aa837e4e1e0/geometry-overlay.jpg",
+    "runs/visual-review/v_ee8ea6748d0b/match-23.jpg",
+    "runs/visual-review/v_4aa837e4e1e0/match-66.jpg",
+    "runs/visual-review/v_ee8ea6748d0b/match-39.jpg",
+    "runs/visual-review/v_4aa837e4e1e0/match-82.jpg"
+  ],
+  "detection_labels": [
+    {
+      "frame_index": 90,
+      "x": 589,
+      "y": 358,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 92,
+      "x": 605,
+      "y": 365,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 94,
+      "x": 620,
+      "y": 377,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 96,
+      "x": 636,
+      "y": 388,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 90,
+      "x": 580,
+      "y": 410,
+      "label": "background"
+    },
+    {
+      "frame_index": 92,
+      "x": 660,
+      "y": 415,
+      "label": "background"
+    },
+    {
+      "frame_index": 94,
+      "x": 590,
+      "y": 400,
+      "label": "background"
+    },
+    {
+      "frame_index": 96,
+      "x": 675,
+      "y": 360,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "contact_support_px": [
+    [
+      616,
+      371
+    ],
+    [
+      631,
+      371
+    ],
+    [
+      631,
+      387
+    ],
+    [
+      616,
+      387
+    ]
+  ],
+  "contact_interval_frames": [
+    94,
+    95
+  ],
+  "observation_status": "contact_interval",
+  "rationale": "90~94 프레임의 하강 후 94~95 구간에 최초 접촉과 반동이 보이며 96 이후 재접촉하며 구른다. 처음 바닥에 닿는 범위는 복식 후방 외곽선 안쪽이다. 99 이후 선 바깥으로 이동한 정지 위치와 구별했다.",
+  "boundary_evidence": {
+    "kind": "court_interior",
+    "polygon_px": [
+      [
+        193,
+        303
+      ],
+      [
+        469,
+        266
+      ],
+      [
+        758,
+        318
+      ],
+      [
+        485,
+        510
+      ]
+    ],
+    "contact_uncertainty_px": 5,
+    "boundary_uncertainty_px": 4,
+    "explanation": "원본 전체 프레임에서 목표 복식 코트 안쪽임을 확인한 보수적인 내부 영역이다. 일부 변은 실제 외곽선이 아니라 내부를 제한하는 선분이며, 이 영역 밖이라는 이유로 OUT을 판단하지 않는다. 최초 접촉 지지 영역 전체가 내부에 위치하며 좌표·경계 판독 오차를 추가했다.",
+    "interior_confirmed": true
+  },
+  "cross_view_match": {
+    "other_video_id": "v_ee8ea6748d0b",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 66,
+        "other_frame_index": 23,
+        "description": "검은 옷 선수의 마지막 서 있는 오버헤드 타격"
+      },
+      {
+        "frame_index": 82,
+        "other_frame_index": 39,
+        "description": "상대 검은 반바지 선수가 몸을 낮추고 오른팔을 앞으로 뻗는 마지막 수비 시도"
+      }
+    ],
+    "rationale": "원본 연속 프레임의 마지막 타격 및 별도의 수비/회수 동작을 두 시점에서 비교했다. 동일한 선수 위치·자세·동작 순서로 사건을 확인했으며 파일명만으로 연결하지 않았다. 프레임 번호 차이는 공통 시계 동기화나 정밀3D 복원을 뜻하지 않는다.",
+    "evidence_paths": [
+      "runs/visual-review/v_ee8ea6748d0b/match-23.jpg",
+      "runs/visual-review/v_4aa837e4e1e0/match-66.jpg",
+      "runs/visual-review/v_ee8ea6748d0b/match-39.jpg",
+      "runs/visual-review/v_4aa837e4e1e0/match-82.jpg"
+    ]
+  }
+}

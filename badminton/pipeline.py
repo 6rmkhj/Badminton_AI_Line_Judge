@@ -10,17 +10,41 @@ from filelock import FileLock
 import cv2
 import numpy as np
 from . import __version__
-from .media import prepare_preview, load_frames, source_crop, SourceFrameSequence
+from .media import prepare_preview, load_frames, source_crop, SourceFrameSequence, file_hash
 
 
 def implementation_fingerprint():
     package = Path(__file__).parent
     digest = hashlib.sha256()
     for name in ('media.py', 'pipeline.py', 'calibration.py', 'detection.py', 'tracking.py',
-                 'events.py', 'decision.py', 'learning.py', 'contact_model.py', 'sync.py'):
+                 'events.py', 'identity.py', 'evidence.py', 'decision.py', 'learning.py',
+                 'contact_model.py', 'sync.py'):
         digest.update(name.encode())
         digest.update((package / name).read_bytes())
     return digest.hexdigest()
+
+
+def model_fingerprints(config):
+    """Changing a checkpoint at the same path must invalidate cached analysis."""
+    signatures = {}
+    for section in ('detector', 'events', 'calibration'):
+        for name, value in (config.get(section) or {}).items():
+            if name.endswith('_path') and ('model' in name or 'scorer' in name):
+                path = Path(value).expanduser().resolve()
+                signatures[f'{section}.{name}'] = {'path': str(path),
+                    'sha256': file_hash(path) if path.is_file() else None}
+    return signatures
+
+
+def select_requested_landings(landings, identity_config):
+    """Anchor matching selects identity, never physical contact or a best score."""
+    if identity_config.get('hit_anchors'):
+        selected = [item for item in landings if item.get('request_match') == 'selected']
+        # A conflicting candidate keeps the request unresolved.
+        if any(item.get('request_match') == 'ambiguous' for item in landings):
+            return landings
+        return selected
+    return landings
 
 
 def write_json(path, value):
@@ -72,10 +96,12 @@ def analyze_video(video_path, output_dir, config=None):
 
 
 def _analyze_video(video_path, output_dir, config=None):
-    from .calibration import calibrate
+    from .calibration import calibrate, assess_camera_stability, guard_calibration_stability
     from .detection import detect_sequence, summarize_detection_quality
     from .tracking import track_detections
-    from .events import estimate_landings
+    from .events import (estimate_landings, refine_source_contacts, validate_contact_modes,
+                         prioritize_review_candidates, review_refinement_regions, review_region_indices)
+    from .identity import apply_identity
     from .decision import decide
     config = dict(config or {})
     source, output = Path(video_path).resolve(), Path(output_dir).resolve()
@@ -86,8 +112,10 @@ def _analyze_video(video_path, output_dir, config=None):
     metadata, presentation, source_sha = prepare_preview(source, output / 'preview.mp4', config.get('analysis_width', 1280))
     detector_config = dict(config.get('detector') or {})
     event_config = dict(config.get('events') or {})
-    learned_input = bool(detector_config.get('model_path') or detector_config.get('scorer_path') or event_config.get('contact_model_path'))
-    if learned_input:
+    validate_contact_modes(event_config)
+    learned_input = bool(detector_config.get('model_path') or detector_config.get('scorer_path')
+                         or event_config.get('contact_model_path'))
+    if learned_input or detector_config.get('refinement_regions'):
         frames = load_frames(source, presentation['frame_count'], config.get('max_frames', 3000),
                              resize_to=(presentation['width'], presentation['height']))
         preprocessing = 'opencv_source_bgr_area_v1'
@@ -99,13 +127,15 @@ def _analyze_video(video_path, output_dir, config=None):
     timings['decode_and_preview_seconds'] = time.perf_counter() - start
     clock = time.perf_counter()
     calibration_frames = [frames[int(i)] for i in np.linspace(0, len(frames)-1, min(9, len(frames)))]
-    calibration = calibrate(calibration_frames, config.get('court_hint'))
+    calibration = calibrate(calibration_frames, config.get('court_hint'), config.get('calibration'))
+    stability = assess_camera_stability(frames, config.get('camera_stability'))
+    calibration = guard_calibration_stability(calibration, stability)
     timings['calibration_seconds'] = time.perf_counter() - clock
     clock = time.perf_counter()
     detector_config['source_path'] = str(source)
     detector_config['frame_preprocessing'] = preprocessing
     source_frames = None
-    if detector_config.get('backend') == 'onnx':
+    if detector_config.get('backend') == 'onnx' or detector_config.get('highres_enabled', True):
         source_frames = SourceFrameSequence(source, len(frames))
         detector_config['source_frames'] = source_frames
     try:
@@ -119,23 +149,48 @@ def _analyze_video(video_path, output_dir, config=None):
     timings['tracking_seconds'] = time.perf_counter() - clock
     clock = time.perf_counter()
     event_config['frame_preprocessing'] = preprocessing
+    event_config['review_refinement_regions'] = detector_config.get('refinement_regions',
+        event_config.get('review_refinement_regions', []))
+    review_regions = review_refinement_regions(event_config,
+        (frames[0].shape[1], frames[0].shape[0]), len(timestamps))
+    identity_config = dict(config.get('identity') or {})
+    if identity_config.get('event_window_seconds') is not None:
+        event_config['event_window_seconds'] = identity_config['event_window_seconds']
     landings = estimate_landings(tracks, frames, timestamps, calibration, event_config)
+    landings = apply_identity(landings, tracks, timestamps, calibration, identity_config)
+    if event_config.get('source_contact_enabled', True):
+        with SourceFrameSequence(source, len(frames)) as originals:
+            landings = refine_source_contacts(landings, originals, timestamps,
+                analysis_size=(frames[0].shape[1], frames[0].shape[0]),
+                config=event_config, output_dir=output)
     for i, landing in enumerate(landings):
         landing['event_id'] = f'event_{i:03d}'
         landing['decision'] = decide(landing, calibration, config.get('rules'))
-    decision = aggregate_decision([landing['decision'] for landing in landings])
+        if landing.get('assistance_used'):
+            landing['decision'].update(assistance_used=True, evaluation_eligible=False)
+    requested = select_requested_landings(landings, identity_config)
+    decision = aggregate_decision([landing['decision'] for landing in requested])
+    assistance_used = bool(identity_config.get('hit_anchors') or event_config.get('target_track_id') is not None
+                           or config.get('request_context') or review_regions)
+    if assistance_used:
+        decision.update(assistance_used=True, evaluation_eligible=False)
     timings['events_and_decision_seconds'] = time.perf_counter() - clock
-    selected = max(landings, key=lambda x: x.get('confidence', 0), default=None)
+    display_candidates = prioritize_review_candidates(requested, review_regions)
+    selected = display_candidates[0] if display_candidates else None
     artifacts = {'preview': 'preview.mp4', 'detections': 'detections.json', 'evidence': []}
     evidence_dir = output / 'evidence'
     evidence_dir.mkdir(exist_ok=True)
     # Preserve several candidate contexts, including original-resolution crops.
-    for landing in sorted(landings, key=lambda x: x.get('confidence', 0), reverse=True)[:6]:
+    for landing in prioritize_review_candidates(landings, review_regions)[:6]:
         index = max(0, min(len(frames)-1, int(landing.get('frame_index', 0))))
         filename = f"{landing['event_id']}.jpg"
         cv2.imwrite(str(evidence_dir / filename), _draw_frame(frames[index], calibration, tracks, index, landing))
         evidence = {'event_id': landing['event_id'], 'frame_index': index, 'time': timestamps[index],
                     'image': 'evidence/' + filename}
+        native = landing.get('source_contact_evidence', {})
+        if native.get('image'):
+            evidence['source_sequence'] = native['image']
+            evidence['source_sequence_info'] = native
         center = landing.get('candidate_px')
         if center and len(artifacts['evidence']) < int(config.get('source_crop_count', 1)):
             crop_name = f"{landing['event_id']}-source.jpg"
@@ -145,19 +200,40 @@ def _analyze_video(video_path, output_dir, config=None):
             if evidence['source_crop_info']['status'] == 'saved':
                 evidence['source_crop'] = 'evidence/' + crop_name
         artifacts['evidence'].append(evidence)
+    review_refinement = {
+        'status': ('matched_candidates' if any(review_region_indices(item, review_regions) for item in landings)
+                   else 'no_matching_candidate') if review_regions else 'not_requested',
+        'regions': review_regions,
+        'matching_event_ids': [item['event_id'] for item in landings if review_region_indices(item, review_regions)],
+        'selected_event_id': selected['event_id'] if selected else None,
+        'selected_in_requested_region': bool(selected and review_region_indices(selected, review_regions)),
+        'scope': 'Evidence prioritization only; all landing decisions remain in the request aggregate.',
+        'assistance_used': bool(review_regions),
+    }
     representative = int(len(frames) / 2)
     cv2.imwrite(str(output / 'overview.jpg'), _draw_frame(frames[representative], calibration, tracks, representative))
     artifacts['overview'] = 'overview.jpg'
+    if config.get('evidence', {}).get('annotated_clip', True):
+        from .evidence import write_annotated_clip
+        artifacts['annotated_clip'] = write_annotated_clip(frames, timestamps, calibration, tracks,
+            selected, decision, output, config.get('evidence'))
     timings['total_seconds'] = time.perf_counter() - start
     result = {'schema_version': 1, 'pipeline_version': __version__, 'video_id': video_id,
+              'implementation_fingerprint': implementation_fingerprint(),
               'file': source.name, 'source_path': str(source), 'source_sha256': source_sha,
               'metadata': metadata, 'analysis': {'width': frames[0].shape[1], 'height': frames[0].shape[0],
                 'frame_count': len(frames), 'preprocessing': preprocessing,
-                'source_scaling': 'Original-resolution crops retained for review'},
-              'timestamps': timestamps, 'calibration': calibration, 'tracks': tracks,
+                'source_scaling': 'Global source-frame scan with native ROI refinement and temporal contact evidence'},
+              'timestamps': timestamps, 'calibration': calibration, 'camera_stability': stability, 'tracks': tracks,
               'detection_quality': summarize_detection_quality(detections, tracks),
               'landings': landings, 'selected_landing': selected, 'decision': decision,
+              'review_refinement': review_refinement,
               'timings': timings, 'artifacts': artifacts, 'config': config,
+              'assistance_used': assistance_used, 'automatic_evaluation_eligible': not assistance_used,
+              'identity': {'requested_event_count': len(requested),
+                           'hit_anchor_count': len(identity_config.get('hit_anchors', [])),
+                           'event_window_seconds': identity_config.get('event_window_seconds')},
+              'model_fingerprints': model_fingerprints(config),
               'detector': {'method': detector_config.get('backend', 'classical_motion_candidates'),
                            'trained_model_provided': bool(detector_config.get('model_path') or detector_config.get('scorer_path')),
                            'calibrated_accuracy': None},
@@ -175,6 +251,7 @@ def analyze_dataset(video_dir, run_dir, config=None, limit=None, resume=True):
     from .sync import synchronize
     from .evaluation import evaluate_run
     config = dict(config or {})
+    cv2.setNumThreads(max(1, min(4, int(config.get('opencv_threads', 2)))))
     run = Path(run_dir).resolve()
     run.mkdir(parents=True, exist_ok=True)
     manifest = build_manifest(video_dir)
@@ -185,7 +262,8 @@ def analyze_dataset(video_dir, run_dir, config=None, limit=None, resume=True):
              'scope': 'Research analysis and human review; no independent accuracy claim.'}
     results = []
     implementation = implementation_fingerprint()
-    config_digest = hashlib.sha256((json.dumps(config, sort_keys=True) + implementation).encode()).hexdigest()
+    config_digest = hashlib.sha256((json.dumps(config, sort_keys=True) + implementation
+                                   + json.dumps(model_fingerprints(config), sort_keys=True)).encode()).hexdigest()
     write_json(run / 'index.json', index)
 
     def process_entry(entry):
@@ -245,4 +323,6 @@ def analyze_dataset(video_dir, run_dir, config=None, limit=None, resume=True):
     write_json(run / 'index.json', index)
     evaluation = evaluate_run(run)
     write_json(run / 'evaluation.json', evaluation)
+    from .reporting import write_run_report
+    write_run_report(run)
     return index

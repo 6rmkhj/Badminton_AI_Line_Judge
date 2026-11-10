@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "video_id": "v_23a020d3d99b",
+  "file": "a시점 14.mp4",
+  "source_sha256": "d67337c445efe538d056eedbbc3246112dbac5475b30e4a75477d0d797b9ac02",
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "reviewer": "Codex review_base_a",
+  "label": "IN",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "target_contact_identity_confirmed": true,
+  "contact_frame_index": 170,
+  "contact_px": [
+    753,
+    301
+  ],
+  "time": 2.867533,
+  "confidence": "high",
+  "observation_status": "contact_interval",
+  "rationale": "남색 선수가 오른쪽으로 손을 뻗은 뒤 셔틀이 근측 코트 후방 안쪽에 최초 접촉하고 튀어 오른다. 원본 164–194 연속 프레임에서 하강·반동을 확인했다. 접촉 근처 파란 선은 복식 롱 서비스라인이며 뒤 베이스라인보다 안쪽이므로 복식 랠리에서는 IN이다.",
+  "limitations": [
+    "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
+    "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    12,
+    25,
+    38,
+    51,
+    63,
+    76,
+    89,
+    102,
+    115,
+    127,
+    140,
+    145,
+    149,
+    153,
+    157,
+    161,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189,
+    190,
+    191,
+    192,
+    193,
+    194,
+    197,
+    201,
+    204,
+    205,
+    209,
+    217,
+    230,
+    242,
+    255,
+    268,
+    281,
+    294
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_23a020d3d99b/overview.jpg",
+    "runs/visual-review/v_23a020d3d99b/detail_145_211_4_preview.jpg",
+    "runs/visual-review/v_23a020d3d99b/detail_176_195_1_native.jpg",
+    "runs/visual-review/v_23a020d3d99b/detail_164_177_1_native.jpg",
+    "runs/visual-review/v_23a020d3d99b/patch-label-check.png"
+  ],
+  "detection_labels_verified_by_ai": true,
+  "detection_labels": [
+    {
+      "frame_index": 0,
+      "x": 500,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 650,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 800,
+      "y": 480,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 0,
+      "x": 900,
+      "y": 400,
+      "label": "background",
+      "evidence": "영상 첫 프레임의 비어 있는 목재 바닥/외곽선"
+    },
+    {
+      "frame_index": 170,
+      "x": 753,
+      "y": 300,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 하강과 첫 반동 중 동일 셔틀 형태 확인"
+    },
+    {
+      "frame_index": 173,
+      "x": 760,
+      "y": 294,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 하강과 첫 반동 중 동일 셔틀 형태 확인"
+    },
+    {
+      "frame_index": 181,
+      "x": 782,
+      "y": 285,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 하강과 첫 반동 중 동일 셔틀 형태 확인"
+    },
+    {
+      "frame_index": 191,
+      "x": 804,
+      "y": 302,
+      "label": "shuttle",
+      "evidence": "원본 확대에서 하강과 첫 반동 중 동일 셔틀 형태 확인"
+    }
+  ],
+  "contact_interval_frames": [
+    169,
+    171
+  ],
+  "contact_support_px": [
+    [
+      749,
+      297
+    ],
+    [
+      758,
+      297
+    ],
+    [
+      758,
+      305
+    ],
+    [
+      749,
+      305
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_px": [
+      [
+        201,
+        235
+      ],
+      [
+        544,
+        218
+      ],
+      [
+        883,
+        303
+      ],
+      [
+        323,
+        511
+      ]
+    ],
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "edge_roles": [
+      "net",
+      "right",
+      "near",
+      "left"
+    ],
+    "contact_uncertainty_px": 3,
+    "boundary_uncertainty_px": 6,
+    "explanation": "근측 코트의 네트 지주 바닥, 두 복식 사이드라인, 뒤 베이스라인의 바깥 경계를 확인했다. 착지 부근 내부 롱 서비스라인은 랠리의 바깥 경계로 쓰지 않는다."
+  },
+  "follow_up_actions": [
+    "독립된 사람 검수자가 같은 첫 접촉 구간과 코트 외곽선 근거를 확인해 별도 정답 레이블을 확정한다.",
+    "현재 레이블은 AI 보조 검수로 보존하고 독립 테스트 정확도로 계산하지 않는다."
+  ]
+}

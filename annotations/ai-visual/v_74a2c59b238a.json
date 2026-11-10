@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_74a2c59b238a",
+  "file": "b시점 20.mp4",
+  "source_sha256": "1c16c119d1c9ed26cb7bc1a7185359fea6a56e3c4e50aff8041c2944aa450a25",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "label": "IN",
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "contact_frame_index": 184,
+  "time": 3.067578,
+  "contact_px": [
+    735,
+    250
+  ],
+  "contact_interval_frames": [
+    182,
+    185
+  ],
+  "target_contact_identity_confirmed": true,
+  "confidence": "moderate",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "최초 접촉은 프레임 사이 구간으로 표기하며 불확실성 영역 밖의 정밀 mm 위치를 주장하지 않는다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    12,
+    15,
+    25,
+    30,
+    35,
+    38,
+    40,
+    45,
+    50,
+    51,
+    55,
+    60,
+    64,
+    75,
+    77,
+    90,
+    103,
+    105,
+    116,
+    120,
+    129,
+    135,
+    142,
+    145,
+    150,
+    154,
+    155,
+    160,
+    165,
+    167,
+    170,
+    175,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    190,
+    193,
+    195,
+    200,
+    206,
+    210,
+    219,
+    225,
+    232,
+    245,
+    258,
+    271,
+    284,
+    297
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_74a2c59b238a/overview-24.jpg",
+    "runs/visual-review/v_74a2c59b238a/detail-142-245.jpg",
+    "runs/visual-review/v_74a2c59b238a/detail-145-185-native.jpg",
+    "runs/visual-review/v_74a2c59b238a/detail-160-200-native.jpg",
+    "runs/visual-review/v_74a2c59b238a/detail-179-187-native.jpg",
+    "runs/visual-review/v_74a2c59b238a/detail-0-225-native.jpg",
+    "runs/visual-review/v_74a2c59b238a/detail-30-60-native.jpg"
+  ],
+  "detection_labels": [
+    {
+      "frame_index": 185,
+      "x": 735,
+      "y": 240,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 186,
+      "x": 735,
+      "y": 232,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 187,
+      "x": 735,
+      "y": 227,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 200,
+      "x": 736,
+      "y": 216,
+      "label": "shuttle",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 179,
+      "x": 735,
+      "y": 250,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 180,
+      "x": 745,
+      "y": 250,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 181,
+      "x": 750,
+      "y": 250,
+      "label": "background",
+      "source": "ai_visual_review"
+    },
+    {
+      "frame_index": 182,
+      "x": 750,
+      "y": 255,
+      "label": "background",
+      "source": "ai_visual_review"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "observation_status": "contact_interval",
+  "contact_support_px": [
+    [
+      730,
+      246
+    ],
+    [
+      740,
+      255
+    ]
+  ],
+  "rationale": "초록 상의 선수가 오른쪽 뒤로 따라간 셔틀은 원본 182~185 프레임 사이 바닥에 닿은 후 185~187에서 코르크가 위로 올라간다. 초기 접촉은 흐리므로 지지 영역과 시간 구간을 넓게 잡았다. 가까운 복식 반코트 안에 있으며 인접 청색 내부선은 최외곽 경계가 아니다.",
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_px": [
+      [
+        128,
+        235
+      ],
+      [
+        480,
+        184
+      ],
+      [
+        835,
+        250
+      ],
+      [
+        430,
+        529
+      ]
+    ],
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "edge_roles": [
+      "net",
+      "right",
+      "near",
+      "left"
+    ],
+    "contact_uncertainty_px": 3,
+    "boundary_uncertainty_px": 5,
+    "explanation": "보이는 두 네트 기둥의 바닥 위치와 가까운 복식 바깥 라인의 두 뒷모서리를 연결한 반코트이다. 안쪽의 단식·서비스 선을 외곽선으로 쓰지 않았다. 실제 미터 좌표나 완전한 코트 보정을 주장하지 않는다."
+  },
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "follow_up_actions": [
+    "독립 사람 검수자가 제시된 접촉 구간과 경계 불확실성을 재검증한 뒤에만 정답 평가용 레이블로 승격한다."
+  ]
+}

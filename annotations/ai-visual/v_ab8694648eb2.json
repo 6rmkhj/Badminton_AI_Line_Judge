@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_ab8694648eb2",
+  "file": "b시점 11.mp4",
+  "source_sha256": "c1de49b67a64274acc8f79b8fce11e33be7568c69913341b4d1dc6f86895e8e4",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "reviewer": "Codex review_base_b",
+  "label": "UNKNOWN",
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "contact_interval_frames": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI의 원본 영상 시각 검수이며 독립 사람 정답 검증이 아니다.",
+    "전체 프레임을 정밀 추적한 사람 검수는 아니며, 나열된 개요·확대 프레임에서 접촉을 확인하지 못했다."
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "inspected_frame_indices": [
+    0,
+    10,
+    20,
+    31,
+    41,
+    52,
+    62,
+    73,
+    83,
+    93,
+    104,
+    114,
+    125,
+    135,
+    146,
+    156,
+    166,
+    177,
+    187,
+    198,
+    208,
+    219,
+    229,
+    240
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_ab8694648eb2/overview-24.jpg",
+    "runs/visual-review/v_ab8694648eb2/detail-62-229-native.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "contact_out_of_view",
+  "rationale": "회색 선수가 뒤에서 오버헤드 타격하고 남색 파트너와 함께 네트로 전진한다. 대상 접촉은 반대편에 있어 해당 코르크와 경계 관계를 이 영상에서 확인하지 못했다.",
+  "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
+  "cross_view_match": {
+    "other_video_id": "v_6a456f8c7b17",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 104,
+        "other_frame_index": 86,
+        "description": "흰 상의 선수가 앞쪽으로 발을 크게 벌려 런지하는 동작이 서로 반대 방향으로 관찰된다."
+      },
+      {
+        "frame_index": 187,
+        "other_frame_index": 172,
+        "description": "초록 상의 선수가 뒤쪽으로 쫓아가 몸을 낮추어 라켓을 뻗는 후속 동작이 일치한다."
+      }
+    ],
+    "rationale": "양쪽 검수자가 선수 조합, 연속 타격·런지·회복 동작을 실제 영상으로 대조했다. 사건 대응을 확인한 것으로 프레임 단위 시계 동기화나 이 시점의 접촉 관측을 주장하지 않는다.",
+    "evidence_paths": [
+      "runs/visual-review/v_ab8694648eb2/detail-62-229-native.jpg",
+      "runs/visual-review/v_6a456f8c7b17/overview.jpg"
+    ],
+    "temporal_alignment": "approximate action correspondence; not synchronized clocks",
+    "reviewers": [
+      "Codex review_base_a",
+      "Codex review_base_b"
+    ]
+  },
+  "follow_up_actions": [
+    "실제 두 동작으로 대조한 다른 시점의 직접 접촉 판정을 보조 결과로 사용한다. 이 시점의 관측 누락은 유지한다.",
+    "독립 사람 검수로 사건 대응과 다른 시점의 접촉·경계를 확인한다."
+  ]
+}

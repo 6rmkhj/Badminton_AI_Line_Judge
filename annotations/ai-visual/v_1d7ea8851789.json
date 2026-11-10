@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_1d7ea8851789",
+  "file": "a시점(uhd30 hd30) 5.mp4",
+  "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "IN",
+  "reviewer": "Codex review_uhdhd",
+  "contact_observed": false,
+  "contact_interval_observed": true,
+  "contact_frame_index": 145,
+  "time": 2.445833,
+  "contact_px": [
+    734,
+    308
+  ],
+  "contact_interval_frames": [
+    145,
+    146
+  ],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "contact_interval",
+  "confidence": "high",
+  "rationale": "원본 f142~150에서 하강한 셔틀이 f145~146에 바닥에 처음 닿은 뒤 올라온다. 접촉은 카메라 쪽 복식 외곽 사이드라인보다 충분히 안쪽이다. 그 뒤 셔틀이 튀어 라인을 넘어 밖에서 멈추므로 마지막 정지점으로 OUT을 만들지 않았다.",
+  "limitations": [
+    "AI 직접 영상 검수이며 독립적인 인간 검증 정답이 아니다.",
+    "A/B 동시각이나 같은 파일명만으로 사건 대응을 확정하지 않았다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    9,
+    18,
+    28,
+    37,
+    46,
+    56,
+    65,
+    74,
+    84,
+    93,
+    102,
+    110,
+    112,
+    114,
+    118,
+    121,
+    122,
+    126,
+    130,
+    132,
+    134,
+    136,
+    138,
+    140,
+    142,
+    143,
+    144,
+    145,
+    146,
+    147,
+    148,
+    149,
+    150,
+    152,
+    154,
+    156,
+    158,
+    160,
+    162,
+    164,
+    166,
+    168,
+    170,
+    174,
+    177,
+    178,
+    182,
+    186,
+    190,
+    196,
+    205,
+    215
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_1d7ea8851789/bounce-native.jpg",
+    "runs/visual-review/v_1d7ea8851789/contact-native.jpg",
+    "runs/visual-review/v_1d7ea8851789/event-detail.jpg",
+    "runs/visual-review/v_1d7ea8851789/frame-0110.jpg",
+    "runs/visual-review/v_1d7ea8851789/frame-0130.jpg",
+    "runs/visual-review/v_1d7ea8851789/frame-0146.jpg",
+    "runs/visual-review/v_1d7ea8851789/native-0215.jpg",
+    "runs/visual-review/v_1d7ea8851789/overview.jpg",
+    "runs/visual-review/v_1d7ea8851789/pair-check-b5.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "detection_labels": [
+    {
+      "frame_index": 145,
+      "x": 734,
+      "y": 306,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 146,
+      "x": 739,
+      "y": 306,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 148,
+      "x": 748,
+      "y": 306,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 150,
+      "x": 755,
+      "y": 308,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 215,
+      "x": 853,
+      "y": 340,
+      "label": "shuttle"
+    },
+    {
+      "frame_index": 145,
+      "x": 715,
+      "y": 280,
+      "label": "background"
+    },
+    {
+      "frame_index": 150,
+      "x": 715,
+      "y": 320,
+      "label": "background"
+    },
+    {
+      "frame_index": 215,
+      "x": 790,
+      "y": 380,
+      "label": "background"
+    }
+  ],
+  "detection_labels_verified_by_ai": true,
+  "contact_support_px": [
+    [
+      732,
+      305
+    ],
+    [
+      739,
+      305
+    ],
+    [
+      739,
+      310
+    ],
+    [
+      732,
+      310
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "court_polygon",
+    "polygon_px": [
+      [
+        194,
+        518
+      ],
+      [
+        914,
+        289
+      ],
+      [
+        560,
+        190
+      ],
+      [
+        215,
+        221
+      ]
+    ],
+    "polygon_region": "near_half",
+    "target_contact_half": "near",
+    "edge_roles": [
+      "near",
+      "right",
+      "net",
+      "left"
+    ],
+    "contact_uncertainty_px": 3.0,
+    "boundary_uncertainty_px": 2.0,
+    "explanation": "수신측 반코트의 보이는 복식 외곽선과 네트 바닥 교차를 원근 사각형으로 기록했다. 하강-접촉-재상승 시퀀스의 가능한 접촉 위치 전체가 사각형 안에 있다."
+  }
+}

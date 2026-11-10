@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_ee8ea6748d0b",
+  "file": "a-4시점(uhd30 4k30).mp4",
+  "source_sha256": "973355dc2d10ab4eebe1564e4c223b02f1ba225d600a9889405eae646b8213b3",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 3840,
+    "height": 2160
+  },
+  "label": "UNKNOWN",
+  "reviewer": "Codex review_uhd4k",
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "contact_observed": false,
+  "contact_interval_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "target_contact_identity_confirmed": false,
+  "confidence": "unresolved",
+  "limitations": [
+    "AI가 직접 영상 프레임을 해석한 보조 레이블이며 사람이 독립 검수한 정답이 아니다.",
+    "검수한 기존 영상에 대한 해석으로 새로운 경기 영상의 자동 판정 정확도를 입증하지 않는다."
+  ],
+  "inspected_frame_indices": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20,
+    23,
+    25,
+    27,
+    29,
+    31,
+    33,
+    35,
+    37,
+    39,
+    41,
+    43,
+    45,
+    47,
+    49,
+    50,
+    51,
+    53,
+    54,
+    55,
+    57,
+    58,
+    59,
+    61,
+    62,
+    63,
+    65,
+    66,
+    67,
+    69,
+    70,
+    71,
+    73,
+    75,
+    77,
+    79,
+    81,
+    83,
+    85,
+    87,
+    89,
+    91,
+    93,
+    95,
+    96
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_ee8ea6748d0b/overview.jpg",
+    "runs/visual-review/v_ee8ea6748d0b/frame-end.jpg",
+    "runs/visual-review/v_ee8ea6748d0b/far-0.jpg",
+    "runs/visual-review/v_ee8ea6748d0b/far-1.jpg",
+    "runs/visual-review/v_ee8ea6748d0b/far-2.jpg",
+    "runs/visual-review/v_ee8ea6748d0b/far-3.jpg",
+    "runs/visual-review/v_ee8ea6748d0b/far-4.jpg",
+    "runs/visual-review/v_ee8ea6748d0b/match-23.jpg",
+    "runs/visual-review/v_4aa837e4e1e0/match-66.jpg",
+    "runs/visual-review/v_ee8ea6748d0b/match-39.jpg",
+    "runs/visual-review/v_4aa837e4e1e0/match-82.jpg"
+  ],
+  "detection_labels": [],
+  "detection_labels_verified_by_ai": false,
+  "observation_status": "contact_out_of_view",
+  "rationale": "20 프레임대 마지막 오버헤드 타격 이후 반대편 검은 반바지 선수가 오른쪽으로 뻗고 뒤로 이동한다. 이 시점에서는 먼 오른쪽 접촉 영역을 직접 확인하기 어렵다. 반대 시점의 마지막 타격과 별도 수비/회수 동작을 교차 확인했으므로 해당 B 영상의 직접 관측 판정을 사건 단위로 참조할 수 있다.",
+  "cross_view_match": {
+    "other_video_id": "v_4aa837e4e1e0",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 23,
+        "other_frame_index": 66,
+        "description": "검은 옷 선수의 마지막 서 있는 오버헤드 타격"
+      },
+      {
+        "frame_index": 39,
+        "other_frame_index": 82,
+        "description": "상대 검은 반바지 선수가 몸을 낮추고 오른팔을 앞으로 뻗는 마지막 수비 시도"
+      }
+    ],
+    "rationale": "원본 연속 프레임의 마지막 타격 및 별도의 수비/회수 동작을 두 시점에서 비교했다. 동일한 선수 위치·자세·동작 순서로 사건을 확인했으며 파일명만으로 연결하지 않았다. 프레임 번호 차이는 공통 시계 동기화나 정밀3D 복원을 뜻하지 않는다.",
+    "evidence_paths": [
+      "runs/visual-review/v_ee8ea6748d0b/match-23.jpg",
+      "runs/visual-review/v_4aa837e4e1e0/match-66.jpg",
+      "runs/visual-review/v_ee8ea6748d0b/match-39.jpg",
+      "runs/visual-review/v_4aa837e4e1e0/match-82.jpg"
+    ]
+  }
+}

@@ -143,11 +143,15 @@ def _offline_links(tracks, config):
         end, start = before["observations"][-1], after["observations"][0]
         if end["time"] >= start["time"]:
             continue
+        occluded_gap = any(gap.get("possible_occlusion", False)
+                           and gap.get("end_frame", -1) >= end["frame_index"] + 1
+                           and gap.get("start_frame", math.inf) <= start["frame_index"] - 1
+                           for gap in before["gaps"])
         before["gaps"] = [gap for gap in before["gaps"] if gap["resolved"]]
         before["gaps"].append({"start_frame": end["frame_index"] + 1, "end_frame": start["frame_index"] - 1,
                                "missing_frame_count": start["frame_index"] - end["frame_index"] - 1,
                                "duration_s": start["time"] - end["time"], "resolved": True,
-                               "possible_occlusion": False, "observations_interpolated": False})
+                               "possible_occlusion": occluded_gap, "observations_interpolated": False})
         before["observations"].extend(after["observations"])
         before["gaps"].extend(after["gaps"])
         before["reconnections"].extend([dict(edge), *after["reconnections"]])

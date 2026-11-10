@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_3190e2a01e60",
+  "file": "8k 30 4k 24 a시점 3.mp4",
+  "source_sha256": "9d29a7841610b8adf20acc41d63432027dcf6d157c4108b390af3982672e07c8",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 7680,
+    "height": 4320
+  },
+  "label": "UNKNOWN",
+  "reviewer": "Codex review_8k",
+  "contact_observed": true,
+  "contact_frame_index": 133,
+  "time": 4.433144,
+  "contact_px": [
+    740,
+    270
+  ],
+  "confidence": "insufficient_near_line_margin",
+  "rationale": "마지막 원본 프레임까지 추가 검수하여 122~132프레임의 하강, 133 부근 최초 접촉, 134~137 반등을 확인했다. 클립 밖의 접촉이 아니다. 접촉은 오른쪽 복식 사이드라인 바깥으로 보이지만 여러 인접 코트의 평행선과 작은 선 간격 때문에 보수적 접촉 지지영역/경계 오차를 두면 충분한 바깥 여유를 확보하지 못한다. B3의 같은 마지막 하강은 지주 뒤에서 첫 접촉이 가려져 선 위/바깥을 독립적으로 해결하지 못한다. 최종 정지 위치나 옆 코트 선수가 기존 셔틀을 줍는 동작은 판정 근거로 쓰지 않는다.",
+  "limitations": [
+    "바깥으로 보이는 첫 접촉의 여유가 동작 흐림과 경계 좌표 오차에 근접함",
+    "여러 평행 바닥선 중 가까운 베이스라인 우측 꼭짓점으로 연결되는 복식 외곽선만 구별",
+    "AI 시각 검수이며 독립된 사람 정답이 아님"
+  ],
+  "inspected_frame_indices": [
+    0,
+    6,
+    12,
+    15,
+    18,
+    24,
+    30,
+    31,
+    37,
+    43,
+    45,
+    49,
+    55,
+    60,
+    62,
+    68,
+    74,
+    75,
+    80,
+    87,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133,
+    134,
+    135,
+    136,
+    137,
+    138,
+    139,
+    140,
+    141,
+    142,
+    143
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_3190e2a01e60/overview.jpg",
+    "runs/visual-review/v_3190e2a01e60/far_native_seq_90_143_0.jpg",
+    "runs/visual-review/v_3190e2a01e60/right_native_seq_90_135_0.jpg",
+    "runs/visual-review/v_3190e2a01e60/right_native_seq_90_135_1.jpg",
+    "runs/visual-review/v_3190e2a01e60/highright_native_seq_98_126_0.jpg",
+    "runs/visual-review/v_3190e2a01e60/highright_native_seq_98_126_1.jpg",
+    "runs/visual-review/v_3190e2a01e60/players_native_seq_90_125_0.jpg",
+    "runs/visual-review/v_3190e2a01e60/players_native_seq_90_125_1.jpg",
+    "runs/visual-review/v_3190e2a01e60/farcontact_seq_0.jpg",
+    "runs/visual-review/v_3190e2a01e60/farcontact_seq_18.jpg",
+    "runs/visual-review/v_3190e2a01e60/final_native_seq_120_143_0.jpg",
+    "runs/visual-review/v_3190e2a01e60/final_native_seq_120_143_1.jpg",
+    "runs/visual-review/v_3190e2a01e60/landing_123_143.jpg",
+    "runs/visual-review/v_3190e2a01e60/landing_native_crop_0132.jpg",
+    "runs/visual-review/v_3190e2a01e60/landing_native_crop_0133.jpg",
+    "runs/visual-review/v_3190e2a01e60/landing_native_crop_0134.jpg",
+    "runs/visual-review/v_3190e2a01e60/court_preview_crop_0133.jpg",
+    "runs/visual-review/v_3190e2a01e60/right_court_grid_0133.jpg",
+    "runs/review-remediation/boundary/v_3190e2a01e60/overview-0.jpg",
+    "runs/review-remediation/boundary/v_3190e2a01e60/overview-1.jpg",
+    "runs/review-remediation/boundary/v_3190e2a01e60/contact-0.jpg",
+    "runs/review-remediation/boundary/v_3190e2a01e60/contact-1.jpg",
+    "runs/review-remediation/boundary/8k3-cross-view-actions.jpg",
+    "runs/review-remediation/boundary/actions/8k3-A-01.jpg",
+    "runs/review-remediation/boundary/actions/8k3-B-01.jpg",
+    "runs/review-remediation/boundary/actions/8k3-A-02.jpg",
+    "runs/review-remediation/boundary/actions/8k3-B-02.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "detection_labels": [],
+  "follow_up": [
+    "133프레임 부근 코르크 최초 접촉과 복식 외곽선 사이를 더 선명하게 구분할 자료 또는 가까운 비가림 시점 필요",
+    "B3의 지주 뒤 접촉 가림을 정지 위치 추정으로 대체하지 않음"
+  ],
+  "target_contact_identity_confirmed": true,
+  "observation_status": "line_ambiguous",
+  "suggested_label": "OUT",
+  "contact_interval_observed": true,
+  "contact_interval_frames": [
+    132,
+    134
+  ],
+  "contact_support_px": [
+    [
+      737,
+      267
+    ],
+    [
+      744,
+      267
+    ],
+    [
+      744,
+      274
+    ],
+    [
+      737,
+      274
+    ]
+  ],
+  "boundary_evidence": {
+    "kind": "local_boundary",
+    "boundaries": [
+      {
+        "role": "right",
+        "line_px": [
+          [
+            720,
+            272.25
+          ],
+          [
+            800,
+            290.25
+          ]
+        ],
+        "inside_point_px": [
+          740,
+          310
+        ],
+        "role_confirmed": true
+      }
+    ],
+    "contact_uncertainty_px": 2,
+    "boundary_uncertainty_px": 2,
+    "explanation": "가까운 베이스라인 오른쪽 꼭짓점(약817,296)에 연결되는 복식 오른쪽 외곽 사이드라인 바깥 테두리. 그 아래/위의 다른 평행선과 구별. 코르크 동작 흐림/선 위치 오차를 보수적으로 포함해 OUT 추정만 보존한다."
+  },
+  "remediation_review": {
+    "source": "ai_visual_review",
+    "human_verified": false,
+    "reviewer": "Codex review_boundary",
+    "inspected_frame_indices": [
+      0,
+      15,
+      30,
+      45,
+      60,
+      75,
+      90,
+      100,
+      110,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      137,
+      138,
+      143
+    ],
+    "finding": "A132–134 접촉 후보는 원본8K에서도 노출 흐림과 근접 평행선 때문에 안전한 바깥 여유가 부족하다. B49–59는 지주·공조기 배경과 겹쳐 최초 코르크 접촉이 분리되지 않는다.",
+    "next_action": "A132–134의 코르크/실제 복식 외곽선 분리 가능한 고속 원본이나 지주 뒤 착지 구간을 보는 추가 시점이 필요하다. B60 이후 재출현은 반등 근거이며 최초 접촉 좌표가 아니다.",
+    "label_changed": false,
+    "clock_synchronization_claimed": false
+  }
+}

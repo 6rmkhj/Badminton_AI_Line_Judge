@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "source": "ai_visual_review",
+  "status": "reviewed_by_ai",
+  "human_verified": false,
+  "video_id": "v_6fcc4642a13f",
+  "file": "8k 30 4k 24 a시점 4.mp4",
+  "source_sha256": "7e730a4a1bf262e2d1a43a09e7524be5d867040691a584976582a98a1255d28e",
+  "analysis_size": {
+    "width": 960,
+    "height": 540
+  },
+  "source_size": {
+    "width": 7680,
+    "height": 4320
+  },
+  "label": "UNKNOWN",
+  "reviewer": "Codex review_8k",
+  "contact_observed": false,
+  "contact_frame_index": null,
+  "time": null,
+  "contact_px": null,
+  "confidence": "insufficient_evidence",
+  "rationale": "중앙 선수들의 타격과 멈춤을 확인했으나 목표 셔틀의 최초 바닥 접촉이 이 시점에서 식별되지 않는다. 오른쪽 인접 코트의 주워드는 동작을 목표 접촉으로 대체하지 않았다. 별도 cross_view_match에 반대 시점과 대조한 두 동작을 기록했다. 이 시점의 미관측 접촉 좌표를 만들어 넣지는 않았다.",
+  "limitations": [
+    "최초 접촉과 외곽 라인의 관계를 확인하지 못함",
+    "AI 시각 검수이며 독립된 사람 정답이 아님"
+  ],
+  "inspected_frame_indices": [
+    0,
+    4,
+    9,
+    14,
+    18,
+    23,
+    28,
+    33,
+    37,
+    42,
+    47,
+    52,
+    56,
+    61,
+    66,
+    71,
+    75,
+    80,
+    85,
+    90,
+    94,
+    99,
+    104,
+    109
+  ],
+  "evidence_paths": [
+    "runs/visual-review/v_6fcc4642a13f/overview.jpg"
+  ],
+  "rules": {
+    "game": "doubles",
+    "phase": "rally"
+  },
+  "detection_labels": [],
+  "follow_up": [
+    "해당 랠리의 반대편 영상과 사건/시간 대응 확인",
+    "접촉이 클립 밖이면 더 긴 원본 확보; 정지 위치나 선수 반응으로 IN/OUT을 강제하지 않음"
+  ],
+  "target_contact_identity_confirmed": false,
+  "observation_status": "contact_out_of_view",
+  "cross_view_match": {
+    "other_video_id": "v_248b1672f38d",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 14,
+        "other_frame_index": 4,
+        "description": "검은색 선수가 네트 쪽으로 크게 런지하며 라켓을 옆으로 뻗고 남색 선수가 뒤를 커버"
+      },
+      {
+        "frame_index": 52,
+        "other_frame_index": 32,
+        "description": "검은색 선수의 다음 포핸드 블록 때 발을 벌리고 가슴 앞에서 셔틀을 맞히는 동작"
+      }
+    ],
+    "rationale": "각 영상의 중앙 목표 코트에서 같은 검은색/남색 두 선수 및 흰색/연청색 상대의 서로 다른 두 동작이 같은 순서로 이어지는 것을 양쪽 시점의 확대 시퀀스로 직접 대조했다. 두 번째 동작 후 이어지는 동일 랠리의 최초 접촉을 근거 시점에서 판독한다. 파일명만으로 연결한 것이 아니며 두 영상의 시각이 동기화되었다고 주장하지 않는다.",
+    "evidence_paths": [
+      "runs/visual-review/v_6fcc4642a13f/cross-view-actions.jpg",
+      "runs/visual-review/v_248b1672f38d/far_native_seq_0_81_0.jpg",
+      "runs/visual-review/v_248b1672f38d/overview.jpg"
+    ],
+    "clock_synchronization_claimed": false
+  }
+}
