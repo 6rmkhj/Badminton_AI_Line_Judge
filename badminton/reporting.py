@@ -70,6 +70,7 @@ def _summarize(run):
     status_counts = Counter(row.get("status", "unknown") for row in entries)
     decisions, calibration_status, sync_status, detector_methods = Counter(), Counter(), Counter(), Counter()
     implementation_fingerprints = Counter()
+    assisted_decisions = Counter()
     source_errors, rows, read_errors = [], [], []
     total_frames = total_detections = budget_frames = total_tracks = ambiguous_tracks = 0
     budget_videos = ambiguous_videos = trained_model_videos = automatic_calibration_accepted = 0
@@ -100,6 +101,9 @@ def _summarize(run):
         label = decision.get("decision", decision.get("label", "ERROR")) if isinstance(decision, dict) else decision
         label = label if label in ("IN", "OUT", "REVIEW") else "ERROR"
         decisions[label] += 1
+        from .evaluation import automatically_inferred
+        if not automatically_inferred(result):
+            assisted_decisions[label] += 1
         if isinstance(decision, dict):
             reason_counts.update(decision.get("reason_codes", []))
         calibration = result.get("calibration", {})
@@ -147,14 +151,14 @@ def _summarize(run):
         sync_status[_pair_sync(pair).get("status", "unknown")] += 1
     completed = status_counts["completed"] - len(read_errors)
     failed = len(entries) - completed
-    automatic = decisions["IN"] + decisions["OUT"]
+    automatic = decisions["IN"] + decisions["OUT"] - assisted_decisions['IN'] - assisted_decisions['OUT']
     ground_truth = evaluation.get("eligible_ground_truth_count", 0)
     accuracy = evaluation.get("decision", {}).get("automatic_accuracy")
     training_file = next((path for path in (run / "training-readiness.json", run / "training_readiness.json") if path.exists()), None)
     training = _read(training_file) if training_file else None
     all_weights = completed > 0 and trained_model_videos == completed
     automatic_accuracy_ready = (ground_truth > 0 and accuracy is not None and automatic > 0 and all_weights)
-    modules = ["media", "calibration", "detection", "tracking", "events", "contact_model", "decision", "sync", "web", "dataset", "evaluation", "learning"]
+    modules = ["media", "calibration", "detection", "tracking", "events", "identity", "requests", "evidence", "contact_model", "decision", "sync", "web", "dataset", "evaluation", "learning"]
     package = Path(__file__).resolve().parent
     module_presence = {name: (package / f"{name}.py").exists() for name in modules}
     software_available = all(module_presence.values())
@@ -179,6 +183,7 @@ def _summarize(run):
                       "processed_frames": total_frames, "summed_clip_analysis_seconds": analysis_seconds,
                       "result_read_errors": read_errors},
         "decisions": {"counts": dict(decisions), "automatic_decisions": automatic,
+                      "assisted_counts": dict(assisted_decisions),
                       "automatic_coverage": _ratio(automatic, len(entries)),
                       "review_rate": _ratio(decisions["REVIEW"], len(entries)),
                       "all_successfully_processed_clips_review": completed > 0 and decisions["REVIEW"] == completed,

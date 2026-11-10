@@ -221,6 +221,10 @@ def test_reanalysis_preserves_trusted_configuration(review_server):
     server, root = review_server
     source = root / "source.mp4"
     source.write_bytes(b"source")
+    from badminton.media import file_hash
+    stored = json.loads((root / "videos/v_a/result.json").read_text())
+    stored["source_sha256"] = file_hash(source)
+    (root / "videos/v_a/result.json").write_text(json.dumps(stored))
     index = json.loads((root / "index.json").read_text())
     index["videos"][0]["source_path"] = str(source)
     (root / "index.json").write_text(json.dumps(index))
