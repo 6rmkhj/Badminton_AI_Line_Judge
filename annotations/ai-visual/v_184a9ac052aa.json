@@ -27,8 +27,8 @@
   "contact_px": null,
   "time": null,
   "confidence": "unresolved",
-  "observation_status": "target_ambiguous",
-  "rationale": "회색·남색 선수의 타구가 이어지고 전경 통행자가 화면 우측을 가린다. 끝부분에 남색 선수가 다시 라켓을 올리므로 단순한 자세 변화만으로 랠리 종료나 최초 접촉을 단정하지 않았다.",
+  "observation_status": "contact_out_of_view",
+  "rationale": "원본 확대 재검수에서 녹색 선수의 오버헤드와 회색 선수의 후속 포핸드, 녹색 선수의 후방 추격이 B20과 같은 랠리임을 확인했다. A20의 먼 반대편 최초 접촉은 직접 확정하지 못하므로 로컬 레이블은 UNKNOWN과 접촉 미관측으로 보존한다. B20에 관측된 최초 접촉 IN 근거는 교차 시점 보조 판정으로만 연결한다. 후반 남색 선수의 라켓 움직임만으로 랠리가 계속 중이라고 간주했던 이전 설명은 철회한다.",
   "limitations": [
     "AI의 시각 검수이며 독립적인 사람 정답 검증이 아니다.",
     "전체 시각 흐름은 균등 간격 프레임으로 확인하고, 사건 주변은 별도로 확대했다."
@@ -36,31 +36,52 @@
   "inspected_frame_indices": [
     0,
     10,
+    15,
     20,
     30,
     40,
+    45,
+    50,
     51,
+    55,
+    60,
     61,
+    65,
+    70,
     71,
+    75,
+    80,
     81,
+    90,
     91,
     102,
+    105,
     112,
+    120,
     122,
     132,
+    135,
     143,
+    150,
     153,
     163,
+    165,
     173,
+    180,
     183,
     194,
+    195,
     204,
+    210,
     214,
     224,
+    225,
     235
   ],
   "evidence_paths": [
-    "runs/visual-review/v_184a9ac052aa/overview.jpg"
+    "runs/visual-review/v_184a9ac052aa/overview.jpg",
+    "runs/visual-review/v_184a9ac052aa/detail_0_236_15_native.jpg",
+    "runs/visual-review/v_184a9ac052aa/detail_45_81_5_native.jpg"
   ],
   "detection_labels_verified_by_ai": true,
   "detection_labels": [
@@ -94,7 +115,35 @@
     }
   ],
   "follow_up_actions": [
-    "최종 랠리와 첫 바닥 접촉이 연속으로 보이는 추가 시점 또는 더 긴 원본을 확보한다.",
-    "선수의 회수 행동만으로 IN/OUT 정답을 만들지 않고 해당 대상 접촉의 식별 근거를 보강한다."
-  ]
+    "확인된 두 타구의 교차 시점 연결로 B20의 직접 접촉 IN 근거를 보조 판정에 사용한다.",
+    "A20의 접촉 픽셀을 추정해서 채우지 않고 독립 사람 검수에서는 같은 사건 연결과 B20 접촉 근거를 함께 확인한다."
+  ],
+  "cross_view_match": {
+    "other_video_id": "v_74a2c59b238a",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 60,
+        "other_frame_index": 45,
+        "description": "녹색 후위 선수가 오버헤드로 타구하며 흰색 전위 파트너가 앞에서 대기하는 같은 동작이다.",
+        "time": 1.012078,
+        "other_time": 0.750222
+      },
+      {
+        "frame_index": 120,
+        "other_frame_index": 105,
+        "description": "이어지는 교환에서 회색 전위 선수가 낮은 포핸드로 받아치고 팔을 몸 앞으로 회수하며 남색 파트너는 뒤에서 대기한다.",
+        "time": 2.024144,
+        "other_time": 1.750522
+      }
+    ],
+    "rationale": "원본 확대에서 녹색 선수의 오버헤드와 회색 선수의 뒤이은 포핸드를 서로 다른 두 동작으로 확인했다. 이후 녹색 선수의 후방 추격도 양 시점에서 일치한다. 두 동작의 약15프레임 차이는 대응 근거이며 카메라 시계 동기화를 의미하지 않는다. 최초 검수에서 남색 선수의 후반 라켓 움직임을 과도하게 해석하여 같은 사건 연결을 놓친 부분을 정정했다.",
+    "evidence_paths": [
+      "runs/visual-review/v_184a9ac052aa/detail_0_236_15_native.jpg",
+      "runs/visual-review/v_184a9ac052aa/detail_45_81_5_native.jpg",
+      "runs/visual-review/v_74a2c59b238a/detail-0-225-native.jpg",
+      "runs/visual-review/v_74a2c59b238a/detail-30-60-native.jpg"
+    ]
+  },
+  "pair_audit_path": "runs/visual-review/a20-b20-pair-audit.json"
 }

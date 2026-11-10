@@ -40,6 +40,7 @@ def main():
  unresolved=[x for x in rows if x['assisted_decision']=='REVIEW']
  summary={'video_count':len(rows),'inspected_frame_index_count':frame_count,'assisted_counts':r['assisted_counts'],
           'unresolved_count':len(unresolved),'automatic_accuracy':None,'human_ground_truth_count':0,
+          'filename_pair_audit':r.get('filename_pair_audit'),
           'unresolved':unresolved,'all_videos':rows}
  (args.run/'follow-up.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
  with (args.run/'verdicts.csv').open('w',encoding='utf-8-sig',newline='') as f:
@@ -70,7 +71,20 @@ B17/B18은 동일 내용이고 같은 랠리의 서로 다른 시점도 포함�
 
 일부 영상에서는 최초 접촉이 안쪽인데 반등 후 밖에 멈췄다. 또한 예비 셔틀 회수와 실제 랠리 종료를 혼동할 수 있었고, 파일명이 대응해도 다른 랠리인 사례가 있었다. 따라서 정지점·회수 동작·파일명만으로 정답을 만들지 않았다. 근접 라인 사례는 접촉/칠 경계의 오차와 가능한 지면 영역을 함께 계산했다.
 
-## 후보 모델 실험
+'''
+ pair_audit=r.get('filename_pair_audit')
+ if pair_audit:
+  pc=pair_audit['counts']
+  text+=f'''## 반대 시점 연결 점검
+
+파일명 기준 후보 {pair_audit['candidate_pair_count']}쌍 중 양쪽이 같은 IN/OUT인 경우 {pc['both_resolved_same_label']}쌍, 양쪽 모두 REVIEW {pc['both_review']}쌍, 한쪽만 REVIEW {pc['one_review_with_decided_partner']}쌍, 양쪽 판정 충돌 {pc['conflicting_resolved_labels']}쌍이다. 이름이 같은 번호라는 사실만으로 판정을 복사하지 않으며, 실제 동작 대응 검증을 통과한 후보는 {pair_audit['event_correspondence_validated_pair_count']}쌍이다.
+
+A5/B5와 A20/B20 재대조에서 누락된 시점 연결을 확인해 B5와 A20에 상대 시점의 IN을 반영했다. 두 영상 자체의 접촉 미관측 레이블은 보존했다. 이전 IN 31 / OUT 10 / REVIEW 33 집계는 이 두 연결을 빠뜨린 결과였다. A18/B18은 B18이 B17과 동일 내용이며 기록된 동작 대응도 A18과 일치하지 않아 연결하지 않았다.
+
+남은 REVIEW 중 {pair_audit['both_review_video_count']}개는 양쪽 모두 REVIEW인 후보쌍에 속한다. 셔틀 후보 탐지와 최초 접촉·라인 관계가 확인된 판정은 구분한다. 상대 시점에 판정이 있으나 연결되지 않은 항목과 그 사유는 보고서 상단과 `filename_pair_audit`에서 확인할 수 있다.
+
+'''
+ text+='''## 후보 모델 실험
 
 확정된 AI 패치 검수 스냅샷으로 후보 분류기를 학습했다. 동일 내용 중복 영상의 같은 패치는 제거했고, 기존 랠리/중복 그룹 분할을 유지했다. v1 이후 원본 재검수에서 A16의 한 패치 좌표를 정정하고 B-UHD3의 검수 패치를 추가해, 같은 40 epoch 설정으로 v2를 다시 학습했다. 같은 데이터셋에서 진행한 개발 실험이므로 독립 최종 성능 시험이라고 해석하지 않는다. v2 학습 스냅샷 동결 후 마지막 원본 검수에서 추가한 24개 패치는 최종 검수 레이블에 보존했으며 이 가중치 학습에는 사용하지 않았다.
 

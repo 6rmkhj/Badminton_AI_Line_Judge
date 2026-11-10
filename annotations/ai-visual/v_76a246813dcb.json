@@ -43,7 +43,9 @@
     96,
     109,
     123,
+    133,
     137,
+    143,
     151,
     164,
     178,
@@ -59,7 +61,10 @@
     316
   ],
   "evidence_paths": [
-    "runs/visual-review/v_76a246813dcb/overview-24.jpg"
+    "runs/visual-review/v_76a246813dcb/overview-24.jpg",
+    "runs/visual-review/v_76a246813dcb/detail-109-233-native.jpg",
+    "runs/visual-review/v_76a246813dcb/detail-137-206-native.jpg",
+    "runs/visual-review/v_76a246813dcb/detail-123-151-native.jpg"
   ],
   "detection_labels": [],
   "detection_labels_verified_by_ai": false,
@@ -67,7 +72,34 @@
   "rationale": "흰 상의 선수가 네트 쪽으로 전진하고 두 선수가 이후 멈추지만 가까운 반코트의 착지 물체를 확인하지 못했다. 선수의 정지만으로 접촉을 추정하지 않는다.",
   "review_scope": "24 evenly sampled overview frames plus the explicitly listed detailed frames; qualifying contacts have contiguous native-resolution bracketing frames.",
   "follow_up_actions": [
-    "네트 반대편의 해당 랠리 최초 접촉을 볼 수 있는 다른 시점을 실제 타격 순서로 대조한다.",
-    "일치 시점에서도 접촉·경계가 확인되지 않으면 원본 후속 구간 또는 독립 사람 검수가 필요하다."
-  ]
+    "실제 두 타격 동작으로 대조한 A5의 직접 IN 판정을 보조 결과로 사용한다. B5 자체의 접촉 미관측 상태는 유지한다.",
+    "독립 사람 검수로 사건 대응과 A5의 최초 접촉·경계를 확인한다."
+  ],
+  "cross_view_match": {
+    "other_video_id": "v_3c33c9503c95",
+    "same_event_confirmed_by_ai": true,
+    "matched_actions": [
+      {
+        "frame_index": 137,
+        "other_frame_index": 158,
+        "description": "초록 상의 선수가 네트 앞으로 발을 디딘 채 짧은 포핸드 리턴을 하고 라켓을 위로 돌리는 구간이 두 시점에서 대응한다. 이어지는 흰 선수 타격과 별개의 첫 번째 타격 동작이다."
+      },
+      {
+        "frame_index": 164,
+        "other_frame_index": 193,
+        "description": "이어지는 흰 상의 선수의 넓은 전위 포핸드 리턴: 두 팔을 벌리고 라켓을 높게 옆으로 뻗는 동작과 뒤의 남색 파트너 자세가 반대 방향으로 대응한다."
+      }
+    ],
+    "rationale": "A5와 B5의 원본 해상도 연속 동작을 대조했다. 초록 선수의 전위 리턴 뒤 흰 선수의 넓은 포핸드 응답, 이어지는 초록 선수의 대응 실패와 랠리 종료 순서가 같다. 파일 번호가 아니라 실제 두 타격 동작으로 동일 대상 랠리를 확인했다. A5가 늦게 직접 IN 판정으로 승격된 뒤 누락되어 있던 B5 전이를 보완한다. B5에서 접촉을 직접 관측한 것으로 바꾸지 않는다.",
+    "evidence_paths": [
+      "runs/visual-review/v_3c33c9503c95/detail-148-168-native.jpg",
+      "runs/visual-review/v_3c33c9503c95/detail-163-223-native.jpg",
+      "runs/visual-review/v_76a246813dcb/detail-123-151-native.jpg",
+      "runs/visual-review/v_76a246813dcb/detail-137-206-native.jpg"
+    ],
+    "temporal_alignment": "approximate action correspondence; not synchronized clocks; anchors may represent different phases within each matched stroke",
+    "reviewers": [
+      "Codex review_base_b"
+    ]
+  }
 }
