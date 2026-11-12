@@ -194,6 +194,125 @@ def test_flight_tag_does_not_promote_a_jittering_mixed_track():
     assert not any(event.get('flight_trajectory_support', {}).get('supported_for_review') for event in events)
 
 
+@pytest.mark.parametrize('tail', [[98, 98, 98, 98, 98], [115, 108]])
+def test_single_jump_to_stationary_pixels_or_short_tail_does_not_support_flight_rebound(tail):
+    # A well-fit descent can attach to an unrelated pixel or stop at the end
+    # of the clip. Keep its draft, but neither supplies repeated rebound data.
+    ys = [10, 15, 24, 37, 54, 75, 100, 129, *tail]
+    moving = track([(30 + i, y) for i, y in enumerate(ys)], ambiguous=True)
+    moving['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
+    frames = [np.zeros((180, 180, 3), np.uint8)] * len(ys)
+    events = estimate_landings([moving], frames, [i / 30 for i in range(len(ys))], {})
+    rebound = next(event for event in events if event.get('image_motion_event'))
+    support = rebound['flight_trajectory_support']
+    assert support['supported_for_review'] is False
+    assert 'MEASURED_REBOUND_SUPPORT_INSUFFICIENT' in rebound['reason_codes']
+    assert rebound['contact_observed'] is False and rebound['contact_px'] is None
+    assert moving['observations'][-1]['y'] == tail[-1]
+
+
+def test_rebound_branch_jump_and_small_later_jump_fail_measured_post_motion_fit():
+    ys = [10, 15, 24, 37, 54, 75, 100, 129, 162, 127, 127.1, 127.2, 122]
+    moving = track([(30 + i, y) for i, y in enumerate(ys)],
+                   times=[i / 60 for i in range(len(ys))], ambiguous=True)
+    # Supply a long enough smooth observed descent for approach support at 60fps.
+    for i, observation in enumerate(moving['observations']):
+        observation['time'] = (i if i < 9 else i + 1) / 60
+    moving['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
+    frames = [np.zeros((180, 180, 3), np.uint8)] * (len(ys) + 1)
+    events = estimate_landings([moving], frames, [i / 60 for i in range(len(frames))], {})
+    rebound = next(event for event in events if event.get('image_motion_event'))
+    support = rebound['flight_trajectory_support']
+    assert support['upward_interval_count'] >= 2
+    assert support['post_motion_fit_residual_px'] > 3.
+    assert support['supported_for_review'] is False
+    assert rebound['contact_observed'] is False
+
+
+def test_combined_appearance_break_withholds_flight_priority_but_preserves_candidate():
+    ys = [10, 15, 24, 37, 54, 75, 100, 129, 162, 150, 142, 138, 140]
+    moving = track([(30 + i, y) for i, y in enumerate(ys)], ambiguous=True)
+    moving['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
+    for i, observation in enumerate(moving['observations']):
+        observation.update(appearance_polarity='bright' if i < 6 else 'dark',
+                           possible_occluder_overlap=i >= 6,
+                           radius=2. if i < 6 else 5.)
+    frames = [np.zeros((200, 180, 3), np.uint8)] * len(ys)
+    events = estimate_landings([moving], frames, [i / 30 for i in range(len(ys))], {})
+    rebound = next(event for event in events if event.get('image_motion_event'))
+    assert rebound['identity_continuity']['flight_support_veto'] is True
+    assert rebound['flight_trajectory_support']['supported_for_review'] is False
+    assert 'OCCLUDER_ENTRY_AND_APPEARANCE_DISCONTINUITY' in rebound['reason_codes']
+    assert rebound['identity_confidence'] <= .25
+    assert rebound['contact_observed'] is False and rebound['contact_px'] is None
+
+
+@pytest.mark.parametrize('visibility,expected', [('overlap', False), ('crossing', True), ('emerging', True), ('unknown', True)])
+def test_wholly_body_overlapping_approach_cannot_supply_free_flight_priority(visibility, expected):
+    ys = [10, 15, 24, 37, 54, 75, 100, 129, 118, 111, 107, 109]
+    moving = track([(30 + i, y) for i, y in enumerate(ys)], ambiguous=True)
+    moving['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
+    for observation in moving['observations']:
+        if visibility != 'unknown':
+            observation['possible_occluder_overlap'] = True
+    if visibility == 'crossing':
+        # A real flight can pass over a player after a clearly observed approach.
+        moving['observations'][0]['possible_occluder_overlap'] = False
+    if visibility == 'emerging':
+        for observation in moving['observations'][8:]:
+            observation['possible_occluder_overlap'] = False
+    frames = [np.zeros((180, 180, 3), np.uint8)] * len(ys)
+    event = estimate_landings([moving], frames, [i / 30 for i in range(len(ys))], {})[0]
+    assert event['flight_trajectory_support']['supported_for_review'] is expected
+    assert ('NO_CLEAR_TRAJECTORY_OUTSIDE_POSSIBLE_OCCLUDER' in event['reason_codes']) is (not expected)
+    assert event['contact_observed'] is False
+
+
+def test_later_upward_jitter_cannot_rescue_initial_downward_shoe_motion():
+    ys = [10, 15, 24, 37, 54, 75, 100, 129, 162,
+          160.5, 161.456, 162.237, 158.278, 160, 161.119, 160.974, 162.971]
+    times = [i / 60 for i in range(len(ys))]
+    moving = track([(30 + i, y) for i, y in enumerate(ys)], times=times, ambiguous=True)
+    moving['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
+    frames = [np.zeros((200, 180, 3), np.uint8)] * len(ys)
+    events = estimate_landings([moving], frames, times, {})
+    rebound = next(event for event in events if event.get('image_motion_event'))
+    support = rebound['flight_trajectory_support']
+    assert support['upward_interval_count'] >= 2
+    assert support['rebound_displacement_y_px'] > 1.5
+    assert support['initial_rebound_displacement_y_px'] < 0
+    assert support['supported_for_review'] is False
+
+
+def test_unobserved_interpolated_tail_cannot_supply_rebound_support():
+    ys = [10, 15, 24, 37, 54, 75, 100, 129, 115, 108, 103, 100]
+    moving = track([(30 + i, y) for i, y in enumerate(ys)], ambiguous=True)
+    moving['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
+    moving['observations'][-2]['observed'] = False
+    moving['observations'][-1]['observed'] = False
+    frames = [np.zeros((180, 180, 3), np.uint8)] * len(ys)
+    events = estimate_landings([moving], frames, [i / 30 for i in range(len(ys))], {})
+    assert events
+    assert not any(event.get('flight_trajectory_support', {}).get('supported_for_review') for event in events)
+    assert all(10 not in event['evidence_frame_indices'] and 11 not in event['evidence_frame_indices'] for event in events)
+
+
+@pytest.mark.parametrize('fps', [24, 30])
+def test_measured_weak_rebound_keeps_support_with_one_missing_post_turn_frame(fps):
+    ys = [10, 15, 20, 25, 30, 30, 28, 27, 26, 27]
+    moving = track([(30 + i, y) for i, y in enumerate(ys)], times=[i / fps for i in range(len(ys))])
+    moving['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
+    for observation in moving['observations'][6:]:
+        observation['frame_index'] += 1
+        observation['time'] += 1 / fps
+    frames = [np.zeros((80, 100, 3), np.uint8)] * (len(ys) + 1)
+    event = estimate_landings([moving], frames, [i / fps for i in range(len(frames))], {})[0]
+    assert event['frame_index'] == 4
+    assert event['flight_trajectory_support']['supported_for_review'] is True
+    assert event['flight_trajectory_support']['upward_interval_count'] >= 2
+    assert event['contact_observed'] is False
+
+
 def test_occluded_flight_intersection_reports_inferred_point_without_filling_observations():
     times = [i * .04 for i in range(15)]
     frames = [np.zeros((200, 200, 3), np.uint8) for _ in times]
@@ -218,11 +337,52 @@ def test_occluded_flight_intersection_reports_inferred_point_without_filling_obs
     assert inferred['flight_trajectory_support']['verified_identity'] is False
     assert [item['frame_index'] for item in tr['observations']] == visible
 
+    # A missing turn plus exactly three observed post-gap samples still
+    # supplies two measured upward intervals. A quadratic through only three
+    # points cannot independently validate its fit, and is labeled accordingly.
+    tr['observations'] = observations[:-1]
+    sparse = estimate_landings([tr], frames, times, {})
+    sparse_inferred = next(event for event in sparse if event.get('image_motion_event', {}).get('kind') == 'occluded_descent_and_rebound')
+    assert sparse_inferred['flight_trajectory_support']['supported_for_review'] is True
+    assert sparse_inferred['flight_trajectory_support']['post_motion_fit_validated'] is False
+    assert sparse_inferred['flight_trajectory_support']['post_motion_fit_residual_px'] is None
+    tr['observations'] = observations
+
     # The same y-turn does not link two spatially unrelated objects across a gap.
     for observation in observations[5:]:
         observation['x'] += 30
     events = estimate_landings([tr], frames, times, {})
     assert not any(event.get('image_motion_event', {}).get('kind') == 'occluded_descent_and_rebound' for event in events)
+
+
+def test_occluded_rebound_fits_equivalent_physical_windows_at_30_and_60_fps():
+    inferred_events = []
+    for fps in [30, 60]:
+        times = [i / fps for i in range(int(.6 * fps) + 1)]
+        observations = []
+        for frame_index, time in enumerate(times):
+            if time > 1 / 6 + 1e-8 and time < .4 - 1e-8:
+                continue
+            if time > .533334:
+                continue
+            y = 10 + 500 * time if time < .2 else 150 - 100 * (time - .28) + 200 * (time - .28) ** 2
+            observations.append({'frame_index': frame_index, 'time': time,
+                                 'x': 40 + 5 * time, 'y': y, 'radius': 1., 'confidence': .7,
+                                 'possible_occluder_overlap': time < .2})
+        moving = {'track_id': 1, 'identity_ambiguous': True, 'observations': observations,
+                  'flight_hypothesis': {'method': 'coherent_free_flight_search'}}
+        frames = [np.zeros((200, 200, 3), np.uint8)] * len(times)
+        events = estimate_landings([moving], frames, times, {})
+        inferred_events.append(next(event for event in events if event.get('image_motion_event', {}).get('kind') == 'occluded_descent_and_rebound'))
+    for event in inferred_events:
+        assert event['image_motion_event']['estimated_time'] == pytest.approx(.28)
+        assert event['candidate_px'] == pytest.approx([41.4, 150.])
+        assert event['flight_trajectory_support']['supported_for_review'] is True
+        assert event['flight_trajectory_support']['approach_wholly_overlaps_possible_occluder'] is True
+        assert event['flight_trajectory_support']['support_wholly_overlaps_possible_occluder'] is False
+        assert event['contact_observed'] is False
+    assert inferred_events[0]['flight_trajectory_support']['approach_displacement_y_px'] == pytest.approx(
+        inferred_events[1]['flight_trajectory_support']['approach_displacement_y_px'])
 
 
 def contact_evidence():

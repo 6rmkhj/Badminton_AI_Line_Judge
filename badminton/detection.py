@@ -76,7 +76,7 @@ def _appearance_components(gray, hsv, bright, motion, foreground, local_base, co
         selected = appearance & ~exclusion.astype(bool)
         if roi is not None:
             selected &= roi > 0
-        if not native:
+        if not native or config.get('native_motion_components'):
             selected &= cue
         elif config.get("native_local_components", bool(config.get("refinement_regions"))):
             selected &= contrast >= contrast_threshold
@@ -107,6 +107,81 @@ def _nms(detections, distance=3.0, limit=64):
     return accepted
 
 
+class _ProposalMotionMemory:
+    """Prioritize measured continuations for search, without assigning identity.
+
+    This small memory runs before the final proposal cutoff. Otherwise a dim
+    continuation can disappear solely because a brighter shoe enters its cell.
+    Forecasts guide native windows only; they are never emitted as detections.
+    """
+
+    def __init__(self):
+        self.paths = []
+
+    def update(self, detections, index, *, extend=False):
+        old = [p for p in self.paths if 0 < index - p['index'] <= 3]
+        if old:
+            old_points = np.array([p['point'] for p in old])
+            old_velocity = np.array([p['velocity'] if p['velocity'] is not None else [0., 0.] for p in old])
+            gaps = np.array([index - p['index'] for p in old])
+            counts = np.array([p['count'] for p in old])
+            established = np.array([p['velocity'] is not None for p in old])
+            gates = np.clip(np.linalg.norm(old_velocity, axis=1) * .4, 3, 18) * gaps
+        current = []
+        for item in detections:
+            point = np.array([item['x'], item['y']], dtype=float)
+            count, error, velocity = 1, 0.0, None
+            if old:
+                velocities = (point - old_points) / gaps[:, None]
+                speeds = np.linalg.norm(velocities, axis=1)
+                errors = np.linalg.norm(point - old_points - old_velocity * gaps[:, None], axis=1)
+                valid = (speeds >= 1.5) & (speeds <= 60) & (~established | (errors <= gates))
+                costs = np.where(established, errors / gates - np.minimum(6, counts + 1) * .4,
+                                 2 + speeds / 60)
+                costs[~valid] = np.inf
+                if np.any((gaps == 1) & (speeds < 1.5)):
+                    # A stationary lattice must not create apparent travel by
+                    # connecting a different neighbouring dot on every frame.
+                    costs[:] = np.inf
+                choice = int(np.argmin(costs))
+                if np.isfinite(costs[choice]):
+                    count = min(8, int(counts[choice]) + 1)
+                    error = float(errors[choice]) if established[choice] else float(speeds[choice])
+                    velocity = velocities[choice]
+            priority = (count * min(4.0, math.sqrt(float(np.linalg.norm(velocity)))) / (1 + error)
+                        if count >= 3 else 0.0)
+            if priority:
+                item['temporal_search_support'] = round(priority, 4)
+                item['temporal_search_observations'] = count
+                item['temporal_search_confirms_identity'] = False
+            current.append({'point': point, 'velocity': velocity, 'count': count,
+                            'error': error, 'priority': priority, 'index': index})
+        # Keep a short disappearance in a fixed-size memory.
+        if extend:
+            current.extend(p for p in self.paths if p['index'] == index)
+        retained = sorted(current, key=lambda p: (-p['count'], -p['priority']))[:512]
+        self.paths = retained + sorted(old, key=lambda p: (-p['count'], -p['priority']))[:128]
+
+    def search_guides(self, index):
+        result = []
+        for path in sorted(self.paths, key=lambda p: (-p['priority'], -p['index'])):
+            if path['count'] < 3 or path['velocity'] is None:
+                continue
+            # A lost observation may be a bounce. Bound extrapolation to one
+            # step and let the native window examine the surrounding pixels.
+            point = path['point'] + path['velocity'] * min(1, index - path['index'])
+            result.append({'x': float(point[0]), 'y': float(point[1]), 'support': path['priority']})
+            if len(result) >= 32:
+                break
+        return result
+
+
+def _motion_search_order(detections):
+    return sorted((item for item in detections if item.get('temporal_search_support', 0) > 0),
+                  key=lambda item: (-item['temporal_search_support'], -item['confidence'],
+                                    item['x'], item['y']))
+
+
 def _candidate_budget(detections, shape, limit, *, mode="ranked", distance=3.0):
     """Preserve spatially separated proposals under the same finite budget.
 
@@ -133,7 +208,21 @@ def _candidate_budget(detections, shape, limit, *, mode="ranked", distance=3.0):
         selected.extend(tier[:limit - len(selected)])
         if len(selected) >= limit:
             break
-    return selected
+    # A bounded share protects observed motion through a crowded image cell.
+    # Keep the ordinary spatial pass intact for new/disconnected trajectories.
+    continuations = []
+    if limit <= 128:
+        for item in _motion_search_order(pool):
+            if any(math.hypot(item['x'] - old['x'], item['y'] - old['y'])
+                   <= max(distance, min(item['radius'], old['radius'])) for old in continuations):
+                continue
+            continuations.append(item)
+            if len(continuations) >= max(1, limit // 4):
+                break
+    if not continuations:
+        return selected
+    selected_ids = {id(item) for item in continuations}
+    return (continuations + [item for item in selected if id(item) not in selected_ids])[:limit]
 
 
 def _refinement_regions(config, shape, frame_count):
@@ -193,6 +282,20 @@ def _multiscale_budget(detections, shape, limit, reserve, mode, distance, region
     selected, _ = _refined_budget(global_candidates, shape, reserve, mode, distance, regions)
     ordinary, _ = _refined_budget(detections, shape, 512, mode, distance, regions)
     reserved_count = len(selected)
+    # Native recovery gets only a quarter of the additional slots; the measured
+    # global observations retain their full reservation.
+    extra_slots = max(0, limit - reserved_count)
+    guided = _motion_search_order([item for item in detections
+                                  if item.get('native_motion_search_supported')
+                                  and not item.get('global_resolution_observation')])
+    if limit <= 128 and extra_slots:
+        for item in guided:
+            if len(selected) >= reserved_count + max(1, extra_slots // 4):
+                break
+            if any(math.hypot(item['x'] - old['x'], item['y'] - old['y'])
+                   <= max(distance, min(item['radius'], old['radius'])) for old in selected):
+                continue
+            selected.append(item)
     for item in ordinary:
         if len(selected) >= limit:
             break
@@ -368,6 +471,7 @@ class _NativeRoiDetector:
             raise ValueError("highres_roi_analysis_size must be between 0 and 128")
         self.previous = None
         self.recent = []
+        self.motion_guides = []
         self.source_shape = None
 
     def _boxes(self, detections, shape, index, regions=()):
@@ -378,7 +482,7 @@ class _NativeRoiDetector:
         size = min(1024, max(self.size, round(self.analysis_size * max(sx, sy))))
         boxes = []
 
-        def append(cx, cy, origin):
+        def append(cx, cy, origin, support=None):
             if not (0 <= cx < width and 0 <= cy < height):
                 return
             low_x, low_y = min(self.width - 1, int(cx / sx)), min(self.height - 1, int(cy / sy))
@@ -393,6 +497,8 @@ class _NativeRoiDetector:
                    and abs(top - old["bbox"][1]) < box[3] * .55 for old in boxes):
                 return
             boxes.append({"bbox": box, "origin": origin})
+            if support is not None:
+                boxes[-1].update(motion_search_support=support, motion_search_point_px=[cx / sx, cy / sy])
 
         focus_budget = min(self.budget, max(1, self.budget // 2)) if regions else 0
         # Start at each reviewed region's centre before rotating across larger
@@ -415,6 +521,11 @@ class _NativeRoiDetector:
                 if len(boxes) >= focus_budget:
                     break
         proposal_budget = max(len(boxes), self.budget - self.explore)
+        motion_budget = min(proposal_budget, len(boxes) + max(1, self.budget // 4))
+        for point in self.motion_guides:
+            if len(boxes) >= motion_budget:
+                break
+            append(point['x'] * sx, point['y'] * sy, 'observed_motion_search', point.get('support', 0))
         # Alternate global and previous-native proposals so neither monopolizes
         # the entire bounded native-resolution budget.
         ranked = (_candidate_budget(detections, (self.height, self.width), 512, mode="spatial")
@@ -490,8 +601,20 @@ class _NativeRoiDetector:
             large = np.flatnonzero(broad_stats[:, cv2.CC_STAT_AREA] > area_limit * 1.5)
             large = large[large != 0]
             exclusion = np.isin(broad_labels, large) if len(large) else np.zeros_like(gray, dtype=bool)
-            for polarity, component, center, pixels, contrast, cue in _appearance_components(
-                    gray, hsv, bright, temporal, foreground, local_base, self.config, exclusion, native=True):
+            def components():
+                for row in _appearance_components(gray, hsv, bright, temporal, foreground,
+                                                  local_base, self.config, exclusion, native=True):
+                    yield (*row, False)
+                if window['origin'] == 'observed_motion_search' and self.config.get('native_motion_recovery'):
+                    sensitive = {**self.config, 'native_motion_components': True,
+                                 'motion_threshold': 8, 'background_threshold': 4,
+                                 'contrast_threshold': 4, 'dark_contrast_threshold': 6}
+                    relative_bright = cv2.inRange(hsv, np.array([0, 0, 100], np.uint8),
+                                                np.array([179, int(self.config.get('max_saturation', 115)), 255], np.uint8))
+                    for row in _appearance_components(gray, hsv, relative_bright, temporal, foreground,
+                                                      local_base, sensitive, exclusion, native=True):
+                        yield (*row, True)
+            for polarity, component, center, pixels, contrast, cue, recovery in components():
                 bx, by, bw, bh, area = map(int, component)
                 if not 1 <= area <= area_limit or max(bw, bh) / max(1, min(bw, bh)) > float(self.config.get("max_component_aspect", 4)):
                     continue
@@ -522,6 +645,16 @@ class _NativeRoiDetector:
                                "source_size": [sw, sh], "roi_origin": window["origin"],
                                "motion_supported_fraction": round(cue_fraction, 4),
                                "foreground_difference": round(motion, 3), "local_contrast": round(local_contrast, 3)})
+                if recovery:
+                    native[-1]['native_motion_recovery'] = True
+                if window['origin'] == 'observed_motion_search' and self.config.get('native_motion_recovery'):
+                    center_distance = math.hypot(cx - window['motion_search_point_px'][0],
+                                                 cy - window['motion_search_point_px'][1])
+                    if center_distance <= 18 and area >= 4 and cue_fraction >= .5:
+                        native[-1]['native_motion_search_supported'] = True
+                        native[-1]['temporal_search_support'] = round(
+                            window['motion_search_support'] / (1 + center_distance / 4), 4)
+                        native[-1]['temporal_search_confirms_identity'] = False
         self.previous = source  # one additional original frame, never the whole clip
         native = _nms(native, max(.5, self.width / 1280), 512)
         self.recent = (_candidate_budget(native, (self.height, self.width), 16, mode="spatial",
@@ -531,6 +664,9 @@ class _NativeRoiDetector:
                         "roi_count": len(windows), "proposal_count": len(native),
                         "pixels_examined": sum(row["bbox"][2] * row["bbox"][3] for row in windows),
                         "full_source_scan": False, "score_kind": "heuristic_rank_not_probability",
+                        "motion_recovery_roi_count": sum(window['origin'] == 'observed_motion_search'
+                                                          for window in windows)
+                                                      if self.config.get('native_motion_recovery') else 0,
                         "local_component_segmentation": bool(self.config.get(
                             "native_local_components", bool(self.config.get("refinement_regions"))))}
 
@@ -550,6 +686,10 @@ def _merge_native(global_candidates, native_candidates, distance):
             refined["global_resolution_observation"] = True
             refined["native_confidence"] = native["confidence"]
             refined["confidence"] = max(best["confidence"], native["confidence"])
+            for key in ('temporal_search_support', 'temporal_search_observations',
+                        'temporal_search_confirms_identity'):
+                if key in best:
+                    refined[key] = best[key]
             refined["method"] = "opencv_source_roi_with_global_support"
             pending = [item for item in pending if item not in matches]
         combined.append(refined)
@@ -572,6 +712,12 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
     contrast/motion thresholds keep this search from weakening the bright-object
     cue. ``max_component_aspect`` admits narrow blur while area and length limits
     still reject broad objects. These are proposals, not verified identities.
+
+    ``temporal_candidate_memory`` optionally reserves part of the existing
+    budget for measured motion continuations. With ``native_motion_recovery``,
+    at most a quarter of native windows also search faint, temporally changing
+    components near those observations. Forecasts are search regions only and
+    never become detections or contact evidence.
     """
     config = dict(config or {})
     _validate_inputs(frames, timestamps)
@@ -630,6 +776,9 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
         raise ValueError("min_area and max_area must be positive finite ordered values")
     native_detector = (_NativeRoiDetector(config, frames[0].shape, background, roi, max_area)
                        if not onnx and config.get("highres_enabled", True) and "source_frames" in config else None)
+    motion_memory = _ProposalMotionMemory() if config.get('temporal_candidate_memory') and not onnx else None
+    provenance['temporal_candidate_memory'] = motion_memory is not None
+    provenance['native_motion_recovery'] = bool(motion_memory is not None and config.get('native_motion_recovery'))
     previous_gray = None
     recent_motion = np.zeros((height, width), np.float32)
     background_low = cv2.erode(background, np.ones((3, 3), np.uint8))
@@ -740,13 +889,21 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
             # cutoff, otherwise discarded target proposals can never be rescued.
             detections = _nms(detections, max(1.0, 3 * scale),
                               512 if scorer or active_regions or selection == "spatial" else max_candidates)
+            if motion_memory is not None:
+                motion_memory.update(detections, index)
         if native_detector is not None:
+            if motion_memory is not None:
+                native_detector.motion_guides = motion_memory.search_guides(index)
             if global_reserve:
                 # Select the low-resolution observations before native texture
                 # can alter their spatial rank. Refinements inherit this slot.
                 detections, _ = _refined_budget(detections, frame.shape, global_reserve,
                                                selection, max(1.0, 3 * scale), active_regions)
             native, high_resolution = native_detector.detect(source_frames[index], detections, index, camera_motion, active_regions)
+            if motion_memory is not None and config.get('native_motion_recovery'):
+                # These are measured current pixels, never the guide forecasts.
+                observed = [item for item in native if item.get('native_motion_search_supported')]
+                motion_memory.update(observed[:128], index, extend=True)
             for item in native:
                 item["possible_occluder_overlap"] = any(
                     b[0] <= item["x"] <= b[0] + b[2] and b[1] <= item["y"] <= b[1] + b[3]

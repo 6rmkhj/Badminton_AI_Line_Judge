@@ -1,2 +1,2 @@
 """Offline badminton line-judge research and review pipeline."""
-__version__ = "0.5.2"
+__version__ = "0.5.3"

@@ -11,6 +11,8 @@
     "candidate_selection": "spatial",
     "max_candidates": 80,
     "global_candidate_reserve": 64,
+    "temporal_candidate_memory": true,
+    "native_motion_recovery": true,
     "include_dark_components": true,
     "dark_contrast_threshold": 8,
     "dark_motion_threshold": 8,

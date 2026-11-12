@@ -15,6 +15,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from .identity_continuity import assess_identity_continuity
+
 
 def _value(observation, name, default=0.0):
     try:
@@ -78,7 +80,76 @@ def prioritize_review_candidates(candidates, regions, *, identity_first=False):
     return sorted(candidates, key=key)
 
 
-def _flight_review_support(track, observations, index, image_width, nominal_step):
+def _measured_rebound_support(observations, index, nominal_step, *, minimum_after=3):
+    """Require repeated measured upward motion, rather than a jump to a stop.
+
+    A single association jump followed by stationary pixels has a negative
+    median velocity too. It cannot support a rebound-based flight preference.
+    Sampling uses elapsed time so high frame rates do not shorten the check.
+    """
+    origin = observations[index]
+    after = [item for item in observations[index + 1:]
+             if 0 < item['time'] - origin['time'] <= max(.16, nominal_step * 4.01)
+             and item.get('observed') is not False]
+    context = [origin, *after]
+    upward_intervals = sum(
+        right['y'] - left['y'] < -max(.05, 3. * (right['time'] - left['time']))
+        for left, right in zip(context, context[1:]))
+    initial = context[:4]
+    initial_upward = sum(
+        right['y'] - left['y'] < -max(.05, 3. * (right['time'] - left['time']))
+        for left, right in zip(initial, initial[1:]))
+    initial_rise = origin['y'] - initial[-1]['y']
+    rise = max([origin['y'] - item['y'] for item in after] or [0.])
+    times = np.asarray([item['time'] - origin['time'] for item in context])
+    points = np.asarray([[item['x'], item['y']] for item in context])
+    residual = 0.
+    if len(context) >= 4:
+        coefficients = np.polyfit(times, points, 2)
+        fitted = np.column_stack([np.polyval(coefficients[:, axis], times) for axis in range(2)])
+        residual = float(np.sqrt(np.mean(np.sum((points - fitted) ** 2, axis=1))))
+    radius = float(np.median([max(1., _value(item, 'radius', 2.)) for item in context]))
+    supported = (len(after) >= minimum_after and initial_upward >= 2 and initial_rise >= 1.5
+                 and residual <= max(3., radius * 1.5))
+    return {'supported': supported, 'post_observation_count': len(after),
+            'upward_interval_count': upward_intervals,
+            'initial_upward_interval_count': initial_upward,
+            'initial_rebound_displacement_y_px': round(float(initial_rise), 4),
+            'rebound_displacement_y_px': round(float(rise), 4),
+            'post_motion_fit_validated': len(context) >= 4,
+            'post_motion_fit_residual_px': round(residual, 4) if len(context) >= 4 else None,
+            'rebound_frame_interval': [origin['frame_index'], context[-1]['frame_index']],
+            'reason_codes': [] if supported else ['MEASURED_REBOUND_SUPPORT_INSUFFICIENT']}
+
+
+def _approach_occluder_support(observations, outgoing=()):
+    """Withhold free-flight priority when no support sample leaves a body.
+
+    These detector flags are only possible overlaps. Unknown flags or a flight
+    crossing or emerging from a player cannot create this gate. A coherent
+    observed rebound outside the mask can support a gap hypothesis whose
+    incoming path was entirely covered by a broad possible-occluder mask.
+    """
+    overlap = sum(item.get('possible_occluder_overlap') is True for item in observations)
+    clear = sum(item.get('possible_occluder_overlap') is False for item in observations)
+    unknown = len(observations) - overlap - clear
+    wholly_overlapping = bool(observations) and overlap == len(observations)
+    context = [*observations, *outgoing]
+    support_overlap = sum(item.get('possible_occluder_overlap') is True for item in context)
+    support_clear = sum(item.get('possible_occluder_overlap') is False for item in context)
+    support_unknown = len(context) - support_overlap - support_clear
+    all_support_overlapping = bool(context) and support_overlap == len(context)
+    return {'approach_wholly_overlaps_possible_occluder': wholly_overlapping,
+            'approach_occluder_overlap_count': overlap,
+            'approach_clear_observation_count': clear,
+            'approach_unknown_occluder_count': unknown,
+            'support_wholly_overlaps_possible_occluder': all_support_overlapping,
+            'support_clear_observation_count': support_clear,
+            'support_unknown_occluder_count': support_unknown,
+            'reason_codes': ['NO_CLEAR_TRAJECTORY_OUTSIDE_POSSIBLE_OCCLUDER'] if all_support_overlapping else []}
+
+
+def _flight_review_support(track, observations, index, image_width, nominal_step, plateau_end=None):
     """Measure a dedicated trajectory's approach; never qualify its identity.
 
     Dense body/clothing proposals can reverse direction too. A separate flight
@@ -102,11 +173,33 @@ def _flight_review_support(track, observations, index, image_width, nominal_step
     if (residual > max(3., radius * 1.5) or drop < max(8., image_width * .02)
             or float(np.mean(increments > 0)) < .8):
         return None
-    return {'supported_for_review': True, 'method': 'coherent_approach_and_image_rebound',
+    rebound = _measured_rebound_support(observations, index if plateau_end is None else plateau_end, nominal_step)
+    outgoing = [item for item in observations[index + 1:]
+                if item['frame_index'] <= rebound['rebound_frame_interval'][1]]
+    visibility = _approach_occluder_support(before, outgoing)
+    return {'supported_for_review': rebound['supported'] and not visibility['support_wholly_overlaps_possible_occluder'],
+            'method': 'coherent_approach_and_image_rebound',
             'approach_observation_count': len(before), 'fit_residual_px': round(residual, 4),
             'approach_displacement_y_px': round(drop, 4),
             'approach_frame_interval': [before[0]['frame_index'], before[-1]['frame_index']],
+            **{key: value for key, value in rebound.items() if key != 'supported'},
+            **{key: value for key, value in visibility.items() if key != 'reason_codes'},
+            'reason_codes': [*rebound['reason_codes'], *visibility['reason_codes']],
             'verified_identity': False, 'physical_contact_verified': False}
+
+
+def _apply_flight_continuity(candidate, track):
+    """Preserve a draft while withholding unsupported flight-review priority."""
+    support = candidate.get('flight_trajectory_support')
+    if not isinstance(support, dict):
+        return
+    assessment = assess_identity_continuity(track.get('observations', []), candidate['frame_index'])
+    candidate['identity_continuity'] = assessment
+    reasons = [*support.get('reason_codes', []), *assessment.get('reason_codes', [])]
+    if assessment.get('flight_support_veto') is True:
+        support['supported_for_review'] = False
+    support['reason_codes'] = list(dict.fromkeys(reasons))
+    candidate['reason_codes'] = list(dict.fromkeys([*candidate['reason_codes'], *reasons]))
 
 
 def _occluded_rebound_candidates(track, observations, timestamps, frames, calibration, nominal_step):
@@ -119,6 +212,8 @@ def _occluded_rebound_candidates(track, observations, timestamps, frames, calibr
         return []
     all_times = np.asarray([item['time'] for item in observations])
     gaps = np.flatnonzero(np.diff(all_times) > nominal_step * 2.5)
+    incoming_window = max(9, min(64, int(math.ceil(.35 / nominal_step))))
+    outgoing_window = max(3, min(32, int(math.ceil(.133 / nominal_step)) + 1))
     proposals = []
     for gap_index in gaps:
         left, right = observations[gap_index], observations[gap_index + 1]
@@ -127,8 +222,8 @@ def _occluded_rebound_candidates(track, observations, timestamps, frames, calibr
             continue
         start = max([int(i) + 1 for i in gaps if i < gap_index] or [0])
         stop = min([int(i) + 1 for i in gaps if i > gap_index] or [len(observations)])
-        before = observations[max(start, gap_index - 9):gap_index + 1]
-        after = observations[gap_index + 1:min(stop, gap_index + 7)]
+        before = observations[max(start, gap_index - incoming_window + 1):gap_index + 1]
+        after = observations[gap_index + 1:min(stop, gap_index + 1 + outgoing_window)]
         if len(before) < 5 or len(after) < 3 or before[-1]['time'] - before[0]['time'] < .12:
             continue
         origin = left['time']
@@ -143,6 +238,11 @@ def _occluded_rebound_candidates(track, observations, timestamps, frames, calibr
 
         incoming, before_error = fit(before)
         outgoing, after_error = fit(after)
+        # The post-gap samples are already after the inferred turn. Three
+        # measured samples with two upward intervals are enough; the missing
+        # turn itself is never inserted as an observed sample.
+        rebound_support = _measured_rebound_support(after, 0, nominal_step, minimum_after=2)
+        approach_visibility = _approach_occluder_support(before, after)
         radius = max(1., _value(left, 'radius', 2.), _value(right, 'radius', 2.))
         tolerance = max(3., radius * 1.5)
         drop = before[-1]['y'] - before[0]['y']
@@ -208,8 +308,13 @@ def _occluded_rebound_candidates(track, observations, timestamps, frames, calibr
                     'method': 'coherent_trajectory_gap_intersection', 'approach_observation_count': len(before),
                     'approach_displacement_y_px': round(float(drop), 4),
                     'fit_residual_px': round(before_error, 4), 'rebound_fit_residual_px': round(after_error, 4),
+                    **{key: value for key, value in rebound_support.items() if key != 'supported'},
+                    **{key: value for key, value in approach_visibility.items() if key != 'reason_codes'},
+                    'reason_codes': [*rebound_support['reason_codes'], *approach_visibility['reason_codes']],
                     'verified_identity': False, 'physical_contact_verified': False},
             })
+            if not rebound_support['supported'] or approach_visibility['support_wholly_overlaps_possible_occluder']:
+                proposals[-1]['flight_trajectory_support']['supported_for_review'] = False
             break
     return proposals
 
@@ -294,6 +399,8 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
     for track in tracks or []:
         observations = []
         for source in track.get("observations", []):
+            if source.get('observed') is False:
+                continue
             item = dict(source)
             try:
                 item["frame_index"] = int(item["frame_index"])
@@ -458,13 +565,15 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
                     candidate['reason_codes'].append('LATER_REBOUND_AFTER_FIRST_CANDIDATE')
                 else:
                     support = _flight_review_support(track, observations, index,
-                        frames[0].shape[1] if frames else 0, nominal_step)
+                        frames[0].shape[1] if frames else 0, nominal_step, plateau_end)
                     if support is not None:
                         candidate['flight_trajectory_support'] = support
+            _apply_flight_continuity(candidate, track)
             candidates.append(candidate)
         for candidate in _occluded_rebound_candidates(track, observations, timestamps, frames, calibration, nominal_step):
             if event_window is None or event_window[0] <= candidate['time'] <= event_window[1]:
                 if not rebounds or candidate['time'] < observations[rebounds[0]]['time']:
+                    _apply_flight_continuity(candidate, track)
                     candidates.append(candidate)
     candidates.sort(key=lambda item: (-item["confidence"], -item["identity_confidence"], item["time"]))
     # The global cap must not discard a reviewed region before the later native

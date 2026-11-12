@@ -215,6 +215,22 @@ def _flight_rank(beam):
             - error / max(1, len(observations) - 2) * 4 - (span - len(observations)) * .6)
 
 
+def _spatial_flight_order(beams):
+    """Reserve endpoint coverage before spending the budget on similar paths.
+
+    Long overlapping prefixes of one bright object otherwise fill the archive
+    and displace a short, fast descent in a different part of the image.
+    """
+    cells = defaultdict(list)
+    for beam in sorted(beams, key=_flight_rank, reverse=True):
+        endpoint = beam[0][-1]
+        cells[(int(endpoint['x'] / 48), int(endpoint['y'] / 48))].append(beam)
+    for depth in range(max((len(group) for group in cells.values()), default=0)):
+        for group in cells.values():
+            if depth < len(group):
+                yield group[depth]
+
+
 def _rebound_extensions(approach, rows):
     """Retain bounded observed alternatives near a free-flight endpoint.
 
@@ -246,8 +262,17 @@ def _rebound_extensions(approach, rows):
         if timestamp - end["time"] <= .35:
             dt = timestamp - end["time"]
             predicted_x = end["x"] + velocity[0] * dt
+            predicted, _, _ = _flight_fit(approach, timestamp)
+            # The missing interval can span more than .15 seconds, especially
+            # when a small shuttle crosses a low-contrast floor. Bound the
+            # possible turn by its incoming motion at this timestamp instead
+            # of a fixed distance from the last detection. Only real measured
+            # points enter a branch; the event stage must fit both segments.
+            fall = max(0., float(predicted[1]) - end['y'], float(velocity[1]) * dt)
+            lower_y = end['y'] - max(12., min(60., fall * .5))
+            upper_y = end['y'] + max(12., fall) + radius * 3
             seeds = [p for p in points if abs(p["x"] - predicted_x) <= max(6., radius * 3)
-                     and abs(p["y"] - end["y"]) <= max(12., min(60., abs(velocity[1]) * .15))]
+                     and lower_y <= p['y'] <= upper_y]
             seeds.sort(key=lambda p: abs(p["x"] - predicted_x) + abs(p["y"] - end["y"]) * .2)
             fresh.extend(([p], 0.) for p in seeds[:3])
         # Both working history and branch count are bounded independently of
@@ -263,7 +288,31 @@ def _rebound_extensions(approach, rows):
                 _, _, residual = _flight_fit(observations, observations[-1]["time"], window=6)
                 if residual <= max(3., radius * 1.5):
                     finished.append((observations, error, residual))
-    finished.sort(key=lambda b: (-len(b[0]), b[1], b[0][0]["time"]))
+    def connection_rank(branch):
+        observations, error, _ = branch
+        # A longer unrelated post-motion must not consume both alternatives
+        # before the event stage sees a short first rebound. Check that the
+        # measured incoming/outgoing curves can actually meet near the gap.
+        origin = end['time']
+        incoming = np.polyfit([o['time'] - origin for o in approach[-10:]],
+                              [[o['x'], o['y']] for o in approach[-10:]], 2)
+        outgoing = np.polyfit([o['time'] - origin for o in observations],
+                              [[o['x'], o['y']] for o in observations], 2)
+        steps = np.diff([o['time'] for o in approach[-6:]])
+        step = float(np.median(steps)) if len(steps) else 1 / 30
+        compatible = False
+        for root in np.roots(incoming[:, 1] - outgoing[:, 1]):
+            if abs(root.imag) > 1e-6 or not 0 <= root.real <= observations[0]['time'] - origin + step * .5:
+                continue
+            t = float(root.real)
+            dx = abs(float(np.polyval(incoming[:, 0], t) - np.polyval(outgoing[:, 0], t)))
+            if (dx <= max(6., radius * 3) and np.polyval(np.polyder(incoming[:, 1]), t) > 12
+                    and np.polyval(np.polyder(outgoing[:, 1]), t) < -12):
+                compatible = True
+                break
+        return (not compatible, observations[0]['time'], -len(observations), error)
+
+    finished.sort(key=connection_rank)
     selected = []
     for observations, _, residual in finished:
         if any(abs(observations[0]["time"] - old[0][0]["time"]) < .08
@@ -283,7 +332,7 @@ def _flight_hypotheses(frame_records, config, first_id, progress_callback=None):
     which object is the shuttle, first contact, or continuity through a gap.
     """
     max_beams = min(2048, max(32, int(config.get("flight_max_beams", 1600))))
-    max_hypotheses = min(160, max(1, int(config.get("flight_max_hypotheses", 96))))
+    max_hypotheses = min(160, max(1, int(config.get("flight_max_hypotheses", 160))))
     steps = np.diff([float(record["time"]) for record in frame_records])
     nominal_step = float(np.median(steps[steps > 0])) if np.any(steps > 0) else 1 / 30
     history_limit = min(64, max(18, int(math.ceil(.35 / nominal_step)) + 1))
@@ -314,6 +363,12 @@ def _flight_hypotheses(frame_records, config, first_id, progress_callback=None):
                 continue
             prediction, _, _ = _flight_fit(observations, timestamp)
             tolerance = 4 + min(4., float(np.median([o["radius"] for o in observations[-4:]]))) * 1.3 + (gap - 1) * 2
+            if len(observations) < 4:
+                # Two samples cannot resolve acceleration. A fast object with
+                # an early missing frame needs bounded velocity-scaled seed
+                # uncertainty until enough actual samples define its curve.
+                step_speed = travel / max(1, observations[-1]['frame_index'] - observations[0]['frame_index'])
+                tolerance = max(tolerance, min(24., step_speed * .5 * gap))
             distances = np.linalg.norm(coordinates - prediction, axis=1)
             for j in np.argsort(distances)[:2]:
                 if distances[j] <= tolerance:
@@ -352,7 +407,7 @@ def _flight_hypotheses(frame_records, config, first_id, progress_callback=None):
                         break
             if len(beams) == max_beams:
                 break
-        for observations, error, _ in sorted(beams, key=_flight_rank, reverse=True)[:400]:
+        for observations, error, _ in _spatial_flight_order(beams):
             direction = observations[-1]["y"] - observations[-2]["y"]
             ys = [o["y"] for o in observations]
             extremum = int(np.argmin(ys)) if direction > 0 else int(np.argmax(ys))
@@ -368,20 +423,39 @@ def _flight_hypotheses(frame_records, config, first_id, progress_callback=None):
             if key not in archive or _flight_rank(candidate) > _flight_rank(archive[key]):
                 archive[key] = candidate
         if len(archive) > 2048:
-            archive = dict(sorted(archive.items(), key=lambda item: _flight_rank(item[1]), reverse=True)[:2048])
+            # Keep strong completed approaches even when their endpoint cell
+            # is crowded; spend the other half on spatial coverage. Repeated
+            # all-spatial pruning can erase a good approach before its rebound
+            # is examined at the end of the video.
+            retained = sorted(archive.values(), key=_flight_rank, reverse=True)[:1024]
+            included = {id(beam) for beam in retained}
+            for beam in _spatial_flight_order(archive.values()):
+                if id(beam) not in included:
+                    retained.append(beam)
+                    included.add(id(beam))
+                if len(retained) >= 2048:
+                    break
+            archive = {tuple((o['frame_index'], o['x'], o['y']) for o in (beam[0][0], beam[0][-1])): beam
+                       for beam in retained}
         reporter.report(order + 1, force=order + 1 == len(rows))
     selected = []
-    for beam in sorted(archive.values(), key=_flight_rank, reverse=True):
-        observations = beam[0]
-        identifiers = {(o["frame_index"], o["x"], o["y"]) for o in observations}
-        if any(len(identifiers & old_ids) / min(len(identifiers), len(old_ids)) > .65
-               and abs(observations[-1]["frame_index"] - old[0][-1]["frame_index"]) <= 1
-               and math.hypot(observations[-1]["x"] - old[0][-1]["x"], observations[-1]["y"] - old[0][-1]["y"]) < 5
-               for old, old_ids in selected):
-            continue
-        selected.append((beam, identifiers))
-        if len(selected) >= max_hypotheses:
-            break
+    # Preserve globally strong approaches as well as endpoint coverage. Pure
+    # spatial ordering can itself discard a late endpoint of a good trajectory
+    # when an unrelated motion shares its cell.
+    for ordering, budget in ((sorted(archive.values(), key=_flight_rank, reverse=True),
+                              max(1, int(max_hypotheses * .6))),
+                             (_spatial_flight_order(archive.values()), max_hypotheses)):
+        for beam in ordering:
+            if len(selected) >= budget:
+                break
+            observations = beam[0]
+            identifiers = {(o["frame_index"], o["x"], o["y"]) for o in observations}
+            if any(len(identifiers & old_ids) / min(len(identifiers), len(old_ids)) > .65
+                   and abs(observations[-1]["frame_index"] - old[0][-1]["frame_index"]) <= 1
+                   and math.hypot(observations[-1]["x"] - old[0][-1]["x"], observations[-1]["y"] - old[0][-1]["y"]) < 5
+                   for old, old_ids in selected):
+                continue
+            selected.append((beam, identifiers))
     paths = []
     if progress_callback is not None:
         progress_callback({'detail': '비행·반동 궤적 연결 검토'})
