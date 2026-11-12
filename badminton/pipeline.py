@@ -18,6 +18,7 @@ def implementation_fingerprint():
     digest = hashlib.sha256()
     for name in ('media.py', 'pipeline.py', 'calibration.py', 'detection.py', 'tracking.py',
                  'events.py', 'identity.py', 'identity_continuity.py', 'candidate_identity.py',
+                 'event_continuity.py', 'observation_support.py', 'scene_context.py',
                  'evidence.py', 'decision.py', 'learning.py',
                  'contact_model.py', 'sync.py'):
         digest.update(name.encode())
@@ -139,7 +140,8 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     validate_contact_modes(event_config)
     learned_input = bool(detector_config.get('model_path') or detector_config.get('scorer_path')
                          or event_config.get('contact_model_path'))
-    if learned_input or detector_config.get('refinement_regions') or detector_config.get('source_analysis_enabled', False):
+    if (learned_input or event_config.get('scene_context_ranking', False)
+            or detector_config.get('refinement_regions') or detector_config.get('source_analysis_enabled', False)):
         frames = load_frames(source, presentation['frame_count'], config.get('max_frames', 3000),
                              resize_to=(presentation['width'], presentation['height']), **observe('prepare'))
         preprocessing = 'opencv_source_bgr_area_v1'

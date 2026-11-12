@@ -377,15 +377,29 @@ def test_later_upward_jitter_cannot_rescue_initial_downward_shoe_motion():
     assert support['supported_for_review'] is False
 
 
-def test_unobserved_interpolated_tail_cannot_supply_rebound_support():
+@pytest.mark.parametrize('tail_kind', ['unobserved', 'interpolated', 'persistent_background', 'stale_background'])
+def test_unobserved_interpolated_tail_cannot_supply_rebound_support(tail_kind):
     ys = [10, 15, 24, 37, 54, 75, 100, 129, 115, 108, 103, 100]
     moving = track([(30 + i, y) for i, y in enumerate(ys)], ambiguous=True)
     moving['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
-    moving['observations'][-2]['observed'] = False
-    moving['observations'][-1]['observed'] = False
+    for observation in moving['observations'][-2:]:
+        if tail_kind == 'unobserved':
+            observation['observed'] = False
+        elif tail_kind == 'interpolated':
+            observation.update(observed=True, interpolated=True)
+        else:
+            observation['observation_support'] = {
+                'schema_version': 1, 'status': 'persistent_background', 'evidence_valid': True,
+                'reject_for_moving_association': True,
+                'frame_index': observation['frame_index'],
+                'point_px': [observation['x'] + (1 if tail_kind == 'stale_background' else 0), observation['y']],
+                'coordinate_size': [180, 180]}
     frames = [np.zeros((180, 180, 3), np.uint8)] * len(ys)
     events = estimate_landings([moving], frames, [i / 30 for i in range(len(ys))], {})
     assert events
+    if tail_kind == 'stale_background':
+        assert any(event.get('flight_trajectory_support', {}).get('supported_for_review') for event in events)
+        return
     assert not any(event.get('flight_trajectory_support', {}).get('supported_for_review') for event in events)
     assert all(10 not in event['evidence_frame_indices'] and 11 not in event['evidence_frame_indices'] for event in events)
 

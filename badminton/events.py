@@ -17,6 +17,8 @@ import numpy as np
 
 from .identity_continuity import assess_identity_continuity
 from .candidate_identity import apply_competing_continuation_evidence
+from .event_continuity import resolve_fragment_turns
+from .observation_support import rejects_moving_association
 
 
 def _value(observation, name, default=0.0):
@@ -30,6 +32,8 @@ def _value(observation, name, default=0.0):
 def validate_contact_modes(config=None):
     """Prevent one observation's geometry from inheriting another model's proof."""
     config = config or {}
+    if not isinstance(config.get('scene_context_ranking', False), bool):
+        raise ValueError('scene_context_ranking must be a boolean')
     if config.get("contact_model_path") and config.get("source_contact_model_path"):
         raise ValueError("Choose either contact_model_path or source_contact_model_path, not both preprocessing modes")
 
@@ -59,9 +63,6 @@ def review_region_indices(candidate, regions):
 def prioritize_review_candidates(candidates, regions, *, identity_first=False):
     """Order the finite evidence budget; retain every supplied candidate/score."""
     def key(candidate):
-        scores = (-_value(candidate, "identity_confidence"), -_value(candidate, "confidence"))
-        if not identity_first:
-            scores = (scores[1],)
         requested = candidate.get('identity_source') == 'operator_selected_track' or candidate.get('request_match') == 'selected'
         support = candidate.get('flight_trajectory_support') or {}
         if not isinstance(support, dict):
@@ -83,6 +84,16 @@ def prioritize_review_candidates(candidates, regions, *, identity_first=False):
         motion_event = candidate.get('image_motion_event') or {}
         if isinstance(motion_event, dict) and motion_event.get('point_kind') == 'inferred_object_center':
             flight_rank *= .7
+        # Appearance context is only a bounded comparison within the existing
+        # guidance/contact/flight tiers. It cannot promote stationary clutter
+        # above a supported flight or change an observation's confidence.
+        factor = 1.
+        if candidate.get('scene_context'):
+            from .scene_context import scene_rank_factor
+            factor = scene_rank_factor(candidate)
+        flight_rank *= factor
+        score = _value(candidate, 'confidence') * (1. if flight else factor)
+        scores = (-_value(candidate, 'identity_confidence'), -score) if identity_first else (-score,)
         return (not bool(review_region_indices(candidate, regions)), not requested, not observed, not flight,
                 -flight_rank if flight else 0., *scores)
     return sorted(candidates, key=key)
@@ -99,7 +110,7 @@ def _measured_rebound_support(observations, index, nominal_step, *, minimum_afte
     after = []
     previous = origin
     for item in observations[index + 1:]:
-        if item.get('observed') is False:
+        if item.get('observed') is False or item.get('interpolated') is True or rejects_moving_association(item):
             continue
         if item['time'] - origin['time'] > max(.16, nominal_step * 4.01):
             break
@@ -461,7 +472,7 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
     for track in tracks or []:
         observations = []
         for source in track.get("observations", []):
-            if source.get('observed') is False:
+            if source.get('observed') is False or source.get('interpolated') is True or rejects_moving_association(source):
                 continue
             item = dict(source)
             try:
@@ -638,6 +649,10 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
                     _apply_flight_continuity(candidate, track, nominal_step)
                     candidates.append(candidate)
     candidates = apply_competing_continuation_evidence(candidates, tracks or [], nominal_step)
+    candidates = resolve_fragment_turns(candidates, tracks or [], nominal_step)
+    if cfg.get('scene_context_ranking', False):
+        from .scene_context import annotate_scene_context
+        candidates = annotate_scene_context(candidates, frames)
     candidates.sort(key=lambda item: (-item["confidence"], -item["identity_confidence"], item["time"]))
     # The global cap must not discard a reviewed region before the later native
     # evidence budget can see it. The cap and physical qualification stay intact.

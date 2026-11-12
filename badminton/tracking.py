@@ -9,6 +9,8 @@ from statistics import median
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
+from .observation_support import rejects_moving_association, observation_support_status
+
 
 def _inside(point, region):
     x, y, width, height = region.get("bbox", [0, 0, 0, 0])
@@ -118,15 +120,22 @@ def _offline_links(tracks, config):
     max_gap = float(config.get("offline_max_gap_seconds", 0.6))
     max_residual = float(config.get("offline_max_residual_px", 28.0))
     links = []
+    background_starts = {id(track): rejects_moving_association(track['observations'][0])
+                         for track in tracks if track.get('observations')}
     for before in tracks:
         if len(before["observations"]) < 3 or before["identity_ambiguous"]:
             continue
         end = before["observations"][-1]
         velocity_before = _velocity(before["observations"])
+        moving_before = float(np.linalg.norm(velocity_before)) >= 25.
         for after in tracks:
             if before is after or len(after["observations"]) < 3 or after["identity_ambiguous"]:
                 continue
             start = after["observations"][0]
+            # A known persistent image feature may remain a stationary
+            # diagnostic track. It cannot complete a moving-object gap link.
+            if moving_before and background_starts.get(id(after), False):
+                continue
             dt = start["time"] - end["time"]
             if not 0 < dt <= max_gap or start["frame_index"] <= end["frame_index"] + 1:
                 continue
@@ -242,6 +251,37 @@ def _spatial_flight_order(beams):
                 yield group[depth]
 
 
+def _continuation_indices(points, distances, history, tolerance, limit=2, *, transient_indices=None):
+    """Keep nearest geometry plus one currently pixel-supported alternative.
+
+    Positive transience is not object identity: it only reserves an existing
+    branch slot inside the unchanged motion gate. With no current positive
+    evidence, ordering is exactly the original nearest-neighbor ordering.
+    """
+    chosen = [int(index) for index in np.argsort(distances)[:limit] if distances[index] <= tolerance]
+    if len(chosen) < limit or limit < 2:
+        return chosen
+    if transient_indices is None:
+        transient_indices = [index for index, point in enumerate(points)
+                             if observation_support_status(point) == 'transient']
+    transient = [index for index in transient_indices if distances[index] <= tolerance]
+    if not transient:
+        return chosen
+    baseline = max(.1, float(np.median([row.get('radius', 2.) for row in history[-5:]])))
+
+    def score(index):
+        radius = max(.1, float(points[index].get('radius', 2.)))
+        # Match the existing bounded Kalman appearance cost; neither detector
+        # confidence nor a transient body/racket pixel confirms a shuttle.
+        size_penalty = min(.35, abs(math.log(radius / baseline)) * .08)
+        return (distances[index] / tolerance + size_penalty, distances[index], index)
+
+    preferred = min(transient, key=score)
+    if preferred not in chosen:
+        chosen[-1] = preferred
+    return chosen
+
+
 def _rebound_extensions(approach, rows):
     """Retain bounded observed alternatives near a free-flight endpoint.
 
@@ -256,6 +296,9 @@ def _rebound_extensions(approach, rows):
     nearby = [row for row in rows if 0 < row[0] - end["time"] <= .5][:64]
     active, finished = [], []
     for timestamp, points in nearby:
+        points = [point for point in points if not rejects_moving_association(point)]
+        pixel_supported = tuple(index for index, point in enumerate(points)
+                                if observation_support_status(point) == 'transient')
         fresh = []
         for observations, error in active:
             gap = timestamp - observations[-1]["time"]
@@ -266,9 +309,9 @@ def _rebound_extensions(approach, rows):
             else:
                 prediction, _, _ = _flight_fit(observations, timestamp)
             distances = [math.hypot(p["x"] - prediction[0], p["y"] - prediction[1]) for p in points]
-            for j in np.argsort(distances)[:2]:
-                if distances[j] <= max(7., radius * 3):
-                    fresh.append((observations + [points[j]], error + distances[j] ** 2))
+            for j in _continuation_indices(points, distances, approach[-5:] + observations,
+                                           max(7., radius * 3), transient_indices=pixel_supported):
+                fresh.append((observations + [points[j]], error + distances[j] ** 2))
             fresh.append((observations, error))
         if timestamp - end["time"] <= .35:
             dt = timestamp - end["time"]
@@ -351,15 +394,22 @@ def _flight_hypotheses(frame_records, config, first_id, progress_callback=None):
     for record in frame_records:
         points = []
         for raw in record.get("detections", []):
+            if raw.get('observed') is False or raw.get('interpolated') is True:
+                continue
             if not all(math.isfinite(float(raw.get(key, math.nan))) for key in ("x", "y", "confidence")):
                 continue
             radius = float(raw.get("radius", 2.))
             confidence = float(raw["confidence"])
             if not math.isfinite(radius) or radius <= 0 or not 0 <= confidence <= 1:
                 continue
-            points.append({**raw, "x": float(raw["x"]), "y": float(raw["y"]), "confidence": confidence,
-                           "radius": radius, "frame_index": int(record["frame_index"]),
-                           "time": float(record["time"]), "observed": True})
+            point = {**raw, "x": float(raw["x"]), "y": float(raw["y"]), "confidence": confidence,
+                     "radius": radius, "frame_index": int(record["frame_index"]),
+                     "time": float(record["time"]), "observed": True}
+            # Preserve the raw record and ordinary diagnostic tracklets; only
+            # dedicated moving-flight hypotheses exclude this strong negative
+            # pixel evidence. Unknown/stale support changes nothing.
+            if not rejects_moving_association(point):
+                points.append(point)
         rows.append((float(record["time"]), points[:256]))
     beams, archive = [], {}
     from .media import _FrameProgress
@@ -367,6 +417,8 @@ def _flight_hypotheses(frame_records, config, first_id, progress_callback=None):
     reporter.report(0, force=True)
     for order, (timestamp, points) in enumerate(rows):
         coordinates = np.asarray([[p["x"], p["y"]] for p in points], dtype=float).reshape(-1, 2)
+        pixel_supported = tuple(index for index, point in enumerate(points)
+                                if observation_support_status(point) == 'transient')
         fresh = []
         for observations, error, travel in beams:
             gap = int(frame_records[order]["frame_index"]) - observations[-1]["frame_index"]
@@ -381,10 +433,10 @@ def _flight_hypotheses(frame_records, config, first_id, progress_callback=None):
                 step_speed = travel / max(1, observations[-1]['frame_index'] - observations[0]['frame_index'])
                 tolerance = max(tolerance, min(24., step_speed * .5 * gap))
             distances = np.linalg.norm(coordinates - prediction, axis=1)
-            for j in np.argsort(distances)[:2]:
-                if distances[j] <= tolerance:
-                    extended = (observations + [points[j]])[-history_limit:]
-                    fresh.append((extended, error * .94 + float((distances[j] / tolerance) ** 2), _path_travel(extended)))
+            for j in _continuation_indices(points, distances, observations, tolerance,
+                                           transient_indices=pixel_supported):
+                extended = (observations + [points[j]])[-history_limit:]
+                fresh.append((extended, error * .94 + float((distances[j] / tolerance) ** 2), _path_travel(extended)))
             if gap < 3:
                 fresh.append((observations, error, travel))
         if order and points and rows[order - 1][1]:
@@ -533,6 +585,8 @@ def track_detections(frame_records, config=None, *, progress_callback=None):
         previous_time, previous_frame = timestamp, frame_index
         candidates = []
         for raw in record.get("detections", []):
+            if raw.get('observed') is False or raw.get('interpolated') is True:
+                continue
             if not all(math.isfinite(float(raw[k])) for k in ("x", "y", "confidence")):
                 continue
             if not 0 <= float(raw["confidence"]) <= 1:
@@ -542,6 +596,7 @@ def track_detections(frame_records, config=None, *, progress_callback=None):
             candidates.append({**raw, "x": float(raw["x"]), "y": float(raw["y"]),
                                "confidence": float(raw["confidence"]), "radius": float(raw.get("radius", 2.0)),
                                "frame_index": frame_index, "time": timestamp, "observed": True})
+        background_candidates = [rejects_moving_association(candidate) for candidate in candidates]
         surviving = []
         for track in active:
             if timestamp - track.observations[-1]["time"] > max_gap or len(track.misses) > max_misses:
@@ -561,6 +616,8 @@ def track_detections(frame_records, config=None, *, progress_callback=None):
             for j, candidate in enumerate(candidates):
                 distance = math.hypot(candidate["x"] - track.state[0], candidate["y"] - track.state[1])
                 if distance > gate:
+                    continue
+                if speed >= 25. and background_candidates[j]:
                     continue
                 size_penalty = min(0.35, abs(math.log(max(0.1, candidate["radius"]) / last_radius)) * 0.08)
                 costs[i, j] = distance / gate + size_penalty + (1 - candidate["confidence"]) * 0.15
@@ -618,4 +675,13 @@ def track_detections(frame_records, config=None, *, progress_callback=None):
                       "observation_count": count, "observed_frame_fraction": round(coverage, 4),
                       "motion_span_px": round(float(np.linalg.norm(xy.max(axis=0) - xy.min(axis=0))), 3),
                       "target_court_confirmed": False})
+        background = [o['frame_index'] for o in observations if rejects_moving_association(o)]
+        transient = [o['frame_index'] for o in observations if observation_support_status(o) == 'transient']
+        track['moving_observation_support'] = {
+            'method': 'coordinate_matched_source_pixel_evidence',
+            'persistent_background_observation_count': len(background),
+            'persistent_background_frame_indices': background,
+            'transient_observation_count': len(transient), 'transient_frame_indices': transient,
+            'unknown_observation_count': len(observations) - len(background) - len(transient),
+            'raw_input_records_unmodified': True, 'identity_verified': False, 'physical_contact_verified': False}
     return sorted(finished, key=lambda track: track["track_id"])

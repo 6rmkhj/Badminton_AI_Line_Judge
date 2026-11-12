@@ -30,6 +30,7 @@
   },
   "tracker": {"flight_search_enabled": true},
   "events": {
+    "scene_context_ranking": true,
     "source_contact_enabled": true,
     "source_contact_max_candidates": 6,
     "source_contact_patch_size": 96

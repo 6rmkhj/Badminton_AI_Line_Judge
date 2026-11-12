@@ -14,6 +14,8 @@ from statistics import median
 
 import numpy as np
 
+from .observation_support import rejects_moving_association
+
 
 def _number(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
@@ -21,7 +23,7 @@ def _number(value):
 
 def _observations(track):
     rows = [row for row in track.get('observations', [])
-            if row.get('observed') is not False
+            if row.get('observed') is not False and row.get('interpolated') is not True
             and all(_number(row.get(key)) for key in ('frame_index', 'time', 'x', 'y'))]
     rows.sort(key=lambda row: (row['time'], row['frame_index']))
     return list({row['time']: row for row in rows}.values())
@@ -130,7 +132,7 @@ def apply_competing_continuation_evidence(candidates, tracks, nominal_step):
                     or time - shared[-1]['time'] > nominal_step * 2.5):
                 continue
             continuation = _suffix(other_rows, time, nominal_step, count=3)
-            if len(continuation) < 3:
+            if len(continuation) < 3 or any(rejects_moving_association(row) for row in continuation):
                 continue
             appearance = _appearance(continuation)
             if (appearance['radius_count'] < 3 or appearance['known_polarity_count'] < 3
