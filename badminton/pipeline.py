@@ -88,14 +88,19 @@ def _draw_frame(frame, calibration, tracks, frame_index, landing=None):
     return canvas
 
 
-def analyze_video(video_path, output_dir, config=None):
+def analyze_video(video_path, output_dir, config=None, *, progress_callback=None):
     output = Path(output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
+    if progress_callback is not None:
+        progress_callback({'stage': 'prepare', 'stage_label': '영상 준비',
+                           'stage_index': 1, 'stage_count': 7, 'detail': '영상 분석 준비·실행 잠금 확인'})
     with FileLock(str(output / '.analysis.lock'), timeout=1800):
-        return _analyze_video(video_path, output, config)
+        if progress_callback is None:
+            return _analyze_video(video_path, output, config)
+        return _analyze_video(video_path, output, config, progress_callback=progress_callback)
 
 
-def _analyze_video(video_path, output_dir, config=None):
+def _analyze_video(video_path, output_dir, config=None, *, progress_callback=None):
     from .calibration import calibrate, assess_camera_stability, guard_calibration_stability
     from .detection import detect_sequence, summarize_detection_quality
     from .tracking import track_detections
@@ -109,7 +114,22 @@ def _analyze_video(video_path, output_dir, config=None):
     video_id = config.get('video_id') or 'v_' + hashlib.sha256(source.name.encode()).hexdigest()[:12]
     start = time.perf_counter()
     timings = {}
-    metadata, presentation, source_sha = prepare_preview(source, output / 'preview.mp4', config.get('analysis_width', 1280))
+    stages = {'prepare': (1, '영상 준비'), 'calibration': (2, '코트 확인'),
+              'detection': (3, '셔틀콕 후보 탐지'), 'tracking': (4, '궤적 연결'),
+              'contact': (5, '착지·라인 확인'), 'evidence': (6, '근거 영상 생성'), 'save': (7, '결과 저장')}
+
+    def report(stage, **fields):
+        if progress_callback is not None:
+            index, label = stages[stage]
+            progress_callback({'stage': stage, 'stage_label': label, 'stage_index': index,
+                               'stage_count': len(stages), **fields})
+
+    def observe(stage):
+        return {'progress_callback': lambda fields: report(stage, **fields)} if progress_callback is not None else {}
+
+    report('prepare', detail='원본 확인·미리보기 준비')
+    metadata, presentation, source_sha = prepare_preview(source, output / 'preview.mp4', config.get('analysis_width', 1280),
+                                                       **observe('prepare'))
     detector_config = dict(config.get('detector') or {})
     event_config = dict(config.get('events') or {})
     validate_contact_modes(event_config)
@@ -117,21 +137,24 @@ def _analyze_video(video_path, output_dir, config=None):
                          or event_config.get('contact_model_path'))
     if learned_input or detector_config.get('refinement_regions'):
         frames = load_frames(source, presentation['frame_count'], config.get('max_frames', 3000),
-                             resize_to=(presentation['width'], presentation['height']))
+                             resize_to=(presentation['width'], presentation['height']), **observe('prepare'))
         preprocessing = 'opencv_source_bgr_area_v1'
     else:
-        frames = load_frames(output / 'preview.mp4', presentation['frame_count'], config.get('max_frames', 3000))
+        frames = load_frames(output / 'preview.mp4', presentation['frame_count'], config.get('max_frames', 3000),
+                             **observe('prepare'))
         preprocessing = 'h264_preview_crf21_bgr_v1'
     timestamps = presentation.pop('timestamps')
     metadata.pop('timestamps', None)
     timings['decode_and_preview_seconds'] = time.perf_counter() - start
     clock = time.perf_counter()
+    report('calibration', detail='코트 선과 카메라 안정성 확인')
     calibration_frames = [frames[int(i)] for i in np.linspace(0, len(frames)-1, min(9, len(frames)))]
     calibration = calibrate(calibration_frames, config.get('court_hint'), config.get('calibration'))
     stability = assess_camera_stability(frames, config.get('camera_stability'))
     calibration = guard_calibration_stability(calibration, stability)
     timings['calibration_seconds'] = time.perf_counter() - clock
     clock = time.perf_counter()
+    report('detection', detail='셔틀콕 후보 탐지 준비')
     detector_config['source_path'] = str(source)
     detector_config['frame_preprocessing'] = preprocessing
     source_frames = None
@@ -139,15 +162,17 @@ def _analyze_video(video_path, output_dir, config=None):
         source_frames = SourceFrameSequence(source, len(frames))
         detector_config['source_frames'] = source_frames
     try:
-        detections = detect_sequence(frames, timestamps, detector_config)
+        detections = detect_sequence(frames, timestamps, detector_config, **observe('detection'))
     finally:
         if source_frames is not None:
             source_frames.close()
     timings['detection_seconds'] = time.perf_counter() - clock
     clock = time.perf_counter()
+    report('tracking', detail='프레임 사이의 후보 궤적 연결')
     tracks = track_detections(detections, config.get('tracker'))
     timings['tracking_seconds'] = time.perf_counter() - clock
     clock = time.perf_counter()
+    report('contact', detail='최초 접촉 후보·라인 관계 검토')
     event_config['frame_preprocessing'] = preprocessing
     event_config['review_refinement_regions'] = detector_config.get('refinement_regions',
         event_config.get('review_refinement_regions', []))
@@ -177,6 +202,7 @@ def _analyze_video(video_path, output_dir, config=None):
     timings['events_and_decision_seconds'] = time.perf_counter() - clock
     display_candidates = prioritize_review_candidates(requested, review_regions)
     selected = display_candidates[0] if display_candidates else None
+    report('evidence', detail='원본 확대 근거·검수 영상 생성')
     artifacts = {'preview': 'preview.mp4', 'detections': 'detections.json', 'evidence': []}
     evidence_dir = output / 'evidence'
     evidence_dir.mkdir(exist_ok=True)
@@ -216,7 +242,8 @@ def _analyze_video(video_path, output_dir, config=None):
     if config.get('evidence', {}).get('annotated_clip', True):
         from .evidence import write_annotated_clip
         artifacts['annotated_clip'] = write_annotated_clip(frames, timestamps, calibration, tracks,
-            selected, decision, output, config.get('evidence'))
+            selected, decision, output, config.get('evidence'), **observe('evidence'))
+    report('save', detail='분석 결과·탐지 근거 저장')
     timings['total_seconds'] = time.perf_counter() - start
     result = {'schema_version': 1, 'pipeline_version': __version__, 'video_id': video_id,
               'implementation_fingerprint': implementation_fingerprint(),

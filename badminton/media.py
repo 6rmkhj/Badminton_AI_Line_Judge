@@ -4,8 +4,71 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import tempfile
+import time
 import uuid
 import cv2
+
+
+class _FrameProgress:
+    """Report observed work at most twice a second, retaining the final count."""
+    def __init__(self, callback, total, detail):
+        self.callback, self.total, self.detail = callback, total, detail
+        self.last_time, self.last_count = float('-inf'), None
+
+    def report(self, count, *, force=False):
+        if self.callback is None or count == self.last_count:
+            return
+        now = time.monotonic()
+        if force or now - self.last_time >= .5:
+            self.callback({'completed_units': int(count), 'total_units': self.total,
+                           'unit': 'frames', 'detail': self.detail})
+            self.last_time, self.last_count = now, count
+
+
+def _run_ffmpeg_progress(command, callback, total, detail, timeout):
+    """Read FFmpeg's actual encoded-frame counter without blocking its stderr.
+
+    The output file is polled while communicate drains stderr. A process that
+    stops reporting progress still has the same wall-clock timeout as before.
+    """
+    reporter = _FrameProgress(callback, total, detail)
+    reporter.report(0, force=True)
+    with tempfile.TemporaryDirectory(prefix='badminton-progress-') as folder:
+        progress = Path(folder) / 'ffmpeg.txt'
+        observed = [command[0], '-progress', str(progress), '-stats_period', '0.5', '-nostats', *command[1:]]
+        process = subprocess.Popen(observed, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+        deadline = time.monotonic() + timeout
+
+        def observed_count():
+            if not progress.exists():
+                return None
+            values = [line.partition('=')[2].strip() for line in progress.read_text().splitlines()
+                      if line.startswith('frame=')]
+            counts = [int(value) for value in values if value.isdigit()]
+            return min(counts[-1], total) if counts else None
+
+        try:
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise subprocess.TimeoutExpired(command, timeout)
+                try:
+                    _, stderr = process.communicate(timeout=min(.5, remaining))
+                    break
+                except subprocess.TimeoutExpired:
+                    count = observed_count()
+                    if count is not None:
+                        reporter.report(count)
+        except BaseException:
+            process.kill()
+            process.communicate()
+            raise
+        if process.returncode == 0:
+            count = observed_count()
+            if count is not None:
+                reporter.report(count, force=True)
+        return subprocess.CompletedProcess(command, process.returncode, stdout='', stderr=stderr)
 
 
 def file_hash(path):
@@ -54,7 +117,7 @@ def probe(path):
             'timestamps': timestamps, 'time_origin_seconds': start, 'warnings': warnings}
 
 
-def prepare_preview(source, destination, width=1280):
+def prepare_preview(source, destination, width=1280, *, progress_callback=None):
     source, destination = Path(source).resolve(), Path(destination)
     metadata = probe(source)
     width = min(int(width), metadata['width'])
@@ -75,13 +138,19 @@ def prepare_preview(source, destination, width=1280):
                    '-threads', '2', '-fps_mode', 'passthrough', '-enc_time_base', 'demux',
                    '-bsf:v', f'setts=pts=PTS:dts=DTS:duration=1/({metadata["fps"]:.9f}*TB)',
                    '-movflags', '+faststart', str(temporary)]
-        completed = subprocess.run(command, capture_output=True, text=True, timeout=1800)
+        if progress_callback is None:
+            completed = subprocess.run(command, capture_output=True, text=True, timeout=1800)
+        else:
+            completed = _run_ffmpeg_progress(command, progress_callback, metadata['frame_count'],
+                                             '미리보기 변환', 1800)
         (destination.parent / 'preview-encode.log').write_text(completed.stderr)
         if completed.returncode or completed.stderr.strip():
             temporary.unlink(missing_ok=True)
             raise RuntimeError(f'Preview encoding failed: {completed.stderr[-2000:]}')
         temporary.replace(destination)
         sidecar.write_text(json.dumps(signature, indent=2) + '\n')
+    if progress_callback is not None:
+        progress_callback({'detail': '미리보기 프레임·시각 검증'})
     repair_preview_tail(destination, metadata['fps'])
     presentation = probe(destination)
     if (presentation['frame_count'] != metadata['frame_count'] or
@@ -126,11 +195,13 @@ def repair_preview_tail(path, fps=None):
     return True
 
 
-def load_frames(path, expected_count=None, max_frames=3000, resize_to=None):
+def load_frames(path, expected_count=None, max_frames=3000, resize_to=None, *, progress_callback=None):
     capture = cv2.VideoCapture(str(path), cv2.CAP_FFMPEG, [cv2.CAP_PROP_N_THREADS, 2])
     if not capture.isOpened():
         raise ValueError(f'Cannot open video: {path}')
     frames = []
+    reporter = _FrameProgress(progress_callback, expected_count, '분석 프레임 읽기')
+    reporter.report(0, force=True)
     try:
         while True:
             ok, frame = capture.read()
@@ -141,12 +212,14 @@ def load_frames(path, expected_count=None, max_frames=3000, resize_to=None):
             if resize_to is not None and (frame.shape[1], frame.shape[0]) != tuple(resize_to):
                 frame = cv2.resize(frame, tuple(resize_to), interpolation=cv2.INTER_AREA)
             frames.append(frame)
+            reporter.report(len(frames))
     finally:
         capture.release()
     if not frames:
         raise ValueError('Decoded zero frames')
     if expected_count is not None and len(frames) != expected_count:
         raise ValueError(f'Timestamp/frame count mismatch: {len(frames)} != {expected_count}')
+    reporter.report(len(frames), force=True)
     return frames
 
 

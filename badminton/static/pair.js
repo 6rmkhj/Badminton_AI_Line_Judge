@@ -6,6 +6,8 @@ const state = {
   videos: [], limits: {max_upload_bytes: 1024 ** 3}, busy: false,
   sources: {A: {mode: 'library'}, B: {mode: 'library'}},
   jobId: null, currentJob: null, pollTimer: null, pollGeneration: 0,
+  dashboardJob: null, receivedAt: 0, connected: true, frozenDelta: 0, announcement: '',
+  transfer: null, submissionError: '',
 };
 const statusNames = {
   queued: '분석 대기', pending: '대기', running: '분석 중', analyzing: '영상 분석 중',
@@ -14,6 +16,176 @@ const statusNames = {
   reused: '기존 근거 연결 완료', stored_ai_review: '기존 AI 검수 연결', fresh_analysis: '새 영상 분석',
 };
 const terminal = new Set(['completed', 'completed_with_errors', 'failed', 'interrupted']);
+const analysisStages = [
+  ['prepare', '영상 준비'], ['calibration', '코트 확인'], ['detection', '셔틀콕 후보 탐지'],
+  ['tracking', '궤적 연결'], ['contact', '착지·라인 확인'], ['evidence', '근거 영상 생성'], ['save', '결과 저장'],
+];
+const workflowLabels = ['입력 전송', '분석 대기', '시점별 분석', '결과 연결'];
+function secondsText(value) {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return '—';
+  const seconds = Math.floor(value), hours = Math.floor(seconds / 3600);
+  return hours ? `${hours}:${String(Math.floor(seconds / 60) % 60).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
+    : `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+}
+function durationText(value) {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? secondsText(value) : '—';
+}
+function validSeconds(value) { return typeof value === 'number' && Number.isFinite(value) && value >= 0; }
+function tickDelta() { return state.connected ? Math.max(0, (performance.now() - state.receivedAt) / 1000) : state.frozenDelta; }
+function announce(message) {
+  if (message !== state.announcement) { $('progress-announcement').textContent = message; state.announcement = message; }
+}
+function currentPhase(job) {
+  if (job.status === 'queued') return 'queued';
+  if (terminal.has(job.status)) return job.status;
+  return job.phase === 'linking' ? 'linking' : 'analyzing';
+}
+function setConnection(message = '') {
+  const box = $('connection-status'); box.hidden = !message; box.textContent = message;
+  $('job-progress').classList.toggle('connection-lost', Boolean(message));
+}
+function drawWorkflow(phase, error = false, lastPhase = null) {
+  const positions = {upload: 0, queued: 1, analyzing: 2, linking: 3, completed: 4, completed_with_errors: 4};
+  const effective = error && phase !== 'completed_with_errors' && Object.hasOwn(positions, lastPhase) ? lastPhase : phase;
+  const active = positions[effective] ?? 2;
+  const list = $('workflow-steps'); list.replaceChildren();
+  workflowLabels.forEach((label, index) => {
+    const errorHere = error && (index === active || phase === 'completed_with_errors' && index === 2);
+    const done = index < active && !errorHere;
+    const current = index === active;
+    const item = el('li', errorHere ? 'attention' : done ? 'done' : current ? 'current' : 'pending');
+    if (current) item.setAttribute('aria-current', 'step');
+    item.append(el('span', 'workflow-number', done ? '✓' : String(index + 1)), el('span', '', label));
+    if (current) item.append(el('small', '', error ? '확인 필요' : '진행 중'));
+    list.append(item);
+  });
+}
+function beginSubmission(refineJob = null) {
+  clearTimeout(state.pollTimer); state.pollGeneration += 1;
+  state.jobId = null; state.dashboardJob = null; state.currentJob = null;
+  state.connected = true; state.submissionError = ''; state.announcement = '';
+  state.transfer = {started: performance.now(), stopped: null, views: {}};
+  for (const camera of cameras) {
+    const source = state.sources[camera];
+    const ready = Boolean(refineJob || source.mode === 'library' || source.uploadId);
+    state.transfer.views[camera] = {status: ready ? 'ready' : 'uploading', loaded: 0,
+      total: !refineJob && source.mode === 'upload' ? source.file?.size || 0 : 0,
+      file: refineJob?.views?.[camera]?.file || (source.mode === 'upload' ? source.file?.name : source.video?.file) || camera + ' 시점'};
+  }
+  $('pair-result').hidden = true; $('job-progress').hidden = false;
+  $('job-permalink').hidden = true; $('retry-poll').hidden = true;
+  setConnection(); renderTransfer();
+  $('job-progress').scrollIntoView({block: 'start', behavior: 'auto'});
+}
+function renderTransfer() {
+  if (!state.transfer || state.dashboardJob) return;
+  const failed = Boolean(state.submissionError);
+  const ready = cameras.filter(camera => state.transfer.views[camera].status === 'ready').length;
+  $('progress-heading').textContent = failed ? '입력 준비를 완료하지 못했습니다.' : ready === 2 ? '분석 작업을 준비하고 있습니다.' : '분석할 영상을 준비하고 있습니다.';
+  $('job-status').textContent = failed ? '입력 확인 필요' : ready === 2 ? '작업 생성 중' : '입력 준비 중';
+  $('job-status').dataset.state = failed ? 'failed' : 'upload';
+  $('overall-progress').textContent = `입력 ${ready} / 2개 준비 완료`;
+  $('progress-message').textContent = state.submissionError || (ready === 2 ? '두 영상의 입력 확인이 끝났습니다. 분석 작업을 만들고 있습니다.' : '전송이 끝나면 프로그램이 영상 형식과 프레임 수를 확인합니다.');
+  $('elapsed-label').textContent = '입력 준비 경과';
+  $('elapsed-caption').textContent = failed ? '실패 시점까지의 시간' : '업로드와 원본 확인 시간';
+  $('queue-time').hidden = true; drawWorkflow('upload', failed);
+  const grid = $('progress-views'); grid.replaceChildren();
+  for (const camera of cameras) grid.append(transferCard(camera, state.transfer.views[camera]));
+  updateClocks();
+  announce(failed ? state.submissionError : ready === 2 ? '두 영상 입력 확인 완료. 분석 작업을 준비합니다.' : '영상 입력을 준비하고 있습니다.');
+}
+function cardHeader(camera, file, status) {
+  const header = el('div', 'analysis-card-header');
+  header.append(el('span', 'mini-camera' + (camera === 'B' ? ' camera-b' : ''), camera));
+  const title = el('div', 'analysis-card-title'); title.append(el('strong', '', camera + ' 시점'), el('span', 'analysis-filename', file || '영상 확인 중'));
+  header.append(title, el('span', 'analysis-card-status', status)); return header;
+}
+function transferCard(camera, view) {
+  const card = el('article', 'analysis-card transfer-card'); card.dataset.camera = camera;
+  const labels = {uploading: '전송 중', checking: '원본 확인 중', ready: '입력 준비 완료', failed: '입력 실패'};
+  card.dataset.state = view.status;
+  card.append(cardHeader(camera, view.file, labels[view.status] || '대기'));
+  const title = el('h3', 'analysis-stage-title', view.status === 'checking' ? '전송 완료 · 영상을 확인합니다.' : labels[view.status]);
+  title.id = 'progress-' + camera.toLowerCase(); card.append(title);
+  const bar = el('progress', 'frame-progress'); bar.max = view.total || 1;
+  if (view.status === 'uploading' && !view.loaded) bar.removeAttribute('value');
+  else bar.value = view.status === 'ready' ? (view.total || 1) : Math.min(view.loaded, view.total || 1);
+  bar.setAttribute('aria-label', camera + ' 시점 파일 전송');
+  card.append(bar);
+  const details = view.total ? `${fmt(view.loaded / 1024 ** 2, 1)} / ${fmt(view.total / 1024 ** 2, 1)} MB 전송` : '기존 영상 입력';
+  card.append(el('p', 'frame-count', view.status === 'ready' ? '✓ 입력 확인 완료' : details));
+  card.append(el('p', 'analysis-detail', view.status === 'checking' ? '영상 정보를 읽고 있습니다. 파일 전송과 별도로 시간이 걸릴 수 있습니다.' : view.status === 'failed' ? '입력을 확인하고 다시 분석을 시작해 주세요.' : view.status === 'ready' ? '두 시점이 모두 준비되면 분석을 시작합니다.' : '이 창을 열어 두세요. 두 시점을 함께 전송합니다.'));
+  return card;
+}
+function renderAnalysisCard(camera, view, job) {
+  const progress = view.progress || {}, running = !terminal.has(job.status) && !terminal.has(view.status) && job.status !== 'queued' && view.status !== 'queued';
+  const done = view.status === 'completed', failed = ['failed', 'interrupted'].includes(view.status);
+  const reused = view.processing_mode === 'stored_ai_review' || progress.last_stage === 'stored_review' || progress.stage === 'stored_review';
+  const index = Number.isInteger(progress.stage_index) && progress.stage_index >= 1 && progress.stage_index <= 7 ? progress.stage_index : null;
+  const known = typeof progress.stage === 'string';
+  const stageLabel = done ? (reused ? '기존 검수 근거를 불러왔습니다.' : '시점 분석을 마쳤습니다.') : progress.stage_label || statusNames[view.status] || '상태 확인 중';
+  const card = el('article', 'analysis-card'); card.dataset.camera = camera; card.dataset.state = failed ? 'failed' : done ? 'completed' : 'running';
+  card.append(cardHeader(camera, view.file, failed ? statusNames[view.status] : done ? '처리 완료' : running && progress.stage ? '처리 중' : statusNames[view.status] || '대기'));
+  const heading = el('div', 'analysis-current');
+  heading.append(el('span', 'stage-position', reused ? '저장된 근거 활용' : known && index ? `${done ? 7 : index} / 7 단계` : done ? '처리 완료' : '현재 상태'));
+  const title = el('h3', 'analysis-stage-title', stageLabel); title.id = 'progress-' + camera.toLowerCase(); heading.append(title);
+  const stageClock = el('span', 'stage-clock'); stageClock.dataset.clock = 'stage'; stageClock.dataset.camera = camera; heading.append(stageClock);
+  card.append(heading);
+  if (validSeconds(progress.total_units) && progress.total_units > 0 && validSeconds(progress.completed_units)) {
+    const count = Math.min(progress.total_units, progress.completed_units), bar = el('progress', 'frame-progress');
+    bar.max = progress.total_units; bar.value = count;
+    bar.setAttribute('aria-label', `${camera} 시점 ${progress.stage_label || '현재 단계'} 프레임 처리`);
+    card.append(bar, el('p', 'frame-count', `${count.toLocaleString('ko-KR')} / ${progress.total_units.toLocaleString('ko-KR')} 프레임 처리`));
+  }
+  if (progress.detail && typeof progress.detail === 'string') card.append(el('p', 'analysis-detail', progress.detail));
+  if (known && !reused) {
+    const list = el('ol', 'analysis-stages'); list.setAttribute('aria-label', camera + ' 시점 분석 단계');
+    const history = Array.isArray(view.stage_history) ? view.stage_history : [];
+    analysisStages.forEach(([id, label], ordinal) => {
+      const record = history.find(item => item.stage === id);
+      const active = progress.stage === id || progress.last_stage === id && failed;
+      const finished = record?.status === 'completed' || done && index === 7 || (index && ordinal + 1 < index);
+      const status = active && failed ? 'failed' : finished ? 'done' : active ? 'current' : 'pending';
+      const item = el('li', status); item.dataset.stage = id;
+      item.append(el('span', 'stage-check', status === 'done' ? '✓' : status === 'failed' ? '!' : String(ordinal + 1)), el('span', 'stage-name', label));
+      const stamp = el('span', 'stage-duration', status === 'done' ? durationText(record?.elapsed_seconds) : status === 'pending' ? '대기' : status === 'failed' ? '중단' : '진행 중');
+      if (status === 'current') { stamp.dataset.clock = 'stage-row'; stamp.dataset.camera = camera; }
+      item.append(stamp); if (status === 'current') item.setAttribute('aria-current', 'step');
+      list.append(item);
+    });
+    card.append(list);
+  } else card.append(el('p', 'analysis-detail', reused ? '저장된 검수의 원본 일치와 근거를 확인합니다. 새 프레임 분석은 실행하지 않습니다.' : '이 작업에는 세부 단계 기록이 없습니다. 처리 상태와 저장된 시간을 표시합니다.'));
+  const footer = el('div', 'analysis-card-footer'); footer.append(el('span', '', '시점 처리 시간'));
+  const elapsed = el('strong'); elapsed.dataset.clock = 'view'; elapsed.dataset.camera = camera; footer.append(elapsed); card.append(footer);
+  if (view.error) card.append(el('p', 'analysis-detail analysis-error', view.error));
+  return card;
+}
+function updateClocks() {
+  if (state.transfer && !state.dashboardJob) {
+    $('job-elapsed').textContent = secondsText(((state.transfer.stopped ?? performance.now()) - state.transfer.started) / 1000); return;
+  }
+  const job = state.dashboardJob; if (!job) return;
+  const live = !terminal.has(job.status) && job.status !== 'queued';
+  $('job-elapsed').textContent = validSeconds(job.elapsed_seconds) ? secondsText(job.elapsed_seconds + (live ? tickDelta() : 0)) : '—';
+  if (validSeconds(job.queue_seconds)) {
+    $('queue-time').textContent = `분석 전 대기 ${secondsText(job.queue_seconds + (job.status === 'queued' ? tickDelta() : 0))}`;
+  }
+  document.querySelectorAll('[data-clock][data-camera]').forEach(node => {
+    const view = job.views?.[node.dataset.camera] || {}, progress = view.progress || {};
+    const advancing = live && !terminal.has(view.status) && view.status !== 'queued';
+    if (node.dataset.clock === 'view') {
+      node.textContent = validSeconds(view.elapsed_seconds) ? secondsText(view.elapsed_seconds + (advancing ? tickDelta() : 0)) : '—'; return;
+    }
+    const stageSeconds = progress.stage_elapsed_seconds;
+    const seconds = validSeconds(stageSeconds) ? stageSeconds + (advancing ? tickDelta() : 0) : null;
+    const prefix = ['failed', 'interrupted'].includes(view.status) ? '중단 단계' : view.status === 'completed' ? '마지막 단계' : '현재 단계';
+    node.textContent = seconds === null ? '' : node.dataset.clock === 'stage' ? `${prefix} ${secondsText(seconds)}` : secondsText(seconds);
+  });
+  if (live && state.connected && tickDelta() > 10 && $('connection-status').hidden) {
+    setConnection('상태 응답을 기다리고 있습니다. 표시된 단계는 마지막으로 확인한 상태입니다.');
+  }
+}
+setInterval(updateClocks, 1000);
 const modeNames = {stored_ai_review: '기존 AI 검수', fresh_analysis: '새 분석', stored_automatic: '기존 자동 분석', review_guided_reanalysis: '원본 집중 재분석', failed: '처리 실패'};
 const correspondenceNames = {
   ai_visual_review: '저장된 AI 검수의 동작 대응', reviewed_actions: '검수된 동작 대응',
@@ -157,6 +329,11 @@ function upload(camera) {
   box.querySelector('span').textContent = '업로드 준비';
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
+    const updateTransfer = (status, loaded) => {
+      const transfer = state.transfer?.views[camera];
+      if (transfer) { transfer.status = status; if (loaded !== undefined) transfer.loaded = loaded; renderTransfer(); }
+    };
+    const fail = message => { updateTransfer('failed'); reject(new Error(message)); };
     xhr.open('POST', '/api/pair-uploads');
     xhr.setRequestHeader('Content-Type', 'application/octet-stream');
     xhr.setRequestHeader('X-Filename', encodeURIComponent(source.file.name));
@@ -166,23 +343,26 @@ function upload(camera) {
       const percent = Math.min(100, Math.round(event.loaded / event.total * 100));
       box.querySelector('progress').value = percent;
       box.querySelector('span').textContent = percent === 100 ? '원본 확인 중' : `${percent}% 업로드`;
+      updateTransfer(percent === 100 ? 'checking' : 'uploading', event.loaded);
     };
+    xhr.upload.onload = () => updateTransfer('checking', source.file.size);
     xhr.onload = () => {
       let data;
       try { data = JSON.parse(xhr.responseText); }
-      catch { reject(new Error(`${camera} 시점 업로드 응답을 읽지 못했습니다.`)); return; }
+      catch { fail(`${camera} 시점 업로드 응답을 읽지 못했습니다.`); return; }
       if (xhr.status < 200 || xhr.status >= 300 || !data.upload_id) {
-        reject(new Error(data.error || `${camera} 시점 업로드에 실패했습니다.`)); return;
+        fail(data.error || `${camera} 시점 업로드에 실패했습니다.`); return;
       }
       source.uploadId = data.upload_id;
       source.upload = data;
       box.querySelector('progress').value = 100;
       box.querySelector('span').textContent = '업로드 완료';
+      updateTransfer('ready', source.file.size);
       resolve({upload_id: data.upload_id});
     };
-    xhr.onerror = () => reject(new Error(`${camera} 시점 업로드 연결이 끊겼습니다.`));
-    xhr.ontimeout = () => reject(new Error(`${camera} 시점 업로드 시간이 초과됐습니다.`));
-    xhr.onabort = () => reject(new Error(`${camera} 시점 업로드가 중단됐습니다.`));
+    xhr.onerror = () => fail(`${camera} 시점 업로드 연결이 끊겼습니다.`);
+    xhr.ontimeout = () => fail(`${camera} 시점 업로드 시간이 초과됐습니다.`);
+    xhr.onabort = () => fail(`${camera} 시점 업로드가 중단됐습니다.`);
     xhr.send(source.file);
   });
 }
@@ -193,18 +373,32 @@ function viewStatus(view) {
   return view.file ? `${label} · ${view.file}` : label;
 }
 function renderJob(job) {
+  state.dashboardJob = job; state.receivedAt = performance.now(); state.transfer = null;
+  state.connected = true; state.frozenDelta = 0; setConnection();
   $('job-progress').hidden = false;
   $('job-status').textContent = statusNames[job.status] || '상태 확인 중';
-  $('progress-a').textContent = viewStatus(job.views?.A);
-  $('progress-b').textContent = viewStatus(job.views?.B);
+  $('job-status').dataset.state = job.status;
+  const phase = currentPhase(job), failed = ['failed', 'interrupted', 'completed_with_errors'].includes(job.status);
+  const completed = cameras.filter(camera => job.views?.[camera]?.status === 'completed').length;
+  $('overall-progress').textContent = phase === 'queued' ? '분석 대기열에 등록되었습니다.' : phase === 'linking' ? 'A/B 근거를 하나의 결과로 연결 중' : `시점 ${completed} / 2개 처리 완료`;
+  $('elapsed-label').textContent = '분석 경과';
+  $('elapsed-caption').textContent = terminal.has(job.status) ? '작업 종료 시점의 처리 시간' : phase === 'queued' ? '분석이 시작되면 시간을 표시합니다.' : '대기 시간을 제외한 실제 처리 시간';
+  $('queue-time').hidden = !validSeconds(job.queue_seconds);
+  const lastPhase = job.last_phase || (job.started_at === null ? 'queued' : cameras.every(camera => job.views?.[camera]?.status === 'completed') ? 'linking' : 'analyzing');
+  drawWorkflow(phase, failed, lastPhase);
+  const grid = $('progress-views'); grid.replaceChildren();
+  for (const camera of cameras) grid.append(renderAnalysisCard(camera, job.views?.[camera] || {}, job));
   $('job-permalink').href = '/pair?job=' + encodeURIComponent(job.job_id);
+  $('job-permalink').hidden = false;
   if (terminal.has(job.status)) {
-    $('progress-heading').textContent = job.result ? 'A/B 연결 분석이 끝났습니다.' : '분석을 완료하지 못했습니다.';
+    $('progress-heading').textContent = failed ? job.result ? '일부 시점의 처리를 완료하지 못했습니다.' : lastPhase === 'linking' ? '두 시점의 결과를 연결하지 못했습니다.' : lastPhase === 'queued' ? '분석 대기 중 작업이 중단되었습니다.' : '분석을 완료하지 못했습니다.' : 'A/B 연결 분석이 끝났습니다.';
     $('progress-message').textContent = job.error || (job.status === 'interrupted' ? '프로그램 실행이 중단된 작업입니다. 입력 영상을 확인하고 새 작업을 시작해 주세요.' : '시점별 근거와 최종 보조 판정을 아래에서 확인하세요.');
   } else {
-    $('progress-heading').textContent = '두 시점의 근거를 확인하고 있습니다.';
-    $('progress-message').textContent = '이 페이지를 다시 열어도 같은 작업의 진행 상태를 확인할 수 있습니다.';
+    $('progress-heading').textContent = phase === 'queued' ? '분석을 시작할 차례를 기다립니다.' : phase === 'linking' ? '두 시점의 결과를 연결하고 있습니다.' : 'A/B 영상을 분석하고 있습니다.';
+    $('progress-message').textContent = phase === 'queued' ? '앞선 작업이 끝나면 자동으로 시작합니다. 창을 열어 두세요.' : phase === 'linking' ? '사건 대응과 시점별 판정 근거를 함께 확인해 최종 결과를 저장합니다.' : '시점별 현재 단계와 처리 프레임을 아래에서 확인하세요. 이 작업은 다시 열어도 이어서 확인할 수 있습니다.';
   }
+  updateClocks();
+  announce(`${$('job-status').textContent}. ` + cameras.map(camera => `${camera} 시점 ${job.views?.[camera]?.progress?.stage_label || statusNames[job.views?.[camera]?.status] || '확인 중'}`).join('. '));
   if (job.result) renderResult(job);
 }
 function seek(player, seconds) {
@@ -370,7 +564,9 @@ async function pollJob(id, generation) {
     state.pollTimer = setTimeout(() => pollJob(id, generation), 1200);
   } catch (error) {
     if (generation !== state.pollGeneration) return;
-    $('progress-message').textContent = error.message;
+    state.frozenDelta = tickDelta(); state.connected = false;
+    setConnection('연결 확인 필요 · ' + error.message + ' 표시된 단계와 시간은 마지막 확인 상태입니다.');
+    updateClocks();
     const unavailable = [400, 403, 404].includes(error.status);
     $('retry-poll').hidden = unavailable;
     if (unavailable) {
@@ -383,9 +579,18 @@ async function pollJob(id, generation) {
 function openJob(id, push = false) {
   if (!/^[a-zA-Z0-9_-]{1,128}$/.test(id)) { showError('잘못된 작업 ID입니다.'); return; }
   clearTimeout(state.pollTimer); state.pollGeneration += 1; state.jobId = id; state.currentJob = null;
+  state.dashboardJob = null; state.transfer = null; state.connected = true; state.frozenDelta = 0;
   $('pair-result').hidden = true; $('job-progress').hidden = false;
   $('progress-heading').textContent = '작업 상태를 불러오고 있습니다.';
-  $('progress-a').textContent = '확인 중'; $('progress-b').textContent = '확인 중';
+  $('job-status').textContent = '상태 확인 중'; $('job-status').dataset.state = 'loading';
+  $('job-elapsed').textContent = '—'; $('elapsed-label').textContent = '분석 경과';
+  $('elapsed-caption').textContent = '저장된 작업 상태를 확인합니다.'; $('queue-time').hidden = true;
+  $('overall-progress').textContent = '진행 정보를 불러오는 중';
+  $('progress-message').textContent = '이 작업의 마지막 처리 상태와 시간을 확인하고 있습니다.';
+  const grid = $('progress-views'); grid.replaceChildren();
+  for (const camera of cameras) grid.append(renderAnalysisCard(camera, {status: 'queued'}, {status: 'queued'}));
+  $('job-permalink').hidden = true; drawWorkflow('queued'); setConnection();
+  announce('작업 상태를 불러오고 있습니다.');
   $('retry-poll').hidden = true; showError(''); setBusy(true);
   if (push) history.pushState({}, '', '/pair?job=' + encodeURIComponent(id));
   pollJob(id, state.pollGeneration);
@@ -434,7 +639,7 @@ $('pair-form').addEventListener('submit', async event => {
   event.preventDefault(); if (state.busy) return;
   showError('');
   try { validateSources(); } catch (error) { showError(error.message); return; }
-  setBusy(true); $('pair-result').hidden = true;
+  setBusy(true); beginSubmission();
   try {
     // Both original files are staged concurrently; the analysis begins only
     // after both inputs have been received and validated by the server.
@@ -447,7 +652,11 @@ $('pair-form').addEventListener('submit', async event => {
     openJob(job.job_id, true);
     $('job-progress').scrollIntoView({block: 'start', behavior: 'auto'});
     loadHistory();
-  } catch (error) { showError(error.message); setBusy(false); loadHistory(); }
+  } catch (error) {
+    showError(error.message); state.submissionError = error.message;
+    if (state.transfer) state.transfer.stopped = performance.now();
+    renderTransfer(); setBusy(false); loadHistory();
+  }
 });
 $('retry-poll').addEventListener('click', () => { if (state.jobId) { $('retry-poll').hidden = true; pollJob(state.jobId, state.pollGeneration); } });
 $('refine-pair').addEventListener('click', async () => {
@@ -463,7 +672,7 @@ $('refine-pair').addEventListener('click', async () => {
       $('refine-error').hidden = false; return;
     }
   }
-  setBusy(true); $('refine-error').hidden = true;
+  setBusy(true); $('refine-error').hidden = true; beginSubmission(job);
   try {
     const created = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, same_event_confirmed: job.request?.same_event_confirmed === true, reuse_review: false, refine_review_regions: true})});
     if (!created.job_id) throw new Error('재분석 작업 ID가 응답에 없습니다. 최근 작업 목록을 확인해 주세요.');
@@ -471,14 +680,16 @@ $('refine-pair').addEventListener('click', async () => {
     $('job-progress').scrollIntoView({block: 'start', behavior: 'auto'});
     loadHistory();
   } catch (error) {
-    $('refine-error').textContent = error.message; $('refine-error').hidden = false; setBusy(false);
+    state.submissionError = error.message;
+    if (state.transfer) state.transfer.stopped = performance.now();
+    renderTransfer(); showError(error.message); setBusy(false);
   }
 });
 $('refresh-history').addEventListener('click', loadHistory);
 window.addEventListener('popstate', () => {
   const id = new URLSearchParams(location.search).get('job');
   if (id) openJob(id);
-  else { clearTimeout(state.pollTimer); state.pollGeneration += 1; state.jobId = null; setBusy(false); $('job-progress').hidden = true; $('pair-result').hidden = true; }
+  else { clearTimeout(state.pollTimer); state.pollGeneration += 1; state.jobId = null; state.dashboardJob = null; state.transfer = null; setBusy(false); $('job-progress').hidden = true; $('pair-result').hidden = true; }
 });
 async function initialize() {
   try {

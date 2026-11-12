@@ -23,6 +23,12 @@ RULES = {"game": "doubles", "phase": "rally"}
 SAFE_ID = re.compile(r"[A-Za-z0-9_-]{1,140}\Z")
 HASH = re.compile(r"[0-9a-f]{64}\Z")
 TERMINAL = {"completed", "completed_with_errors", "failed", "interrupted"}
+ANALYSIS_STAGES = {
+    "prepare": (1, "영상 준비"), "calibration": (2, "코트 확인"),
+    "detection": (3, "셔틀콕 후보 탐지"), "tracking": (4, "궤적 연결"),
+    "contact": (5, "착지·라인 확인"), "evidence": (6, "근거 영상 생성"),
+    "save": (7, "결과 저장"),
+}
 REASONS = {
     "SAME_EVENT_UNCONFIRMED": "두 영상이 같은 랠리인지 확인되지 않았습니다.",
     "KNOWN_DIFFERENT_RALLY": "기존 동작 검수에서 서로 다른 랠리로 확인된 영상입니다.",
@@ -46,6 +52,13 @@ class PairWorkspaceError(Exception):
 
 def _now():
     return datetime.now(timezone.utc).isoformat()
+
+
+def _seconds_between(start, end):
+    try:
+        return max(0., (datetime.fromisoformat(end) - datetime.fromisoformat(start)).total_seconds())
+    except (TypeError, ValueError):
+        return 0.
 
 
 def _read(path, default=None):
@@ -155,6 +168,10 @@ class PairWorkspace:
         self.lock = threading.RLock()
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="paired-analysis")
         self.jobs = {}
+        self._job_clocks = {}
+        self._view_clocks = {}
+        self._stage_clocks = {}
+        self._progress_writes = {}
         self._closed = False
         for path in sorted((self.root / "jobs").glob("*/job.json")):
             try:
@@ -162,7 +179,28 @@ class PairWorkspace:
                 if job.get("job_id") != path.parent.name or not SAFE_ID.fullmatch(job["job_id"]):
                     continue
                 if job.get("status") not in TERMINAL:
-                    job.update(status="interrupted", error="서버가 종료되어 작업이 중단되었습니다. 다시 제출하세요.", updated_at=_now())
+                    # The last persisted measurement is the last known active
+                    # time; server downtime must never become analysis time.
+                    stopped_at = job.get("updated_at", job.get("created_at", _now()))
+                    job.update(status="interrupted", phase="interrupted",
+                               last_phase=job.get("phase") or ("queued" if job.get("status") == "queued" else "analyzing"),
+                               error="서버가 종료되어 작업이 중단되었습니다. 다시 제출하세요.",
+                               finished_at=stopped_at, interrupted_at=_now())
+                    if job.get("started_at"):
+                        job["elapsed_seconds"] = _seconds_between(job["started_at"], stopped_at)
+                    for view in job.get("views", {}).values():
+                        if view.get("status") not in TERMINAL:
+                            view.update(status="interrupted", finished_at=stopped_at)
+                            if view.get("started_at"):
+                                view["elapsed_seconds"] = _seconds_between(view["started_at"], stopped_at)
+                            progress = view.get("progress")
+                            if progress:
+                                progress.update(stage_status="interrupted", updated_at=stopped_at)
+                                progress["stage_elapsed_seconds"] = _seconds_between(progress.get("stage_started_at"), stopped_at)
+                            history = view.get("stage_history", [])
+                            if history and history[-1].get("status") == "running":
+                                history[-1].update(status="interrupted", finished_at=stopped_at,
+                                    elapsed_seconds=_seconds_between(history[-1].get("started_at"), stopped_at))
                     _write(path, job)
                 self.jobs[job["job_id"]] = job
             except (ValueError, OSError, AttributeError, TypeError):
@@ -353,8 +391,13 @@ class PairWorkspace:
             if sum(job["status"] not in TERMINAL for job in self.jobs.values()) >= MAX_ACTIVE_JOBS:
                 raise PairWorkspaceError(429, "대기 중인 A/B 작업이 많습니다. 기존 작업이 끝난 뒤 다시 시도하세요.")
             identifier, now = uuid.uuid4().hex, _now()
-            job = {"job_id": identifier, "status": "queued", "created_at": now, "updated_at": now,
-                   "views": {camera: {"status": "queued", "file": value["file"]} for camera, value in selected.items()},
+            job = {"job_id": identifier, "status": "queued", "phase": "queued", "created_at": now, "updated_at": now,
+                   "started_at": None, "finished_at": None, "elapsed_seconds": 0., "queue_seconds": 0.,
+                   "views": {camera: {"status": "queued", "file": value["file"], "elapsed_seconds": 0.,
+                                      "started_at": None, "finished_at": None, "stage_history": [],
+                                      "progress": {"stage": "queued", "stage_label": "분석 대기", "stage_index": 0,
+                                                   "stage_count": 7, "stage_status": "queued", "updated_at": now}}
+                             for camera, value in selected.items()},
                    "result": None, "request": {"views": selected, "same_event_confirmed": same_event,
                                               "reuse_review": reuse, "refine_review_regions": refine, "rules": deepcopy(RULES)}}
             self.jobs[identifier] = job
@@ -363,27 +406,138 @@ class PairWorkspace:
         return {"job_id": identifier, "status": "queued"}
 
     def _persist(self, job):
+        self._refresh_timing(job)
         _write(self.root / "jobs" / job["job_id"] / "job.json", job)
+
+    def _refresh_timing(self, job):
+        """Refresh live measurements under self.lock, without writing a file."""
+        clock = time.perf_counter()
+        identifier = job["job_id"]
+        if job.get("status") not in TERMINAL and identifier in self._job_clocks:
+            job["elapsed_seconds"] = round(max(0., clock - self._job_clocks[identifier]), 6)
+        for camera, view in job.get("views", {}).items():
+            key = (identifier, camera)
+            if view.get("status") == "running" and key in self._view_clocks:
+                view["elapsed_seconds"] = round(max(0., clock - self._view_clocks[key]), 6)
+                if key in self._stage_clocks:
+                    elapsed = round(max(0., clock - self._stage_clocks[key]), 6)
+                    view["progress"]["stage_elapsed_seconds"] = elapsed
+                    if view.get("stage_history"):
+                        view["stage_history"][-1]["elapsed_seconds"] = elapsed
+
+    def _snapshot(self, job):
+        self._refresh_timing(job)
+        snapshot = deepcopy(job)
+        snapshot["server_time"] = _now()
+        if job.get("status") == "queued":
+            snapshot["queue_seconds"] = _seconds_between(job.get("created_at"), snapshot["server_time"])
+        return snapshot
 
     def get_job(self, identifier):
         _identifier(identifier)
         with self.lock:
             if identifier not in self.jobs:
                 raise PairWorkspaceError(404, "A/B 작업을 찾을 수 없습니다.")
-            return deepcopy(self.jobs[identifier])
+            return self._snapshot(self.jobs[identifier])
 
     def list_jobs(self):
         with self.lock:
             rows = sorted(self.jobs.values(), key=lambda item: item["created_at"], reverse=True)
-            return {"jobs": [{key: deepcopy(job[key]) for key in ("job_id", "status", "created_at", "updated_at", "views")}
-                             | {"decision": (job.get("result") or {}).get("decision")} for job in rows[:100]]}
+            snapshots = [self._snapshot(job) for job in rows[:100]]
+            keys = ("job_id", "status", "phase", "last_phase", "created_at", "updated_at", "views", "started_at",
+                    "finished_at", "elapsed_seconds", "queue_seconds", "server_time")
+            return {"jobs": [{key: job[key] for key in keys if key in job}
+                             | {"decision": (job.get("result") or {}).get("decision")} for job in snapshots]}
+
+    def _analysis_progress(self, identifier, camera, event):
+        stage = event.get("stage")
+        if stage not in ANALYSIS_STAGES and stage not in {"resolve", "stored_review"}:
+            return
+        index, label = ANALYSIS_STAGES.get(stage, (0, "원본 확인" if stage == "resolve" else "기존 검수 근거 확인"))
+        with self.lock:
+            job = self.jobs[identifier]
+            view = job["views"][camera]
+            if view.get("status") != "running":
+                return
+            now, clock = _now(), time.perf_counter()
+            key = (identifier, camera)
+            previous = view.get("progress", {})
+            changed = previous.get("stage") != stage
+            if changed:
+                self._refresh_timing(job)
+                history = view.setdefault("stage_history", [])
+                if history and history[-1].get("status") == "running":
+                    history[-1].update(status="completed", finished_at=now)
+                history.append({"stage": stage, "stage_label": label, "stage_index": index,
+                                "started_at": now, "elapsed_seconds": 0., "status": "running"})
+                self._stage_clocks[key] = clock
+                progress = {"stage": stage, "stage_label": label, "stage_index": index, "stage_count": 7,
+                            "stage_started_at": now, "stage_elapsed_seconds": 0., "stage_status": "running"}
+            else:
+                progress = deepcopy(previous)
+            # Accept only serializable, bounded display fields. Counters refer
+            # to actual work completed, never a time-based simulated percent.
+            total, completed = event.get("total_units"), event.get("completed_units")
+            valid_counter = (isinstance(total, int) and not isinstance(total, bool) and total > 0
+                    and isinstance(completed, int) and not isinstance(completed, bool) and completed >= 0)
+            detail_changed = isinstance(event.get("detail"), str) and event["detail"] != previous.get("detail")
+            if detail_changed and not valid_counter:
+                for field in ("completed_units", "total_units", "unit"):
+                    progress.pop(field, None)
+            if valid_counter:
+                progress.update(total_units=total, completed_units=min(completed, total))
+                if event.get("unit") == "frames":
+                    progress["unit"] = "frames"
+            if isinstance(event.get("detail"), str):
+                progress["detail"] = event["detail"][:240]
+            progress["updated_at"] = now
+            view["progress"] = progress
+            job["updated_at"] = now
+            self._refresh_timing(job)
+            final_units = valid_counter and completed >= total and previous.get("completed_units") != total
+            if changed or detail_changed or final_units or clock - self._progress_writes.get(key, 0.) >= .5:
+                self._persist(job)
+                self._progress_writes[key] = clock
 
     def _progress(self, identifier, camera, status):
         with self.lock:
             job = self.jobs[identifier]
-            job["views"][camera]["status"] = status
-            job["updated_at"] = _now()
+            view = job["views"][camera]
+            now, clock = _now(), time.perf_counter()
+            key = (identifier, camera)
+            if status == "running":
+                view.update(status="running", started_at=now, elapsed_seconds=0.)
+                self._view_clocks[key] = clock
+                self._analysis_progress(identifier, camera, {"stage": "resolve"})
+            else:
+                self._refresh_timing(job)
+                progress = view.get("progress", {})
+                if view.get("stage_history"):
+                    view["stage_history"][-1].update(status="completed" if status == "completed" else status,
+                                                    finished_at=now)
+                if status == "completed":
+                    progress = {"stage": "completed", "stage_label": "시점 분석 완료", "stage_index": 7,
+                                "stage_count": 7, "stage_status": "completed", "updated_at": now,
+                                "last_stage": progress.get("stage")}
+                else:
+                    progress.update(stage_status=status, updated_at=now)
+                view.update(status=status, finished_at=now, progress=progress)
+                self._view_clocks.pop(key, None)
+                self._stage_clocks.pop(key, None)
+                self._progress_writes.pop(key, None)
+            job["updated_at"] = now
             self._persist(job)
+
+    def _finish_view(self, identifier, camera, base):
+        self._progress(identifier, camera, base["status"])
+        with self.lock:
+            measured = self.jobs[identifier]["views"][camera]
+            for key in ("started_at", "finished_at", "elapsed_seconds", "progress", "stage_history"):
+                if key in measured:
+                    base[key] = deepcopy(measured[key])
+            self.jobs[identifier]["views"][camera] = deepcopy(base)
+            self._persist(self.jobs[identifier])
+        return base
 
     def _original(self, entry):
         row = entry["row"]
@@ -456,6 +610,7 @@ class PairWorkspace:
             hint = entry["row"]["annotation"] if entry and entry["kind"] == "review" and self._review_valid(entry["row"]) else {}
             base["refinement_available"] = bool(review_regions(hint)) and original is not None
             if reuse and entry is not None and entry["kind"] == "review":
+                self._analysis_progress(identifier, camera, {"stage": "stored_review"})
                 row = entry["row"]
                 if not self._review_valid(row):
                     raise PairWorkspaceError(409, REASONS["STALE_REVIEW"])
@@ -493,7 +648,8 @@ class PairWorkspace:
                         "scope": "검수 좌표는 후보 검색에만 사용하며 기존 판정·접촉 확정을 복사하지 않습니다."}
                 cv2.setNumThreads(max(1, min(2, int(config.get("opencv_threads", 2)))))
                 output = self.root / "jobs" / identifier / "views" / camera
-                result = analyze_video(original, output, config=config)
+                result = analyze_video(original, output, config=config,
+                    progress_callback=lambda event: self._analysis_progress(identifier, camera, event))
                 if result.get("source_sha256") != digest:
                     raise PairWorkspaceError(409, REASONS["SOURCE_CHANGED"])
                 decision = result.get("decision", {}).get("decision", "REVIEW")
@@ -517,15 +673,12 @@ class PairWorkspace:
                     reason_codes=(result.get("decision") or {}).get("reason_codes", []),
                     rationale="새 원본 분석의 접촉·경계 검증 결과입니다.", analysis_timings=result.get("timings", {}),
                     source_verification="current_original_sha256")
-            base["elapsed_seconds"] = round(time.perf_counter() - started, 6)
-            self._progress(identifier, camera, "completed")
-            return base
+            return self._finish_view(identifier, camera, base)
         except Exception as error:
             base.update(status="failed", reason_codes=["VIEW_ANALYSIS_FAILED"], review_source="none",
                         processing_mode="failed", error=str(error) if isinstance(error, PairWorkspaceError) else f"영상 분석 실패: {type(error).__name__}",
                         elapsed_seconds=round(time.perf_counter() - started, 6))
-            self._progress(identifier, camera, "failed")
-            return base
+            return self._finish_view(identifier, camera, base)
 
     def _correspondence(self, views, catalog):
         accepted, rejected, actions = False, False, []
@@ -561,7 +714,10 @@ class PairWorkspace:
         started = time.perf_counter()
         with self.lock:
             job = self.jobs[identifier]
-            job.update(status="running", updated_at=_now())
+            now = _now()
+            job.update(status="running", phase="analyzing", started_at=now, updated_at=now,
+                       queue_seconds=_seconds_between(job.get("created_at"), now))
+            self._job_clocks[identifier] = started
             self._persist(job)
             request = deepcopy(job["request"])
         try:
@@ -572,6 +728,9 @@ class PairWorkspace:
                            for camera, selected in request["views"].items()}
                 views = {futures[future]: future.result() for future in as_completed(futures)}
             views = {camera: views[camera] for camera in ("A", "B")}
+            with self.lock:
+                job.update(phase="linking", views=deepcopy(views), updated_at=_now())
+                self._persist(job)
             accepted, rejected, actions = self._correspondence(views, catalog)
             if not request["reuse_review"] and not request.get("refine_review_regions", False):
                 accepted, actions = False, []
@@ -583,10 +742,27 @@ class PairWorkspace:
                           refinement_applied_camera_ids=[camera for camera, view in views.items() if view.get("refinement")],
                           elapsed_seconds=round(time.perf_counter() - started, 6), completed_at=_now())
             with self.lock:
-                job.update(status="completed_with_errors" if any(v["status"] == "failed" for v in views.values()) else "completed",
-                           result=result, updated_at=_now())
+                failed = any(v["status"] == "failed" for v in views.values())
+                if failed:
+                    # Linking can produce a REVIEW result after a view failed;
+                    # the failed work still belongs to the analysis phase.
+                    job["last_phase"] = "analyzing"
+                job.update(status="completed_with_errors" if failed else "completed",
+                           phase="failed" if failed else "completed", result=result,
+                           updated_at=_now(), finished_at=result["completed_at"],
+                           elapsed_seconds=result["elapsed_seconds"])
+                self._job_clocks.pop(identifier, None)
                 self._persist(job)
         except Exception as error:
             with self.lock:
-                job.update(status="failed", error=f"A/B 작업 실패: {type(error).__name__}", updated_at=_now())
+                now = _now()
+                self._refresh_timing(job)
+                for camera, view in job.get("views", {}).items():
+                    if view.get("status") not in TERMINAL:
+                        self._progress(identifier, camera, "failed")
+                job.update(status="failed", phase="failed", last_phase=job.get("phase", "analyzing"),
+                           error=f"A/B 작업 실패: {type(error).__name__}",
+                           updated_at=now, finished_at=now,
+                           elapsed_seconds=round(time.perf_counter() - started, 6))
+                self._job_clocks.pop(identifier, None)
                 self._persist(job)
