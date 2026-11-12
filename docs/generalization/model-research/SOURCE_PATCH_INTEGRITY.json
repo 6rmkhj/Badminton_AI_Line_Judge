@@ -1,0 +1,29 @@
+{
+  "checks": "Original CV rows unchanged except appended model observations; budget\u22648 and total\u226488; exact frame index/PTS; every recorded gray pixel matches actual cached source; radius derives from support pixels; uncalibrated/nonnative/noninterpolated flags retained. This verifies data integrity, not shuttle identity or contact.",
+  "results": [
+    {
+      "clip": "8k-2-b",
+      "frames": 80,
+      "original_observations_preserved": 6400,
+      "model_observations": 186,
+      "actual_source_cache_pixels_verified": 7412,
+      "max_added_per_frame": 4
+    },
+    {
+      "clip": "8k-5-b",
+      "frames": 92,
+      "original_observations_preserved": 7360,
+      "model_observations": 154,
+      "actual_source_cache_pixels_verified": 4566,
+      "max_added_per_frame": 4
+    },
+    {
+      "clip": "8k-2-a",
+      "frames": 129,
+      "original_observations_preserved": 10320,
+      "model_observations": 204,
+      "actual_source_cache_pixels_verified": 7609,
+      "max_added_per_frame": 4
+    }
+  ]
+}

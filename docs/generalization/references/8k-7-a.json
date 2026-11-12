@@ -1,0 +1,76 @@
+{
+  "key": "8k-7-a",
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    77,
+    79
+  ],
+  "landing_point_px": [
+    292,
+    291
+  ],
+  "tolerance_px": 15,
+  "confidence": "high for initial floor encounter then rebound; approximate image centre",
+  "trajectory_points": [
+    {
+      "frame_index": 64,
+      "x": 334,
+      "y": 148,
+      "time_seconds": 2.133244
+    },
+    {
+      "frame_index": 76,
+      "x": 298,
+      "y": 267,
+      "time_seconds": 2.533233
+    },
+    {
+      "frame_index": 78,
+      "x": 292,
+      "y": 290,
+      "time_seconds": 2.599889
+    },
+    {
+      "frame_index": 80,
+      "x": 289,
+      "y": 286,
+      "time_seconds": 2.666556
+    },
+    {
+      "frame_index": 84,
+      "x": 282,
+      "y": 284,
+      "time_seconds": 2.799889
+    },
+    {
+      "frame_index": 86,
+      "x": 278,
+      "y": 290,
+      "time_seconds": 2.866544
+    }
+  ],
+  "notes": [
+    "Main-court final shuttle descends to near-left floor region. f76 remains above its first low point; f78 reaches initial floor vicinity, with f80/f82 moving up/left.",
+    "Later motion from f84 onward and final pickup by black-shirt player must not replace first encounter.",
+    "The stationary bottle near [307,240] is not this moving target.",
+    "This reference is AI visual review, not independent human ground truth or an IN/OUT decision."
+  ],
+  "evidence": [
+    "visual/8k-7-a/crop-64-94-0.jpg",
+    "visual/8k-7-a/crop-64-94-1.jpg",
+    "visual/8k-7-a/contact-zoom.jpg"
+  ],
+  "file": "8k 30 4k 24 a시점 7.mp4",
+  "source_sha256": "cf9ad62b3e429094f325404e1347adf646eaa3a2439bf37d258463b154a9f02f",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "ground_truth_eligible": false,
+  "split": "holdout",
+  "landing_time_interval_seconds": [
+    2.566567,
+    2.633222
+  ]
+}

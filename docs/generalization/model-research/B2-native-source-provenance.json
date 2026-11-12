@@ -1,0 +1,35 @@
+{
+  "source": "/workspace/generalization/input/8k 30 4k 24 b\uc2dc\uc810 2.mp4",
+  "frame_indices": [
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53
+  ],
+  "decode": "sequential ffmpeg select by zero-based n, threads2, no resize, native RGB crop",
+  "source_roi": [
+    1520,
+    660,
+    300,
+    260
+  ],
+  "analysis_coordinate_size": [
+    960,
+    540
+  ],
+  "markers": "cyan=model-only selected track; red=fusion selected track; native raw sheets have no model overlay"
+}

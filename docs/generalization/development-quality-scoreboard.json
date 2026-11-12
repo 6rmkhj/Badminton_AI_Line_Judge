@@ -1,0 +1,556 @@
+{
+  "scope": "Development diagnostic scoreboard, not independent physical contact or line-judgment accuracy. Stage-only experiments require their own implementation/config provenance.",
+  "baseline_audit_sha256": "e87bc601b59b3912aae88cfbf1c1dff38459ab5b9392e90e7091801dd6f1dd0e",
+  "experiment_audit_sha256": "7312779851b92841eab393df6b43b01317228ff3fe99c59c16ea70c03bc93761",
+  "experiment_metrics": {
+    "declared_videos": 16,
+    "declared_development_videos": 16,
+    "declared_holdout_videos": 0,
+    "audited_outputs": 16,
+    "pending_or_invalid_outputs": 0,
+    "status_counts": {
+      "audited": 16
+    },
+    "reference_visibility_counts": {
+      "visible": 9,
+      "occluded": 2,
+      "ambiguous": 5
+    },
+    "selection_category_counts": {
+      "correct_first_vicinity": 3,
+      "wrong_target_or_spatial_localization": 6,
+      "no_observable_ground_truth": 7
+    },
+    "diagnostic_failure_stage_counts": {
+      "none_selected_first_vicinity": 3,
+      "event_proposal_missing_or_temporally_mislocalized": 2,
+      "candidate_rank_wrong": 2,
+      "detector_contact_candidate_absent": 2
+    },
+    "causal_failure_category_counts": {
+      "none_selected_first_vicinity": 3,
+      "event_proposal_missing_or_temporally_mislocalized": 2,
+      "candidate_rank_wrong": 2,
+      "detector_contact_candidate_absent": 2
+    },
+    "automatic_decision_counts": {
+      "REVIEW": 16
+    },
+    "first_vicinity_match_count": 3,
+    "first_vicinity_denominator": 9,
+    "first_vicinity_fraction": 0.3333333333333333,
+    "decision_abstention_count": 16,
+    "decision_abstention_denominator": 16,
+    "candidate_abstention_count": 0,
+    "candidate_abstention_denominator": 16,
+    "independent_contact_accuracy": null,
+    "independent_line_judgment_accuracy": null
+  },
+  "strict_regressions": [],
+  "strict_gains": [
+    "8k-2-a",
+    "ordinary-12-b"
+  ],
+  "qualitative_regressions": [],
+  "semantic_checks_pending": [],
+  "videos": [
+    {
+      "key": "8k-2-a",
+      "before_strict_match": false,
+      "after_strict_match": true,
+      "strict_regression": false,
+      "strict_gain": true,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 1089,
+        "frame_index": 84,
+        "time": 2.799889,
+        "candidate_px": [
+          284.833,
+          369.0
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TEMPORAL_GAP_NEAR_CANDIDATE",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "correct_first_vicinity",
+      "semantic_review": null
+    },
+    {
+      "key": "8k-2-b",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 888,
+        "frame_index": 12,
+        "time": 0.500111,
+        "candidate_px": [
+          727.421,
+          179.355
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "wrong_target_or_spatial_localization",
+      "semantic_review": null
+    },
+    {
+      "key": "8k-5-a",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 325,
+        "frame_index": 45,
+        "time": 1.499933,
+        "candidate_px": [
+          646.236,
+          177.686
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "no_observable_ground_truth",
+      "semantic_review": null
+    },
+    {
+      "key": "8k-5-b",
+      "before_strict_match": true,
+      "after_strict_match": true,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 885,
+        "frame_index": 39,
+        "time": 1.625489,
+        "candidate_px": [
+          818.667,
+          298.667
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "correct_first_vicinity",
+      "semantic_review": null
+    },
+    {
+      "key": "ordinary-4-a",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 3537,
+        "frame_index": 42,
+        "time": 0.708444,
+        "candidate_px": [
+          55.25,
+          109.25
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "wrong_target_or_spatial_localization",
+      "semantic_review": null
+    },
+    {
+      "key": "ordinary-4-b",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 4957,
+        "frame_index": 142,
+        "time": 2.367356,
+        "candidate_px": [
+          295.333,
+          106.0
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "wrong_target_or_spatial_localization",
+      "semantic_review": null
+    },
+    {
+      "key": "ordinary-12-a",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 2411,
+        "frame_index": 150,
+        "time": 2.530167,
+        "candidate_px": [
+          481.316,
+          208.421
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "wrong_target_or_spatial_localization",
+      "semantic_review": {
+        "status": "correct_object_first_vicinity_borderline",
+        "note": "Separate AI source interpretation; does not change benchmark categories or tolerances."
+      }
+    },
+    {
+      "key": "ordinary-12-b",
+      "before_strict_match": false,
+      "after_strict_match": true,
+      "strict_regression": false,
+      "strict_gain": true,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 4679,
+        "frame_index": 183,
+        "time": 3.050911,
+        "candidate_px": [
+          170.24043916295832,
+          253.2796158820173
+        ],
+        "contact_observed": false,
+        "method": "offline_occluded_image_trajectory_intersection",
+        "reason_codes": [
+          "OCCLUDED_IMAGE_TRAJECTORY_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "CONTACT_OCCLUDED_OR_MISSING",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TEMPORAL_GAP_NEAR_CANDIDATE",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "correct_first_vicinity",
+      "semantic_review": null
+    },
+    {
+      "key": "uhd4k-2-a",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 1210,
+        "frame_index": 59,
+        "time": 1.966833,
+        "candidate_px": [
+          684.875,
+          176.875
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "no_observable_ground_truth",
+      "semantic_review": null
+    },
+    {
+      "key": "uhd4k-2-b",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 1890,
+        "frame_index": 57,
+        "time": 1.901667,
+        "candidate_px": [
+          260.8699081913292,
+          201.2445655857205
+        ],
+        "contact_observed": false,
+        "method": "offline_occluded_image_trajectory_intersection",
+        "reason_codes": [
+          "OCCLUDED_IMAGE_TRAJECTORY_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "CONTACT_OCCLUDED_OR_MISSING",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TEMPORAL_GAP_NEAR_CANDIDATE",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "no_observable_ground_truth",
+      "semantic_review": null
+    },
+    {
+      "key": "uhd4k-4-a",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 862,
+        "frame_index": 45,
+        "time": 1.500133,
+        "candidate_px": [
+          513.5,
+          109.125
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "no_observable_ground_truth",
+      "semantic_review": null
+    },
+    {
+      "key": "uhd4k-4-b",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 1336,
+        "frame_index": 44,
+        "time": 1.466667,
+        "candidate_px": [
+          267.25,
+          201.0
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "no_observable_ground_truth",
+      "semantic_review": null
+    },
+    {
+      "key": "uhdhd-2-a",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 1933,
+        "frame_index": 88,
+        "time": 1.484367,
+        "candidate_px": [
+          750.211,
+          122.998
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "no_observable_ground_truth",
+      "semantic_review": null
+    },
+    {
+      "key": "uhdhd-2-b",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 857,
+        "frame_index": 60,
+        "time": 2.0,
+        "candidate_px": [
+          601.021,
+          264.167
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "no_observable_ground_truth",
+      "semantic_review": null
+    },
+    {
+      "key": "uhdhd-4-a",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 1089,
+        "frame_index": 93,
+        "time": 1.5687,
+        "candidate_px": [
+          478.375,
+          246.875
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "wrong_target_or_spatial_localization",
+      "semantic_review": null
+    },
+    {
+      "key": "uhdhd-4-b",
+      "before_strict_match": false,
+      "after_strict_match": false,
+      "strict_regression": false,
+      "strict_gain": false,
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 933,
+        "frame_index": 71,
+        "time": 2.368333,
+        "candidate_px": [
+          147.385,
+          283.154
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "selection_category": "wrong_target_or_spatial_localization",
+      "semantic_review": null
+    }
+  ]
+}

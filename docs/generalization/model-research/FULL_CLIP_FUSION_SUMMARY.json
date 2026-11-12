@@ -1,0 +1,167 @@
+{
+  "decision": "Research only. Do not adopt as production default or ship model weights.",
+  "source_commit": "d7f3d3303daa40c699d579c17e40269173220937",
+  "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "model_sha256": "b0ed780c3cc2c4f8eab6efa08d1489667381ecdcced7fad52abccbd176204ed6",
+  "reference_kind": "AI source-blinded development estimate; not independent human ground truth",
+  "scope": "Full cached-source observations, no native contact refinement; model weights not shipped",
+  "critical_track_failure": "B2 fusion includes background CV point atf46 despite primary matching; identity/contact unverified. Model-only fails5B andA2.",
+  "clips": [
+    {
+      "clip": "8k-2-b",
+      "inference_seconds": 78.30046731600487,
+      "preprocess_seconds": 1.6757510459901823,
+      "max_rss_mb": 1284.48828125,
+      "added_candidate_count": 186,
+      "original_candidate_count": 6400,
+      "methods": {
+        "cv_only": {
+          "frame_index": 12,
+          "candidate_px": [
+            727.421,
+            179.355
+          ],
+          "reference_distance_px": 309.6574870175111,
+          "primary_matches_sparse_reference": false,
+          "target_identity_ambiguous": true,
+          "flight_supported_for_review": true,
+          "physical_contact_verified": false,
+          "decision": "REVIEW",
+          "replay_seconds": 7.284370659999695
+        },
+        "model_only": {
+          "frame_index": 45,
+          "candidate_px": [
+            419.625,
+            206.4375
+          ],
+          "reference_distance_px": 0.8408515029421069,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "flight_supported_for_review": true,
+          "physical_contact_verified": false,
+          "decision": "REVIEW",
+          "replay_seconds": 0.3725668480001332
+        },
+        "fusion": {
+          "frame_index": 45,
+          "candidate_px": [
+            419.625,
+            206.4375
+          ],
+          "reference_distance_px": 0.8408515029421069,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "flight_supported_for_review": true,
+          "physical_contact_verified": false,
+          "decision": "REVIEW",
+          "replay_seconds": 6.7642985559996305
+        }
+      }
+    },
+    {
+      "clip": "8k-5-b",
+      "inference_seconds": 95.90203745600047,
+      "preprocess_seconds": 1.9058587419949617,
+      "max_rss_mb": 1307.2265625,
+      "added_candidate_count": 154,
+      "original_candidate_count": 7360,
+      "methods": {
+        "cv_only": {
+          "frame_index": 39,
+          "candidate_px": [
+            818.667,
+            298.667
+          ],
+          "reference_distance_px": 7.782016319695012,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "flight_supported_for_review": true,
+          "physical_contact_verified": false,
+          "decision": "REVIEW",
+          "replay_seconds": 7.927340979998917
+        },
+        "model_only": {
+          "frame_index": 13,
+          "candidate_px": [
+            364.5,
+            166.5
+          ],
+          "reference_distance_px": 472.2081109002682,
+          "primary_matches_sparse_reference": false,
+          "target_identity_ambiguous": true,
+          "flight_supported_for_review": false,
+          "physical_contact_verified": false,
+          "decision": "REVIEW",
+          "replay_seconds": 0.11080766600025527
+        },
+        "fusion": {
+          "frame_index": 39,
+          "candidate_px": [
+            818.667,
+            298.667
+          ],
+          "reference_distance_px": 7.782016319695012,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "flight_supported_for_review": true,
+          "physical_contact_verified": false,
+          "decision": "REVIEW",
+          "replay_seconds": 9.375033102000089
+        }
+      }
+    },
+    {
+      "clip": "8k-2-a",
+      "inference_seconds": 140.82977042500897,
+      "preprocess_seconds": 3.063736711990714,
+      "max_rss_mb": 1376.93359375,
+      "added_candidate_count": 204,
+      "original_candidate_count": 10320,
+      "methods": {
+        "cv_only": {
+          "frame_index": 84,
+          "candidate_px": [
+            284.833,
+            369.0
+          ],
+          "reference_distance_px": 7.327747880488239,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "flight_supported_for_review": true,
+          "physical_contact_verified": false,
+          "decision": "REVIEW",
+          "replay_seconds": 12.307645935999972
+        },
+        "model_only": {
+          "frame_index": 97,
+          "candidate_px": [
+            789.0,
+            181.125
+          ],
+          "reference_distance_px": 533.5913845115942,
+          "primary_matches_sparse_reference": false,
+          "target_identity_ambiguous": false,
+          "flight_supported_for_review": false,
+          "physical_contact_verified": false,
+          "decision": "REVIEW",
+          "replay_seconds": 0.3780722039991815
+        },
+        "fusion": {
+          "frame_index": 84,
+          "candidate_px": [
+            284.833,
+            369.0
+          ],
+          "reference_distance_px": 7.327747880488239,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "flight_supported_for_review": true,
+          "physical_contact_verified": false,
+          "decision": "REVIEW",
+          "replay_seconds": 11.979330566999124
+        }
+      }
+    }
+  ]
+}

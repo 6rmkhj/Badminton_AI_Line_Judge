@@ -1,0 +1,78 @@
+{
+  "status": "passed",
+  "scope": "Replay fixture using completed frozen 0.5.3 CLI results; no fresh browser upload or browser-run analysis tested.",
+  "code_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+  "fixture_job": "generalization053control",
+  "media_checks": [
+    {
+      "camera": "A",
+      "candidate_frame": 49,
+      "source_seek_target": 1.5666,
+      "source_seek_actual": 1.5666,
+      "context_loaded": true,
+      "evidence_asset_count": 12,
+      "replay_present": true
+    },
+    {
+      "camera": "B",
+      "candidate_frame": 42,
+      "source_seek_target": 1.708833,
+      "source_seek_actual": 1.708833,
+      "context_loaded": true,
+      "evidence_asset_count": 12,
+      "replay_present": true
+    }
+  ],
+  "reload_restoration": true,
+  "mobile": [
+    {
+      "width": 375,
+      "horizontal_overflow": false
+    },
+    {
+      "width": 390,
+      "horizontal_overflow": false
+    }
+  ],
+  "javascript_errors": [],
+  "failed_requests": [],
+  "app_profile_flags": {
+    "temporal_candidate_memory": true,
+    "native_motion_recovery": true
+  },
+  "no_holdout_access": true,
+  "decoded_playback": [
+    {
+      "camera": "A",
+      "kind": ".view-video",
+      "current_time_seconds": 0.0965,
+      "width": 960,
+      "height": 540,
+      "decoded_frames": 4
+    },
+    {
+      "camera": "A",
+      "kind": ".trajectory-replay video",
+      "current_time_seconds": 0.0813,
+      "width": 960,
+      "height": 540,
+      "decoded_frames": 4
+    },
+    {
+      "camera": "B",
+      "kind": ".view-video",
+      "current_time_seconds": 0.0675,
+      "width": 960,
+      "height": 540,
+      "decoded_frames": 4
+    },
+    {
+      "camera": "B",
+      "kind": ".trajectory-replay video",
+      "current_time_seconds": 0.0731,
+      "width": 960,
+      "height": 540,
+      "decoded_frames": 4
+    }
+  ]
+}

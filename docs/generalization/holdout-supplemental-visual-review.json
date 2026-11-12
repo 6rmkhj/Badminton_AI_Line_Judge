@@ -1,0 +1,36 @@
+{
+  "scope": "Post-release AI source/context visual check of the second heldout gain; not independent human ground truth.",
+  "production_commit": "d7f3d3303daa40c699d579c17e40269173220937",
+  "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "release_receipt_sha256": "ff878bdd524f17504abae79a54432d245b9ea07d633e38e27f0740237de0cb98",
+  "key": "8k-7-a",
+  "reference_sha256": "7ae7499e9c1a184dae7ea91c84efa0d2b24442f3679bdf9ee52d3ba4bd514db3",
+  "result_sha256": "5e316569215ec464132f2e4f9dfd1ed0877738209d5d6f76a685529dced3db43",
+  "selection": {
+    "frame": 77,
+    "point": [
+      290.5334454255675,
+      289.70965462808795
+    ],
+    "distance_px": 1.9534,
+    "point_kind": "inferred_object_center",
+    "contact_observed": false
+  },
+  "observation": "Full overview places the candidate at the intended near-left main-court floor. Source contact zoom shows descent at76, initial floor vicinity78, upward/left motion80–84 and a later return86. Current measured trajectory ends its approach75 and resumes78; intersection estimates the center at77. The nearby stationary bottle is not the tracked moving object.",
+  "conclusion": "Strict first-vicinity agreement is consistent with the source, but the selected center is inferred across missing observations and is not directly observed cork-floor contact.",
+  "criteria_or_production_changes": false,
+  "reviewed_images": [
+    {
+      "path": "/workspace/generalization/release/8k-7-a/overview.jpg",
+      "sha256": "e5642519f018cd2c70c6eb92e3a34af24814b3c45fbbeaa02e7e2234cb09970b"
+    },
+    {
+      "path": "/workspace/generalization/release/8k-7-a/evidence/trajectory-context.jpg",
+      "sha256": "3d759fcb0baae5803825d6e0bba0a1b9bcc474176328a159a81918926f2e4b1f"
+    },
+    {
+      "path": "/workspace/generalization/visual/8k-7-a/contact-zoom.jpg",
+      "sha256": "bfe61f43265d935d47c063145ef1bed22b7c4365aaf31a6b57e937ea32e24025"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "reference_is_human_ground_truth": false,
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "coordinate_system": "Original source image resized uniformly by 1/4 from 3840x2160; x rightward, y downward; frame indices are zero based. Landing point approximates cork/floor contact; trajectory points approximate visible shuttle center.",
+  "source_size": [
+    3840,
+    2160
+  ],
+  "contact_visibility": "visible",
+  "tolerance_px": 6,
+  "reference_inspection_method": "Original source sequential frames and native crops decoded from frame 0 with OpenCV VideoCapture two threads. No frame seeking. No pipeline predictions or previous AI annotations were inspected. Both original camera views were inspected independently and cross-checked by rally sequence.",
+  "blinded_holdout": true,
+  "key": "ordinary-18-b",
+  "file": "b시점 18.mp4",
+  "source_file": "/workspace/generalization/input/b시점 18.mp4",
+  "source_sha256": "c2b3e5cd92940e93598163c454c831c0a25df07dd347c1f9b67f5e27acd0d831",
+  "landing_frame_interval": [
+    185,
+    188
+  ],
+  "landing_point_px": [
+    349,
+    310
+  ],
+  "trajectory_points": [
+    {
+      "frame_index": 140,
+      "x": 275,
+      "y": 66
+    },
+    {
+      "frame_index": 150,
+      "x": 288,
+      "y": 70
+    },
+    {
+      "frame_index": 160,
+      "x": 303,
+      "y": 97
+    },
+    {
+      "frame_index": 166,
+      "x": 313,
+      "y": 132
+    },
+    {
+      "frame_index": 170,
+      "x": 320,
+      "y": 164
+    },
+    {
+      "frame_index": 174,
+      "x": 327,
+      "y": 190
+    },
+    {
+      "frame_index": 178,
+      "x": 335,
+      "y": 230
+    },
+    {
+      "frame_index": 182,
+      "x": 342,
+      "y": 267
+    },
+    {
+      "frame_index": 185,
+      "x": 347,
+      "y": 297
+    },
+    {
+      "frame_index": 186,
+      "x": 349,
+      "y": 309
+    },
+    {
+      "frame_index": 190,
+      "x": 349,
+      "y": 298
+    },
+    {
+      "frame_index": 200,
+      "x": 349,
+      "y": 280
+    },
+    {
+      "frame_index": 213,
+      "x": 358,
+      "y": 309
+    },
+    {
+      "frame_index": 214,
+      "x": 358,
+      "y": 313
+    }
+  ],
+  "later_bounce_observations": [
+    {
+      "frame_interval": [
+        213,
+        215
+      ],
+      "point_px": [
+        358,
+        314
+      ],
+      "tolerance_px": 6,
+      "notes": "Second floor contact after the first rebound; clear cork turning/rebound in consecutive native crops."
+    }
+  ],
+  "notes": [
+    "AI visual estimate, not human ground truth.",
+    "The main-court shuttle falls into the foreground between the net and the near dark-green-shirt player. The main pair in this view are the white-shirt and dark-green-shirt players; the active players farther right belong to the adjacent court.",
+    "Motion blur and the pale floor reduce contrast immediately before the first contact. Native consecutive source crops show the downward motion reversing between frames 186 and 187, followed by a long small rebound.",
+    "The later contact around frame 214 and the subsequent shuttle on the floor must not replace the first landing near frame 186."
+  ],
+  "evidence_files": [
+    "/workspace/generalization/visual/ordinary-18-b/upper-140-168.jpg",
+    "/workspace/generalization/visual/ordinary-18-b/native-flight-sheet-172.jpg",
+    "/workspace/generalization/visual/ordinary-18-b/native-contact-sheet-180.jpg",
+    "/workspace/generalization/visual/ordinary-18-b/native-contact-sheet-189.jpg",
+    "/workspace/generalization/visual/ordinary-18-b/native-contact-sheet-207.jpg"
+  ],
+  "landing_source_timestamp_interval_seconds": [
+    3.103956,
+    3.153967
+  ],
+  "landing_clip_relative_time_interval_seconds": [
+    3.084256,
+    3.134267
+  ]
+}

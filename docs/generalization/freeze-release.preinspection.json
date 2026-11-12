@@ -1,0 +1,45 @@
+{
+  "frozen_at": "2026-11-12T07:43:23.281548+00:00",
+  "commit": "d7f3d3303daa40c699d579c17e40269173220937",
+  "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "manifest_sha256": "1b385c6147fd8fb818215ca24448fd611ec6f60b7cee2299f5088c8eb0b86917",
+  "runs": {
+    "baseline": {
+      "commit": "7e74b058ae95543bb9c7d121761426462e74f49c",
+      "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+      "run_config_sha256": "2b0c47f3107ce40da34f8b71bf2a7e19ee8678d371dfeb5e88a9d90f05cc823c"
+    },
+    "release": {
+      "commit": "d7f3d3303daa40c699d579c17e40269173220937",
+      "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+      "run_config_sha256": "ebb818d343c12b0aaf7115242825cea8a293f967e01881ee571ca1a959b0a950"
+    }
+  },
+  "development_validation": {
+    "mode": "detector_stage_reuse",
+    "declared_count": 16,
+    "detector_replay_run_sha256": "10a09379774e7e88fe2840f8458f81b2ce7f086f67c68e169d784baec34bcc8d",
+    "replay_runner_sha256": "2e5aebe5dd273fed7506ac85e4311e7192473f36871acd40ee66a06e292a20aa",
+    "reviewed_policy_sha256": "4bd8a8f11ba6540052826b44e9cf9aa68e08bea22b17bf1f1e4a758be0b2eeff",
+    "status": "completed; strict and qualitative regression checks passed",
+    "audit_path": "/workspace/generalization/audit-development-release.json",
+    "audit_sha256": "7312779851b92841eab393df6b43b01317228ff3fe99c59c16ea70c03bc93761",
+    "quality_scoreboard_path": "/workspace/generalization/quality-scoreboard-release.json",
+    "quality_scoreboard_sha256": "bc92ae480f0ebd730cf4abf9854c96c306c0f78f172cc1dc5b80b381e2f7892f",
+    "quality_ledger_sha256": "5bf3e7cc61c7161a35116cdcc1d325e841528651cb10a89cc6af8a3dec9cb17a",
+    "strict_matches": 3,
+    "visible_scorable": 9,
+    "strict_regressions": [],
+    "qualitative_regressions": []
+  },
+  "holdout_validation": {
+    "mode": "full_fresh",
+    "declared_count": 8,
+    "expected_run_config_path": "/workspace/generalization/release-full-fresh-run-config.expected.json",
+    "expected_run_config_sha256": "ebb818d343c12b0aaf7115242825cea8a293f967e01881ee571ca1a959b0a950",
+    "status": "full fresh blind execution starting; predictions/references remain sealed"
+  },
+  "holdout_release_status": "Root authorized BLIND EXECUTION after successful development audit; holdout reference/prediction/evidence inspection is NOT RELEASED.",
+  "original_controls_required": "A/B both full fresh under the same final implementation; outside24-video metrics",
+  "sealed_for_blind_execution_at": "2026-11-12T07:51:45.264402+00:00"
+}

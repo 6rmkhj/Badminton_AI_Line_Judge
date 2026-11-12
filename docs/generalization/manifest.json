@@ -1,0 +1,272 @@
+{
+  "schema_version": 1,
+  "source_commit": "7e74b058ae95543bb9c7d121761426462e74f49c",
+  "selection": "Predeclared two development pairs and one held-back pair from each of four filename capture groups; original A1/B1 fix clips excluded",
+  "reference_policy": "Inspect source video before viewing pipeline selections; AI visual development review, not independent human ground truth",
+  "videos": [
+    {
+      "key": "8k-2-a",
+      "file": "8k 30 4k 24 a시점 2.mp4",
+      "group": "8k",
+      "number": 2,
+      "view": "A",
+      "split": "development",
+      "git_blob": "ebe2ca7f9936946b98f22fbe68cf8ccebe29daa8",
+      "bytes": 87548904,
+      "sha256": "311b814ee7f7347dfa244e56d6c5f3b9d94be8fc4de29dada2adc89858167492"
+    },
+    {
+      "key": "8k-2-b",
+      "file": "8k 30 4k 24 b시점 2.mp4",
+      "group": "8k",
+      "number": 2,
+      "view": "B",
+      "split": "development",
+      "git_blob": "b0da4245e65729a18d57fedc933658331185ec5a",
+      "bytes": 12588538,
+      "sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead"
+    },
+    {
+      "key": "8k-5-a",
+      "file": "8k 30 4k 24 a시점 5.mp4",
+      "group": "8k",
+      "number": 5,
+      "view": "A",
+      "split": "development",
+      "git_blob": "4d22317450a9bbaeb1574df7a9ad5a84595bc7b1",
+      "bytes": 68137770,
+      "sha256": "2030ff7b0e2e51039bbb48db6c40a7be2ca44e06cbba77c6b31b8f7aee08e0b9"
+    },
+    {
+      "key": "8k-5-b",
+      "file": "8k 30 4k 24 b시점 5.mp4",
+      "group": "8k",
+      "number": 5,
+      "view": "B",
+      "split": "development",
+      "git_blob": "55d0a9d634860cf29a7f070dd6acd849b5eb922a",
+      "bytes": 14290366,
+      "sha256": "7eccb2951dde57a8ab51b6cf1e42671348a7369d62e4ebf3800d536349a48667"
+    },
+    {
+      "key": "8k-7-a",
+      "file": "8k 30 4k 24 a시점 7.mp4",
+      "group": "8k",
+      "number": 7,
+      "view": "A",
+      "split": "holdout",
+      "git_blob": "53ddc6a06c38bf312abbc466d513313a04939823",
+      "bytes": 86538683,
+      "sha256": "cf9ad62b3e429094f325404e1347adf646eaa3a2439bf37d258463b154a9f02f"
+    },
+    {
+      "key": "8k-7-b",
+      "file": "8k 30 4k 24 b시점 7.mp4",
+      "group": "8k",
+      "number": 7,
+      "view": "B",
+      "split": "holdout",
+      "git_blob": "5580fb182a9ce00089e4f2e8af80519c4e5add0f",
+      "bytes": 16741236,
+      "sha256": "c8c2fa52ef709de4c8084c8fdc456d2cf6cdb4b44924f32ec08b406d2acfe4d7"
+    },
+    {
+      "key": "ordinary-4-a",
+      "file": "a시점 4.mp4",
+      "group": "ordinary",
+      "number": 4,
+      "view": "A",
+      "split": "development",
+      "git_blob": "67b4a62eccb370005ef33286973418863a1e83b9",
+      "bytes": 36829811,
+      "sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd"
+    },
+    {
+      "key": "ordinary-4-b",
+      "file": "b시점 4.mp4",
+      "group": "ordinary",
+      "number": 4,
+      "view": "B",
+      "split": "development",
+      "git_blob": "6efef993a8684d5bb05e9e54ff7dfa5fc75e39a7",
+      "bytes": 30808006,
+      "sha256": "5564dda029e222e8dc4b0fc529ed0d6affe4407f80ecbd66d582b7044ceb497a"
+    },
+    {
+      "key": "ordinary-12-a",
+      "file": "a시점 12.mp4",
+      "group": "ordinary",
+      "number": 12,
+      "view": "A",
+      "split": "development",
+      "git_blob": "2710d156f4d43dadad16ca6599dd106833438f18",
+      "bytes": 36034996,
+      "sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb"
+    },
+    {
+      "key": "ordinary-12-b",
+      "file": "b시점 12.mp4",
+      "group": "ordinary",
+      "number": 12,
+      "view": "B",
+      "split": "development",
+      "git_blob": "b3ad1f75318904881d49bf1180873c258b7f0925",
+      "bytes": 38589970,
+      "sha256": "3aed5a60fbc157354e7fef85feb5bde191f9db0311b2fab4ee9811646fada62d"
+    },
+    {
+      "key": "ordinary-18-a",
+      "file": "a시점 18.mp4",
+      "group": "ordinary",
+      "number": 18,
+      "view": "A",
+      "split": "holdout",
+      "git_blob": "53140993930a2bc7b224b2a95e4d058fa96816ca",
+      "bytes": 25882149,
+      "sha256": "dd04f1a5a96ce2ba9ad1c14eb750396fbd4537b23cc09749fc065f0b2a260c9d"
+    },
+    {
+      "key": "ordinary-18-b",
+      "file": "b시점 18.mp4",
+      "group": "ordinary",
+      "number": 18,
+      "view": "B",
+      "split": "holdout",
+      "git_blob": "845fa47c43f4f1449530c24ac2b356ecf00d52be",
+      "bytes": 28727446,
+      "sha256": "c2b3e5cd92940e93598163c454c831c0a25df07dd347c1f9b67f5e27acd0d831"
+    },
+    {
+      "key": "uhd4k-2-a",
+      "file": "a-2시점(uhd30 4k30).mp4",
+      "group": "uhd4k",
+      "number": 2,
+      "view": "A",
+      "split": "development",
+      "git_blob": "e0a187d68560999f96ad75e22e2ed957aa188c81",
+      "bytes": 25095959,
+      "sha256": "4e42f1c0996825312f6782fa94168c21789fe2d22cac9b7e43e05c5a7461c4ee"
+    },
+    {
+      "key": "uhd4k-2-b",
+      "file": "b-2시점(uhd30 4k30).mp4",
+      "group": "uhd4k",
+      "number": 2,
+      "view": "B",
+      "split": "development",
+      "git_blob": "c62e244c7a18c2875afc38c6c5c3686b3c5bc369",
+      "bytes": 32030687,
+      "sha256": "26c434519a4fdcb2e43e38bf067b8683f67c9346b003e5f7e330f2debe846000"
+    },
+    {
+      "key": "uhd4k-4-a",
+      "file": "a-4시점(uhd30 4k30).mp4",
+      "group": "uhd4k",
+      "number": 4,
+      "view": "A",
+      "split": "development",
+      "git_blob": "ec42d71e79921ae1fe1a655d53df7f82c767e09a",
+      "bytes": 17072269,
+      "sha256": "973355dc2d10ab4eebe1564e4c223b02f1ba225d600a9889405eae646b8213b3"
+    },
+    {
+      "key": "uhd4k-4-b",
+      "file": "b-4시점(uhd30 4k30).mp4",
+      "group": "uhd4k",
+      "number": 4,
+      "view": "B",
+      "split": "development",
+      "git_blob": "a7c691c33b5b3ff5e0099b6d8738f9b637540920",
+      "bytes": 26482445,
+      "sha256": "018caa9ed0179b56a2e672ee32d84c5d08db3f51b51b3b1b83dea19b561ab729"
+    },
+    {
+      "key": "uhd4k-3-a",
+      "file": "a-3시점(uhd30 4k30).mp4",
+      "group": "uhd4k",
+      "number": 3,
+      "view": "A",
+      "split": "holdout",
+      "git_blob": "af2345c9a5f62fadceb72eb2f62eac572e1b5cf4",
+      "bytes": 23983684,
+      "sha256": "4780ea68e9689f3602bfdc3955cb3bc47c41d2bcbfd78dfa78378dbe47242729"
+    },
+    {
+      "key": "uhd4k-3-b",
+      "file": "b-3시점(uhd30 4k30).mp4",
+      "group": "uhd4k",
+      "number": 3,
+      "view": "B",
+      "split": "holdout",
+      "git_blob": "39f530618312b18cbc05076ed7a6769446c358ff",
+      "bytes": 21914516,
+      "sha256": "1469100923fd649976a9ebb3ffff518018c7a6ad660f036fd35d007443ae54c5"
+    },
+    {
+      "key": "uhdhd-2-a",
+      "file": "a시점(uhd30 hd30) 2.mp4",
+      "group": "uhdhd",
+      "number": 2,
+      "view": "A",
+      "split": "development",
+      "git_blob": "c237a9325595aee9b4be84b909cb7dbd2f6d8986",
+      "bytes": 23598306,
+      "sha256": "c6bc1029c316cb96713d1076ba0f098f4124914802648aade538c5a7f1e28ec7"
+    },
+    {
+      "key": "uhdhd-2-b",
+      "file": "b시점(uhd30 hd30) 2.mp4",
+      "group": "uhdhd",
+      "number": 2,
+      "view": "B",
+      "split": "development",
+      "git_blob": "c7281f805b5eac6063434b129554a125e0498f5f",
+      "bytes": 7041033,
+      "sha256": "972a0183da9fcdbb41e2ec94cc83201a84259238c34a54cfdf59b0cde4c56823"
+    },
+    {
+      "key": "uhdhd-4-a",
+      "file": "a시점(uhd30 hd30) 4.mp4",
+      "group": "uhdhd",
+      "number": 4,
+      "view": "A",
+      "split": "development",
+      "git_blob": "ff10f7540c1dc5b7cc1fd9a4612a6c2ed35112a9",
+      "bytes": 25535462,
+      "sha256": "c143093bc59937dcd50343a6c09628a031d71c726e313a6f1330c6a6c04c06d6"
+    },
+    {
+      "key": "uhdhd-4-b",
+      "file": "b시점(uhd30 hd30) 4.mp4",
+      "group": "uhdhd",
+      "number": 4,
+      "view": "B",
+      "split": "development",
+      "git_blob": "9cbc5913ba000b857516346a2312a6a9a4d49bbf",
+      "bytes": 8694967,
+      "sha256": "10c84268a2aedd469fdbe91048bd3ee7bd3f6d1b9002a803552d1d37ea1c2c52"
+    },
+    {
+      "key": "uhdhd-5-a",
+      "file": "a시점(uhd30 hd30) 5.mp4",
+      "group": "uhdhd",
+      "number": 5,
+      "view": "A",
+      "split": "holdout",
+      "git_blob": "be55856a7ab0b23ccadb1684bd20cb9b09b051b5",
+      "bytes": 28200584,
+      "sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952"
+    },
+    {
+      "key": "uhdhd-5-b",
+      "file": "b시점(uhd30 hd30) 5.mp4",
+      "group": "uhdhd",
+      "number": 5,
+      "view": "B",
+      "split": "holdout",
+      "git_blob": "963783e7dd8082fdf26c8ee07b65d2b64ee56bff",
+      "bytes": 6585570,
+      "sha256": "e09374a98ab6839216c2ec4baab9a90fd18b3c76bdbbd3df90005248de8b8476"
+    }
+  ]
+}

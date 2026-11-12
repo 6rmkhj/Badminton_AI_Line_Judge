@@ -1,0 +1,4186 @@
+{
+  "status": "final_after_explicit_holdout_release",
+  "baseline_revision": "7e74b058ae95543bb9c7d121761426462e74f49c",
+  "final_revision": "d7f3d3303daa40c699d579c17e40269173220937",
+  "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "run_profiles": {
+    "baseline": {
+      "run_config_sha256": "2b0c47f3107ce40da34f8b71bf2a7e19ee8678d371dfeb5e88a9d90f05cc823c",
+      "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+      "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+      "config": {
+        "analysis_width": 960,
+        "workers": 2,
+        "opencv_threads": 2,
+        "max_frames": 3000,
+        "source_crop_count": 0,
+        "rules": {
+          "game": "doubles",
+          "phase": "rally"
+        },
+        "detector": {
+          "backend": "opencv_candidates",
+          "source_analysis_enabled": true,
+          "candidate_selection": "spatial",
+          "max_candidates": 80,
+          "global_candidate_reserve": 64,
+          "include_dark_components": true,
+          "dark_contrast_threshold": 8,
+          "dark_motion_threshold": 8,
+          "dark_max_saturation": 190,
+          "max_component_aspect": 12,
+          "native_local_components": true,
+          "highres_enabled": true,
+          "highres_max_rois": 16,
+          "highres_roi_size": 192,
+          "highres_roi_analysis_size": 48,
+          "highres_exploration_rois": 4,
+          "person_backend": "hog",
+          "person_width": 960,
+          "person_interval": 16
+        },
+        "tracker": {
+          "flight_search_enabled": true
+        },
+        "events": {
+          "source_contact_enabled": true,
+          "source_contact_max_candidates": 6,
+          "source_contact_patch_size": 96
+        },
+        "evidence": {
+          "annotated_clip": true,
+          "seconds_before": 0.7,
+          "seconds_after": 0.7
+        }
+      }
+    },
+    "final": {
+      "run_config_sha256": "ebb818d343c12b0aaf7115242825cea8a293f967e01881ee571ca1a959b0a950",
+      "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+      "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+      "config": {
+        "analysis_width": 960,
+        "workers": 2,
+        "opencv_threads": 2,
+        "max_frames": 3000,
+        "source_crop_count": 0,
+        "rules": {
+          "game": "doubles",
+          "phase": "rally"
+        },
+        "detector": {
+          "backend": "opencv_candidates",
+          "source_analysis_enabled": true,
+          "candidate_selection": "spatial",
+          "max_candidates": 80,
+          "global_candidate_reserve": 64,
+          "temporal_candidate_memory": true,
+          "native_motion_recovery": true,
+          "include_dark_components": true,
+          "dark_contrast_threshold": 8,
+          "dark_motion_threshold": 8,
+          "dark_max_saturation": 190,
+          "max_component_aspect": 12,
+          "native_local_components": true,
+          "highres_enabled": true,
+          "highres_max_rois": 16,
+          "highres_roi_size": 192,
+          "highres_roi_analysis_size": 48,
+          "highres_exploration_rois": 4,
+          "person_backend": "hog",
+          "person_width": 960,
+          "person_interval": 16
+        },
+        "tracker": {
+          "flight_search_enabled": true
+        },
+        "events": {
+          "source_contact_enabled": true,
+          "source_contact_max_candidates": 6,
+          "source_contact_patch_size": 96
+        },
+        "evidence": {
+          "annotated_clip": true,
+          "seconds_before": 0.7,
+          "seconds_after": 0.7
+        }
+      }
+    }
+  },
+  "reference_policy": "Inspect source video before viewing pipeline selections; AI visual development review, not independent human ground truth",
+  "summary": {
+    "development": {
+      "before": {
+        "declared": 16,
+        "audited": 16,
+        "pending_or_invalid": 0,
+        "first_vicinity_matches": 1,
+        "first_vicinity_denominator": 9,
+        "automatic_decisions": {
+          "REVIEW": 16
+        },
+        "reference_trajectory_points": 66,
+        "raw_trajectory_hits": 35,
+        "raw_reference_trajectory_points": 66,
+        "best_single_track_trajectory_hits": 23,
+        "selected_track_trajectory_hits": 9,
+        "independent_contact_accuracy": null,
+        "independent_line_judgment_accuracy": null
+      },
+      "after": {
+        "declared": 16,
+        "audited": 16,
+        "pending_or_invalid": 0,
+        "first_vicinity_matches": 3,
+        "first_vicinity_denominator": 9,
+        "automatic_decisions": {
+          "REVIEW": 16
+        },
+        "reference_trajectory_points": 66,
+        "raw_trajectory_hits": 44,
+        "raw_reference_trajectory_points": 66,
+        "best_single_track_trajectory_hits": 30,
+        "selected_track_trajectory_hits": 15,
+        "independent_contact_accuracy": null,
+        "independent_line_judgment_accuracy": null
+      }
+    },
+    "holdout": {
+      "before": {
+        "declared": 8,
+        "audited": 8,
+        "pending_or_invalid": 0,
+        "first_vicinity_matches": 0,
+        "first_vicinity_denominator": 4,
+        "automatic_decisions": {
+          "REVIEW": 8
+        },
+        "reference_trajectory_points": 37,
+        "raw_trajectory_hits": 24,
+        "raw_reference_trajectory_points": 37,
+        "best_single_track_trajectory_hits": 14,
+        "selected_track_trajectory_hits": 3,
+        "independent_contact_accuracy": null,
+        "independent_line_judgment_accuracy": null
+      },
+      "after": {
+        "declared": 8,
+        "audited": 8,
+        "pending_or_invalid": 0,
+        "first_vicinity_matches": 2,
+        "first_vicinity_denominator": 4,
+        "automatic_decisions": {
+          "REVIEW": 8
+        },
+        "reference_trajectory_points": 37,
+        "raw_trajectory_hits": 28,
+        "raw_reference_trajectory_points": 37,
+        "best_single_track_trajectory_hits": 19,
+        "selected_track_trajectory_hits": 12,
+        "independent_contact_accuracy": null,
+        "independent_line_judgment_accuracy": null
+      }
+    }
+  },
+  "videos": [
+    {
+      "key": "8k-2-a",
+      "split": "development",
+      "before": {
+        "key": "8k-2-a",
+        "group": "8k",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "311b814ee7f7347dfa244e56d6c5f3b9d94be8fc4de29dada2adc89858167492",
+        "reference_sha256": "c2e8627b03569427228052706497f8f992e5b1ec80190075a69a2e53c6e98d70",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          83,
+          85
+        ],
+        "reference_point": [
+          287,
+          362
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 15,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 74,
+          "reference_coordinate_point": [
+            297.421,
+            157.377
+          ],
+          "distance_px": 204.8882,
+          "frame_error": 9,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1162,
+          "frame_index": 74,
+          "time": 2.466567,
+          "candidate_px": [
+            297.421,
+            157.377
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 233.75639178799975,
+        "diagnosis": {
+          "failure_stage": "event_candidate_budget_rank_loss",
+          "causal_failure_category": "event_candidate_budget_rank_loss",
+          "reference_trajectory_point_count": 5,
+          "raw_trajectory_hit_count": 4,
+          "best_track_trajectory_hit_count": 3,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "8k-2-a",
+        "group": "8k",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "311b814ee7f7347dfa244e56d6c5f3b9d94be8fc4de29dada2adc89858167492",
+        "reference_sha256": "c2e8627b03569427228052706497f8f992e5b1ec80190075a69a2e53c6e98d70",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          83,
+          85
+        ],
+        "reference_point": [
+          287,
+          362
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 15,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "correct_first_vicinity",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 84,
+          "reference_coordinate_point": [
+            284.833,
+            369.0
+          ],
+          "distance_px": 7.3277,
+          "frame_error": 0,
+          "within_spatial_tolerance": true,
+          "within_frame_tolerance": true,
+          "matches_first_vicinity": true
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1089,
+          "frame_index": 84,
+          "time": 2.799889,
+          "candidate_px": [
+            284.833,
+            369.0
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 119.73579133699968,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/8k-2-a/result.json",
+          "source_run_result_sha256": "4cf166bf65c8a1553840af0feb5b721b016a2f573866c80300c035aed96e254a",
+          "source_detections": "/workspace/generalization/final/8k-2-a/detections.json",
+          "source_detections_sha256": "172697b417882453acc40105c032d9d8471b5b601b89cbeb0f2336e408c6196f",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "311b814ee7f7347dfa244e56d6c5f3b9d94be8fc4de29dada2adc89858167492",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 87.15426076999938,
+          "original_run_total_seconds": 190.88585203000002,
+          "decoded_analysis_frames_sha256": "42db7d088c53d597ed1721bb54b9ae4fb6d961b8245041b522a7ae123124c868",
+          "exact_timestamp_array_sha256": "8c84cd6864b0a4085ef8eb3ab5a4aa04b7958272141d81cd8998d4c3463309ca",
+          "frame_count": 129,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "172697b417882453acc40105c032d9d8471b5b601b89cbeb0f2336e408c6196f"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {
+          "failure_stage": "none_selected_first_vicinity",
+          "causal_failure_category": "none_selected_first_vicinity",
+          "reference_trajectory_point_count": 5,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 5,
+          "best_track_trajectory_hit_count": 4,
+          "selected_track_trajectory_hit_count": 4,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "8k-2-b",
+      "split": "development",
+      "before": {
+        "key": "8k-2-b",
+        "group": "8k",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead",
+        "reference_sha256": "72e969f9957b4eb8bb196cb933e4ed19fd287f71709df42010e836084e5f00b9",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          45,
+          47
+        ],
+        "reference_point": [
+          419,
+          207
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 15,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 14,
+          "reference_coordinate_point": [
+            736.463,
+            243.51500000000001
+          ],
+          "distance_px": 319.5561,
+          "frame_error": 31,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 765,
+          "frame_index": 14,
+          "time": 0.583467,
+          "candidate_px": [
+            736.463,
+            243.515
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 62.77181378000023,
+        "diagnosis": {
+          "failure_stage": "event_proposal_missing_or_temporally_mislocalized",
+          "causal_failure_category": "identity_switch_or_occluder_extension_suspected",
+          "reference_trajectory_point_count": 5,
+          "raw_trajectory_hit_count": 3,
+          "best_track_trajectory_hit_count": 3,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "8k-2-b",
+        "group": "8k",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead",
+        "reference_sha256": "72e969f9957b4eb8bb196cb933e4ed19fd287f71709df42010e836084e5f00b9",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          45,
+          47
+        ],
+        "reference_point": [
+          419,
+          207
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 15,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 12,
+          "reference_coordinate_point": [
+            727.421,
+            179.355
+          ],
+          "distance_px": 309.6575,
+          "frame_error": 33,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 888,
+          "frame_index": 12,
+          "time": 0.500111,
+          "candidate_px": [
+            727.421,
+            179.355
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 15.834642101999634,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/8k-2-b/result.json",
+          "source_run_result_sha256": "d9ea0f7fd47818b958669eb9d3fed6db1819688982fc11d05e1ca48a2b91cf99",
+          "source_detections": "/workspace/generalization/final/8k-2-b/detections.json",
+          "source_detections_sha256": "c300633e7cc65bb04adf82b7166062f14b741dccb8e3b81f2d3cea467597f6ba",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 19.485772996000378,
+          "original_run_total_seconds": 37.57073830399895,
+          "decoded_analysis_frames_sha256": "41c66bfc6d72a44b6d2b4db1763f19aa24c8fce15846968c9dca85b386c66974",
+          "exact_timestamp_array_sha256": "7042471d3e69da33fa87dc88060596c45cffd651f2343c47171032b083f9fa76",
+          "frame_count": 80,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "c300633e7cc65bb04adf82b7166062f14b741dccb8e3b81f2d3cea467597f6ba"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {
+          "failure_stage": "event_proposal_missing_or_temporally_mislocalized",
+          "causal_failure_category": "event_proposal_missing_or_temporally_mislocalized",
+          "reference_trajectory_point_count": 5,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 4,
+          "best_track_trajectory_hit_count": 3,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "8k-5-a",
+      "split": "development",
+      "before": {
+        "key": "8k-5-a",
+        "group": "8k",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "2030ff7b0e2e51039bbb48db6c40a7be2ca44e06cbba77c6b31b8f7aee08e0b9",
+        "reference_sha256": "6956e412cc958cf5cafaf360f5ca27e7b0b0de8784caa0f716a2686114263dc8",
+        "contact_visibility": "occluded",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 674,
+          "frame_index": 56,
+          "time": 1.866589,
+          "candidate_px": [
+            241.0,
+            207.0
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 186.35605895500157,
+        "diagnosis": {}
+      },
+      "after": {
+        "key": "8k-5-a",
+        "group": "8k",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "2030ff7b0e2e51039bbb48db6c40a7be2ca44e06cbba77c6b31b8f7aee08e0b9",
+        "reference_sha256": "6956e412cc958cf5cafaf360f5ca27e7b0b0de8784caa0f716a2686114263dc8",
+        "contact_visibility": "occluded",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 325,
+          "frame_index": 45,
+          "time": 1.499933,
+          "candidate_px": [
+            646.236,
+            177.686
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 105.59885888399913,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/8k-5-a/result.json",
+          "source_run_result_sha256": "1e8daba42d4ccff10f3a7e7be5f5cdcb7e86784011ab2ef5ca681d707ed4cbc1",
+          "source_detections": "/workspace/generalization/final/8k-5-a/detections.json",
+          "source_detections_sha256": "9d6de14f44cfa4a2d8a1ae7ecc72dd819f6364b2c8a817f6b74bbd4dbcab0100",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "2030ff7b0e2e51039bbb48db6c40a7be2ca44e06cbba77c6b31b8f7aee08e0b9",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 95.43187310699977,
+          "original_run_total_seconds": 165.95483680799953,
+          "decoded_analysis_frames_sha256": "455467d1e66436b7183d5a4746d2669ed0c206ed02c29d37f4b7d020c4f21dcc",
+          "exact_timestamp_array_sha256": "1feefae2fc26b558572c5f04945a3d23ac2061952b388b378b018a29b2234635",
+          "frame_count": 100,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "9d6de14f44cfa4a2d8a1ae7ecc72dd819f6364b2c8a817f6b74bbd4dbcab0100"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {}
+      }
+    },
+    {
+      "key": "8k-5-b",
+      "split": "development",
+      "before": {
+        "key": "8k-5-b",
+        "group": "8k",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "7eccb2951dde57a8ab51b6cf1e42671348a7369d62e4ebf3800d536349a48667",
+        "reference_sha256": "4c2cbb5aa122e07b452fa2bfb74d1e3ec1f450068e5f2ab96cd50378d7b174ef",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          39,
+          41
+        ],
+        "reference_point": [
+          820,
+          291
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 15,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "correct_first_vicinity",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 39,
+          "reference_coordinate_point": [
+            818.667,
+            298.667
+          ],
+          "distance_px": 7.782,
+          "frame_error": 0,
+          "within_spatial_tolerance": true,
+          "within_frame_tolerance": true,
+          "matches_first_vicinity": true
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 811,
+          "frame_index": 39,
+          "time": 1.625489,
+          "candidate_px": [
+            818.667,
+            298.667
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 35.37325089600017,
+        "diagnosis": {
+          "failure_stage": "none_selected_first_vicinity",
+          "causal_failure_category": "none_selected_first_vicinity",
+          "reference_trajectory_point_count": 4,
+          "raw_trajectory_hit_count": 2,
+          "best_track_trajectory_hit_count": 2,
+          "selected_track_trajectory_hit_count": 2,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "8k-5-b",
+        "group": "8k",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "7eccb2951dde57a8ab51b6cf1e42671348a7369d62e4ebf3800d536349a48667",
+        "reference_sha256": "4c2cbb5aa122e07b452fa2bfb74d1e3ec1f450068e5f2ab96cd50378d7b174ef",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          39,
+          41
+        ],
+        "reference_point": [
+          820,
+          291
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 15,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "correct_first_vicinity",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 39,
+          "reference_coordinate_point": [
+            818.667,
+            298.667
+          ],
+          "distance_px": 7.782,
+          "frame_error": 0,
+          "within_spatial_tolerance": true,
+          "within_frame_tolerance": true,
+          "matches_first_vicinity": true
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 885,
+          "frame_index": 39,
+          "time": 1.625489,
+          "candidate_px": [
+            818.667,
+            298.667
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 22.394165808000253,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/8k-5-b/result.json",
+          "source_run_result_sha256": "81071bb3101e251279fc2531710db4ef81a45b50f326ed2bcc65e078206d2af5",
+          "source_detections": "/workspace/generalization/final/8k-5-b/detections.json",
+          "source_detections_sha256": "ba87b74372525782247d604dc36d0393c32902a2a0d8a5b581d97971633da580",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "7eccb2951dde57a8ab51b6cf1e42671348a7369d62e4ebf3800d536349a48667",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 25.823087136999675,
+          "original_run_total_seconds": 49.392243306001546,
+          "decoded_analysis_frames_sha256": "b9523246e4b1702a7c365d3d4e0176612cdd27496924697d3d921d824c4b93fe",
+          "exact_timestamp_array_sha256": "27ccc0386475d448f71a553cdb30f8ba204290e4f077e938681671066c45e2d2",
+          "frame_count": 92,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "ba87b74372525782247d604dc36d0393c32902a2a0d8a5b581d97971633da580"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {
+          "failure_stage": "none_selected_first_vicinity",
+          "causal_failure_category": "none_selected_first_vicinity",
+          "reference_trajectory_point_count": 4,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 3,
+          "best_track_trajectory_hit_count": 3,
+          "selected_track_trajectory_hit_count": 3,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "8k-7-a",
+      "split": "holdout",
+      "before": {
+        "key": "8k-7-a",
+        "group": "8k",
+        "view": "A",
+        "split": "holdout",
+        "source_sha256": "cf9ad62b3e429094f325404e1347adf646eaa3a2439bf37d258463b154a9f02f",
+        "reference_sha256": "7ae7499e9c1a184dae7ea91c84efa0d2b24442f3679bdf9ee52d3ba4bd514db3",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          77,
+          79
+        ],
+        "reference_point": [
+          292,
+          291
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 15,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 109,
+          "reference_coordinate_point": [
+            523.0,
+            206.5
+          ],
+          "distance_px": 245.97,
+          "frame_error": 30,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 906,
+          "frame_index": 109,
+          "time": 3.633189,
+          "candidate_px": [
+            523.0,
+            206.5
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 180.80607359399983,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {
+          "failure_stage": "event_proposal_missing_or_temporally_mislocalized",
+          "causal_failure_category": "event_proposal_missing_or_temporally_mislocalized",
+          "reference_trajectory_point_count": 6,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 5,
+          "best_track_trajectory_hit_count": 4,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "8k-7-a",
+        "group": "8k",
+        "view": "A",
+        "split": "holdout",
+        "source_sha256": "cf9ad62b3e429094f325404e1347adf646eaa3a2439bf37d258463b154a9f02f",
+        "reference_sha256": "7ae7499e9c1a184dae7ea91c84efa0d2b24442f3679bdf9ee52d3ba4bd514db3",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          77,
+          79
+        ],
+        "reference_point": [
+          292,
+          291
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 15,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "correct_first_vicinity",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 77,
+          "reference_coordinate_point": [
+            290.5334454255675,
+            289.70965462808795
+          ],
+          "distance_px": 1.9534,
+          "frame_error": 0,
+          "within_spatial_tolerance": true,
+          "within_frame_tolerance": true,
+          "matches_first_vicinity": true
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 943,
+          "frame_index": 77,
+          "time": 2.566567,
+          "candidate_px": [
+            290.5334454255675,
+            289.70965462808795
+          ],
+          "contact_observed": false,
+          "method": "offline_occluded_image_trajectory_intersection",
+          "reason_codes": [
+            "OCCLUDED_IMAGE_TRAJECTORY_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "CONTACT_OCCLUDED_OR_MISSING",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 202.62103229999957,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {
+          "failure_stage": "none_selected_first_vicinity",
+          "causal_failure_category": "none_selected_first_vicinity",
+          "reference_trajectory_point_count": 6,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 5,
+          "best_track_trajectory_hit_count": 4,
+          "selected_track_trajectory_hit_count": 4,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "8k-7-b",
+      "split": "holdout",
+      "before": {
+        "key": "8k-7-b",
+        "group": "8k",
+        "view": "B",
+        "split": "holdout",
+        "source_sha256": "c8c2fa52ef709de4c8084c8fdc456d2cf6cdb4b44924f32ec08b406d2acfe4d7",
+        "reference_sha256": "ad4632b1bdab32441b6c62b4a2489c12cd3bbb0be86faa193572ce5a4a83a070",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1238,
+          "frame_index": 27,
+          "time": 1.125344,
+          "candidate_px": [
+            375.649,
+            263.577
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 44.42785385699972,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {}
+      },
+      "after": {
+        "key": "8k-7-b",
+        "group": "8k",
+        "view": "B",
+        "split": "holdout",
+        "source_sha256": "c8c2fa52ef709de4c8084c8fdc456d2cf6cdb4b44924f32ec08b406d2acfe4d7",
+        "reference_sha256": "ad4632b1bdab32441b6c62b4a2489c12cd3bbb0be86faa193572ce5a4a83a070",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 879,
+          "frame_index": 73,
+          "time": 3.042556,
+          "candidate_px": [
+            937.375,
+            197.75
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 49.18641226699947,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {}
+      }
+    },
+    {
+      "key": "ordinary-4-a",
+      "split": "development",
+      "before": {
+        "key": "ordinary-4-a",
+        "group": "ordinary",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+        "reference_sha256": "b3861193dd347788cbf5de0efb46ab80c04bb28443e5c3b810a1c7ef86e9c29e",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          188,
+          191
+        ],
+        "reference_point": [
+          603,
+          243
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 41,
+          "reference_coordinate_point": [
+            55.857,
+            107.238
+          ],
+          "distance_px": 563.7347,
+          "frame_error": 147,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 3076,
+          "frame_index": 41,
+          "time": 0.691578,
+          "candidate_px": [
+            55.857,
+            107.238
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 147.67442920800022,
+        "diagnosis": {
+          "failure_stage": "tracking_fragmentation_or_association",
+          "causal_failure_category": "tracking_fragmentation_or_association",
+          "reference_trajectory_point_count": 10,
+          "raw_trajectory_hit_count": 7,
+          "best_track_trajectory_hit_count": 3,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "ordinary-4-a",
+        "group": "ordinary",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+        "reference_sha256": "b3861193dd347788cbf5de0efb46ab80c04bb28443e5c3b810a1c7ef86e9c29e",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          188,
+          191
+        ],
+        "reference_point": [
+          603,
+          243
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 42,
+          "reference_coordinate_point": [
+            55.25,
+            109.25
+          ],
+          "distance_px": 563.8432,
+          "frame_error": 146,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 3537,
+          "frame_index": 42,
+          "time": 0.708444,
+          "candidate_px": [
+            55.25,
+            109.25
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 87.11670265199973,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/ordinary-4-a/result.json",
+          "source_run_result_sha256": "cdbda3db92f9b0bcb3921e25d1869c20b576de82844cf828ccb3046bcee0da58",
+          "source_detections": "/workspace/generalization/final/ordinary-4-a/detections.json",
+          "source_detections_sha256": "0d81aab2d6f747f17b9fadb222dff4e454c6a2fe24918d31da53d4a368454736",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 91.18741071600016,
+          "original_run_total_seconds": 183.19047968699851,
+          "decoded_analysis_frames_sha256": "9fa66c62eec25278021d8654981db79467e8c1ea56dd425129b031bd9824534a",
+          "exact_timestamp_array_sha256": "967c7dc8162721d6aba3b3f5be0efb8103960215db468c39ae0e389da86165a0",
+          "frame_count": 281,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "0d81aab2d6f747f17b9fadb222dff4e454c6a2fe24918d31da53d4a368454736"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {
+          "failure_stage": "candidate_rank_wrong",
+          "causal_failure_category": "candidate_rank_wrong",
+          "reference_trajectory_point_count": 10,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 7,
+          "best_track_trajectory_hit_count": 4,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "ordinary-4-b",
+      "split": "development",
+      "before": {
+        "key": "ordinary-4-b",
+        "group": "ordinary",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "5564dda029e222e8dc4b0fc529ed0d6affe4407f80ecbd66d582b7044ceb497a",
+        "reference_sha256": "c54f295bd34661ec70286b6db17e112fb059cb2d54b3c201ec631583bc4375a8",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          228,
+          231
+        ],
+        "reference_point": [
+          180,
+          203
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 267,
+          "reference_coordinate_point": [
+            482.329,
+            86.021
+          ],
+          "distance_px": 324.1711,
+          "frame_error": 36,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 5054,
+          "frame_index": 267,
+          "time": 4.451322,
+          "candidate_px": [
+            482.329,
+            86.021
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 144.7847719069996,
+        "diagnosis": {
+          "failure_stage": "detector_contact_candidate_absent",
+          "causal_failure_category": "detector_contact_candidate_absent",
+          "reference_trajectory_point_count": 9,
+          "raw_trajectory_hit_count": 2,
+          "best_track_trajectory_hit_count": 1,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "ordinary-4-b",
+        "group": "ordinary",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "5564dda029e222e8dc4b0fc529ed0d6affe4407f80ecbd66d582b7044ceb497a",
+        "reference_sha256": "c54f295bd34661ec70286b6db17e112fb059cb2d54b3c201ec631583bc4375a8",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          228,
+          231
+        ],
+        "reference_point": [
+          180,
+          203
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 142,
+          "reference_coordinate_point": [
+            295.333,
+            106.0
+          ],
+          "distance_px": 150.7007,
+          "frame_error": 86,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 4957,
+          "frame_index": 142,
+          "time": 2.367356,
+          "candidate_px": [
+            295.333,
+            106.0
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 90.16890177300047,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/ordinary-4-b/result.json",
+          "source_run_result_sha256": "1e7d71682f1da9d8ed865ab0754e2ab28ec178fa69a2bc0bc4812074eca23716",
+          "source_detections": "/workspace/generalization/final/ordinary-4-b/detections.json",
+          "source_detections_sha256": "be573d74ac2bfd6f9b595f41da0d90d0d1d1e7d938825c24f455b2d0571a3c50",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "5564dda029e222e8dc4b0fc529ed0d6affe4407f80ecbd66d582b7044ceb497a",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 169.9293385259989,
+          "original_run_total_seconds": 243.00140256099985,
+          "decoded_analysis_frames_sha256": "00d79b9cd13279569e19bf3acd0eb5940d5d90c420e77346c77ecf23eae63dc4",
+          "exact_timestamp_array_sha256": "0d3b49409ba0408b8ccb839799ce44c5dfd27760384395e9d4350838596cc568",
+          "frame_count": 284,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "be573d74ac2bfd6f9b595f41da0d90d0d1d1e7d938825c24f455b2d0571a3c50"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {
+          "failure_stage": "detector_contact_candidate_absent",
+          "causal_failure_category": "detector_contact_candidate_absent",
+          "reference_trajectory_point_count": 9,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 2,
+          "best_track_trajectory_hit_count": 1,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "ordinary-12-a",
+      "split": "development",
+      "before": {
+        "key": "ordinary-12-a",
+        "group": "ordinary",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb",
+        "reference_sha256": "619a834d2eb3c5c2ddd442adcfa3fd0dcfce49bd8b110b46b52f90c98559f8ec",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          150,
+          153
+        ],
+        "reference_point": [
+          482,
+          215
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 6,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 152,
+          "reference_coordinate_point": [
+            481.833,
+            208.667
+          ],
+          "distance_px": 6.3352,
+          "frame_error": 0,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": true,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 2077,
+          "frame_index": 152,
+          "time": 2.563911,
+          "candidate_px": [
+            481.833,
+            208.667
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 169.50109438400068,
+        "diagnosis": {
+          "failure_stage": "candidate_rank_wrong",
+          "causal_failure_category": "candidate_rank_wrong",
+          "reference_trajectory_point_count": 11,
+          "raw_trajectory_hit_count": 9,
+          "best_track_trajectory_hit_count": 5,
+          "selected_track_trajectory_hit_count": 2,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "ordinary-12-a",
+        "group": "ordinary",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb",
+        "reference_sha256": "619a834d2eb3c5c2ddd442adcfa3fd0dcfce49bd8b110b46b52f90c98559f8ec",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          150,
+          153
+        ],
+        "reference_point": [
+          482,
+          215
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 6,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 150,
+          "reference_coordinate_point": [
+            481.316,
+            208.421
+          ],
+          "distance_px": 6.6145,
+          "frame_error": 0,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": true,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 2411,
+          "frame_index": 150,
+          "time": 2.530167,
+          "candidate_px": [
+            481.316,
+            208.421
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 78.48910383300063,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/ordinary-12-a/result.json",
+          "source_run_result_sha256": "e0fae153f99725e74e9fcb8d3c4629f78b0226fc994437b25dce36e5ab51f55a",
+          "source_detections": "/workspace/generalization/final/ordinary-12-a/detections.json",
+          "source_detections_sha256": "f90d5a0aead2f680e7fad24b1193f096dce6e1ac5cf7f5251e209a94f0405a21",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 123.80001798899866,
+          "original_run_total_seconds": 196.97510507399966,
+          "decoded_analysis_frames_sha256": "1eae170fb394c6f34cbad931780d75a7ee5e9f8ab9797e1a466be52aba91db85",
+          "exact_timestamp_array_sha256": "a80dff08ff4aaed9cac08300afefc244a064b668eacc4ac37d67b5397152f58c",
+          "frame_count": 274,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "f90d5a0aead2f680e7fad24b1193f096dce6e1ac5cf7f5251e209a94f0405a21"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {
+          "failure_stage": "candidate_rank_wrong",
+          "causal_failure_category": "candidate_rank_wrong",
+          "reference_trajectory_point_count": 11,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 10,
+          "best_track_trajectory_hit_count": 5,
+          "selected_track_trajectory_hit_count": 3,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "ordinary-12-b",
+      "split": "development",
+      "before": {
+        "key": "ordinary-12-b",
+        "group": "ordinary",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "3aed5a60fbc157354e7fef85feb5bde191f9db0311b2fab4ee9811646fada62d",
+        "reference_sha256": "baa9eacc30a1b2b8dbc0bf182a5bd4bceeefeae3065d71eeb20ebb5e5a53283a",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          182,
+          185
+        ],
+        "reference_point": [
+          172,
+          253
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 165,
+          "reference_coordinate_point": [
+            207.339,
+            138.196
+          ],
+          "distance_px": 120.12,
+          "frame_error": 17,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 4471,
+          "frame_index": 165,
+          "time": 2.751033,
+          "candidate_px": [
+            207.339,
+            138.196
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 199.88651547600057,
+        "diagnosis": {
+          "failure_stage": "event_proposal_missing_or_temporally_mislocalized",
+          "causal_failure_category": "event_proposal_missing_or_temporally_mislocalized",
+          "reference_trajectory_point_count": 9,
+          "raw_trajectory_hit_count": 4,
+          "best_track_trajectory_hit_count": 2,
+          "selected_track_trajectory_hit_count": 2,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "ordinary-12-b",
+        "group": "ordinary",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "3aed5a60fbc157354e7fef85feb5bde191f9db0311b2fab4ee9811646fada62d",
+        "reference_sha256": "baa9eacc30a1b2b8dbc0bf182a5bd4bceeefeae3065d71eeb20ebb5e5a53283a",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          182,
+          185
+        ],
+        "reference_point": [
+          172,
+          253
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "correct_first_vicinity",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 183,
+          "reference_coordinate_point": [
+            170.24043916295832,
+            253.27961588201728
+          ],
+          "distance_px": 1.7816,
+          "frame_error": 0,
+          "within_spatial_tolerance": true,
+          "within_frame_tolerance": true,
+          "matches_first_vicinity": true
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 4679,
+          "frame_index": 183,
+          "time": 3.050911,
+          "candidate_px": [
+            170.24043916295832,
+            253.2796158820173
+          ],
+          "contact_observed": false,
+          "method": "offline_occluded_image_trajectory_intersection",
+          "reason_codes": [
+            "OCCLUDED_IMAGE_TRAJECTORY_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "CONTACT_OCCLUDED_OR_MISSING",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 96.42187681399992,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/ordinary-12-b/result.json",
+          "source_run_result_sha256": "6e882eaeca20409b17b162db1eef7837bcb142c48bccd4dfc188ac0dbcd304e6",
+          "source_detections": "/workspace/generalization/final/ordinary-12-b/detections.json",
+          "source_detections_sha256": "25688c12eeefd4295ca889571b88f1252b8465a72bc605a99ffd3c1fad6b7628",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "3aed5a60fbc157354e7fef85feb5bde191f9db0311b2fab4ee9811646fada62d",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 202.0045797370003,
+          "original_run_total_seconds": 310.8883739849989,
+          "decoded_analysis_frames_sha256": "37255e90ad686de1c623e0f02971e6ffa7649473c5369afcb8234e2559a525f8",
+          "exact_timestamp_array_sha256": "6290f22c097b0c9452085fa4f9f90cef4918b3057b85780d841127b72689321b",
+          "frame_count": 357,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "25688c12eeefd4295ca889571b88f1252b8465a72bc605a99ffd3c1fad6b7628"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {
+          "failure_stage": "none_selected_first_vicinity",
+          "causal_failure_category": "none_selected_first_vicinity",
+          "reference_trajectory_point_count": 9,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 8,
+          "best_track_trajectory_hit_count": 6,
+          "selected_track_trajectory_hit_count": 5,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "ordinary-18-a",
+      "split": "holdout",
+      "before": {
+        "key": "ordinary-18-a",
+        "group": "ordinary",
+        "view": "A",
+        "split": "holdout",
+        "source_sha256": "dd04f1a5a96ce2ba9ad1c14eb750396fbd4537b23cc09749fc065f0b2a260c9d",
+        "reference_sha256": "521f231a6233578231c3f978c11afd3f09cea48d708c488613784654a54ba07b",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          131,
+          133
+        ],
+        "reference_point": [
+          405,
+          201
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 6,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 25,
+          "reference_coordinate_point": [
+            221.546,
+            81.512
+          ],
+          "distance_px": 218.9355,
+          "frame_error": 106,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1640,
+          "frame_index": 25,
+          "time": 0.4217,
+          "candidate_px": [
+            221.546,
+            81.512
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 93.16473358300027,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {
+          "failure_stage": "detector_contact_candidate_absent",
+          "causal_failure_category": "detector_contact_candidate_absent",
+          "reference_trajectory_point_count": 11,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 3,
+          "best_track_trajectory_hit_count": 3,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "ordinary-18-a",
+        "group": "ordinary",
+        "view": "A",
+        "split": "holdout",
+        "source_sha256": "dd04f1a5a96ce2ba9ad1c14eb750396fbd4537b23cc09749fc065f0b2a260c9d",
+        "reference_sha256": "521f231a6233578231c3f978c11afd3f09cea48d708c488613784654a54ba07b",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          131,
+          133
+        ],
+        "reference_point": [
+          405,
+          201
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 6,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 67,
+          "reference_coordinate_point": [
+            521.25,
+            188.875
+          ],
+          "distance_px": 116.8806,
+          "frame_error": 64,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1717,
+          "frame_index": 67,
+          "time": 1.130144,
+          "candidate_px": [
+            521.25,
+            188.875
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 122.15873537300104,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {
+          "failure_stage": "detector_contact_candidate_absent",
+          "causal_failure_category": "detector_contact_candidate_absent",
+          "reference_trajectory_point_count": 11,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 4,
+          "best_track_trajectory_hit_count": 3,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "ordinary-18-b",
+      "split": "holdout",
+      "before": {
+        "key": "ordinary-18-b",
+        "group": "ordinary",
+        "view": "B",
+        "split": "holdout",
+        "source_sha256": "c2b3e5cd92940e93598163c454c831c0a25df07dd347c1f9b67f5e27acd0d831",
+        "reference_sha256": "a36596b9d3ca8018037b081269e43650c3c2fdeee960cd6183ea0d9f64a79d44",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          185,
+          188
+        ],
+        "reference_point": [
+          349,
+          310
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 6,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 167,
+          "reference_coordinate_point": [
+            314.452,
+            135.887
+          ],
+          "distance_px": 177.5075,
+          "frame_error": 18,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 3229,
+          "frame_index": 167,
+          "time": 2.784156,
+          "candidate_px": [
+            314.452,
+            135.887
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 171.74341465699945,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {
+          "failure_stage": "tracking_fragmentation_or_association",
+          "causal_failure_category": "tracking_fragmentation_or_association",
+          "reference_trajectory_point_count": 14,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 12,
+          "best_track_trajectory_hit_count": 5,
+          "selected_track_trajectory_hit_count": 3,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "ordinary-18-b",
+        "group": "ordinary",
+        "view": "B",
+        "split": "holdout",
+        "source_sha256": "c2b3e5cd92940e93598163c454c831c0a25df07dd347c1f9b67f5e27acd0d831",
+        "reference_sha256": "a36596b9d3ca8018037b081269e43650c3c2fdeee960cd6183ea0d9f64a79d44",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          185,
+          188
+        ],
+        "reference_point": [
+          349,
+          310
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 6,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "correct_first_vicinity",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 186,
+          "reference_coordinate_point": [
+            348.0,
+            313.333
+          ],
+          "distance_px": 3.4798,
+          "frame_error": 0,
+          "within_spatial_tolerance": true,
+          "within_frame_tolerance": true,
+          "matches_first_vicinity": true
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 3443,
+          "frame_index": 186,
+          "time": 3.100922,
+          "candidate_px": [
+            348.0,
+            313.333
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 180.7887077159994,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {
+          "failure_stage": "none_selected_first_vicinity",
+          "causal_failure_category": "none_selected_first_vicinity",
+          "reference_trajectory_point_count": 14,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 14,
+          "best_track_trajectory_hit_count": 8,
+          "selected_track_trajectory_hit_count": 8,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "uhd4k-2-a",
+      "split": "development",
+      "before": {
+        "key": "uhd4k-2-a",
+        "group": "uhd4k",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "4e42f1c0996825312f6782fa94168c21789fe2d22cac9b7e43e05c5a7461c4ee",
+        "reference_sha256": "ee35aa582770d4144206acded52acade76468f4bef610264cc5093f8daca8dbf",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1148,
+          "frame_index": 59,
+          "time": 1.966833,
+          "candidate_px": [
+            684.875,
+            176.875
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 115.65510910000012,
+        "diagnosis": {}
+      },
+      "after": {
+        "key": "uhd4k-2-a",
+        "group": "uhd4k",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "4e42f1c0996825312f6782fa94168c21789fe2d22cac9b7e43e05c5a7461c4ee",
+        "reference_sha256": "ee35aa582770d4144206acded52acade76468f4bef610264cc5093f8daca8dbf",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1210,
+          "frame_index": 59,
+          "time": 1.966833,
+          "candidate_px": [
+            684.875,
+            176.875
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 41.18032869400122,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/uhd4k-2-a/result.json",
+          "source_run_result_sha256": "418c6f5affb3b890a34458d00361e7ff5c926c72ea8fc3462b974db4f4227c8a",
+          "source_detections": "/workspace/generalization/final/uhd4k-2-a/detections.json",
+          "source_detections_sha256": "433e7e515a214ec53e2a299bc286e03b24c78f2aa263d8f4e5d31198875b5ec6",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "4e42f1c0996825312f6782fa94168c21789fe2d22cac9b7e43e05c5a7461c4ee",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 52.453722778000156,
+          "original_run_total_seconds": 92.06058854999901,
+          "decoded_analysis_frames_sha256": "18521357c330296c8d42aab39ce654222ea2557d0f451e02fdf7c60d0559c1e6",
+          "exact_timestamp_array_sha256": "769c8b2bed6cce287743cd41fb173d15f87a79e3673a7be9ecf9a80387ca7c18",
+          "frame_count": 145,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "433e7e515a214ec53e2a299bc286e03b24c78f2aa263d8f4e5d31198875b5ec6"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {}
+      }
+    },
+    {
+      "key": "uhd4k-2-b",
+      "split": "development",
+      "before": {
+        "key": "uhd4k-2-b",
+        "group": "uhd4k",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "26c434519a4fdcb2e43e38bf067b8683f67c9346b003e5f7e330f2debe846000",
+        "reference_sha256": "0050e4c223a5e44dbc5272c4dbe88e2fe525fe71dfc1e26cb41b312550a2ded9",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1717,
+          "frame_index": 41,
+          "time": 1.368333,
+          "candidate_px": [
+            266.209,
+            108.629
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 89.89073381799972,
+        "diagnosis": {}
+      },
+      "after": {
+        "key": "uhd4k-2-b",
+        "group": "uhd4k",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "26c434519a4fdcb2e43e38bf067b8683f67c9346b003e5f7e330f2debe846000",
+        "reference_sha256": "0050e4c223a5e44dbc5272c4dbe88e2fe525fe71dfc1e26cb41b312550a2ded9",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1890,
+          "frame_index": 57,
+          "time": 1.901667,
+          "candidate_px": [
+            260.8699081913292,
+            201.2445655857205
+          ],
+          "contact_observed": false,
+          "method": "offline_occluded_image_trajectory_intersection",
+          "reason_codes": [
+            "OCCLUDED_IMAGE_TRAJECTORY_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "CONTACT_OCCLUDED_OR_MISSING",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 47.798693773000196,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/uhd4k-2-b/result.json",
+          "source_run_result_sha256": "d0bb11dafdfad663c8510e674bba1b3a2c316f6fcb6a84b31486ab8a8ddb0c17",
+          "source_detections": "/workspace/generalization/final/uhd4k-2-b/detections.json",
+          "source_detections_sha256": "7a5558f79d15868a874ba376d11a4b47bc68f143328dfabcba914e8b3365118f",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "26c434519a4fdcb2e43e38bf067b8683f67c9346b003e5f7e330f2debe846000",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 141.93898141200043,
+          "original_run_total_seconds": 185.1541402419989,
+          "decoded_analysis_frames_sha256": "d35ca20e70d4523672b7080d9285f330ad740228c961238ac2abeef1b0d0fd01",
+          "exact_timestamp_array_sha256": "8d5bc9ab15d93392185572595c4c675a426d9a109f93725811f06a028edc581b",
+          "frame_count": 168,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "7a5558f79d15868a874ba376d11a4b47bc68f143328dfabcba914e8b3365118f"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {}
+      }
+    },
+    {
+      "key": "uhd4k-4-a",
+      "split": "development",
+      "before": {
+        "key": "uhd4k-4-a",
+        "group": "uhd4k",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "973355dc2d10ab4eebe1564e4c223b02f1ba225d600a9889405eae646b8213b3",
+        "reference_sha256": "1584fe4d02cdeedcdb7e73c4f3a6541b7b863879678a2dd8912343d8e51fc0db",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 729,
+          "frame_index": 45,
+          "time": 1.500133,
+          "candidate_px": [
+            513.5,
+            109.125
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 57.7136009750011,
+        "diagnosis": {}
+      },
+      "after": {
+        "key": "uhd4k-4-a",
+        "group": "uhd4k",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "973355dc2d10ab4eebe1564e4c223b02f1ba225d600a9889405eae646b8213b3",
+        "reference_sha256": "1584fe4d02cdeedcdb7e73c4f3a6541b7b863879678a2dd8912343d8e51fc0db",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 862,
+          "frame_index": 45,
+          "time": 1.500133,
+          "candidate_px": [
+            513.5,
+            109.125
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 43.16432799099857,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/uhd4k-4-a/result.json",
+          "source_run_result_sha256": "60e0a4d04e5753e4ae9d6ebfd7525b4e8a70365ec3041fa56ac0547ad2c26490",
+          "source_detections": "/workspace/generalization/final/uhd4k-4-a/detections.json",
+          "source_detections_sha256": "a057a756504c3836f481aed486107358328e42ad30b61250bc08b3ca8f5e7a51",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "973355dc2d10ab4eebe1564e4c223b02f1ba225d600a9889405eae646b8213b3",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 62.12794979499995,
+          "original_run_total_seconds": 93.04085279699939,
+          "decoded_analysis_frames_sha256": "cfbde292793791dc336a725fcb2c539302e64ca9f422444cb2ad36243dcd7dac",
+          "exact_timestamp_array_sha256": "21b55b409389320c8dd92717a61b471df6db4b270c3f0385a6685bc00a86d196",
+          "frame_count": 97,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "a057a756504c3836f481aed486107358328e42ad30b61250bc08b3ca8f5e7a51"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {}
+      }
+    },
+    {
+      "key": "uhd4k-4-b",
+      "split": "development",
+      "before": {
+        "key": "uhd4k-4-b",
+        "group": "uhd4k",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "018caa9ed0179b56a2e672ee32d84c5d08db3f51b51b3b1b83dea19b561ab729",
+        "reference_sha256": "917027c3be06aff4048e4aa94a99e911cab35ea72a36b2c26d68a17225848116",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1287,
+          "frame_index": 54,
+          "time": 1.8,
+          "candidate_px": [
+            475.6,
+            215.025
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 73.46084923700073,
+        "diagnosis": {}
+      },
+      "after": {
+        "key": "uhd4k-4-b",
+        "group": "uhd4k",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "018caa9ed0179b56a2e672ee32d84c5d08db3f51b51b3b1b83dea19b561ab729",
+        "reference_sha256": "917027c3be06aff4048e4aa94a99e911cab35ea72a36b2c26d68a17225848116",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1336,
+          "frame_index": 44,
+          "time": 1.466667,
+          "candidate_px": [
+            267.25,
+            201.0
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 31.86773616100072,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/uhd4k-4-b/result.json",
+          "source_run_result_sha256": "d9ed45fa305cdadcb574891722e6a084d72b5efdf74370fbb20be0a19ac8ac21",
+          "source_detections": "/workspace/generalization/final/uhd4k-4-b/detections.json",
+          "source_detections_sha256": "b06cbff443289b3e56d0fcf2d8f4ca5ea1b6f51163468c4339175f361591be24",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "018caa9ed0179b56a2e672ee32d84c5d08db3f51b51b3b1b83dea19b561ab729",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 43.829778500999964,
+          "original_run_total_seconds": 86.34858964399973,
+          "decoded_analysis_frames_sha256": "bd6aa1152da0e95ee9f89b0c70200a27493f30c1b0ef58571a931d19de849b97",
+          "exact_timestamp_array_sha256": "f37d74e7f9973b31d1613f6a53ef33c3805f0709d9ac45255c0d4da8d4e8d103",
+          "frame_count": 127,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "b06cbff443289b3e56d0fcf2d8f4ca5ea1b6f51163468c4339175f361591be24"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {}
+      }
+    },
+    {
+      "key": "uhd4k-3-a",
+      "split": "holdout",
+      "before": {
+        "key": "uhd4k-3-a",
+        "group": "uhd4k",
+        "view": "A",
+        "split": "holdout",
+        "source_sha256": "4780ea68e9689f3602bfdc3955cb3bc47c41d2bcbfd78dfa78378dbe47242729",
+        "reference_sha256": "5fd5f3582540a6b872adc6d083c39dd4445cc0201d41be1ab08fd40bef794f17",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1076,
+          "frame_index": 23,
+          "time": 0.766733,
+          "candidate_px": [
+            727.159269748835,
+            148.90008475018405
+          ],
+          "contact_observed": false,
+          "method": "offline_occluded_image_trajectory_intersection",
+          "reason_codes": [
+            "OCCLUDED_IMAGE_TRAJECTORY_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "CONTACT_OCCLUDED_OR_MISSING",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 82.61082645999886,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {}
+      },
+      "after": {
+        "key": "uhd4k-3-a",
+        "group": "uhd4k",
+        "view": "A",
+        "split": "holdout",
+        "source_sha256": "4780ea68e9689f3602bfdc3955cb3bc47c41d2bcbfd78dfa78378dbe47242729",
+        "reference_sha256": "5fd5f3582540a6b872adc6d083c39dd4445cc0201d41be1ab08fd40bef794f17",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1396,
+          "frame_index": 76,
+          "time": 2.533544,
+          "candidate_px": [
+            385.0,
+            250.0
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 84.94132342600096,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {}
+      }
+    },
+    {
+      "key": "uhd4k-3-b",
+      "split": "holdout",
+      "before": {
+        "key": "uhd4k-3-b",
+        "group": "uhd4k",
+        "view": "B",
+        "split": "holdout",
+        "source_sha256": "1469100923fd649976a9ebb3ffff518018c7a6ad660f036fd35d007443ae54c5",
+        "reference_sha256": "2bf524009ad75ad2e67c5e512c7d19859cea55a51f8a8f46e44e073f88c3dcd8",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 729,
+          "frame_index": 20,
+          "time": 0.666667,
+          "candidate_px": [
+            470.833,
+            238.667
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 58.70203884700095,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {}
+      },
+      "after": {
+        "key": "uhd4k-3-b",
+        "group": "uhd4k",
+        "view": "B",
+        "split": "holdout",
+        "source_sha256": "1469100923fd649976a9ebb3ffff518018c7a6ad660f036fd35d007443ae54c5",
+        "reference_sha256": "2bf524009ad75ad2e67c5e512c7d19859cea55a51f8a8f46e44e073f88c3dcd8",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": null,
+        "frame_tolerance": 2,
+        "effective_frame_tolerance": null,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 731,
+          "frame_index": 62,
+          "time": 2.068333,
+          "candidate_px": [
+            332.4138025007407,
+            202.3771905104236
+          ],
+          "contact_observed": false,
+          "method": "offline_occluded_image_trajectory_intersection",
+          "reason_codes": [
+            "OCCLUDED_IMAGE_TRAJECTORY_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "CONTACT_OCCLUDED_OR_MISSING",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 94.81487179600117,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {}
+      }
+    },
+    {
+      "key": "uhdhd-2-a",
+      "split": "development",
+      "before": {
+        "key": "uhdhd-2-a",
+        "group": "uhdhd",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "c6bc1029c316cb96713d1076ba0f098f4124914802648aade538c5a7f1e28ec7",
+        "reference_sha256": "549477069b501f31be7d9ec76b8e8b9adcdbf672cb37654219ba6b8d5649cddd",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1864,
+          "frame_index": 89,
+          "time": 1.501233,
+          "candidate_px": [
+            751.574,
+            126.298
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 107.41359163599918,
+        "diagnosis": {}
+      },
+      "after": {
+        "key": "uhdhd-2-a",
+        "group": "uhdhd",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "c6bc1029c316cb96713d1076ba0f098f4124914802648aade538c5a7f1e28ec7",
+        "reference_sha256": "549477069b501f31be7d9ec76b8e8b9adcdbf672cb37654219ba6b8d5649cddd",
+        "contact_visibility": "ambiguous",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1933,
+          "frame_index": 88,
+          "time": 1.484367,
+          "candidate_px": [
+            750.211,
+            122.998
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 55.444748638999954,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/uhdhd-2-a/result.json",
+          "source_run_result_sha256": "b300f798f4cd4e3cafbfc2b76009679d68b4c1275bc47842316f309b36bb1be6",
+          "source_detections": "/workspace/generalization/final/uhdhd-2-a/detections.json",
+          "source_detections_sha256": "7b335c3e67a9f8d3220d75d86d755941bf86f79043162222a3bc4482173aa3fa",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "c6bc1029c316cb96713d1076ba0f098f4124914802648aade538c5a7f1e28ec7",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 109.42310136699962,
+          "original_run_total_seconds": 158.63063815499845,
+          "decoded_analysis_frames_sha256": "6a9ce405b20e1c47e8248c034c7b5e767d6bbec8c42ebc8bfe9a2d3a4b09a3d1",
+          "exact_timestamp_array_sha256": "fd3e27d280601b687f472123670510bf370cae6bbf4d33db227e6eb120c9c0f3",
+          "frame_count": 179,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "7b335c3e67a9f8d3220d75d86d755941bf86f79043162222a3bc4482173aa3fa"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {}
+      }
+    },
+    {
+      "key": "uhdhd-2-b",
+      "split": "development",
+      "before": {
+        "key": "uhdhd-2-b",
+        "group": "uhdhd",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "972a0183da9fcdbb41e2ec94cc83201a84259238c34a54cfdf59b0cde4c56823",
+        "reference_sha256": "378855f6a61233342ad7e8c3179ba536e2a51693a2a1063820a86d5bb5deba6a",
+        "contact_visibility": "occluded",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 884,
+          "frame_index": 20,
+          "time": 0.666667,
+          "candidate_px": [
+            70.0,
+            375.5
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 40.16488664099961,
+        "diagnosis": {}
+      },
+      "after": {
+        "key": "uhdhd-2-b",
+        "group": "uhdhd",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "972a0183da9fcdbb41e2ec94cc83201a84259238c34a54cfdf59b0cde4c56823",
+        "reference_sha256": "378855f6a61233342ad7e8c3179ba536e2a51693a2a1063820a86d5bb5deba6a",
+        "contact_visibility": "occluded",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 857,
+          "frame_index": 60,
+          "time": 2.0,
+          "candidate_px": [
+            601.021,
+            264.167
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 24.149219675000495,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/uhdhd-2-b/result.json",
+          "source_run_result_sha256": "12e184183b137a27b170f57d2755992d1ac36ecbf8fe54bf00b64fc62550a072",
+          "source_detections": "/workspace/generalization/final/uhdhd-2-b/detections.json",
+          "source_detections_sha256": "aec527aa7f9d547248eaf0c14fb66645d2282a8a740ba6289164b410373d1079",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "972a0183da9fcdbb41e2ec94cc83201a84259238c34a54cfdf59b0cde4c56823",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 35.091612710000845,
+          "original_run_total_seconds": 59.70716719600023,
+          "decoded_analysis_frames_sha256": "4a6e375b60f00108190f521fbc34f84d3e59daa6ebee93ea596758310179b16b",
+          "exact_timestamp_array_sha256": "d44cda586751ded6731a602af4b116209a4041026d334f3c261b49b7bde6f4aa",
+          "frame_count": 83,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "aec527aa7f9d547248eaf0c14fb66645d2282a8a740ba6289164b410373d1079"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {}
+      }
+    },
+    {
+      "key": "uhdhd-4-a",
+      "split": "development",
+      "before": {
+        "key": "uhdhd-4-a",
+        "group": "uhdhd",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "c143093bc59937dcd50343a6c09628a031d71c726e313a6f1330c6a6c04c06d6",
+        "reference_sha256": "85858b1ad548290eaccf4fc790d499ff65db05944d197ea44b728fadd4d5eb67",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          142,
+          144
+        ],
+        "reference_point": [
+          332,
+          182
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 6,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 138,
+          "reference_coordinate_point": [
+            332.0,
+            163.5
+          ],
+          "distance_px": 18.5,
+          "frame_error": 4,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 2496,
+          "frame_index": 138,
+          "time": 2.327756,
+          "candidate_px": [
+            332.0,
+            163.5
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 135.18030408899904,
+        "diagnosis": {
+          "failure_stage": "detector_contact_candidate_absent",
+          "causal_failure_category": "detector_contact_candidate_absent",
+          "reference_trajectory_point_count": 6,
+          "raw_trajectory_hit_count": 3,
+          "best_track_trajectory_hit_count": 3,
+          "selected_track_trajectory_hit_count": 3,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "uhdhd-4-a",
+        "group": "uhdhd",
+        "view": "A",
+        "split": "development",
+        "source_sha256": "c143093bc59937dcd50343a6c09628a031d71c726e313a6f1330c6a6c04c06d6",
+        "reference_sha256": "85858b1ad548290eaccf4fc790d499ff65db05944d197ea44b728fadd4d5eb67",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          142,
+          144
+        ],
+        "reference_point": [
+          332,
+          182
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 6,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 93,
+          "reference_coordinate_point": [
+            478.375,
+            246.875
+          ],
+          "distance_px": 160.1075,
+          "frame_error": 49,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 1089,
+          "frame_index": 93,
+          "time": 1.5687,
+          "candidate_px": [
+            478.375,
+            246.875
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 41.29629277099957,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/uhdhd-4-a/result.json",
+          "source_run_result_sha256": "8d83990e0cc94a3726c2e1bda7088c85d2fab771c5137aafbca297f897644fa6",
+          "source_detections": "/workspace/generalization/final/uhdhd-4-a/detections.json",
+          "source_detections_sha256": "377a9847e579617030c1ac84ed18cfc99b086a536b31d97d84bb3e00b9159078",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "c143093bc59937dcd50343a6c09628a031d71c726e313a6f1330c6a6c04c06d6",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 94.94591504699929,
+          "original_run_total_seconds": 158.22353246700004,
+          "decoded_analysis_frames_sha256": "ca1d1cee7b64eb0431d9c9a779f98ad6d3099c8d125919ae0d7a1b143f1dbd4e",
+          "exact_timestamp_array_sha256": "02ff1a1605e5056dcafeb68aa4c623857c9a6ad2720c60a3b70d8a91bcb0f9bc",
+          "frame_count": 192,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "377a9847e579617030c1ac84ed18cfc99b086a536b31d97d84bb3e00b9159078"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {
+          "failure_stage": "detector_contact_candidate_absent",
+          "causal_failure_category": "detector_contact_candidate_absent",
+          "reference_trajectory_point_count": 6,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 3,
+          "best_track_trajectory_hit_count": 3,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": false
+        }
+      }
+    },
+    {
+      "key": "uhdhd-4-b",
+      "split": "development",
+      "before": {
+        "key": "uhdhd-4-b",
+        "group": "uhdhd",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "10c84268a2aedd469fdbe91048bd3ee7bd3f6d1b9002a803552d1d37ea1c2c52",
+        "reference_sha256": "6832cae824764bd855682bf4b17144890aa2304e0b308d9ee0d6fde52311f442",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          75,
+          77
+        ],
+        "reference_point": [
+          544,
+          339
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 71,
+          "reference_coordinate_point": [
+            148.5263860862344,
+            277.7658794127886
+          ],
+          "distance_px": 400.1862,
+          "frame_error": 4,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 977,
+          "frame_index": 71,
+          "time": 2.368333,
+          "candidate_px": [
+            148.5263860862344,
+            277.7658794127886
+          ],
+          "contact_observed": false,
+          "method": "offline_occluded_image_trajectory_intersection",
+          "reason_codes": [
+            "OCCLUDED_IMAGE_TRAJECTORY_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "CONTACT_OCCLUDED_OR_MISSING",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TEMPORAL_GAP_NEAR_CANDIDATE",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 46.7235674450003,
+        "diagnosis": {
+          "failure_stage": "event_proposal_missing_or_temporally_mislocalized",
+          "causal_failure_category": "event_proposal_missing_or_temporally_mislocalized",
+          "reference_trajectory_point_count": 7,
+          "raw_trajectory_hit_count": 1,
+          "best_track_trajectory_hit_count": 1,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "uhdhd-4-b",
+        "group": "uhdhd",
+        "view": "B",
+        "split": "development",
+        "source_sha256": "10c84268a2aedd469fdbe91048bd3ee7bd3f6d1b9002a803552d1d37ea1c2c52",
+        "reference_sha256": "6832cae824764bd855682bf4b17144890aa2304e0b308d9ee0d6fde52311f442",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          75,
+          77
+        ],
+        "reference_point": [
+          544,
+          339
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 71,
+          "reference_coordinate_point": [
+            147.38499999999996,
+            283.154
+          ],
+          "distance_px": 400.5274,
+          "frame_error": 4,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 933,
+          "frame_index": 71,
+          "time": 2.368333,
+          "candidate_px": [
+            147.385,
+            283.154
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 17.268237944999782,
+        "validation_mode": "detector_stage_reuse",
+        "validation_run": {
+          "source_run_result": "/workspace/generalization/final/uhdhd-4-b/result.json",
+          "source_run_result_sha256": "1bf465b7fbbf9d0879f4302c8a7756e110a36ff6bdb5e7c9ad1c0eae75b1bbd7",
+          "source_detections": "/workspace/generalization/final/uhdhd-4-b/detections.json",
+          "source_detections_sha256": "266d5f2bf5ec03359e649661eaeda8ea45def25df1c55b92f7f93b37100abb5e",
+          "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+          "source_implementation_fingerprint": "721558d430c93973a8c1383bc72f55a958a1b12bb78743694adca44bb94dd53f",
+          "source_sha256": "10c84268a2aedd469fdbe91048bd3ee7bd3f6d1b9002a803552d1d37ea1c2c52",
+          "source_analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+          "original_detector_seconds": 39.88159968999935,
+          "original_run_total_seconds": 65.16500906599867,
+          "decoded_analysis_frames_sha256": "c7916a34dba70a7c3143e39106869e9a4a85b95398fd89bb29d1faa8b2228f7f",
+          "exact_timestamp_array_sha256": "8cf7752c3f845788471bf8cd85c84df6820f8994482e513ea73b060c01b46b2f",
+          "frame_count": 108,
+          "analysis_size": [
+            960,
+            540
+          ],
+          "preprocessing": "opencv_source_bgr_area_v1",
+          "native_decoder_invoked_for_detection": false,
+          "native_decoder_sequential_compatibility": "Code-reviewed: unchanged detector indexes0..N; new SourceFrameSequence random seek only applies to skips>=32. No native pixel-equality claim is inferred from cache reuse.",
+          "detector_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+          "detector_stage_reused": true,
+          "assistance_used": false,
+          "reference_files_read": false,
+          "fresh_stages": [
+            "decode_preview",
+            "calibration",
+            "tracking",
+            "events",
+            "native_contact_evidence",
+            "trajectory_context",
+            "decision",
+            "evidence"
+          ],
+          "timing_scope": "Partial pipeline replay with unchanged detector artifacts; not full fresh runtime.",
+          "saved_replayed_detections_sha256": "266d5f2bf5ec03359e649661eaeda8ea45def25df1c55b92f7f93b37100abb5e"
+        },
+        "timing_scope": "detector_stage_reuse",
+        "diagnosis": {
+          "failure_stage": "event_proposal_missing_or_temporally_mislocalized",
+          "causal_failure_category": "event_proposal_missing_or_temporally_mislocalized",
+          "reference_trajectory_point_count": 7,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 2,
+          "best_track_trajectory_hit_count": 1,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "uhdhd-5-a",
+      "split": "holdout",
+      "before": {
+        "key": "uhdhd-5-a",
+        "group": "uhdhd",
+        "view": "A",
+        "split": "holdout",
+        "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+        "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          144,
+          146
+        ],
+        "reference_point": [
+          732,
+          310
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 48,
+          "reference_coordinate_point": [
+            857.5,
+            122.0
+          ],
+          "distance_px": 226.0404,
+          "frame_error": 96,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 2128,
+          "frame_index": 48,
+          "time": 0.809656,
+          "candidate_px": [
+            857.5,
+            122.0
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 122.91879326300113,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {
+          "failure_stage": "event_proposal_missing_or_temporally_mislocalized",
+          "causal_failure_category": "event_proposal_missing_or_temporally_mislocalized",
+          "reference_trajectory_point_count": 6,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 4,
+          "best_track_trajectory_hit_count": 2,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      },
+      "after": {
+        "key": "uhdhd-5-a",
+        "group": "uhdhd",
+        "view": "A",
+        "split": "holdout",
+        "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+        "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+        "contact_visibility": "visible",
+        "reference_interval": [
+          144,
+          146
+        ],
+        "reference_point": [
+          732,
+          310
+        ],
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": true,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "wrong_target_or_spatial_localization",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": {
+          "frame_index": 55,
+          "reference_coordinate_point": [
+            864.0,
+            141.0
+          ],
+          "distance_px": 214.4411,
+          "frame_error": 89,
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 2272,
+          "frame_index": 55,
+          "time": 0.927733,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 139.81736062600066,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {
+          "failure_stage": "event_proposal_missing_or_temporally_mislocalized",
+          "causal_failure_category": "event_proposal_missing_or_temporally_mislocalized",
+          "reference_trajectory_point_count": 6,
+          "detection_artifact_available": true,
+          "raw_trajectory_hit_count": 5,
+          "best_track_trajectory_hit_count": 4,
+          "selected_track_trajectory_hit_count": 0,
+          "selected_track_has_flight_hypothesis": true
+        }
+      }
+    },
+    {
+      "key": "uhdhd-5-b",
+      "split": "holdout",
+      "before": {
+        "key": "uhdhd-5-b",
+        "group": "uhdhd",
+        "view": "B",
+        "split": "holdout",
+        "source_sha256": "e09374a98ab6839216c2ec4baab9a90fd18b3c76bdbbd3df90005248de8b8476",
+        "reference_sha256": "135375b793fd7a4b6eb4e89b7468d387d87e370508ed818df976a8cd08182bb4",
+        "contact_visibility": "occluded",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+        "analysis_config_sha256": "68cb0cfdaa430537741fc422f1e86c6eaa1b61e26057e36aecbeb7c1d5cd992d",
+        "pipeline_version": "0.5.2",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 94,
+          "frame_index": 18,
+          "time": 0.6,
+          "candidate_px": [
+            331.0,
+            243.5
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 40.5036966509997,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {}
+      },
+      "after": {
+        "key": "uhdhd-5-b",
+        "group": "uhdhd",
+        "view": "B",
+        "split": "holdout",
+        "source_sha256": "e09374a98ab6839216c2ec4baab9a90fd18b3c76bdbbd3df90005248de8b8476",
+        "reference_sha256": "135375b793fd7a4b6eb4e89b7468d387d87e370508ed818df976a8cd08182bb4",
+        "contact_visibility": "occluded",
+        "reference_interval": null,
+        "reference_point": null,
+        "coordinate_size": [
+          960,
+          540
+        ],
+        "tolerance_px": 8,
+        "frame_tolerance": null,
+        "effective_frame_tolerance": 0.0,
+        "localization_scorable": false,
+        "status": "audited",
+        "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+        "analysis_config_sha256": "b865e93c6de8ff5c01545d80ca3f908ae8a1f950f1cd90750fcb08aff599b46b",
+        "pipeline_version": "0.5.3",
+        "selection_category": "no_observable_ground_truth",
+        "automatic_decision": "REVIEW",
+        "decision_abstention": true,
+        "candidate_abstention": false,
+        "selected_comparison": null,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 977,
+          "frame_index": 79,
+          "time": 2.635,
+          "candidate_px": [
+            104.5,
+            296.0
+          ],
+          "contact_observed": false,
+          "method": "offline_motion_and_tracklet_candidate_search",
+          "reason_codes": [
+            "IMAGE_SPACE_DESCENT_AND_REBOUND",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TRACK_IDENTITY_AMBIGUOUS",
+            "TRACK_HAS_MISSING_OBSERVATIONS",
+            "TARGET_IDENTITY_UNVERIFIED",
+            "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+            "CALIBRATION_NOT_CONFIRMED"
+          ]
+        },
+        "elapsed_seconds": 48.907535327001824,
+        "validation_mode": "full_pipeline",
+        "validation_run": null,
+        "timing_scope": "full_pipeline",
+        "diagnosis": {}
+      }
+    }
+  ],
+  "execution_modes_after": {
+    "development": {
+      "detector_stage_reuse": 16
+    },
+    "holdout": {
+      "full_pipeline": 8
+    }
+  },
+  "audit_input_sha256": {
+    "baseline": [
+      {
+        "file": "audit-development-baseline.json",
+        "sha256": "e87bc601b59b3912aae88cfbf1c1dff38459ab5b9392e90e7091801dd6f1dd0e"
+      },
+      {
+        "file": "audit-holdout-baseline.json",
+        "sha256": "bedd653ae3cd4c7fc59ea14c9aea026029bbc7af9f666217fcbe7bae2ac2422f"
+      }
+    ],
+    "final": [
+      {
+        "file": "audit-development-release.json",
+        "sha256": "7312779851b92841eab393df6b43b01317228ff3fe99c59c16ea70c03bc93761"
+      },
+      {
+        "file": "audit-holdout-release.json",
+        "sha256": "a6bb73f83f2fd11c19cb39e009933b1de02447552bd3221711779071b02a66d5"
+      }
+    ]
+  },
+  "holdout_inspection_release": {
+    "receipt": "holdout-inspection-release-20261112T080012Z.json",
+    "receipt_sha256": "ff878bdd524f17504abae79a54432d245b9ea07d633e38e27f0740237de0cb98",
+    "released_at": "2026-11-12T08:00:12.953456+00:00",
+    "preinspection_freeze": "freeze-release.preinspection.json",
+    "preinspection_freeze_sha256": "81fe1f5682a32eb263efb8f727ce1669872888114d20c9c8e52108b4fb4e9c6c"
+  },
+  "post_release_visual_reviews": [
+    {
+      "path": "holdout-independent-visual-review.json",
+      "sha256": "3a2c13c8c7528a6b4297acab27af4129d1ca0af91470db3082590c969e9f38d8"
+    },
+    {
+      "path": "holdout-supplemental-visual-review.json",
+      "sha256": "0a0da50e4154d97de45e86a07e92b4cc29ff51248cc13a9db451e361fd865c4c"
+    }
+  ]
+}

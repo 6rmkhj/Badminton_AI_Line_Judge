@@ -1,0 +1,67 @@
+{
+  "key": "8k-5-a",
+  "contact_visibility": "occluded",
+  "landing_frame_interval": null,
+  "landing_point_px": null,
+  "tolerance_px": null,
+  "confidence": "main descending flight medium-high; first floor contact not visible enough to localize",
+  "trajectory_points": [
+    {
+      "frame_index": 36,
+      "x": 285,
+      "y": 147,
+      "time_seconds": 1.199956
+    },
+    {
+      "frame_index": 38,
+      "x": 275,
+      "y": 150,
+      "time_seconds": 1.266611
+    },
+    {
+      "frame_index": 40,
+      "x": 270,
+      "y": 154,
+      "time_seconds": 1.333278
+    },
+    {
+      "frame_index": 42,
+      "x": 262,
+      "y": 157,
+      "time_seconds": 1.399944
+    },
+    {
+      "frame_index": 44,
+      "x": 256,
+      "y": 165,
+      "time_seconds": 1.466611
+    },
+    {
+      "frame_index": 46,
+      "x": 253,
+      "y": 169,
+      "time_seconds": 1.533267
+    }
+  ],
+  "notes": [
+    "Main-court shuttle descends leftward across the far spectators after the near blue-shirt player's stroke.",
+    "Its terminal descent approaches the left net-post/net structure. The small shuttle is obscured/ambiguous around that structure; a unique first floor impact and rebound cannot be localized confidently from this A view.",
+    "No contact point or impact interval is asserted. The sibling B-view result was not used to manufacture an A-view impact annotation.",
+    "The static white spot high on the wall and spectators/rackets are not the shuttle.",
+    "AI visual development reference only; unobservable contact must not be counted as verified localization failure/success."
+  ],
+  "evidence": [
+    "visual/8k-5-a/crop-34-58-0.jpg",
+    "visual/8k-5-a/crop-34-58-1.jpg",
+    "visual/8k-5-a/contact-zoom.jpg"
+  ],
+  "file": "8k 30 4k 24 a시점 5.mp4",
+  "source_sha256": "2030ff7b0e2e51039bbb48db6c40a7be2ca44e06cbba77c6b31b8f7aee08e0b9",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "ground_truth_eligible": false,
+  "split": "development"
+}

@@ -1,0 +1,70 @@
+{
+  "key": "8k-2-b",
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    45,
+    47
+  ],
+  "landing_point_px": [
+    419,
+    207
+  ],
+  "tolerance_px": 15,
+  "confidence": "medium; small far-side object but descent and initial rebound distinguishable",
+  "trajectory_points": [
+    {
+      "frame_index": 42,
+      "x": 418,
+      "y": 186,
+      "time_seconds": 1.7505
+    },
+    {
+      "frame_index": 43,
+      "x": 418,
+      "y": 193,
+      "time_seconds": 1.792178
+    },
+    {
+      "frame_index": 44,
+      "x": 419,
+      "y": 200,
+      "time_seconds": 1.833844
+    },
+    {
+      "frame_index": 46,
+      "x": 419,
+      "y": 207,
+      "time_seconds": 1.917211
+    },
+    {
+      "frame_index": 48,
+      "x": 418,
+      "y": 201,
+      "time_seconds": 2.000567
+    }
+  ],
+  "notes": [
+    "Main-court final shuttle descends on the far court, image-right of the far black-shirt player.",
+    "The floorward low point is around f46, followed by upward motion at f47/f48; do not use the later settled/retrieved shuttle.",
+    "A stationary near-floor bottle near [405,238] is a distractor and is not this trajectory.",
+    "Body/racket is close to the small trajectory; use the broad interval and pixel tolerance rather than asserting an exact cork contact pixel.",
+    "Source clip A/B starts are not assumed aligned."
+  ],
+  "evidence": [
+    "visual/8k-2-b/crop-38-51-0.jpg",
+    "visual/8k-2-b/crop-38-51-1.jpg"
+  ],
+  "file": "8k 30 4k 24 b시점 2.mp4",
+  "source_sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "ground_truth_eligible": false,
+  "split": "development",
+  "landing_time_interval_seconds": [
+    1.875522,
+    1.958889
+  ]
+}
