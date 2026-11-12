@@ -17,7 +17,8 @@ def implementation_fingerprint():
     package = Path(__file__).parent
     digest = hashlib.sha256()
     for name in ('media.py', 'pipeline.py', 'calibration.py', 'detection.py', 'tracking.py',
-                 'events.py', 'identity.py', 'identity_continuity.py', 'evidence.py', 'decision.py', 'learning.py',
+                 'events.py', 'identity.py', 'identity_continuity.py', 'candidate_identity.py',
+                 'evidence.py', 'decision.py', 'learning.py',
                  'contact_model.py', 'sync.py'):
         digest.update(name.encode())
         digest.update((package / name).read_bytes())

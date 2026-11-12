@@ -229,6 +229,99 @@ def test_rebound_branch_jump_and_small_later_jump_fail_measured_post_motion_fit(
     assert rebound['contact_observed'] is False
 
 
+def test_missing_outgoing_interval_cannot_complete_measured_rebound_support():
+    ys = [10, 15, 24, 37, 54, 75, 100, 129, 162, 157.5, 157.48, 150]
+    moving = track([(30 + i, y) for i, y in enumerate(ys)], times=[i / 60 for i in range(len(ys))])
+    moving['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
+    # Two nearby observations, then an unrelated point after a long missing
+    # interval. That last point cannot turn a short tail into a measured bounce.
+    moving['observations'][-1]['time'] += 5 / 60
+    moving['observations'][-1]['frame_index'] += 5
+    times = [i / 60 for i in range(len(ys) + 5)]
+    frames = [np.zeros((200, 180, 3), np.uint8)] * len(times)
+    events = estimate_landings([moving], frames, times, {})
+    candidate = next(event for event in events if event.get('image_motion_event'))
+    assert candidate['flight_trajectory_support']['post_observation_count'] == 2
+    assert candidate['flight_trajectory_support']['supported_for_review'] is False
+    assert candidate['contact_observed'] is False
+
+
+def test_long_missing_incoming_span_cannot_supply_normal_flight_support():
+    indices = [0, 1, 2, 3, 4, 5, 18, 19, 20, 21, 22]
+    points = [(30 + i, 10 + .3 * i * i) for i in indices[:8]] + [(50, 110), (51, 104), (52, 100)]
+    moving = track(points, times=[i / 30 for i in indices], ambiguous=True)
+    moving['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
+    for observation, frame in zip(moving['observations'], indices):
+        observation['frame_index'] = frame
+    frames = [np.zeros((180, 180, 3), np.uint8)] * 23
+    events = estimate_landings([moving], frames, [i / 30 for i in range(23)], {})
+    candidate = next(event for event in events if event['frame_index'] == 19)
+    assert candidate['image_motion_event']['kind'] == 'descent_and_rebound'
+    assert not candidate.get('flight_trajectory_support', {}).get('supported_for_review')
+    assert candidate['contact_observed'] is False
+
+
+def test_eligible_occluded_descent_retains_measured_history_only_for_review_ranking():
+    indices = [0, 1, 2, 3, 4, 5, 8, 10, 11, 12, 13, 15, 16, 17, 18]
+    points = [(30 + i * 2, 10 + .8 * i * i) for i in indices[:11]] + [(60, y) for y in [133, 125, 120, 119]]
+    moving = track(points, times=[i / 30 for i in indices], ambiguous=True)
+    moving['track_id'] = 'moving'
+    moving['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
+    for observation, frame in zip(moving['observations'], indices):
+        observation.update(frame_index=frame, confidence=.4)
+    ys = [10, 15, 24, 37, 54, 75, 100, 129, 118, 111, 107, 109]
+    other = track([(150 - i * 2, y) for i, y in enumerate(ys)], ambiguous=True)
+    other['track_id'] = 'other'
+    other['flight_hypothesis'] = {'method': 'coherent_free_flight_search'}
+    frames = [np.zeros((200, 200, 3), np.uint8)] * 19
+    events = estimate_landings([other, moving], frames, [i / 30 for i in range(19)], {})
+    event = events[0]
+    assert event['track_id'] == 'moving' and event['frame_index'] == 13
+    support = event['flight_trajectory_support']
+    assert support['approach_frame_interval'] == [8, 13]
+    assert support['approach_observation_count'] == 5
+    history = support['ranking_history']
+    assert history['includes_gaps'] is True and history['maximum_gap_seconds'] == pytest.approx(.1)
+    assert history['frame_interval'] == [3, 13]
+    assert history['observation_count'] == 8 and len(history['observations']) == 8
+    assert history['missing_association_resolved'] is False and history['identity_verified'] is False
+    assert history['changes_local_eligibility'] is False
+    assert event['contact_observed'] is False
+
+
+def test_ineligible_event_history_cannot_override_local_support_requirement():
+    from badminton.events import prioritize_review_candidates
+    supported = {'track_id': 'local', 'flight_trajectory_support': {'supported_for_review': True,
+        'approach_displacement_y_px': 20., 'fit_residual_px': 1.}}
+    unsupported = {'track_id': 'gapped', 'flight_trajectory_support': {'supported_for_review': False,
+        'ranking_history': {'qualified_for_ranking': True, 'displacement_y_px': 500., 'fit_residual_px': 0.}}}
+    assert prioritize_review_candidates([unsupported, supported], [])[0] is supported
+
+
+@pytest.mark.parametrize('change',['size_collapse','appearance_break'])
+def test_post_gap_fragments_cannot_veto_supported_local_rebound(change):
+    ys=[10,15,24,37,54,75,100,129,162,150,142,138,137,136,135]
+    moving=track([(30+i*5,y) for i,y in enumerate(ys)],ambiguous=True)
+    moving['flight_hypothesis']={'method':'coherent_free_flight_search'}
+    for i,observation in enumerate(moving['observations']):
+        frame=i+(15 if i>=12 else 0)
+        observation.update(frame_index=frame,time=frame/30,
+            radius=3. if i<5 else 1.8 if 9<=i<=11 else .6,
+            appearance_polarity='bright',possible_occluder_overlap=i>=5)
+        if change=='appearance_break':
+            observation.update(radius=3. if i<=8 else 2.5 if i<=11 else .6,
+                appearance_polarity='bright' if i<=8 else 'unknown' if i<=11 else 'dark',
+                possible_occluder_overlap=i>=8)
+    frames=[np.zeros((200,180,3),np.uint8)]*30
+    events=estimate_landings([moving],frames,[i/30 for i in range(30)],{})
+    event=next(event for event in events if event['frame_index']==8)
+    assert event['flight_trajectory_support']['supported_for_review'] is True
+    assert event['flight_trajectory_support']['post_observation_count']==3
+    assert not event['identity_continuity']['flight_support_veto']
+    assert event['identity_continuity']['evidence'][0]['post_distinct_observation_count']==3
+    assert event['contact_observed'] is False
+
+
 def test_combined_appearance_break_withholds_flight_priority_but_preserves_candidate():
     ys = [10, 15, 24, 37, 54, 75, 100, 129, 162, 150, 142, 138, 140]
     moving = track([(30 + i, y) for i, y in enumerate(ys)], ambiguous=True)

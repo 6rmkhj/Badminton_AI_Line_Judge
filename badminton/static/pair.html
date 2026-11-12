@@ -26,7 +26,19 @@
           <div class="source-tabs" role="group" aria-label="A 시점 입력 방식"><button type="button" class="selected" data-view="A" data-mode="library" aria-pressed="true">기존 영상 선택</button><button type="button" data-view="A" data-mode="upload" aria-pressed="false">새 영상 업로드</button></div>
           <div id="library-a-panel" class="source-panel"><label for="library-a">라이브러리 영상</label><select id="library-a" aria-describedby="source-a-meta"><option value="">A 시점 영상을 선택하세요</option></select></div>
           <div id="upload-a-panel" class="source-panel" hidden><label class="file-picker" for="file-a"><span class="upload-icon" aria-hidden="true">↥</span><strong>영상 파일 선택</strong><span id="file-a-name">MP4 · MOV · MKV · AVI · WEBM</span><input id="file-a" type="file" accept=".mp4,.mov,.mkv,.avi,.webm,video/*"></label></div>
-          <div class="input-preview"><video id="preview-a" controls preload="metadata" playsinline hidden aria-label="선택한 A 시점 미리보기"></video><div class="preview-empty" id="empty-a"><span aria-hidden="true">A</span><p>첫 번째 시점의 영상을 선택하세요.</p></div></div>
+          <div class="input-preview" id="preview-box-a"><video id="preview-a" controls preload="metadata" playsinline hidden aria-label="선택한 A 시점 미리보기"></video><div id="region-layer-a" class="region-layer" aria-hidden="true"><div id="region-box-a" class="region-box" hidden><span>수동 검토 영역</span></div></div><div class="preview-empty" id="empty-a"><span aria-hidden="true">A</span><p>첫 번째 시점의 영상을 선택하세요.</p></div></div>
+          <details class="region-tools" id="region-tools-a">
+            <summary>검토 영역 지정 <span>선택 사항</span></summary>
+            <p id="region-help-a" class="region-help">원하는 코트와 셔틀콕의 이동 구간을 포함하세요. 수동 탐색 보조이며, 셔틀콕의 정체나 실제 접촉·IN/OUT을 확정하지 않습니다. 지정하지 않으면 자동으로 분석합니다.</p>
+            <div class="region-actions"><button type="button" id="region-draw-a" aria-describedby="region-help-a" aria-pressed="false" disabled>영상에서 영역 그리기</button><button type="button" id="region-clear-a" disabled>지정 해제</button></div>
+            <p class="region-status" id="region-status-a" role="status" aria-live="polite">자동 탐색 · 지정된 영역 없음</p>
+            <fieldset class="region-fields" id="region-fields-a" disabled><legend>영상 전체 기준 비율 (%) · 키보드로도 조정할 수 있습니다.</legend>
+              <label for="region-x-a">왼쪽<input id="region-x-a" type="number" min="0" max="99" step="1" value="0" inputmode="decimal" aria-label="A 검토 영역 왼쪽 비율"></label>
+              <label for="region-y-a">위쪽<input id="region-y-a" type="number" min="0" max="99" step="1" value="0" inputmode="decimal" aria-label="A 검토 영역 위쪽 비율"></label>
+              <label for="region-width-a">너비<input id="region-width-a" type="number" min="1" max="100" step="1" value="100" inputmode="decimal" aria-label="A 검토 영역 너비 비율"></label>
+              <label for="region-height-a">높이<input id="region-height-a" type="number" min="1" max="100" step="1" value="100" inputmode="decimal" aria-label="A 검토 영역 높이 비율"></label>
+            </fieldset>
+          </details>
           <p id="source-a-meta" class="source-meta">기존 영상의 검수 근거도 함께 불러올 수 있습니다.</p>
           <p class="preview-error" id="preview-a-error" hidden>이 브라우저에서 원본 미리보기를 재생할 수 없습니다. 분석 후 변환된 미리보기를 제공합니다.</p>
           <div class="upload-progress" id="upload-a-progress" hidden><progress max="100" value="0" aria-label="A 시점 업로드 진행률"></progress><span></span></div>
@@ -36,7 +48,19 @@
           <div class="source-tabs" role="group" aria-label="B 시점 입력 방식"><button type="button" class="selected" data-view="B" data-mode="library" aria-pressed="true">기존 영상 선택</button><button type="button" data-view="B" data-mode="upload" aria-pressed="false">새 영상 업로드</button></div>
           <div id="library-b-panel" class="source-panel"><label for="library-b">라이브러리 영상</label><select id="library-b" aria-describedby="source-b-meta"><option value="">B 시점 영상을 선택하세요</option></select></div>
           <div id="upload-b-panel" class="source-panel" hidden><label class="file-picker" for="file-b"><span class="upload-icon" aria-hidden="true">↥</span><strong>영상 파일 선택</strong><span id="file-b-name">MP4 · MOV · MKV · AVI · WEBM</span><input id="file-b" type="file" accept=".mp4,.mov,.mkv,.avi,.webm,video/*"></label></div>
-          <div class="input-preview"><video id="preview-b" controls preload="metadata" playsinline hidden aria-label="선택한 B 시점 미리보기"></video><div class="preview-empty" id="empty-b"><span aria-hidden="true">B</span><p>반대 시점의 영상을 선택하세요.</p></div></div>
+          <div class="input-preview" id="preview-box-b"><video id="preview-b" controls preload="metadata" playsinline hidden aria-label="선택한 B 시점 미리보기"></video><div id="region-layer-b" class="region-layer" aria-hidden="true"><div id="region-box-b" class="region-box" hidden><span>수동 검토 영역</span></div></div><div class="preview-empty" id="empty-b"><span aria-hidden="true">B</span><p>반대 시점의 영상을 선택하세요.</p></div></div>
+          <details class="region-tools" id="region-tools-b">
+            <summary>검토 영역 지정 <span>선택 사항</span></summary>
+            <p id="region-help-b" class="region-help">원하는 코트와 셔틀콕의 이동 구간을 포함하세요. 수동 탐색 보조이며, 셔틀콕의 정체나 실제 접촉·IN/OUT을 확정하지 않습니다. 지정하지 않으면 자동으로 분석합니다.</p>
+            <div class="region-actions"><button type="button" id="region-draw-b" aria-describedby="region-help-b" aria-pressed="false" disabled>영상에서 영역 그리기</button><button type="button" id="region-clear-b" disabled>지정 해제</button></div>
+            <p class="region-status" id="region-status-b" role="status" aria-live="polite">자동 탐색 · 지정된 영역 없음</p>
+            <fieldset class="region-fields" id="region-fields-b" disabled><legend>영상 전체 기준 비율 (%) · 키보드로도 조정할 수 있습니다.</legend>
+              <label for="region-x-b">왼쪽<input id="region-x-b" type="number" min="0" max="99" step="1" value="0" inputmode="decimal" aria-label="B 검토 영역 왼쪽 비율"></label>
+              <label for="region-y-b">위쪽<input id="region-y-b" type="number" min="0" max="99" step="1" value="0" inputmode="decimal" aria-label="B 검토 영역 위쪽 비율"></label>
+              <label for="region-width-b">너비<input id="region-width-b" type="number" min="1" max="100" step="1" value="100" inputmode="decimal" aria-label="B 검토 영역 너비 비율"></label>
+              <label for="region-height-b">높이<input id="region-height-b" type="number" min="1" max="100" step="1" value="100" inputmode="decimal" aria-label="B 검토 영역 높이 비율"></label>
+            </fieldset>
+          </details>
           <p id="source-b-meta" class="source-meta">A 시점과 촬영 시작 시각이 달라도 입력할 수 있습니다.</p>
           <p class="preview-error" id="preview-b-error" hidden>이 브라우저에서 원본 미리보기를 재생할 수 없습니다. 분석 후 변환된 미리보기를 제공합니다.</p>
           <div class="upload-progress" id="upload-b-progress" hidden><progress max="100" value="0" aria-label="B 시점 업로드 진행률"></progress><span></span></div>
@@ -71,6 +95,7 @@
         <div class="result-heading"><p class="eyebrow">A/B LINKED RESULT</p><h2 id="result-heading">A/B 최종 보조 판정</h2><div id="final-verdict" class="final-verdict">—</div><p id="result-provenance" class="result-provenance"></p></div>
         <div class="result-explanation"><div id="source-cameras" class="source-cameras"></div><ul id="result-reasons"></ul><p id="correspondence-status" class="muted"></p><p id="result-timing" class="muted"></p><a id="result-json" class="secondary" href="#" download>결과 JSON 내려받기 ↗</a></div>
       </div>
+      <div class="region-result-action"><button id="edit-regions" class="secondary" type="button">검토 영역 지정 후 다시 분석</button><span>저장된 원본을 사용합니다. 수동 탐색 보조 · 접촉 미확정</span></div>
       <p class="result-context">두 시점의 관측 근거와 사건 대응을 함께 검토한 결과입니다. 직접 관측과 다른 시점에서 가져온 근거를 구분해 표시합니다.</p>
       <section id="review-diagnostics" class="review-diagnostics" aria-labelledby="diagnostics-heading" hidden>
         <div class="section-title"><div><p class="eyebrow">REVIEW DIAGNOSIS</p><h2 id="diagnostics-heading">어떤 근거가 더 필요한가요?</h2></div><span id="diagnostics-count" class="status-pill"></span></div>

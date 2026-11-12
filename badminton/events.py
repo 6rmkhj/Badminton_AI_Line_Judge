@@ -16,6 +16,7 @@ import cv2
 import numpy as np
 
 from .identity_continuity import assess_identity_continuity
+from .candidate_identity import apply_competing_continuation_evidence
 
 
 def _value(observation, name, default=0.0):
@@ -72,6 +73,13 @@ def prioritize_review_candidates(candidates, regions, *, identity_first=False):
         # coherent flight and a high-contrast shirt edge. Rank the measured
         # approach extent, discounted by its path-fit residual, for review only.
         flight_rank = max(0., _value(support, 'approach_displacement_y_px')) / (1 + max(0., _value(support, 'fit_residual_px')))
+        history = support.get('ranking_history') or {}
+        if isinstance(history, dict) and history.get('qualified_for_ranking') is True:
+            # A locally qualified rebound may retain measured incoming history
+            # across an unresolved gap. This changes review ordering only; the
+            # history cannot make an ineligible local event a supported flight.
+            historical_rank = max(0., _value(history, 'displacement_y_px')) / (1 + max(0., _value(history, 'fit_residual_px')))
+            flight_rank = max(flight_rank, historical_rank)
         motion_event = candidate.get('image_motion_event') or {}
         if isinstance(motion_event, dict) and motion_event.get('point_kind') == 'inferred_object_center':
             flight_rank *= .7
@@ -88,9 +96,20 @@ def _measured_rebound_support(observations, index, nominal_step, *, minimum_afte
     Sampling uses elapsed time so high frame rates do not shorten the check.
     """
     origin = observations[index]
-    after = [item for item in observations[index + 1:]
-             if 0 < item['time'] - origin['time'] <= max(.16, nominal_step * 4.01)
-             and item.get('observed') is not False]
+    after = []
+    previous = origin
+    for item in observations[index + 1:]:
+        if item.get('observed') is False:
+            continue
+        if item['time'] - origin['time'] > max(.16, nominal_step * 4.01):
+            break
+        # An unobserved part of the outgoing path cannot count as repeated
+        # measured rebound motion. Gap-intersection candidates start this
+        # check at their first actual post-gap sample instead.
+        if item['time'] - previous['time'] > nominal_step * 2.5:
+            break
+        after.append(item)
+        previous = item
     context = [origin, *after]
     upward_intervals = sum(
         right['y'] - left['y'] < -max(.05, 3. * (right['time'] - left['time']))
@@ -149,6 +168,46 @@ def _approach_occluder_support(observations, outgoing=()):
             'reason_codes': ['NO_CLEAR_TRAJECTORY_OUTSIDE_POSSIBLE_OCCLUDER'] if all_support_overlapping else []}
 
 
+def _measured_approach_window(observations, index, nominal_step):
+    """Take a bounded actual incoming segment without crossing a missing span."""
+    maximum = max(9, min(64, int(math.ceil(.35 / nominal_step))))
+    start = index
+    while start > max(0, index - maximum + 1):
+        previous, current = observations[start - 1], observations[start]
+        if (current['time'] - previous['time'] > nominal_step * 2.5
+                or observations[index]['time'] - previous['time'] > .35):
+            break
+        start -= 1
+    return observations[start:index + 1]
+
+
+def _incoming_ranking_history(observations, index, local, nominal_step, radius):
+    """Keep fitted measured history separate from local observed eligibility."""
+    end = observations[index]['time']
+    history = [item for item in observations[:index + 1] if 0 <= end - item['time'] <= .35][-64:]
+    if len(history) <= len(local):
+        return None
+    times = np.asarray([item['time'] - end for item in history])
+    points = np.asarray([[item['x'], item['y']] for item in history])
+    coefficients = np.polyfit(times, points, 2)
+    fitted = np.column_stack([np.polyval(coefficients[:, axis], times) for axis in range(2)])
+    residual = float(np.sqrt(np.mean(np.sum((points - fitted) ** 2, axis=1))))
+    if residual > max(3., radius * 1.5) or float(np.mean(np.diff(points[:, 1]) > 0)) < .8:
+        return None
+    steps = np.diff([item['time'] for item in history])
+    return {'qualified_for_ranking': True, 'method': 'fitted_actual_incoming_history',
+            'observation_count': len(history), 'window_seconds': .35,
+            'frame_interval': [history[0]['frame_index'], history[-1]['frame_index']],
+            'time_interval': [history[0]['time'], history[-1]['time']],
+            'includes_gaps': bool(np.any(steps > nominal_step * 1.5)),
+            'maximum_gap_seconds': round(float(max(steps)), 6),
+            'fit_residual_px': round(residual, 4),
+            'displacement_y_px': round(float(points[-1, 1] - points[0, 1]), 4),
+            'observations': [{key: item[key] for key in ('frame_index', 'time', 'x', 'y')} for item in history],
+            'missing_association_resolved': False, 'identity_verified': False,
+            'physical_contact_verified': False, 'changes_local_eligibility': False}
+
+
 def _flight_review_support(track, observations, index, image_width, nominal_step, plateau_end=None):
     """Measure a dedicated trajectory's approach; never qualify its identity.
 
@@ -158,8 +217,7 @@ def _flight_review_support(track, observations, index, image_width, nominal_step
     """
     if not isinstance(track.get('flight_hypothesis'), dict):
         return None
-    window = max(9, min(64, int(math.ceil(.35 / nominal_step))))
-    before = observations[max(0, index - window + 1):index + 1]
+    before = _measured_approach_window(observations, index, nominal_step)
     if len(before) < 5 or before[-1]['time'] - before[0]['time'] < .12:
         return None
     times = np.asarray([item['time'] - before[-1]['time'] for item in before])
@@ -177,7 +235,7 @@ def _flight_review_support(track, observations, index, image_width, nominal_step
     outgoing = [item for item in observations[index + 1:]
                 if item['frame_index'] <= rebound['rebound_frame_interval'][1]]
     visibility = _approach_occluder_support(before, outgoing)
-    return {'supported_for_review': rebound['supported'] and not visibility['support_wholly_overlaps_possible_occluder'],
+    result = {'supported_for_review': rebound['supported'] and not visibility['support_wholly_overlaps_possible_occluder'],
             'method': 'coherent_approach_and_image_rebound',
             'approach_observation_count': len(before), 'fit_residual_px': round(residual, 4),
             'approach_displacement_y_px': round(drop, 4),
@@ -186,14 +244,20 @@ def _flight_review_support(track, observations, index, image_width, nominal_step
             **{key: value for key, value in visibility.items() if key != 'reason_codes'},
             'reason_codes': [*rebound['reason_codes'], *visibility['reason_codes']],
             'verified_identity': False, 'physical_contact_verified': False}
+    if result['supported_for_review']:
+        history = _incoming_ranking_history(observations, index, before, nominal_step, radius)
+        if history is not None:
+            result['ranking_history'] = history
+    return result
 
 
-def _apply_flight_continuity(candidate, track):
+def _apply_flight_continuity(candidate, track, nominal_step):
     """Preserve a draft while withholding unsupported flight-review priority."""
     support = candidate.get('flight_trajectory_support')
     if not isinstance(support, dict):
         return
-    assessment = assess_identity_continuity(track.get('observations', []), candidate['frame_index'])
+    assessment = assess_identity_continuity(track.get('observations', []), candidate['frame_index'],
+                                            nominal_step=nominal_step)
     candidate['identity_continuity'] = assessment
     reasons = [*support.get('reason_codes', []), *assessment.get('reason_codes', [])]
     if assessment.get('flight_support_veto') is True:
@@ -212,7 +276,6 @@ def _occluded_rebound_candidates(track, observations, timestamps, frames, calibr
         return []
     all_times = np.asarray([item['time'] for item in observations])
     gaps = np.flatnonzero(np.diff(all_times) > nominal_step * 2.5)
-    incoming_window = max(9, min(64, int(math.ceil(.35 / nominal_step))))
     outgoing_window = max(3, min(32, int(math.ceil(.133 / nominal_step)) + 1))
     proposals = []
     for gap_index in gaps:
@@ -220,9 +283,8 @@ def _occluded_rebound_candidates(track, observations, timestamps, frames, calibr
         duration = right['time'] - left['time']
         if duration > .35:
             continue
-        start = max([int(i) + 1 for i in gaps if i < gap_index] or [0])
         stop = min([int(i) + 1 for i in gaps if i > gap_index] or [len(observations)])
-        before = observations[max(start, gap_index - incoming_window + 1):gap_index + 1]
+        before = _measured_approach_window(observations, gap_index, nominal_step)
         after = observations[gap_index + 1:min(stop, gap_index + 1 + outgoing_window)]
         if len(before) < 5 or len(after) < 3 or before[-1]['time'] - before[0]['time'] < .12:
             continue
@@ -568,13 +630,14 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
                         frames[0].shape[1] if frames else 0, nominal_step, plateau_end)
                     if support is not None:
                         candidate['flight_trajectory_support'] = support
-            _apply_flight_continuity(candidate, track)
+            _apply_flight_continuity(candidate, track, nominal_step)
             candidates.append(candidate)
         for candidate in _occluded_rebound_candidates(track, observations, timestamps, frames, calibration, nominal_step):
             if event_window is None or event_window[0] <= candidate['time'] <= event_window[1]:
                 if not rebounds or candidate['time'] < observations[rebounds[0]]['time']:
-                    _apply_flight_continuity(candidate, track)
+                    _apply_flight_continuity(candidate, track, nominal_step)
                     candidates.append(candidate)
+    candidates = apply_competing_continuation_evidence(candidates, tracks or [], nominal_step)
     candidates.sort(key=lambda item: (-item["confidence"], -item["identity_confidence"], item["time"]))
     # The global cap must not discard a reviewed region before the later native
     # evidence budget can see it. The cap and physical qualification stay intact.

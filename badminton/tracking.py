@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import math
 from collections import defaultdict
+from functools import lru_cache
+from statistics import median
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
@@ -189,18 +191,27 @@ def _offline_links(tracks, config):
     return [track for track in tracks if leader(track["track_id"]) == track["track_id"]]
 
 
-def _flight_fit(observations, timestamp, window=6):
-    recent = observations[-window:]
-    xy = np.asarray([[o["x"], o["y"]] for o in recent], dtype=float)
-    times = np.asarray([o["time"] for o in recent], dtype=float)
+@lru_cache(maxsize=4096)
+def _flight_coefficients(samples):
+    """Reuse an identical measured history, never a predicted observation."""
+    xy = np.asarray([[x, y] for _, x, y in samples], dtype=float)
+    times = np.asarray([time for time, _, _ in samples], dtype=float)
     times -= times[-1]
-    degree = 2 if len(recent) >= 4 else 1
+    degree = 2 if len(samples) >= 4 else 1
     design = np.column_stack([times ** i for i in range(degree + 1)])
     coefficients = np.linalg.lstsq(design, xy, rcond=None)[0]
-    dt = timestamp - recent[-1]["time"]
-    predicted = np.asarray([dt ** i for i in range(degree + 1)]) @ coefficients
     residual = float(np.sqrt(np.mean(np.sum((design @ coefficients - xy) ** 2, axis=1))))
-    return predicted, coefficients[1], residual
+    coefficients.setflags(write=False)
+    return coefficients, residual
+
+
+def _flight_fit(observations, timestamp, window=6):
+    recent = observations[-window:]
+    samples = tuple((o['time'], o['x'], o['y']) for o in recent)
+    coefficients, residual = _flight_coefficients(samples)
+    dt = timestamp - recent[-1]['time']
+    predicted = np.asarray([dt ** i for i in range(len(coefficients))]) @ coefficients
+    return predicted, coefficients[1].copy(), residual
 
 
 def _path_travel(observations):
@@ -362,7 +373,7 @@ def _flight_hypotheses(frame_records, config, first_id, progress_callback=None):
             if not 1 <= gap <= 3:
                 continue
             prediction, _, _ = _flight_fit(observations, timestamp)
-            tolerance = 4 + min(4., float(np.median([o["radius"] for o in observations[-4:]]))) * 1.3 + (gap - 1) * 2
+            tolerance = 4 + min(4., median(o['radius'] for o in observations[-4:])) * 1.3 + (gap - 1) * 2
             if len(observations) < 4:
                 # Two samples cannot resolve acceleration. A fast object with
                 # an early missing frame needs bounded velocity-scaled seed

@@ -2,6 +2,7 @@
 from __future__ import annotations
 import hashlib
 import json
+import math
 from pathlib import Path
 import subprocess
 import tempfile
@@ -224,18 +225,82 @@ def load_frames(path, expected_count=None, max_frames=3000, resize_to=None, *, p
 
 
 class SourceFrameSequence:
-    """Decode displayed original frames in order with a one-frame memory cache.
+    """Read displayed original frames with a one-frame memory cache.
 
     OpenCV applies the file's rotation and edit list, matching ``load_frames``.
-    Rewinding reopens the stream instead of using imprecise keyframe seeking.
+    Large skips may seek, but only a matching decoded presentation timestamp
+    can accept the result. Unsupported or inaccurate seeking falls back to
+    sequential decoding from the beginning, preserving exact frame indexing.
     """
-    def __init__(self, path, count):
+    def __init__(self, path, count, *, verified_seek=True):
         self.path, self.count = str(path), int(count)
         self.capture = None
         self.index, self.frame = -1, None
+        self._seek_enabled = bool(verified_seek)
+        self._timestamps, self._decoder_origin = None, None
+        self.seek_statistics = {'attempts': 0, 'accepted': 0, 'fallbacks': 0}
 
     def __len__(self):
         return self.count
+
+    def _open(self):
+        if self.capture is not None:
+            self.capture.release()
+        self.capture = cv2.VideoCapture(self.path, cv2.CAP_FFMPEG, [cv2.CAP_PROP_N_THREADS, 2])
+        self.index, self.frame, self._decoder_origin = -1, None, None
+
+    def _grab(self, requested):
+        if not self.capture.grab():
+            raise ValueError(f'Original-resolution frame {requested} is unavailable')
+        self.index += 1
+        if self.index == 0:
+            # Backends can report source timestamps or stream-relative ones.
+            # Calibrate from an actually decoded first frame, not a seek index.
+            self._decoder_origin = self.capture.get(cv2.CAP_PROP_POS_MSEC) / 1000
+
+    def _verified_seek(self, index):
+        if not self._seek_enabled:
+            return False
+        if self._timestamps is None:
+            try:
+                timestamps = probe(self.path)['timestamps']
+                if (len(timestamps) != self.count or not all(math.isfinite(t) for t in timestamps)
+                        or any(b <= a for a, b in zip(timestamps, timestamps[1:]))):
+                    self._seek_enabled = False
+                    return False
+                self._timestamps = timestamps
+            except (OSError, ValueError, KeyError, subprocess.SubprocessError):
+                # Random access is an optimization; it must not add a probe
+                # dependency to callers that could already decode the source.
+                self._seek_enabled = False
+                return False
+        if self.index < 0:
+            self._grab(index)
+        expected = self._decoder_origin + self._timestamps[index]
+        if not math.isfinite(expected):
+            self._seek_enabled = False
+            return False
+        adjacent_steps = ([self._timestamps[index] - self._timestamps[index - 1]] if index else [])
+        if index + 1 < self.count:
+            adjacent_steps.append(self._timestamps[index + 1] - self._timestamps[index])
+        tolerance = min(.0001, min(adjacent_steps, default=.001) * .25)
+        self.seek_statistics['attempts'] += 1
+        try:
+            moved = self.capture.set(cv2.CAP_PROP_POS_FRAMES, index)
+            grabbed = moved and self.capture.grab()
+            actual = self.capture.get(cv2.CAP_PROP_POS_MSEC) / 1000 if grabbed else math.nan
+            # ffprobe prints microsecond precision. A tolerance below one
+            # tenth of a millisecond covers rounding, never a normal frame.
+            valid = grabbed and math.isfinite(actual) and abs(actual - expected) <= tolerance
+        except cv2.error:
+            valid = False
+        if not valid:
+            self.seek_statistics['fallbacks'] += 1
+            self._open()
+            return False
+        self.index, self.frame = index, None
+        self.seek_statistics['accepted'] += 1
+        return True
 
     def __getitem__(self, index):
         if not isinstance(index, int) or not 0 <= index < self.count:
@@ -243,13 +308,13 @@ class SourceFrameSequence:
         if index == self.index and self.frame is not None:
             return self.frame
         if self.capture is None or index < self.index:
-            self.close()
-            self.capture = cv2.VideoCapture(self.path, cv2.CAP_FFMPEG, [cv2.CAP_PROP_N_THREADS, 2])
-            self.index = -1
+            self._open()
+        # Sequential detector reads do not probe or seek. Evidence windows
+        # starting late in a clip can avoid decoding every preceding GOP.
+        if index - self.index >= 32:
+            self._verified_seek(index)
         while self.index < index:
-            if not self.capture.grab():
-                raise ValueError(f'Original-resolution frame {index} is unavailable')
-            self.index += 1
+            self._grab(index)
         ok, self.frame = self.capture.retrieve()
         if not ok or self.frame is None:
             raise ValueError(f'Original-resolution frame {index} is unavailable')
@@ -261,6 +326,8 @@ class SourceFrameSequence:
         self.capture = None
         self.frame = None
         self.index = -1
+        self._decoder_origin = None
+        self._timestamps = None
 
     def __enter__(self):
         return self

@@ -7,7 +7,7 @@ const state = {
   sources: {A: {mode: 'library'}, B: {mode: 'library'}},
   jobId: null, currentJob: null, pollTimer: null, pollGeneration: 0,
   dashboardJob: null, receivedAt: 0, connected: true, frozenDelta: 0, announcement: '',
-  transfer: null, submissionError: '',
+  transfer: null, submissionError: '', restoredJobId: null,
 };
 const statusNames = {
   queued: '분석 대기', pending: '대기', running: '분석 중', analyzing: '영상 분석 중',
@@ -186,7 +186,7 @@ function updateClocks() {
   }
 }
 setInterval(updateClocks, 1000);
-const modeNames = {stored_ai_review: '기존 AI 검수', fresh_analysis: '새 분석', stored_automatic: '기존 자동 분석', review_guided_reanalysis: '원본 집중 재분석', failed: '처리 실패'};
+const modeNames = {stored_ai_review: '기존 AI 검수', fresh_analysis: '새 분석', stored_automatic: '기존 자동 분석', review_guided_reanalysis: '원본 집중 재분석', user_region_reanalysis: '사용자 영역 재분석', failed: '처리 실패'};
 const correspondenceNames = {
   ai_visual_review: '저장된 AI 검수의 동작 대응', reviewed_actions: '검수된 동작 대응',
   stored_ai_review: '저장된 AI 검수의 동작 대응', operator_selection: '사용자가 확인한 사건 대응',
@@ -258,6 +258,62 @@ function setBusy(busy) {
   document.querySelectorAll('#pair-form button, #pair-form input, #pair-form select').forEach(node => { node.disabled = busy; });
   $('submit-pair').querySelector('span').textContent = busy ? 'A/B 작업 진행 중' : 'A/B 연결 분석';
   $('refine-pair').disabled = busy;
+  $('edit-regions').disabled = busy;
+  cameras.forEach(renderRegion);
+}
+const regionKeys = ['x', 'y', 'width', 'height'];
+function validRegion(value) {
+  return value && regionKeys.every(key => typeof value[key] === 'number' && Number.isFinite(value[key]))
+    && value.x >= 0 && value.y >= 0 && value.width > 0 && value.height > 0
+    && value.x + value.width <= 1 && value.y + value.height <= 1;
+}
+function clearRegion(camera) {
+  const source = state.sources[camera];
+  source.reviewRegion = null; source.regionDraft = null; source.regionDrag = null; source.regionEditing = false;
+  renderRegion(camera);
+}
+function renderRegion(camera) {
+  const key = camera.toLowerCase(), source = state.sources[camera], player = $('preview-' + key);
+  const ready = !player.hidden && player.readyState >= 1 && player.videoWidth > 0;
+  const layer = $('region-layer-' + key), box = $('region-box-' + key);
+  const region = source.regionDraft || source.reviewRegion;
+  if (ready) {
+    // Align to the displayed video pixels, excluding object-fit letterboxing.
+    const scale = Math.min(player.clientWidth / player.videoWidth, player.clientHeight / player.videoHeight);
+    const width = player.videoWidth * scale, height = player.videoHeight * scale;
+    Object.assign(layer.style, {left: (player.clientWidth - width) / 2 + 'px', top: (player.clientHeight - height) / 2 + 'px', width: width + 'px', height: height + 'px'});
+  }
+  layer.hidden = !ready; layer.classList.toggle('editing', Boolean(source.regionEditing && !state.busy));
+  box.hidden = !region;
+  if (region) Object.assign(box.style, {left: region.x * 100 + '%', top: region.y * 100 + '%', width: region.width * 100 + '%', height: region.height * 100 + '%'});
+  const draw = $('region-draw-' + key);
+  draw.disabled = state.busy || !ready;
+  draw.setAttribute('aria-pressed', String(Boolean(source.regionEditing)));
+  draw.textContent = source.regionEditing ? '그리기 취소 · 재생으로 돌아가기' : '영상에서 영역 그리기';
+  $('region-clear-' + key).disabled = state.busy || !source.reviewRegion && !source.regionEditing;
+  $('region-fields-' + key).disabled = state.busy || !ready;
+  const fields = source.reviewRegion || {x: 0, y: 0, width: 1, height: 1};
+  regionKeys.forEach(name => { $('region-' + name + '-' + key).value = String(Math.round(fields[name] * 10000) / 100); });
+  $('region-status-' + key).textContent = source.regionEditing ? '영상 위를 드래그하세요. 그린 뒤에는 재생·탐색을 계속할 수 있습니다. Esc로 취소합니다.'
+    : source.reviewRegion ? '수동 검토 영역 적용 예정 · 접촉 미확정' : ready ? '자동 탐색 · 지정된 영역 없음' : '미리보기를 불러오면 영역을 지정할 수 있습니다.';
+  const manual = cameras.some(id => validRegion(state.sources[id].reviewRegion));
+  if (manual) $('reuse-review').checked = false;
+  $('reuse-review').disabled = state.busy || manual;
+  $('submit-pair').querySelector('span').textContent = state.busy ? 'A/B 작업 진행 중' : manual ? '지정 영역으로 A/B 분석' : 'A/B 연결 분석';
+}
+function setRegion(camera, region) {
+  const source = state.sources[camera];
+  if (!validRegion(region)) return;
+  source.reviewRegion = {...region}; source.regionEditing = false; source.regionDraft = null; source.regionDrag = null;
+  renderRegion(camera);
+}
+function regionPoint(camera, event) {
+  const rect = $('region-layer-' + camera.toLowerCase()).getBoundingClientRect();
+  return {x: Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)),
+    y: Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height))};
+}
+function withRegion(camera, value) {
+  return validRegion(state.sources[camera].reviewRegion) ? {...value, review_region: {...state.sources[camera].reviewRegion}} : value;
 }
 function setPreview(camera, url) {
   const key = camera.toLowerCase(), player = $('preview-' + key);
@@ -274,6 +330,7 @@ function setPreview(camera, url) {
     player.hidden = true;
     $('empty-' + key).hidden = false;
   }
+  renderRegion(camera);
 }
 function updateSource(camera) {
   const source = state.sources[camera], key = camera.toLowerCase();
@@ -286,16 +343,17 @@ function updateSource(camera) {
       ? [row.width && row.height ? `${row.width} × ${row.height}` : '', Number.isFinite(row.duration_seconds) ? `${fmt(row.duration_seconds)}초` : '', row.has_review ? 'AI 검수 기록 있음' : '자동 분석 기록'].filter(Boolean).join(' · ')
       : '기존 영상의 검수 근거도 함께 불러올 수 있습니다.';
   } else {
-    $('source-' + key + '-state').textContent = source.file ? '파일 선택 완료' : '입력 대기';
-    setPreview(camera, source.objectUrl || null);
+    $('source-' + key + '-state').textContent = source.file || source.uploadId ? '파일 선택 완료' : '입력 대기';
+    setPreview(camera, source.objectUrl || safeUrl(source.previewUrl) || null);
     $('source-' + key + '-meta').textContent = source.file
       ? `${source.file.name} · ${fmt(source.file.size / (1024 ** 2), 1)} MB`
-      : `영상 파일을 선택하세요. 파일당 최대 ${fmt(state.limits.max_upload_bytes / (1024 ** 3), 1)} GB`;
+      : source.uploadId ? `${source.savedFile || '저장된 원본'} · 다시 업로드하지 않고 분석합니다.`
+        : `영상 파일을 선택하세요. 파일당 최대 ${fmt(state.limits.max_upload_bytes / (1024 ** 3), 1)} GB`;
   }
 }
-function changeMode(camera, mode) {
-  if (state.busy) return;
-  if (state.sources[camera].mode !== mode) $('same-event').checked = false;
+function changeMode(camera, mode, restoring = false) {
+  if (state.busy && !restoring) return;
+  if (state.sources[camera].mode !== mode && !restoring) { $('same-event').checked = false; clearRegion(camera); }
   state.sources[camera].mode = mode;
   const key = camera.toLowerCase();
   $('library-' + key + '-panel').hidden = mode !== 'library';
@@ -312,11 +370,11 @@ function validateSources() {
   for (const camera of cameras) {
     const source = state.sources[camera];
     if (source.mode === 'library' && !source.video) throw new Error(`${camera} 시점 영상을 선택해 주세요.`);
-    if (source.mode === 'upload' && !source.file) throw new Error(`${camera} 시점 영상 파일을 선택해 주세요.`);
-    if (source.mode === 'upload' && source.file.size > state.limits.max_upload_bytes) {
+    if (source.mode === 'upload' && !source.file && !source.uploadId) throw new Error(`${camera} 시점 영상 파일을 선택해 주세요.`);
+    if (source.mode === 'upload' && source.file?.size > state.limits.max_upload_bytes) {
       throw new Error(`${camera} 시점 파일이 업로드 한도(${fmt(state.limits.max_upload_bytes / (1024 ** 3), 1)} GB)를 초과합니다.`);
     }
-    if (source.mode === 'upload' && source.file.size === 0) throw new Error(`${camera} 시점 파일이 비어 있습니다.`);
+    if (source.mode === 'upload' && source.file?.size === 0) throw new Error(`${camera} 시점 파일이 비어 있습니다.`);
   }
 }
 function upload(camera) {
@@ -367,12 +425,46 @@ function upload(camera) {
   });
 }
 function jobUrl(id) { return '/api/pair-jobs/' + encodeURIComponent(id); }
+function restoreJobSources(job) {
+  if (!job.request?.views) return;
+  const first = state.restoredJobId !== job.job_id;
+  for (const camera of cameras) {
+    const selected = job.request.views[camera], source = state.sources[camera], key = camera.toLowerCase();
+    if (!selected) continue;
+    if (first) {
+      const sameUpload = selected.upload_id && selected.upload_id === source.uploadId;
+      if (!sameUpload && source.objectUrl) URL.revokeObjectURL(source.objectUrl);
+      if (!sameUpload) { source.file = null; source.objectUrl = null; source.uploadId = null; source.previewUrl = null; $('file-' + key).value = ''; }
+      source.reviewRegion = validRegion(selected.review_region) ? {...selected.review_region} : null;
+      source.regionDraft = null; source.regionDrag = null; source.regionEditing = false;
+      if (selected.upload_id) {
+        source.uploadId = selected.upload_id;
+        source.savedFile = selected.file || job.views?.[camera]?.file;
+        $('file-' + key + '-name').textContent = source.savedFile || '저장된 업로드 원본';
+        source.previewUrl = safeUrl(job.result?.views?.[camera]?.preview_url);
+        changeMode(camera, 'upload', true);
+      } else if (selected.video_id) {
+        $('library-' + key).value = selected.video_id;
+        changeMode(camera, 'library', true);
+      }
+    } else if (source.mode === 'upload' && source.uploadId === selected.upload_id && !source.objectUrl && !source.previewUrl) {
+      const preview = safeUrl(job.result?.views?.[camera]?.preview_url);
+      if (preview) { source.previewUrl = preview; setPreview(camera, preview); }
+    }
+  }
+  if (first) {
+    $('same-event').checked = job.request.same_event_confirmed === true;
+    $('reuse-review').checked = job.request.reuse_review === true && !cameras.some(camera => state.sources[camera].reviewRegion);
+    state.restoredJobId = job.job_id;
+  }
+}
 function viewStatus(view) {
   if (!view) return '대기';
   const label = statusNames[view.status] || '처리 중';
   return view.file ? `${label} · ${view.file}` : label;
 }
 function renderJob(job) {
+  restoreJobSources(job);
   state.dashboardJob = job; state.receivedAt = performance.now(); state.transfer = null;
   state.connected = true; state.frozenDelta = 0; setConnection();
   $('job-progress').hidden = false;
@@ -498,7 +590,7 @@ function renderView(camera, view, diagnostics) {
   header.append(title, el('span', 'processing-label', modeNames[view.processing_mode] || '결과 확인'));
   card.append(header);
   const verdicts = el('div', 'view-verdicts');
-  const analysisLabel = view.processing_mode === 'review_guided_reanalysis' ? '후보 구간 재분석' : '자동 분석';
+  const analysisLabel = view.processing_mode === 'user_region_reanalysis' ? '수동 탐색 보조' : view.processing_mode === 'review_guided_reanalysis' ? '후보 구간 재분석' : '자동 분석';
   for (const [label, value] of [[analysisLabel, view.automatic_decision], ['직접 관측 근거', view.direct_decision], ['시점 보조 판정', view.assisted_decision]]) {
     const cell = el('div');
     cell.append(el('span', '', label), el('strong', '', value || 'REVIEW'));
@@ -574,7 +666,7 @@ function renderView(camera, view, diagnostics) {
   }
   const details = el('details', 'provenance-details');
   details.append(el('summary', '', '판정 출처와 원본 확인'));
-  const reviewSource = {ai_visual_review: 'AI 시각 검수', ai_review_guided_search: 'AI 검수의 후보 구간을 참고한 재분석', automatic: '자동 분석'}[view.review_source] || view.review_source || '자동 분석';
+  const reviewSource = {ai_visual_review: 'AI 시각 검수', ai_review_guided_search: 'AI 검수의 후보 구간을 참고한 재분석', operator_region_guided_search: '사용자 지정 영역의 수동 탐색 보조', automatic: '자동 분석'}[view.review_source] || view.review_source || '자동 분석';
   details.append(el('p', '', `검수 출처: ${reviewSource}`));
   if (view.source_sha256) details.append(el('p', '', '원본 SHA256: ' + view.source_sha256));
   if (Array.isArray(view.reason_codes) && view.reason_codes.length) details.append(el('p', '', view.reason_codes.join(' · ')));
@@ -592,7 +684,10 @@ function renderResult(job) {
   const refinedCameras = Array.isArray(result.refinement_applied_camera_ids)
     ? result.refinement_applied_camera_ids.filter(camera => cameras.includes(camera))
     : cameras.filter(camera => views[camera]?.processing_mode === 'review_guided_reanalysis');
-  $('result-provenance').textContent = refinedCameras.length
+  const manualCameras = cameras.filter(camera => validRegion(job.request?.views?.[camera]?.review_region));
+  $('result-provenance').textContent = manualCameras.length
+    ? `사용자 지정 영역으로 탐색한 보조 결과 · ${manualCameras.join('/')} 시점 · 접촉 미확정`
+    : refinedCameras.length
     ? `AI 검수의 후보 구간을 참고한 원본 집중 재분석 · ${refinedCameras.join('/')} 시점`
     : (result.refinement_requested === true || job.request?.refine_review_regions === true)
       ? '두 시점 새 분석 · 적용된 AI 후보 구간 없음'
@@ -639,7 +734,7 @@ async function pollJob(id, generation) {
 }
 function openJob(id, push = false) {
   if (!/^[a-zA-Z0-9_-]{1,128}$/.test(id)) { showError('잘못된 작업 ID입니다.'); return; }
-  clearTimeout(state.pollTimer); state.pollGeneration += 1; state.jobId = id; state.currentJob = null;
+  clearTimeout(state.pollTimer); state.pollGeneration += 1; state.jobId = id; state.currentJob = null; state.restoredJobId = null;
   state.dashboardJob = null; state.transfer = null; state.connected = true; state.frozenDelta = 0;
   $('pair-result').hidden = true; $('job-progress').hidden = false;
   $('progress-heading').textContent = '작업 상태를 불러오고 있습니다.';
@@ -682,20 +777,68 @@ async function loadHistory() {
 document.querySelectorAll('[data-mode][data-view]').forEach(button => button.addEventListener('click', () => { showError(''); changeMode(button.dataset.view, button.dataset.mode); }));
 for (const camera of cameras) {
   const key = camera.toLowerCase();
-  $('library-' + key).addEventListener('change', () => { showError(''); $('same-event').checked = false; updateSource(camera); });
+  $('library-' + key).addEventListener('change', () => { showError(''); $('same-event').checked = false; clearRegion(camera); updateSource(camera); });
   $('file-' + key).addEventListener('change', event => {
     showError('');
     const source = state.sources[camera];
     if (source.objectUrl) URL.revokeObjectURL(source.objectUrl);
     source.file = event.target.files[0] || null;
-    source.uploadId = null; source.upload = null;
+    source.uploadId = null; source.upload = null; source.previewUrl = null; source.savedFile = null; clearRegion(camera);
     $('same-event').checked = false;
     source.objectUrl = source.file ? URL.createObjectURL(source.file) : null;
     $('file-' + key + '-name').textContent = source.file?.name || 'MP4 · MOV · MKV · AVI · WEBM';
     $('upload-' + key + '-progress').hidden = true; updateSource(camera);
   });
   $('preview-' + key).addEventListener('error', () => { if (!$('preview-' + key).hidden) $('preview-' + key + '-error').hidden = false; });
+  $('preview-' + key).addEventListener('loadedmetadata', () => renderRegion(camera));
+  new ResizeObserver(() => renderRegion(camera)).observe($('preview-box-' + key));
+  $('region-draw-' + key).addEventListener('click', () => {
+    const source = state.sources[camera];
+    source.regionEditing = !source.regionEditing; source.regionDraft = null; source.regionDrag = null;
+    $('preview-' + key).pause(); renderRegion(camera);
+    if (source.regionEditing) $('preview-' + key).scrollIntoView({block: 'center', behavior: 'auto'});
+  });
+  $('region-clear-' + key).addEventListener('click', () => clearRegion(camera));
+  regionKeys.forEach(name => $('region-' + name + '-' + key).addEventListener('change', event => {
+    const input = event.target, value = input.valueAsNumber;
+    if (!Number.isFinite(value) || value < (['width', 'height'].includes(name) ? 1 : 0) || value > 100) {
+      renderRegion(camera); $('region-status-' + key).textContent = '위치 0–99%, 크기 1–100%의 숫자를 입력하세요.'; return;
+    }
+    const region = {...(state.sources[camera].reviewRegion || {x: 0, y: 0, width: 1, height: 1})};
+    region[name] = value / 100;
+    region.x = Math.min(region.x, .99); region.y = Math.min(region.y, .99);
+    region.width = Math.min(region.width, 1 - region.x); region.height = Math.min(region.height, 1 - region.y);
+    setRegion(camera, region);
+  }));
+  const layer = $('region-layer-' + key);
+  layer.addEventListener('pointerdown', event => {
+    const source = state.sources[camera];
+    if (state.busy || !source.regionEditing || event.button !== 0) return;
+    event.preventDefault(); layer.setPointerCapture(event.pointerId);
+    source.regionDrag = {pointer: event.pointerId, start: regionPoint(camera, event)};
+  });
+  layer.addEventListener('pointermove', event => {
+    const source = state.sources[camera], drag = source.regionDrag;
+    if (!drag || event.pointerId !== drag.pointer) return;
+    const point = regionPoint(camera, event);
+    source.regionDraft = {x: Math.min(drag.start.x, point.x), y: Math.min(drag.start.y, point.y),
+      width: Math.abs(point.x - drag.start.x), height: Math.abs(point.y - drag.start.y)};
+    renderRegion(camera);
+  });
+  layer.addEventListener('pointerup', event => {
+    const source = state.sources[camera];
+    if (source.regionDrag?.pointer !== event.pointerId) return;
+    if (layer.hasPointerCapture(event.pointerId)) layer.releasePointerCapture(event.pointerId);
+    const region = source.regionDraft;
+    if (region && region.width >= .01 && region.height >= .01) setRegion(camera, region);
+    else { source.regionDrag = null; source.regionDraft = null; renderRegion(camera); $('region-status-' + key).textContent = '조금 더 넓은 영역을 드래그해 주세요. Esc로 취소할 수 있습니다.'; }
+  });
+  layer.addEventListener('pointercancel', () => { const source = state.sources[camera]; source.regionDrag = null; source.regionDraft = null; source.regionEditing = false; renderRegion(camera); });
 }
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  cameras.forEach(camera => { const source = state.sources[camera]; if (source.regionEditing) { source.regionEditing = false; source.regionDrag = null; source.regionDraft = null; renderRegion(camera); } });
+});
 $('pair-form').addEventListener('submit', async event => {
   event.preventDefault(); if (state.busy) return;
   showError('');
@@ -707,7 +850,7 @@ $('pair-form').addEventListener('submit', async event => {
     const uploads = await Promise.allSettled(cameras.map(upload));
     const failure = uploads.find(result => result.status === 'rejected');
     if (failure) throw failure.reason;
-    const views = {A: uploads[0].value, B: uploads[1].value};
+    const views = {A: withRegion('A', uploads[0].value), B: withRegion('B', uploads[1].value)};
     const job = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, same_event_confirmed: $('same-event').checked, reuse_review: $('reuse-review').checked})});
     if (!job.job_id) throw new Error('작업 ID가 응답에 없습니다. 최근 작업 목록을 확인해 주세요.');
     openJob(job.job_id, true);
@@ -732,6 +875,7 @@ $('refine-pair').addEventListener('click', async () => {
       $('refine-error').textContent = '저장된 작업의 입력 정보를 읽지 못했습니다. A/B 영상을 다시 선택해 주세요.';
       $('refine-error').hidden = false; return;
     }
+    if (validRegion(source.review_region)) views[camera].review_region = {...source.review_region};
   }
   setBusy(true); $('refine-error').hidden = true; beginSubmission(job);
   try {
@@ -747,6 +891,12 @@ $('refine-pair').addEventListener('click', async () => {
   }
 });
 $('refresh-history').addEventListener('click', loadHistory);
+$('edit-regions').addEventListener('click', () => {
+  if (state.busy) return;
+  cameras.forEach(camera => { $('region-tools-' + camera.toLowerCase()).open = true; });
+  $('pair-form').scrollIntoView({block: 'start', behavior: 'auto'});
+  $('region-tools-a').querySelector('summary').focus();
+});
 window.addEventListener('popstate', () => {
   const id = new URLSearchParams(location.search).get('job');
   if (id) openJob(id);
