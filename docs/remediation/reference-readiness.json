@@ -1,0 +1,16 @@
+{
+  "status": "sealed",
+  "reference_count": 8,
+  "visibility_counts": {
+    "visible": 4,
+    "occluded": 4
+  },
+  "freeze_manifest_path": "/workspace/remediation/sealed_references/freeze-manifest.json",
+  "freeze_manifest_sha256": "6e7dcd7e609fc0537f230e810d9399e36c76d04ea70353e0f5374aad1f4d7096",
+  "source_manifest_sha256": "c90491c328ad5a75c051228f4eb0915ace430bfc31d908c85bc0a15b621f2280",
+  "evidence_references_verified": 48,
+  "source_only": true,
+  "positions_released": false,
+  "scope": "Eight same-project/current-round holdout video files, four filename A/B pairs; not globally unseen data or independent human ground truth.",
+  "validation": "Reference inventory, exact normalized timestamps, source metadata, evidence hashes, nullable nonlocatable targets, and frame/coordinate bounds verified; no prediction files read."
+}

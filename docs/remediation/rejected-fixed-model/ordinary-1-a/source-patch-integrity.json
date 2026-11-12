@@ -1,0 +1,8 @@
+{
+  "case": "ordinary-1-a",
+  "model_detections_sha256": "cc4a2d67d10a71d606ce7bf2f3e10c708b0503fda6dc32a97b8d875577ffa21b",
+  "actual_gray_pixel_values_checked": 11923,
+  "observations_checked": 294,
+  "mismatches": 0,
+  "source_patch_contrast_does_not_prove_identity_motion_or_contact": true
+}

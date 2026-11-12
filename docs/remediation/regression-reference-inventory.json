@@ -1,0 +1,151 @@
+{
+  "strict_visible_count": 13,
+  "baseline_strict_matches": 5,
+  "reference_bytes_unchanged": true,
+  "references": [
+    {
+      "key": "8k-2-a",
+      "sha256": "c2e8627b03569427228052706497f8f992e5b1ec80190075a69a2e53c6e98d70",
+      "path": "/workspace/remediation/regression_references/8k-2-a.json",
+      "original_split": "development"
+    },
+    {
+      "key": "8k-2-b",
+      "sha256": "72e969f9957b4eb8bb196cb933e4ed19fd287f71709df42010e836084e5f00b9",
+      "path": "/workspace/remediation/regression_references/8k-2-b.json",
+      "original_split": "development"
+    },
+    {
+      "key": "8k-5-a",
+      "sha256": "6956e412cc958cf5cafaf360f5ca27e7b0b0de8784caa0f716a2686114263dc8",
+      "path": "/workspace/remediation/regression_references/8k-5-a.json",
+      "original_split": "development"
+    },
+    {
+      "key": "8k-5-b",
+      "sha256": "4c2cbb5aa122e07b452fa2bfb74d1e3ec1f450068e5f2ab96cd50378d7b174ef",
+      "path": "/workspace/remediation/regression_references/8k-5-b.json",
+      "original_split": "development"
+    },
+    {
+      "key": "8k-7-a",
+      "sha256": "7ae7499e9c1a184dae7ea91c84efa0d2b24442f3679bdf9ee52d3ba4bd514db3",
+      "path": "/workspace/remediation/regression_references/8k-7-a.json",
+      "original_split": "holdout"
+    },
+    {
+      "key": "8k-7-b",
+      "sha256": "ad4632b1bdab32441b6c62b4a2489c12cd3bbb0be86faa193572ce5a4a83a070",
+      "path": "/workspace/remediation/regression_references/8k-7-b.json",
+      "original_split": "holdout"
+    },
+    {
+      "key": "ordinary-4-a",
+      "sha256": "b3861193dd347788cbf5de0efb46ab80c04bb28443e5c3b810a1c7ef86e9c29e",
+      "path": "/workspace/remediation/regression_references/ordinary-4-a.json",
+      "original_split": "development"
+    },
+    {
+      "key": "ordinary-4-b",
+      "sha256": "c54f295bd34661ec70286b6db17e112fb059cb2d54b3c201ec631583bc4375a8",
+      "path": "/workspace/remediation/regression_references/ordinary-4-b.json",
+      "original_split": "development"
+    },
+    {
+      "key": "ordinary-12-a",
+      "sha256": "619a834d2eb3c5c2ddd442adcfa3fd0dcfce49bd8b110b46b52f90c98559f8ec",
+      "path": "/workspace/remediation/regression_references/ordinary-12-a.json",
+      "original_split": "development"
+    },
+    {
+      "key": "ordinary-12-b",
+      "sha256": "baa9eacc30a1b2b8dbc0bf182a5bd4bceeefeae3065d71eeb20ebb5e5a53283a",
+      "path": "/workspace/remediation/regression_references/ordinary-12-b.json",
+      "original_split": "development"
+    },
+    {
+      "key": "ordinary-18-a",
+      "sha256": "521f231a6233578231c3f978c11afd3f09cea48d708c488613784654a54ba07b",
+      "path": "/workspace/remediation/regression_references/ordinary-18-a.json",
+      "original_split": "holdout"
+    },
+    {
+      "key": "ordinary-18-b",
+      "sha256": "a36596b9d3ca8018037b081269e43650c3c2fdeee960cd6183ea0d9f64a79d44",
+      "path": "/workspace/remediation/regression_references/ordinary-18-b.json",
+      "original_split": "holdout"
+    },
+    {
+      "key": "uhd4k-2-a",
+      "sha256": "ee35aa582770d4144206acded52acade76468f4bef610264cc5093f8daca8dbf",
+      "path": "/workspace/remediation/regression_references/uhd4k-2-a.json",
+      "original_split": "development"
+    },
+    {
+      "key": "uhd4k-2-b",
+      "sha256": "0050e4c223a5e44dbc5272c4dbe88e2fe525fe71dfc1e26cb41b312550a2ded9",
+      "path": "/workspace/remediation/regression_references/uhd4k-2-b.json",
+      "original_split": "development"
+    },
+    {
+      "key": "uhd4k-4-a",
+      "sha256": "1584fe4d02cdeedcdb7e73c4f3a6541b7b863879678a2dd8912343d8e51fc0db",
+      "path": "/workspace/remediation/regression_references/uhd4k-4-a.json",
+      "original_split": "development"
+    },
+    {
+      "key": "uhd4k-4-b",
+      "sha256": "917027c3be06aff4048e4aa94a99e911cab35ea72a36b2c26d68a17225848116",
+      "path": "/workspace/remediation/regression_references/uhd4k-4-b.json",
+      "original_split": "development"
+    },
+    {
+      "key": "uhd4k-3-a",
+      "sha256": "5fd5f3582540a6b872adc6d083c39dd4445cc0201d41be1ab08fd40bef794f17",
+      "path": "/workspace/remediation/regression_references/uhd4k-3-a.json",
+      "original_split": "holdout"
+    },
+    {
+      "key": "uhd4k-3-b",
+      "sha256": "2bf524009ad75ad2e67c5e512c7d19859cea55a51f8a8f46e44e073f88c3dcd8",
+      "path": "/workspace/remediation/regression_references/uhd4k-3-b.json",
+      "original_split": "holdout"
+    },
+    {
+      "key": "uhdhd-2-a",
+      "sha256": "549477069b501f31be7d9ec76b8e8b9adcdbf672cb37654219ba6b8d5649cddd",
+      "path": "/workspace/remediation/regression_references/uhdhd-2-a.json",
+      "original_split": "development"
+    },
+    {
+      "key": "uhdhd-2-b",
+      "sha256": "378855f6a61233342ad7e8c3179ba536e2a51693a2a1063820a86d5bb5deba6a",
+      "path": "/workspace/remediation/regression_references/uhdhd-2-b.json",
+      "original_split": "development"
+    },
+    {
+      "key": "uhdhd-4-a",
+      "sha256": "85858b1ad548290eaccf4fc790d499ff65db05944d197ea44b728fadd4d5eb67",
+      "path": "/workspace/remediation/regression_references/uhdhd-4-a.json",
+      "original_split": "development"
+    },
+    {
+      "key": "uhdhd-4-b",
+      "sha256": "6832cae824764bd855682bf4b17144890aa2304e0b308d9ee0d6fde52311f442",
+      "path": "/workspace/remediation/regression_references/uhdhd-4-b.json",
+      "original_split": "development"
+    },
+    {
+      "key": "uhdhd-5-a",
+      "sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+      "path": "/workspace/remediation/regression_references/uhdhd-5-a.json",
+      "original_split": "holdout"
+    },
+    {
+      "key": "uhdhd-5-b",
+      "sha256": "135375b793fd7a4b6eb4e89b7468d387d87e370508ed818df976a8cd08182bb4",
+      "path": "/workspace/remediation/regression_references/uhdhd-5-b.json",
+      "original_split": "holdout"
+    }
+  ]
+}

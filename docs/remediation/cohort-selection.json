@@ -1,0 +1,285 @@
+{
+  "declared_at": "2026-11-12T08:15:41.430057+00:00",
+  "round": "false_positive_remediation_after_0.5.3",
+  "base_commit": "868b1e38700ad3613f83835b71857ae36d898814",
+  "source_inventory_commit": "7e74b058ae95543bb9c7d121761426462e74f49c",
+  "selection_algorithm": "For each filename group in [8k,ordinary,uhd4k,uhdhd], choose the lowest numeric complete A/B pair after exclusions. No predictions or source pixels used for selection.",
+  "prior_prediction_inspection_for_selected_inputs_this_round": false,
+  "pairing_scope": "Filename pairing only; actual same-rally identity and clock correspondence are not established by names.",
+  "historical_exposure_scope": "These are held out for this task round only. All74 source files previously appeared in project inventory/possible historical CV/AI workflows; globally unseen exposure is not claimed. Known TrackNet experiment clips and exact content duplicates of prior24/original controls are excluded.",
+  "known_model_experiment_keys": [
+    "8k-2-a",
+    "8k-2-b",
+    "8k-5-b",
+    "ordinary-12-b",
+    "ordinary-4-a",
+    "ordinary-4-b"
+  ],
+  "model_artifact_name_inventory_sha256": "d51d4f257965f5b9e3f723d444dabffe421d8b1782c9c1e32ae89a5e2192ef3e",
+  "excluded_pairs": [
+    {
+      "group": "8k",
+      "number": 1,
+      "keys": [
+        "8k-1-a",
+        "8k-1-b"
+      ],
+      "reasons": [
+        "content_of_original_A1_B1_control",
+        "original_A1_B1_control"
+      ]
+    },
+    {
+      "group": "8k",
+      "number": 2,
+      "keys": [
+        "8k-2-a",
+        "8k-2-b"
+      ],
+      "reasons": [
+        "known_TrackNet_experiment_clip",
+        "prior24"
+      ]
+    },
+    {
+      "group": "8k",
+      "number": 5,
+      "keys": [
+        "8k-5-a",
+        "8k-5-b"
+      ],
+      "reasons": [
+        "known_TrackNet_experiment_clip",
+        "prior24"
+      ]
+    },
+    {
+      "group": "8k",
+      "number": 7,
+      "keys": [
+        "8k-7-a",
+        "8k-7-b"
+      ],
+      "reasons": [
+        "prior24"
+      ]
+    },
+    {
+      "group": "ordinary",
+      "number": 4,
+      "keys": [
+        "ordinary-4-a",
+        "ordinary-4-b"
+      ],
+      "reasons": [
+        "known_TrackNet_experiment_clip",
+        "prior24"
+      ]
+    },
+    {
+      "group": "ordinary",
+      "number": 12,
+      "keys": [
+        "ordinary-12-a",
+        "ordinary-12-b"
+      ],
+      "reasons": [
+        "known_TrackNet_experiment_clip",
+        "prior24"
+      ]
+    },
+    {
+      "group": "ordinary",
+      "number": 17,
+      "keys": [
+        "ordinary-17-a",
+        "ordinary-17-b"
+      ],
+      "reasons": [
+        "content_duplicate_of_prior24"
+      ]
+    },
+    {
+      "group": "ordinary",
+      "number": 18,
+      "keys": [
+        "ordinary-18-a",
+        "ordinary-18-b"
+      ],
+      "reasons": [
+        "prior24"
+      ]
+    },
+    {
+      "group": "uhd4k",
+      "number": 2,
+      "keys": [
+        "uhd4k-2-a",
+        "uhd4k-2-b"
+      ],
+      "reasons": [
+        "prior24"
+      ]
+    },
+    {
+      "group": "uhd4k",
+      "number": 3,
+      "keys": [
+        "uhd4k-3-a",
+        "uhd4k-3-b"
+      ],
+      "reasons": [
+        "prior24"
+      ]
+    },
+    {
+      "group": "uhd4k",
+      "number": 4,
+      "keys": [
+        "uhd4k-4-a",
+        "uhd4k-4-b"
+      ],
+      "reasons": [
+        "prior24"
+      ]
+    },
+    {
+      "group": "uhdhd",
+      "number": 2,
+      "keys": [
+        "uhdhd-2-a",
+        "uhdhd-2-b"
+      ],
+      "reasons": [
+        "prior24"
+      ]
+    },
+    {
+      "group": "uhdhd",
+      "number": 4,
+      "keys": [
+        "uhdhd-4-a",
+        "uhdhd-4-b"
+      ],
+      "reasons": [
+        "prior24"
+      ]
+    },
+    {
+      "group": "uhdhd",
+      "number": 5,
+      "keys": [
+        "uhdhd-5-a",
+        "uhdhd-5-b"
+      ],
+      "reasons": [
+        "prior24"
+      ]
+    }
+  ],
+  "eligible_pairs": [
+    {
+      "group": "8k",
+      "number": 3
+    },
+    {
+      "group": "8k",
+      "number": 4
+    },
+    {
+      "group": "8k",
+      "number": 6
+    },
+    {
+      "group": "8k",
+      "number": 8
+    },
+    {
+      "group": "ordinary",
+      "number": 1
+    },
+    {
+      "group": "ordinary",
+      "number": 2
+    },
+    {
+      "group": "ordinary",
+      "number": 3
+    },
+    {
+      "group": "ordinary",
+      "number": 5
+    },
+    {
+      "group": "ordinary",
+      "number": 6
+    },
+    {
+      "group": "ordinary",
+      "number": 7
+    },
+    {
+      "group": "ordinary",
+      "number": 8
+    },
+    {
+      "group": "ordinary",
+      "number": 9
+    },
+    {
+      "group": "ordinary",
+      "number": 10
+    },
+    {
+      "group": "ordinary",
+      "number": 11
+    },
+    {
+      "group": "ordinary",
+      "number": 13
+    },
+    {
+      "group": "ordinary",
+      "number": 14
+    },
+    {
+      "group": "ordinary",
+      "number": 15
+    },
+    {
+      "group": "ordinary",
+      "number": 16
+    },
+    {
+      "group": "ordinary",
+      "number": 19
+    },
+    {
+      "group": "ordinary",
+      "number": 20
+    },
+    {
+      "group": "uhd4k",
+      "number": 1
+    },
+    {
+      "group": "uhdhd",
+      "number": 1
+    },
+    {
+      "group": "uhdhd",
+      "number": 3
+    }
+  ],
+  "selected_keys": [
+    "8k-3-a",
+    "8k-3-b",
+    "ordinary-1-a",
+    "ordinary-1-b",
+    "uhd4k-1-a",
+    "uhd4k-1-b",
+    "uhdhd-1-a",
+    "uhdhd-1-b"
+  ],
+  "holdout_status": "sealed_for_current_round_until_new_code_config_freeze_and_explicit_root_release"
+}

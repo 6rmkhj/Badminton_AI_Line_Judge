@@ -1,0 +1,96 @@
+{
+  "key": "ordinary-4-b",
+  "file": "b시점 4.mp4",
+  "source_path": "/workspace/generalization/input/b시점 4.mp4",
+  "source_sha256": "5564dda029e222e8dc4b0fc529ed0d6affe4407f80ecbd66d582b7044ceb497a",
+  "split": "development",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    3840,
+    2160
+  ],
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    228,
+    231
+  ],
+  "landing_time_interval_seconds": [
+    3.828933,
+    3.878944
+  ],
+  "landing_point_px": [
+    180,
+    203
+  ],
+  "tolerance_px": 8,
+  "trajectory_points": [
+    {
+      "frame_index": 200,
+      "time_seconds": 3.362122,
+      "x": 191,
+      "y": 100
+    },
+    {
+      "frame_index": 206,
+      "time_seconds": 3.462144,
+      "x": 184,
+      "y": 121
+    },
+    {
+      "frame_index": 212,
+      "time_seconds": 3.562189,
+      "x": 181,
+      "y": 143
+    },
+    {
+      "frame_index": 218,
+      "time_seconds": 3.662211,
+      "x": 180,
+      "y": 161
+    },
+    {
+      "frame_index": 224,
+      "time_seconds": 3.762233,
+      "x": 180,
+      "y": 181
+    },
+    {
+      "frame_index": 227,
+      "time_seconds": 3.812267,
+      "x": 180,
+      "y": 194
+    },
+    {
+      "frame_index": 230,
+      "time_seconds": 3.862278,
+      "x": 180,
+      "y": 202
+    },
+    {
+      "frame_index": 234,
+      "time_seconds": 3.928956,
+      "x": 180,
+      "y": 194
+    },
+    {
+      "frame_index": 237,
+      "time_seconds": 3.978967,
+      "x": 178,
+      "y": 190
+    }
+  ],
+  "later_bounce_observations": [],
+  "notes": "Main-court shuttle descends beside the left net-post/barrier assembly after the near white-shirt player shot. A far green-shirt player reaches but does not intercept the final descending segment. The object is small and low contrast against the floor and closely overlaps the right edge of the blue barrier in projection. A downward-to-upward reversal around the interval is visible; fine cork-floor contact cannot be resolved to a single frame. The estimate is for this main-court moving shuttle, not stationary shuttles or neighboring rallies.",
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "evidence": [
+    "/workspace/generalization/visual/ordinary-4-b/native-222-245-0.png",
+    "/workspace/generalization/visual/ordinary-4-b/native-222-245-1.png",
+    "/workspace/generalization/visual/ordinary-4-b/crop-200-250-0.jpg",
+    "/workspace/generalization/visual/ordinary-4-b/crop-200-250-1.jpg"
+  ],
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; native crops use sequential decoding. Source timestamps from ffprobe. Contact-sheet time labels based on mean FPS are illustrative only."
+}

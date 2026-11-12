@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "key": "uhd4k-1-a",
+  "file": "a-1시점(uhd30 4k30).mp4",
+  "source_path": "/workspace/remediation/input/a-1시점(uhd30 4k30).mp4",
+  "source_sha256": "5d96da4c41da8ea61969423563930cf2a593026b2d687b0a460a3148e048f597",
+  "split": "holdout",
+  "round_holdout": true,
+  "round": "false_positive_remediation_after_0.5.3",
+  "scope": "Eight same-project/current-round holdout video files, four filename A/B pairs; not globally unseen data or independent human ground truth.",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    3840,
+    2160
+  ],
+  "contact_visibility": "occluded",
+  "landing_point_px": null,
+  "tolerance_px": null,
+  "notes": "After the near black-shirt player overhead shot, the main shuttle descends toward the two far players. The visible approach is followed by overlap with the far player white shoe/leg and the lower net cord at the critical low segment. The shuttle is not separable enough there to locate its first floorward reversal. Subsequent bending/retrieval is contextual behavior, not direct evidence of a contact frame. No landing point or interval is inferred from it or from the companion view.",
+  "landing_frame_interval": null,
+  "landing_time_interval_seconds": null,
+  "additional_frame_tolerance": 0,
+  "trajectory_points": [
+    {
+      "frame_index": 94,
+      "time_seconds": 3.1336,
+      "x": 363,
+      "y": 132
+    },
+    {
+      "frame_index": 95,
+      "time_seconds": 3.166933,
+      "x": 360,
+      "y": 139
+    },
+    {
+      "frame_index": 97,
+      "time_seconds": 3.2336,
+      "x": 355,
+      "y": 147
+    },
+    {
+      "frame_index": 98,
+      "time_seconds": 3.266944,
+      "x": 354,
+      "y": 152
+    },
+    {
+      "frame_index": 99,
+      "time_seconds": 3.300278,
+      "x": 352,
+      "y": 156
+    }
+  ],
+  "later_bounce_observations": [],
+  "reference_source": "AI source-frame visual inspection blinded to current-round outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "ground_truth_eligible": false,
+  "predictions_or_model_outputs_inspected": false,
+  "companion_view_calibration_used": false,
+  "evidence": [
+    "/workspace/remediation/sealed_visual/uhd4k-1-a/overview-2.jpg",
+    "/workspace/remediation/sealed_visual/uhd4k-1-a/native-90-108-280-105-0.png",
+    "/workspace/remediation/sealed_visual/uhd4k-1-a/native-90-108-280-105-1.png"
+  ],
+  "evidence_sha256": {
+    "/workspace/remediation/sealed_visual/uhd4k-1-a/overview-2.jpg": "cbc47e71c438d8c064bf00a5e4e5baa25ef6f1f3110766ba62751aca87123325",
+    "/workspace/remediation/sealed_visual/uhd4k-1-a/native-90-108-280-105-0.png": "c40c5bee9b329fa5b55fd08db81224b6b0b18fbe4c4b92443893d936325226bd",
+    "/workspace/remediation/sealed_visual/uhd4k-1-a/native-90-108-280-105-1.png": "fcfce901c48c2c77615f8c04fb0d184ddc4e4de68b294432cf356a829f187e35"
+  },
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; normalized source timestamps from ffprobe.",
+  "inspection_decode_threads": 1
+}

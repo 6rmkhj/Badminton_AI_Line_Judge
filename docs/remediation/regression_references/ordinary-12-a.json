@@ -1,0 +1,108 @@
+{
+  "key": "ordinary-12-a",
+  "file": "a시점 12.mp4",
+  "source_path": "/workspace/generalization/input/a시점 12.mp4",
+  "source_sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb",
+  "split": "development",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    3840,
+    2160
+  ],
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    150,
+    153
+  ],
+  "landing_time_interval_seconds": [
+    2.559467,
+    2.610078
+  ],
+  "landing_point_px": [
+    482,
+    215
+  ],
+  "tolerance_px": 6,
+  "trajectory_points": [
+    {
+      "frame_index": 104,
+      "time_seconds": 1.783556,
+      "x": 422,
+      "y": 127
+    },
+    {
+      "frame_index": 110,
+      "time_seconds": 1.884756,
+      "x": 435,
+      "y": 125
+    },
+    {
+      "frame_index": 116,
+      "time_seconds": 1.985967,
+      "x": 447,
+      "y": 129
+    },
+    {
+      "frame_index": 122,
+      "time_seconds": 2.087178,
+      "x": 458,
+      "y": 139
+    },
+    {
+      "frame_index": 128,
+      "time_seconds": 2.188378,
+      "x": 467,
+      "y": 152
+    },
+    {
+      "frame_index": 144,
+      "time_seconds": 2.458267,
+      "x": 477,
+      "y": 191
+    },
+    {
+      "frame_index": 147,
+      "time_seconds": 2.508867,
+      "x": 479,
+      "y": 200
+    },
+    {
+      "frame_index": 149,
+      "time_seconds": 2.5426,
+      "x": 481,
+      "y": 207
+    },
+    {
+      "frame_index": 151,
+      "time_seconds": 2.576344,
+      "x": 482,
+      "y": 215
+    },
+    {
+      "frame_index": 154,
+      "time_seconds": 2.626944,
+      "x": 483,
+      "y": 208
+    },
+    {
+      "frame_index": 158,
+      "time_seconds": 2.694411,
+      "x": 485,
+      "y": 205
+    }
+  ],
+  "later_bounce_observations": [],
+  "notes": "Main-court shuttle follows the near gray-shirt player return, moving right across the far green-shirt player reach. It descends clearly in front of the blue divider and rebounds from the visible floor near its base. Native-resolution frames show the first bounce and ensuing upward motion; frame interval and location remain approximate AI visual estimates. Nearby court activity and divider hardware must not be substituted for the shuttle.",
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "evidence": [
+    "/workspace/generalization/visual/ordinary-12-a/native-144-167-0.png",
+    "/workspace/generalization/visual/ordinary-12-a/native-144-167-1.png",
+    "/workspace/generalization/visual/ordinary-12-a/crop-95-180-0.jpg",
+    "/workspace/generalization/visual/ordinary-12-a/crop-95-180-1.jpg"
+  ],
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; native crops use sequential decoding. Source timestamps from ffprobe. Contact-sheet time labels based on mean FPS are illustrative only."
+}

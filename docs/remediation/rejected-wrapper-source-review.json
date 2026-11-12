@@ -1,0 +1,285 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-11-12T08:59:55.357681+00:00",
+  "scope": "Prediction-aware qualitative source review of three OLD24 OFF/ON selection changes. This is separate from frozen strict numeric scoring. No new8 reference or output was opened for this task.",
+  "review_method": "Inspected full 960x540 actual-source frames and consecutive nearest-neighbor crops from the verified actual-pixel cache. Checked cache SHA256 against provenance. Red crosses in separately marked context copies indicate the selected point only; unmarked source copies are retained. No new detector run, full decode, reference revision, inferred ground truth, or physical-contact certification.",
+  "cases": [
+    {
+      "key": "uhd4k-3-a",
+      "result_path": "/workspace/remediation/support-wrapper-on-a-v1/uhd4k-3-a/result.json",
+      "result_sha256": "7919d9d17152cbb64f1a6481dab01f3c3f49afdd2766a9f07d4d8b80ceb55e98",
+      "baseline_result_path": "/workspace/remediation/support-wrapper-off-v1/uhd4k-3-a/result.json",
+      "baseline_result_sha256": "ca33170d34e7078ff458cc195da17cbf6dd10169fc48060c06fe58eb999a80ed",
+      "reference_path": "/workspace/remediation/regression_references/uhd4k-3-a.json",
+      "reference_sha256": "5fd5f3582540a6b872adc6d083c39dd4445cc0201d41be1ab08fd40bef794f17",
+      "selection": {
+        "frame_index": 23,
+        "candidate_px": [
+          727.0913321324088,
+          152.32334459887193
+        ],
+        "method": "offline_occluded_image_trajectory_intersection",
+        "point_kind": "inferred_object_center",
+        "contact_observed": false,
+        "decision": "REVIEW"
+      },
+      "baseline_selection": {
+        "frame_index": 76,
+        "candidate_px": [
+          385.0,
+          250.0
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "point_kind": "observed_object_center",
+        "contact_observed": false,
+        "decision": "REVIEW"
+      },
+      "candidate_displacement_px": 355.7628543432784,
+      "frame_change": -53,
+      "status": "wrong_target_changed_no_verified_gain",
+      "change_assessment": "no_verified_improvement",
+      "before_judgment": {
+        "object": "player_shoe",
+        "same_main_rally_shuttle": false,
+        "first_floor_near": false,
+        "observation": "The OFF point at f76 [385,250] falls on the near red-shirt player pink/green shoe. Its preceding support follows player/body motion during the foreground overhead stroke. The same shoe remains identifiable through the alleged rebound."
+      },
+      "after_judgment": {
+        "object": "adjacent_court_shuttle_or_floor_cluster",
+        "same_main_rally_shuttle": false,
+        "first_floor_near": null,
+        "observation": "The ON approach f11–21 is a small moving white object in the court to image-right, descending toward the cluster of training shuttles by the adjacent net. It is spatially separate from the central red/black main rally, which continues. The selected f23 center is inferred across a gap; that exact first floor contact is not directly visible. This is not verified recovery of the requested main shuttle."
+      },
+      "conclusion": "OFF already selects a shoe; ON changes to an adjacent-court moving object/low floor candidate. This is an object-category change, not a demonstrated main-rally landing gain. It is not counted as a verified regression because the OFF selection was already wrong.",
+      "frozen_reference_visibility": "ambiguous",
+      "strict_numeric_score": "unscorable; frozen reference unchanged",
+      "source_sha256": "4780ea68e9689f3602bfdc3955cb3bc47c41d2bcbfd78dfa78378dbe47242729",
+      "source_frame_cache": "/workspace/remediation/frame_cache/uhd4k-3-a/frames.npy",
+      "source_frame_cache_sha256": "d044fe46457130d7b4aaf6af854c85607084a6062319315582a8e02dcd77db7d",
+      "frame_provenance_path": "/workspace/remediation/frame_cache/uhd4k-3-a/provenance.json",
+      "frame_provenance_sha256": "8f98aeac84033d7d0f4e5c8421f5bb0c6ef7643d8e86d559c6af13c0f8f62321",
+      "evidence": [
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-3-a/frame-023.png",
+          "sha256": "734a3acf858fb18e3d8b581581ff02c73a7a2b267ca476ef77a684c991e1aa1e",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-3-a/frame-076.png",
+          "sha256": "3b66942131575a74a9d7d995d0a336996f2ab3d0024ac963780d3500b513723b",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-3-a/on-0.png",
+          "sha256": "da652602be93bd8cfadc650fdf225d85ef810fafa068c33175b1e7d74e1ecf9f",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-3-a/on-1.png",
+          "sha256": "f5155b0f179aa21610c2428684d0e4c66a793bb50052a3ef3feffa0aa8c80938",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-3-a/off-0.png",
+          "sha256": "c20080760eb92509253237c7f7422f991109e04448995755ef117e436732528e",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        }
+      ],
+      "physical_contact_certified": false,
+      "main_target_success_verified": false
+    },
+    {
+      "key": "uhd4k-2-b",
+      "result_path": "/workspace/remediation/support-wrapper-on-b-v1/uhd4k-2-b/result.json",
+      "result_sha256": "5fb3ab08621d32b40428ce59ae9de084828551087816588b3306bbd9282cd3f8",
+      "baseline_result_path": "/workspace/remediation/support-wrapper-off-v1/uhd4k-2-b/result.json",
+      "baseline_result_sha256": "a74ca541dcdd15b6f8a509a95c418e41af68d634aa224f0b9aca7617c4774257",
+      "reference_path": "/workspace/remediation/regression_references/uhd4k-2-b.json",
+      "reference_sha256": "0050e4c223a5e44dbc5272c4dbe88e2fe525fe71dfc1e26cb41b312550a2ded9",
+      "selection": {
+        "frame_index": 57,
+        "candidate_px": [
+          260.84554143591293,
+          201.5460881916926
+        ],
+        "method": "offline_occluded_image_trajectory_intersection",
+        "point_kind": "inferred_object_center",
+        "contact_observed": false,
+        "decision": "REVIEW"
+      },
+      "baseline_selection": {
+        "frame_index": 57,
+        "candidate_px": [
+          260.8699081913292,
+          201.2445655857205
+        ],
+        "method": "offline_occluded_image_trajectory_intersection",
+        "point_kind": "inferred_object_center",
+        "contact_observed": false,
+        "decision": "REVIEW"
+      },
+      "candidate_displacement_px": 0.3025055713234539,
+      "frame_change": 0,
+      "status": "same_unsupported_candidate_localization_change",
+      "change_assessment": "no_verified_improvement",
+      "before_judgment": {
+        "object": "background_near_player_after_identity_break",
+        "same_main_rally_shuttle": false,
+        "first_floor_near": false,
+        "observation": "The approach contains the real high incoming shuttle before the far black-shirt player overhead return. After that racket stroke, the main shuttle is visibly moving to image-right (around x310,y178 at f57). The selected inferred center [260.87,201.24] and post-gap points lie on the brown background immediately left of the player head, not on the visible shuttle or floor."
+      },
+      "after_judgment": {
+        "object": "same_background_near_player_after_identity_break",
+        "same_main_rally_shuttle": false,
+        "first_floor_near": false,
+        "observation": "ON selects the same frame and the same unsupported post-gap association. The source trajectory listed in OFF and ON is identical; only the fitted intersection changes by about 0.303 px. This small numerical movement does not repair the identity break across the racket stroke."
+      },
+      "conclusion": "Both selections remain the same unsupported inferred event after a racket return. No verified improvement or new regression is established by the subpixel coordinate change.",
+      "frozen_reference_visibility": "ambiguous",
+      "strict_numeric_score": "unscorable; frozen reference unchanged",
+      "source_sha256": "26c434519a4fdcb2e43e38bf067b8683f67c9346b003e5f7e330f2debe846000",
+      "source_frame_cache": "/workspace/remediation/frame_cache/uhd4k-2-b/frames.npy",
+      "source_frame_cache_sha256": "f7fa7c1cb4adbfc0ab986dc372d8cddf1485099e5c411f118a7becf5903d4a5e",
+      "frame_provenance_path": "/workspace/remediation/frame_cache/uhd4k-2-b/provenance.json",
+      "frame_provenance_sha256": "a9636864d2cbccc54909a1cad797335975ae1b4c8d4e9b881a4e0358b5a79d25",
+      "evidence": [
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-2-b/frame-057.png",
+          "sha256": "550c29eb4697c4b2f1e6ba2208701b87f867bb2eb480a4f53ad7b9bd340a2b4d",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-2-b/both-0.png",
+          "sha256": "05c1d035d6ecf78f2902749b775a8e558b3a81d6a6966d26d007f1d38856205b",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-2-b/both-1.png",
+          "sha256": "86b80bbbfe1c3e787ebca8cae4074d1b6182509f298cc56f3600546d6a84b621",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-2-b/on-selection-context.png",
+          "sha256": "e456a0c2566f2125c4ea76716707f1d16ac942e898f90d159aa5d16f78cb516c",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-2-b/on-selection-context-marked.png",
+          "sha256": "a83c22348996d8f15667140e214bd33a9ddd49bf1024e8efa4076a08ab779f5a",
+          "kind": "diagnostic_marker_overlay"
+        }
+      ],
+      "physical_contact_certified": false,
+      "main_target_success_verified": false
+    },
+    {
+      "key": "uhd4k-4-b",
+      "result_path": "/workspace/remediation/support-wrapper-on-b-v1/uhd4k-4-b/result.json",
+      "result_sha256": "c7b1f3d41de4eba5f6f2362952fd1873739bb6759ce66773f799a3ade6f6ffb7",
+      "baseline_result_path": "/workspace/remediation/support-wrapper-off-v1/uhd4k-4-b/result.json",
+      "baseline_result_sha256": "61619c363617a5907bb7a686c50e80f9cd4dee6c1d92246955204ea8c6928ac7",
+      "reference_path": "/workspace/remediation/regression_references/uhd4k-4-b.json",
+      "reference_sha256": "917027c3be06aff4048e4aa94a99e911cab35ea72a36b2c26d68a17225848116",
+      "selection": {
+        "frame_index": 46,
+        "candidate_px": [
+          313.273,
+          256.074
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "point_kind": "observed_object_center",
+        "contact_observed": false,
+        "decision": "REVIEW"
+      },
+      "baseline_selection": {
+        "frame_index": 44,
+        "candidate_px": [
+          267.25,
+          201.0
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "point_kind": "observed_object_center",
+        "contact_observed": false,
+        "decision": "REVIEW"
+      },
+      "candidate_displacement_px": 71.77229273891146,
+      "frame_change": 2,
+      "status": "wrong_object_changed_no_verified_gain",
+      "change_assessment": "no_verified_improvement",
+      "before_judgment": {
+        "object": "unsupported_background_or_racket_association",
+        "same_main_rally_shuttle": false,
+        "first_floor_near": false,
+        "observation": "A real incoming white shuttle descends through f34–43, then the near black-shirt player racket redirects it upward. At f44 the visible shuttle is to the right of the OFF point and subsequently rises at f45–49. OFF [267.25,201] lies on the brown background beside the racket action; it is not a first floor event."
+      },
+      "after_judgment": {
+        "object": "far_red_player_shoe",
+        "same_main_rally_shuttle": false,
+        "first_floor_near": false,
+        "observation": "ON [313.273,256.074] at f46 is on the far red-shirt player left shoe. Meanwhile the real shuttle is visibly higher, around x274,y163, continuing the racket-return arc. The proposed continuation from incoming shuttle to shoe does not preserve object identity."
+      },
+      "conclusion": "ON switches from an already unsupported preexisting event to a shoe. It is a wrong-object selection after a real racket return, not a gain. OFF was already wrong, so this review does not count a verified correct-to-incorrect regression.",
+      "frozen_reference_visibility": "ambiguous",
+      "strict_numeric_score": "unscorable; frozen reference unchanged",
+      "source_sha256": "018caa9ed0179b56a2e672ee32d84c5d08db3f51b51b3b1b83dea19b561ab729",
+      "source_frame_cache": "/workspace/remediation/frame_cache/uhd4k-4-b/frames.npy",
+      "source_frame_cache_sha256": "c9e50efad628a037d8291c3fbfcf8315155443f19c4c6d0a94c15f97ace1282a",
+      "frame_provenance_path": "/workspace/remediation/frame_cache/uhd4k-4-b/provenance.json",
+      "frame_provenance_sha256": "6d02e1538ba28718918f951b6b98c7b400afcc9ab57569b7a785dd7cad3b93e4",
+      "evidence": [
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-4-b/frame-044.png",
+          "sha256": "8d40f37591cb7461f30632a6cd0cc38bb04cb37ecc01178f56cfa313247a2f82",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-4-b/frame-046.png",
+          "sha256": "6a4b1f1c7d5cb0d723e8ec4c1fc3b3c12c723fb1c7aa0cc05a17dc8c40d21ba5",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-4-b/both-0.png",
+          "sha256": "f1a94a5f02fd18a316350bc972b50fd4dd6036f392b1ce6c5f4e6c3883fb4b28",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-4-b/both-1.png",
+          "sha256": "30c3201f3e48f9c612b1cc70f286eae0d34615fcb1986cc981a1471ae692991b",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-4-b/off-selection-context.png",
+          "sha256": "841d40a6beb4ffc66d3e80ab3e196644952ab8782891c2a9ec0b2fcf7b23fe6f",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-4-b/off-selection-context-marked.png",
+          "sha256": "78635df1ae70922370f22ef0a9901fdb6f03e88162337179d69ff5012fde8236",
+          "kind": "diagnostic_marker_overlay"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-4-b/on-selection-context.png",
+          "sha256": "49e669aee2d9d3cb127c3c78467d32b0a782e0d96e802a27cfb40dce2cbd151c",
+          "kind": "source_frame_or_nearest_neighbor_source_crop"
+        },
+        {
+          "path": "/workspace/remediation/support-wrapper-review-visual/uhd4k-4-b/on-selection-context-marked.png",
+          "sha256": "80e5a67a1da49938e8a11788f3d91967e61c11661e97d991da52ea709087074a",
+          "kind": "diagnostic_marker_overlay"
+        }
+      ],
+      "physical_contact_certified": false,
+      "main_target_success_verified": false
+    }
+  ],
+  "summary": {
+    "cases_reviewed": 3,
+    "confirmed_main_rally_landing_gains": 0,
+    "verified_correct_to_incorrect_regressions": 0,
+    "no_verified_improvement": 3,
+    "frozen_numeric_references_changed": 0,
+    "all_output_decisions": "REVIEW",
+    "physical_contact_certified": false
+  },
+  "new_round_holdout_read": false
+}

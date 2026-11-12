@@ -1,0 +1,34 @@
+{
+  "status": "waiting_for_auditor_reference_release",
+  "purpose": "Fixed-model development alternative after immutable frozen-core new8 result; not a new holdout accuracy claim or default adoption.",
+  "source_core_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+  "source_implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+  "adapter": "/workspace/remediation/rejected-experiments/tracknet-adapter/tracknet_candidates.py",
+  "adapter_sha256": "225d62c6add396fcc0b5db6b070af893ec8c0511ebde8903ed19996646ce7da4",
+  "model_sha256": "b0ed780c3cc2c4f8eab6efa08d1489667381ecdcced7fad52abccbd176204ed6",
+  "fixed_parameters": {
+    "grid": "2x2 unhinted fullclip; tile .6W,.6H; origins0,.4W and0,.4H",
+    "heatmap_threshold": 0.5,
+    "max_added_proposals_per_frame": 8,
+    "original_cv_candidates_preserved": true,
+    "cpu_threads": 1,
+    "source_frames": "actual source-derived cached960 BGR, exact source PTS and SHA verified",
+    "preprocessing": "archived adapter unchanged: fullclip median +8RGB, cv2 INTER_CUBIC, 512x288, NCHW/255",
+    "interpolation": false,
+    "inpaintnet": false,
+    "scene_context_ranking": true
+  },
+  "selection_rule": "After explicit auditor release choose first2 distinct scorable failed sources from the released case list, favor shorter full clips if ordering not prescribed. Do not select ROI or time window using references.",
+  "comparison": [
+    "immutable7306 final baseline",
+    "CV-only same-stage replay",
+    "model-only same-stage replay",
+    "CV+model same-stage replay"
+  ],
+  "scope_limit": "Tracking/events/identity/decision replay over saved detections and actual pixels; native source-contact refinement and output video generation are not rerun. Record this scope; do not call replay fresh full-pipeline validation.",
+  "stopping_rule": "If both first cases show no useful actual target candidate/path evidence, stop. If one helps, report to root before broadening protected cases.",
+  "production_edits": false,
+  "parameter_tuning": false,
+  "prior_frozen_results_mutated": false,
+  "no_inference_before_explicit_reference_release": true
+}

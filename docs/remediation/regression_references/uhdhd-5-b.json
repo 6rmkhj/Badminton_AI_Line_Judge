@@ -1,0 +1,58 @@
+{
+  "key": "uhdhd-5-b",
+  "file": "b시점(uhd30 hd30) 5.mp4",
+  "source_sha256": "e09374a98ab6839216c2ec4baab9a90fd18b3c76bdbbd3df90005248de8b8476",
+  "split": "holdout",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "human_verified": false,
+  "reference_frozen": true,
+  "contact_visibility": "occluded",
+  "landing_frame_interval": null,
+  "landing_point_px": null,
+  "tolerance_px": 8,
+  "trajectory_points": [
+    {
+      "frame_index": 67,
+      "x": 339,
+      "y": 265,
+      "time": 2.233333
+    },
+    {
+      "frame_index": 69,
+      "x": 323,
+      "y": 277,
+      "time": 2.3
+    },
+    {
+      "frame_index": 71,
+      "x": 314,
+      "y": 285,
+      "time": 2.368333
+    },
+    {
+      "frame_index": 72,
+      "x": 310,
+      "y": 290,
+      "time": 2.401667
+    },
+    {
+      "frame_index": 73,
+      "x": 306,
+      "y": 294,
+      "time": 2.435
+    }
+  ],
+  "notes": [
+    "Native source frames show the main-court shuttle descending toward the far black-shirt player and overlapping the shoe/leg area around frames74–80.",
+    "The first physical floor contact cannot be isolated in this view because the small white shuttle overlaps the bright shoe and nearby court markings. No contact point or interval is invented from the paired camera or from later shuttle motion."
+  ],
+  "evidence_images": [
+    "visual/uhdhd-5-b/native-60-86-220-150.jpg",
+    "visual/uhdhd-5-b/native-64-86-150-220.jpg",
+    "visual/uhdhd-5-b/native-67-86-270-250.jpg"
+  ]
+}

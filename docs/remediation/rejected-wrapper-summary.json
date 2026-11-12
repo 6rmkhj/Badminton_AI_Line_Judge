@@ -1,0 +1,49 @@
+{
+  "status": "complete_no_verified_improvement_default_stays_off",
+  "scope": "All old24 are development/regression for this round. Strict original13-visible criteria unchanged. Stage-only outcomes are diagnostics, not full fresh end-to-end accuracy.",
+  "strict_off": [
+    6,
+    13
+  ],
+  "strict_on": [
+    6,
+    13
+  ],
+  "selected_frame_point_changes": [
+    "uhd4k-2-b",
+    "uhd4k-4-b",
+    "uhd4k-3-a"
+  ],
+  "selected_trajectory_changes": [
+    "uhd4k-2-b",
+    "uhd4k-4-b",
+    "uhd4k-3-a"
+  ],
+  "strict_gains": [],
+  "strict_regressions": [],
+  "qualitative_regressions": [],
+  "source_reviews_pending": [],
+  "review_conclusion": "All three changed selections show no verified improvement; OFF was already unsupported/wrong. No correct-to-incorrect regression claim.",
+  "counts": {
+    "assessed_observations": 2822,
+    "persistent_background_observations": 48,
+    "transient_observations": 1427,
+    "unknown_observations": 1347,
+    "native_needed_observations": 862,
+    "unassessed_due_to_budget": 0,
+    "invalid_geometry_observations": 0,
+    "rejected_moving_observations": 48
+  },
+  "timings": {
+    "off_total_component_seconds": 385.4063524720077,
+    "on_total_component_seconds": 808.4184010380013,
+    "on_over_off_component_ratio": 2.097574147008169,
+    "pixel_assessment_total_seconds": 22.845577000000002,
+    "retry_tracking_and_events_total_seconds": 365.697870963013,
+    "off_median_clip_seconds": 11.791286903498985,
+    "on_median_clip_seconds": 26.03036424649872
+  },
+  "instrumentation_note": "Stage totals include diagnostic raw-pool immutability checks and hashing; they are not a pure production benchmark. Pixel-assessment and retracking/event fields isolate the corresponding wrapper operations. No complete-video latency multiplier is claimed.",
+  "implementation_fingerprint": "f4f04ca37cbd863e3b19369a705b4131b7fbeae12a260abb9441adc5bd2fbc2c",
+  "new_holdout_files_opened": false
+}

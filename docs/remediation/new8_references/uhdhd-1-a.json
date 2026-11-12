@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "key": "uhdhd-1-a",
+  "file": "a시점(uhd30 hd30) 1.mp4",
+  "source_path": "/workspace/remediation/input/a시점(uhd30 hd30) 1.mp4",
+  "source_sha256": "8c41d422456f4d9103667fc61b91b208327a03639f9281b1c654c4cb05127771",
+  "split": "holdout",
+  "round_holdout": true,
+  "round": "false_positive_remediation_after_0.5.3",
+  "scope": "Eight same-project/current-round holdout video files, four filename A/B pairs; not globally unseen data or independent human ground truth.",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    3840,
+    2160
+  ],
+  "contact_visibility": "visible",
+  "landing_point_px": [
+    685,
+    349
+  ],
+  "tolerance_px": 12,
+  "notes": "The main shuttle descends toward the near-right court after the red-shirt player reach. Its last approach appears as a long low-contrast streak, followed by a clearly visible feather/cork object rising and tumbling above the floor. The interval brackets the first floorward reversal, before later small bounces toward image-right. Spatial tolerance reflects the long exposure streak and the difference between feather-body center and cork tip. This is an approximate image-space reference, not confirmed physical contact or a line ruling.",
+  "landing_frame_interval": [
+    195,
+    196
+  ],
+  "landing_time_interval_seconds": [
+    3.289222,
+    3.306089
+  ],
+  "additional_frame_tolerance": 0,
+  "trajectory_points": [
+    {
+      "frame_index": 190,
+      "time_seconds": 3.204889,
+      "x": 643,
+      "y": 284
+    },
+    {
+      "frame_index": 192,
+      "time_seconds": 3.238622,
+      "x": 658,
+      "y": 309
+    },
+    {
+      "frame_index": 193,
+      "time_seconds": 3.255489,
+      "x": 665,
+      "y": 325
+    },
+    {
+      "frame_index": 194,
+      "time_seconds": 3.272356,
+      "x": 673,
+      "y": 336
+    },
+    {
+      "frame_index": 195,
+      "time_seconds": 3.289222,
+      "x": 680,
+      "y": 345
+    },
+    {
+      "frame_index": 196,
+      "time_seconds": 3.306089,
+      "x": 686,
+      "y": 347
+    },
+    {
+      "frame_index": 198,
+      "time_seconds": 3.339833,
+      "x": 695,
+      "y": 342
+    },
+    {
+      "frame_index": 200,
+      "time_seconds": 3.373567,
+      "x": 699,
+      "y": 338
+    },
+    {
+      "frame_index": 204,
+      "time_seconds": 3.441033,
+      "x": 714,
+      "y": 334
+    }
+  ],
+  "later_bounce_observations": [],
+  "reference_source": "AI source-frame visual inspection blinded to current-round outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "ground_truth_eligible": false,
+  "predictions_or_model_outputs_inspected": false,
+  "companion_view_calibration_used": false,
+  "evidence": [
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/overview-2.jpg",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/late-cached-0.png",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/late-cached-1.png",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/native-184-206-620-245-0.png",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/native-184-206-620-245-1.png",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/native-detail-191-194.png",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/native-detail-195-198.png"
+  ],
+  "evidence_sha256": {
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/overview-2.jpg": "e0f04c3ee504c0d94a5be0696a9d1819effce560502e8100a1c0a953c0f14b2c",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/late-cached-0.png": "d488417ba6ef06fddc645df3b2975141b173f1acbd3dc2607b72d0802fc6edb9",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/late-cached-1.png": "fa35769ced5539ae47a7372c537b86c57d22a9d33439cff0d61110bf595f6d90",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/native-184-206-620-245-0.png": "8758579b5b2b7211dbc2cd4584a02b75396e2e4e9f1a99d2986b20d6cdbf1334",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/native-184-206-620-245-1.png": "ca5c888495441711f54e07ea143d350a9904710e8a076a181bd2fb73e6d615cc",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/native-detail-191-194.png": "ae2fdac854528ed7573754d3d21e45ce63da7d6996f23c04f8d89b8422462e8b",
+    "/workspace/remediation/sealed_visual/uhdhd-1-a/native-detail-195-198.png": "7b2ee4f017e6476012857eb72fc41f85fd49abdbe1354e6595e5b1d2b510adcc"
+  },
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; normalized source timestamps from ffprobe.",
+  "inspection_decode_threads": 1
+}

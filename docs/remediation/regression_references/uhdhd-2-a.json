@@ -1,0 +1,26 @@
+{
+  "key": "uhdhd-2-a",
+  "file": "a시점(uhd30 hd30) 2.mp4",
+  "source_sha256": "c6bc1029c316cb96713d1076ba0f098f4124914802648aade538c5a7f1e28ec7",
+  "split": "development",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "human_verified": false,
+  "reference_frozen": true,
+  "contact_visibility": "ambiguous",
+  "landing_frame_interval": null,
+  "landing_point_px": null,
+  "tolerance_px": 8,
+  "trajectory_points": [],
+  "notes": [
+    "Source overview and near-court sequence frames75–130 inspected before predictions. Red-shirt/black-shirt near pair identifies the main court.",
+    "No first floor contact could be located with a defensible coordinate; near-court players and far-court overlap make this view ambiguous. Do not score an invented point as ground truth."
+  ],
+  "evidence_images": [
+    "visual/uhdhd-2-a/overview.jpg",
+    "visual/uhdhd-2-a/crop-75-130-180-100.jpg"
+  ]
+}

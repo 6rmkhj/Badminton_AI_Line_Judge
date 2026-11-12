@@ -1,0 +1,117 @@
+{
+  "mode": "tracking_events_actual_source_pixels_no_native_refinement",
+  "code": {
+    "source_tree_sha256": "e7ebc988c83f9553fdb965c18ed589650967a7f370c85136e2a8d59e82e10a4c",
+    "source_files": {
+      "badminton/__init__.py": "49b4f28311ec5837f82cd1d938a282bf9787e474fe9690ffe940daffdb896812",
+      "badminton/__main__.py": "b62632d7bf9059d2e8584f2958991bff9ca3fd689313e2d19ad677a0378fd74f",
+      "badminton/calibration.py": "068c65e343b3fbd27dcb7ccfb5dc6dce8bdc874731def0e1ec962fd2d1cc83fd",
+      "badminton/candidate_identity.py": "684739c98e06ec63a18b15edddfab8eb085cb50ea6e7f69d035d71ea8caf3943",
+      "badminton/contact_model.py": "94c40bbfe76ee6476ef810ba12675ba8be75fe414d3487e220924ac74f373707",
+      "badminton/dataset.py": "9bfaafd2a9de070f1324cea9b062932f0be442b19b7a2160ae1ad9813ff5ffc2",
+      "badminton/decision.py": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a",
+      "badminton/detection.py": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+      "badminton/evaluation.py": "21854945fd436b74906ab658032a082bf4007c0a77d2f5c5c0430dab0a214b24",
+      "badminton/event_continuity.py": "d659c2e84e573adf2bb69ef9537478d5ce4fa76aa4c3b1d9fac921052f87177f",
+      "badminton/events.py": "f575d26642a9083fc4d9e4f33167478336842b0d12c075a017f641708a3ba6ba",
+      "badminton/evidence.py": "1a265f10e7f219d9ea782fb47453b7adef284b227d054f39e8ee44ad87858332",
+      "badminton/identity.py": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+      "badminton/identity_continuity.py": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+      "badminton/learning.py": "375c8e12a276abd533506e8e3a244d4014b6350093a7d1d3924f4c1c5ffec3dc",
+      "badminton/media.py": "b509e267deea34661e9d51550d38836b951db40b5c3ef7ec2ba69777134de1b1",
+      "badminton/observation_support.py": "6ff337da25abbf6781428031cf00a741cf8b1c41f6bffe616795d4983979c1c6",
+      "badminton/pair_workspace.py": "5d1a4fca74dd15df6187970b14d1eac0630a987cbfd08563c278949974008506",
+      "badminton/pipeline.py": "e38f54406da18df0ec44da72b64db3ed7b925b1e8b6a95034f095525b2ed5143",
+      "badminton/reporting.py": "c19ca54b23acb9d7f31a29654f6cef05ae6fcfb3dc602b74dd8064c4d832bccd",
+      "badminton/requests.py": "ae6b6f131ce628891745c97f6ea5c65ffca9fd02ed4247e763b60df547130a0b",
+      "badminton/review_diagnostics.py": "d3629272538c60715c78bad617a66fb5de8ffdbf5c9beaaf2ee11282cea457d1",
+      "badminton/review_refinement.py": "7227dcdca2c037578e5cd924c4e03c9c3ed5069da74f4fc99ac5d7d87c3b7aed",
+      "badminton/scene_context.py": "faa1bc862100a66b822a6a0dcd9a55f30dd741b770777217e1433fcf6348448e",
+      "badminton/static_review.py": "8b822cf73db45264635c81e8211d4748a26594f5a21be69721576bc41cfa6615",
+      "badminton/sync.py": "130024be1aed2a0fa11fed5135797affab06681801ab6de770ddbe432e437040",
+      "badminton/tracking.py": "77fb4da37f5bd713900e052a0da6c71bad1220cdcb0c1e249d1ca481d3bfa087",
+      "badminton/visual_review.py": "5a177fd96b9fb594e2e537bbb069a3c25fcf2c1ef1bff565e96951f751a7fbde",
+      "badminton/web.py": "99e20e901b6653e31cc5e1b353a4f81288973265f152ae05085d0fe994bbc67b"
+    },
+    "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+    "repository_head": "7306efe267e40f4f8539c0439711ec54c2afcd41"
+  },
+  "config": {
+    "analysis_width": 960,
+    "workers": 2,
+    "opencv_threads": 2,
+    "max_frames": 3000,
+    "source_crop_count": 0,
+    "rules": {
+      "game": "doubles",
+      "phase": "rally"
+    },
+    "detector": {
+      "backend": "opencv_candidates",
+      "source_analysis_enabled": true,
+      "candidate_selection": "spatial",
+      "max_candidates": 80,
+      "global_candidate_reserve": 64,
+      "temporal_candidate_memory": true,
+      "native_motion_recovery": true,
+      "include_dark_components": true,
+      "dark_contrast_threshold": 8,
+      "dark_motion_threshold": 8,
+      "dark_max_saturation": 190,
+      "max_component_aspect": 12,
+      "native_local_components": true,
+      "highres_enabled": true,
+      "highres_max_rois": 16,
+      "highres_roi_size": 192,
+      "highres_roi_analysis_size": 48,
+      "highres_exploration_rois": 4,
+      "person_backend": "hog",
+      "person_width": 960,
+      "person_interval": 16
+    },
+    "tracker": {
+      "flight_search_enabled": true
+    },
+    "events": {
+      "scene_context_ranking": true,
+      "source_contact_enabled": true,
+      "source_contact_max_candidates": 6,
+      "source_contact_patch_size": 96
+    },
+    "evidence": {
+      "annotated_clip": true,
+      "seconds_before": 0.7,
+      "seconds_after": 0.7
+    }
+  },
+  "original_config_sha256": "e1f21c7835ac4d1f1be10305352b596f0c341af009f4dddb29a57eea816d56cf",
+  "effective_config_sha256": "e1f21c7835ac4d1f1be10305352b596f0c341af009f4dddb29a57eea816d56cf",
+  "detector_and_calibration_code": {
+    "detection.py": {
+      "frozen_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89",
+      "current_sha256": "337b74dc4fa986153c5fddd9ed018e36e119dfe6e413591f71cc79a1e36cfd89"
+    },
+    "calibration.py": {
+      "frozen_sha256": "068c65e343b3fbd27dcb7ccfb5dc6dce8bdc874731def0e1ec962fd2d1cc83fd",
+      "current_sha256": "068c65e343b3fbd27dcb7ccfb5dc6dce8bdc874731def0e1ec962fd2d1cc83fd"
+    }
+  },
+  "fixed_observations_component_ablation": false,
+  "uncapped_events": false,
+  "created_at": "2026-11-12T09:21:39.500661+00:00",
+  "new_holdouts_opened": false,
+  "reference_labels_read_by_inference": false,
+  "omitted_stages": [
+    "detector",
+    "native_contact_refinement",
+    "preview",
+    "evidence"
+  ],
+  "scope": "Compare same-stage baseline. Full-pipeline5/13 remains a separate frozen reference result.",
+  "runner_sha256": "894572bcd8aace230b75abd1ab0ff06ba1c3e7577bae1ca2ae5e320eaa24c353",
+  "support_wrapper": {
+    "enabled": false,
+    "preserve_current_detector_evidence": false,
+    "max_retry_count": 1
+  }
+}

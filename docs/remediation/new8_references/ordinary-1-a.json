@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "key": "ordinary-1-a",
+  "file": "a시점 1.mp4",
+  "source_path": "/workspace/remediation/input/a시점 1.mp4",
+  "source_sha256": "aa5e23a6400121849b7994664fd9dc942c9034b9e34180117a8973f10d83be76",
+  "split": "holdout",
+  "round_holdout": true,
+  "round": "false_positive_remediation_after_0.5.3",
+  "scope": "Eight same-project/current-round holdout video files, four filename A/B pairs; not globally unseen data or independent human ground truth.",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    3840,
+    2160
+  ],
+  "contact_visibility": "visible",
+  "landing_point_px": [
+    207,
+    330
+  ],
+  "tolerance_px": 8,
+  "notes": "The main shuttle drops in the front-left court while the near green-shirt player lunges. The descending white streak becomes a dark cork/feather object at floor level and rises immediately afterward. The first floorward reversal is visible before later small bounces and retrieval. The frame interval includes exposure blur around that first reversal, and the approximate image point describes the object-center vicinity. The cork-floor instant and legal line outcome are not independently confirmed.",
+  "landing_frame_interval": [
+    158,
+    160
+  ],
+  "landing_time_interval_seconds": [
+    2.665111,
+    2.698844
+  ],
+  "additional_frame_tolerance": 0,
+  "trajectory_points": [
+    {
+      "frame_index": 154,
+      "time_seconds": 2.597644,
+      "x": 215,
+      "y": 283
+    },
+    {
+      "frame_index": 156,
+      "time_seconds": 2.631378,
+      "x": 211,
+      "y": 298
+    },
+    {
+      "frame_index": 158,
+      "time_seconds": 2.665111,
+      "x": 209,
+      "y": 316
+    },
+    {
+      "frame_index": 159,
+      "time_seconds": 2.681978,
+      "x": 207,
+      "y": 330
+    },
+    {
+      "frame_index": 162,
+      "time_seconds": 2.732589,
+      "x": 204,
+      "y": 321
+    },
+    {
+      "frame_index": 165,
+      "time_seconds": 2.783189,
+      "x": 201,
+      "y": 314
+    },
+    {
+      "frame_index": 168,
+      "time_seconds": 2.833789,
+      "x": 196,
+      "y": 308
+    }
+  ],
+  "later_bounce_observations": [],
+  "reference_source": "AI source-frame visual inspection blinded to current-round outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "ground_truth_eligible": false,
+  "predictions_or_model_outputs_inspected": false,
+  "companion_view_calibration_used": false,
+  "evidence": [
+    "/workspace/remediation/sealed_visual/ordinary-1-a/overview-1.jpg",
+    "/workspace/remediation/sealed_visual/ordinary-1-a/overview-2.jpg",
+    "/workspace/remediation/sealed_visual/ordinary-1-a/approach-cached-0.png",
+    "/workspace/remediation/sealed_visual/ordinary-1-a/approach-cached-1.png",
+    "/workspace/remediation/sealed_visual/ordinary-1-a/native-154-174-180-270-0.png",
+    "/workspace/remediation/sealed_visual/ordinary-1-a/native-154-174-180-270-1.png"
+  ],
+  "evidence_sha256": {
+    "/workspace/remediation/sealed_visual/ordinary-1-a/overview-1.jpg": "7b01e1987f31c1e4c5e0c2cfbb106696a110e704ff6d7265beb528b8d8969070",
+    "/workspace/remediation/sealed_visual/ordinary-1-a/overview-2.jpg": "2757800ce6e1d58e00ba1e30727e74c2633484b9053c6a98f219858a0ddebf97",
+    "/workspace/remediation/sealed_visual/ordinary-1-a/approach-cached-0.png": "87763d0c04b9e4ea8ece8b8ceae0a9d7538594e0bd964a67ca4758ddbd25c8ef",
+    "/workspace/remediation/sealed_visual/ordinary-1-a/approach-cached-1.png": "e34aab517bab93d93606a78a05385249706eb1033bc7eca45e4092dd3d0114bc",
+    "/workspace/remediation/sealed_visual/ordinary-1-a/native-154-174-180-270-0.png": "573299830394de8c84656691bb645223bb5f46e90aa67a42194d73cd1ded0562",
+    "/workspace/remediation/sealed_visual/ordinary-1-a/native-154-174-180-270-1.png": "6a6b40b025adcfbc657952659df94d2736fc5fd62bcd131c0c5599b59e6aeb03"
+  },
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; normalized source timestamps from ffprobe.",
+  "inspection_decode_threads": 1
+}

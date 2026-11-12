@@ -1,0 +1,69 @@
+{
+  "key": "uhdhd-5-a",
+  "file": "a시점(uhd30 hd30) 5.mp4",
+  "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+  "split": "holdout",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "human_verified": false,
+  "reference_frozen": true,
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    144,
+    146
+  ],
+  "landing_point_px": [
+    732,
+    310
+  ],
+  "tolerance_px": 8,
+  "trajectory_points": [
+    {
+      "frame_index": 136,
+      "x": 674,
+      "y": 264,
+      "time": 2.294022
+    },
+    {
+      "frame_index": 140,
+      "x": 700,
+      "y": 280,
+      "time": 2.3615
+    },
+    {
+      "frame_index": 142,
+      "x": 712,
+      "y": 291,
+      "time": 2.395233
+    },
+    {
+      "frame_index": 144,
+      "x": 726,
+      "y": 307,
+      "time": 2.428967
+    },
+    {
+      "frame_index": 145,
+      "x": 732,
+      "y": 310,
+      "time": 2.445833
+    },
+    {
+      "frame_index": 148,
+      "x": 748,
+      "y": 307,
+      "time": 2.496433
+    }
+  ],
+  "notes": [
+    "Native 4K source frames show the main-court shuttle approaching near the right-side black-shirt player, descending through the blue-line area and making a first low floor contact around frames144–146.",
+    "The feather/cork angle changes abruptly at frame145 and subsequent frames show a low rebound moving right, before the later contact/tumble near the lower blue line. The first impact point uses the cork side of the motion blur, not the later resting point."
+  ],
+  "evidence_images": [
+    "visual/uhdhd-5-a/native-124-155-600-180.jpg",
+    "visual/uhdhd-5-a/native-138-161-685-270.jpg"
+  ]
+}

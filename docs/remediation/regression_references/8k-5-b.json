@@ -1,0 +1,62 @@
+{
+  "key": "8k-5-b",
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    39,
+    41
+  ],
+  "landing_point_px": [
+    820,
+    291
+  ],
+  "tolerance_px": 15,
+  "confidence": "medium-high for first bounce; approximate image centre",
+  "trajectory_points": [
+    {
+      "frame_index": 40,
+      "x": 820,
+      "y": 291,
+      "time_seconds": 1.667167
+    },
+    {
+      "frame_index": 42,
+      "x": 835,
+      "y": 290,
+      "time_seconds": 1.750733
+    },
+    {
+      "frame_index": 44,
+      "x": 839,
+      "y": 286,
+      "time_seconds": 1.833889
+    },
+    {
+      "frame_index": 46,
+      "x": 842,
+      "y": 290,
+      "time_seconds": 1.917267
+    }
+  ],
+  "notes": [
+    "Main-court shuttle reaches near-right back floor region by f40, then moves rightward and upward at f42/f44 before dropping again.",
+    "The stationary white shuttle near [800,235] belongs to the background floor and is not the moving landing target.",
+    "Later retrieval by white-shirt player is after this bounce; do not choose retrieval/rest frames as first impact.",
+    "This is AI visual development reference, not independently verified ground truth or an IN/OUT label."
+  ],
+  "evidence": [
+    "visual/8k-5-b/crop-28-56-1.jpg"
+  ],
+  "file": "8k 30 4k 24 b시점 5.mp4",
+  "source_sha256": "7eccb2951dde57a8ab51b6cf1e42671348a7369d62e4ebf3800d536349a48667",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "ground_truth_eligible": false,
+  "split": "development",
+  "landing_time_interval_seconds": [
+    1.625489,
+    1.708844
+  ]
+}

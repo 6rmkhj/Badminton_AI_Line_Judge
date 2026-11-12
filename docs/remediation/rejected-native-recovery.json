@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "decision": "rejected_no_qualified_end_to_end_gain",
+  "accepted_release_core_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+  "key": "ordinary-18-a",
+  "scope": "Historical old-development component experiments, separate from frozen final 7306 evaluation. Native v4 has a tracking/event replay; v5 and measured-chain findings are detector/validator diagnostics and do not constitute a complete pipeline run. No experimental runtime modules, weights, raw detections or source videos are bundled in this summary.",
+  "source_sha256": "dd04f1a5a96ce2ba9ad1c14eb750396fbd4537b23cc09749fc065f0b2a260c9d",
+  "reference_sha256": "521f231a6233578231c3f978c11afd3f09cea48d708c488613784654a54ba07b",
+  "native_runs": {
+    "v4": {
+      "scope": "Full source detector pass only",
+      "source_frames_read": 195,
+      "source_read_order_strictly_ascending_once": true,
+      "elapsed_seconds": 130.77722477912903,
+      "extra_actual_measurements": 2637,
+      "maximum_observations_per_frame": 96,
+      "baseline_equivalence": {
+        "original_observations_identical": true,
+        "original_native_rois_identical": true,
+        "changed_original_observation_frames": [],
+        "changed_original_roi_frames": []
+      },
+      "code_sha256": {
+        "detection.py": "5aa483a6818d68ce655664b3f3f3785fe1db6acafaed2f2cb18c8950893d4034",
+        "native_recovery.py": "d1c228d53ea9a0aa7d44adabd50583d990be13706bd00ef54d813d228edf1bfa",
+        "observation_support.py": "6ff337da25abbf6781428031cf00a741cf8b1c41f6bffe616795d4983979c1c6"
+      }
+    },
+    "v5": {
+      "scope": "Full source detector pass only",
+      "source_frames_read": 195,
+      "source_read_order_strictly_ascending_once": true,
+      "elapsed_seconds": 170.47841787338257,
+      "extra_actual_measurements": 3102,
+      "maximum_observations_per_frame": 96,
+      "baseline_equivalence": {
+        "original_observations_identical": true,
+        "original_native_rois_identical": true,
+        "changed_original_observation_frames": [],
+        "changed_original_roi_frames": []
+      },
+      "code_sha256": {
+        "detection.py": "3e820badc14e44f25af130fdc8fdfa1ebdaa0ef596218dfca571e5c6f9ac13ae",
+        "native_recovery.py": "58bf7050b9950fda4354d549697019abf9a3ba3294832ff3b24fddf45b74eb06",
+        "observation_support.py": "6ff337da25abbf6781428031cf00a741cf8b1c41f6bffe616795d4983979c1c6"
+      }
+    }
+  },
+  "v4_event_replay": {
+    "selected_before": {
+      "frame_index": 67,
+      "reference_coordinate_point": [
+        521.25,
+        188.875
+      ],
+      "distance_px": 116.8806,
+      "frame_error": 64,
+      "within_spatial_tolerance": false,
+      "within_frame_tolerance": false,
+      "matches_first_vicinity": false
+    },
+    "selected_after": {
+      "frame_index": 67,
+      "reference_coordinate_point": [
+        521.25,
+        188.875
+      ],
+      "distance_px": 116.8806,
+      "frame_error": 64,
+      "within_spatial_tolerance": false,
+      "within_frame_tolerance": false,
+      "matches_first_vicinity": false
+    },
+    "uncapped_candidate_count": 1686,
+    "uncapped_first_vicinity_candidates": 0,
+    "selected_contact_observed": false,
+    "automatic_decision": "REVIEW",
+    "result_sha256": "05927e330646f2ae9276b88cb8f4f8e1f7080a60da3365a7dce1e0ad954b3f84",
+    "first_blocker": "Actual restored observations fragment across unrelated tracklets; no complete coherent flight path survives.",
+    "secondary_gate": {
+      "first_frame": 125,
+      "peak_frame": 133,
+      "descent_px": 17.893,
+      "existing_flight_review_minimum_descent_px": 19.2,
+      "meets_descent_gate": false,
+      "note": "Source-reviewed raw observations; no current selected/coherent track contains this full approach. The detector membership list is separately bounded to recent samples."
+    }
+  },
+  "measured_chain_validator": {
+    "scope": "Negative validator-only component diagnosis on archived old-development18A raw pools. Reviewed-region lookup is report-only and never affects selection. No source decode, full tracking/event replay, new heldout read, join, budget tuning, or event-threshold change.",
+    "tracking_source_sha256": "2aee37ef1d1c6b67b35db86ca4f78804f174b218e2627905a9ef7dbdaf63bb16",
+    "findings": [
+      "V4 measured graph contains disconnected125–130 and130–138 segments with distinct frame130 observations. There is no verified125–137 chain.",
+      "Default32 does not retain these weak segments. An earlier explicit64 diagnostic retained only130–138; the default was not tuned to that example.",
+      "V5 drops exact raw members; affected groups are rejected without substituting nearby candidates.",
+      "Detector final cached mixed-pool/coalescing/spatial16 prototype still fails a complete retained123–137 incoming/rebound path. No qualified end-to-end gain was demonstrated.",
+      "Default canonical old24 pools contain no membership metadata and receive zero additions. Existing algorithms,19.2px approach drop and rebound support thresholds remain unchanged."
+    ],
+    "rows": [
+      {
+        "version": "v4",
+        "input_sha256": "aa03cf84a3a52cefdfa1952a2a7217b0f600d4a500aa17209bb15ee9ccbb2678",
+        "default_extra_budget": 32,
+        "valid_group_count": 821,
+        "valid_unbranched_path_count": 374,
+        "missing_declared_member_references": 1420,
+        "reviewed_region_retained_default": []
+      },
+      {
+        "version": "v5",
+        "input_sha256": "600e00325465081dcb0722a57d9ce0d6d4f64d4d290a25d821822c3ddb9e3ea7",
+        "default_extra_budget": 32,
+        "valid_group_count": 444,
+        "valid_unbranched_path_count": 190,
+        "missing_declared_member_references": 5876,
+        "reviewed_region_retained_default": []
+      }
+    ]
+  },
+  "release_action": "Experimental residual recovery and measured-chain preservation remain excluded. Existing detector observations, qualification thresholds and frozen reference bytes remain unchanged in accepted 7306.",
+  "source_artifacts": [
+    {
+      "path": "/workspace/remediation/native18a-v4-candidate-ablation-audit.json",
+      "sha256": "50baf69ab48e51961ed19c1bff2a5af3152c8b49a46deaae1be7f0deae2186f0",
+      "bytes": 9765
+    },
+    {
+      "path": "/workspace/remediation/native18a-v4-path-gate-attribution.json",
+      "sha256": "d068b4c9ec8dd81df69f87da28cfbed5ac282f5b3fbb6fa121d2127f73e3adeb",
+      "bytes": 16031
+    },
+    {
+      "path": "/workspace/remediation/native-pass-v4/ordinary-18-a/report.json",
+      "sha256": "da5958434d461843e06a2bb18b67afeb120682bccff4861ffb29fc83fdedd4da",
+      "bytes": 1774
+    },
+    {
+      "path": "/workspace/remediation/native-pass-v4/ordinary-18-a/baseline-equivalence.json",
+      "sha256": "a779cb99bc9389f38e703119433d9b79df21653c3403ba53ce356f522bfb4f29",
+      "bytes": 169
+    },
+    {
+      "path": "/workspace/remediation/native-pass-v5/ordinary-18-a/report.json",
+      "sha256": "537496cd7a99d234d6302b869fe1727908315343b7dc367f12892f292cae5645",
+      "bytes": 1774
+    },
+    {
+      "path": "/workspace/remediation/native-pass-v5/ordinary-18-a/baseline-equivalence.json",
+      "sha256": "a779cb99bc9389f38e703119433d9b79df21653c3403ba53ce356f522bfb4f29",
+      "bytes": 169
+    },
+    {
+      "path": "/workspace/remediation/tracking/measured-continuation/NEGATIVE_CHAIN_REPORT.json",
+      "sha256": "16acac7c602c52c7dd0541ad401475de34676556da5ac9e4db60baa59eb05bbb",
+      "bytes": 9041
+    },
+    {
+      "path": "/workspace/remediation/native-diagnosis/ordinary-18-a/mixed-pool-coalescing-prototype.json",
+      "sha256": "a99b6c3729d38e4e3edb17802dbc3f8e9b3ea65176944946f46d78e0028cd096",
+      "bytes": 36108
+    }
+  ]
+}

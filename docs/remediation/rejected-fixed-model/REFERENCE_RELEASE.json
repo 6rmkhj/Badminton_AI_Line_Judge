@@ -1,0 +1,15 @@
+{
+  "reference_release_receipt": "/workspace/remediation/new8-release-receipt.json",
+  "receipt_sha256": "174a9b0835f3def17bf5cbb43c5d2fcd2199c6cb7276276ffff858074d3f003a",
+  "auditor_release_confirmed": true,
+  "authorization": "Root instructed a new fixed TrackNet fusion DEVELOPMENT experiment after the frozen-core new8 result; auditor confirmed release and specified first2 distinct scorable failures in immutable manifest order.",
+  "initial_cases": [
+    "8k-3-a",
+    "ordinary-1-a"
+  ],
+  "original_frozen_result_remains_immutable": true,
+  "no_new_holdout_accuracy_claim": true,
+  "frozen_protocol_sha256": "eac0b6f1ed6fe8087945cb2bf6098884642724c9617c800fb143bdd942ed1967",
+  "model_runner_sha256": "67577d063068ada03844921c9ac78ed030ab1dcad31296c7503a376a80e92e54",
+  "labels_not_used_by_inference_replay_script": true
+}

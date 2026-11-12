@@ -1,0 +1,34 @@
+{
+  "created_at": "2026-11-12T08:43:49.376724+00:00",
+  "status": "component_validation_complete_final_detector_pipeline_validation_pending",
+  "scope": "Actual-pixel, uncapped tracking/events component ablation on24 development/regression files with unchanged frozen CV observations. Native contact/evidence/detector execution omitted.",
+  "baseline_strict": [
+    5,
+    13
+  ],
+  "experiment_strict": [
+    6,
+    13
+  ],
+  "strict_gains": [
+    "ordinary-12-a"
+  ],
+  "strict_regressions": [],
+  "qualitative_regressions": [],
+  "source_reviews_pending": [],
+  "selected_frame_point_changed_vs_frozen_full_baseline": [
+    "ordinary-12-a"
+  ],
+  "strict_match_candidate_kinds": {
+    "observed_object_center": 4,
+    "inferred_object_center": 2
+  },
+  "baseline_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "experiment_implementation_fingerprint": "44c938423576c83569f19d5672e486b8d0f85a39ab48f9d84db451e476047520",
+  "experiment_source_tree_sha256": "6ebfe20ceb245b3e20c7679747c6f6782a362338a672a7fb467ca050dae7f3cc",
+  "audit_sha256": "e9110311482b2f04a25690c151cc1c5a77ab2d87558cf043e290558e5989cdc9",
+  "qualitative_review_sha256": "3e75212619508c891aadc1317b6dd7bce45f7caf478c39a25cb560003dff08f8",
+  "new_holdout_predictions_or_positions_opened": false,
+  "new_holdout_reference_inventory_sha256": "6e7dcd7e609fc0537f230e810d9399e36c76d04ea70353e0f5374aad1f4d7096",
+  "next_required": "Validate fresh changed detector measurements with final accepted code/config; full fresh new8 and originalA1/B1; inspect new8 only after explicit freeze/release."
+}

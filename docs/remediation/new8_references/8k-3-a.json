@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "key": "8k-3-a",
+  "file": "8k 30 4k 24 a시점 3.mp4",
+  "source_path": "/workspace/remediation/input/8k 30 4k 24 a시점 3.mp4",
+  "source_sha256": "9d29a7841610b8adf20acc41d63432027dcf6d157c4108b390af3982672e07c8",
+  "split": "holdout",
+  "round_holdout": true,
+  "round": "false_positive_remediation_after_0.5.3",
+  "scope": "Eight same-project/current-round holdout video files, four filename A/B pairs; not globally unseen data or independent human ground truth.",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    7680,
+    4320
+  ],
+  "contact_visibility": "visible",
+  "landing_point_px": [
+    740,
+    270
+  ],
+  "tolerance_px": 12,
+  "notes": "Main rally shuttle travels to image-right after the near black-shirt player shot. The final approach crosses a neighboring player in projection, then the shuttle is visible in front of the floor to the right of his shoes. A long descending blur is followed by a short upward rebound. The interval brackets the first floorward reversal; the precise cork-surface instant is unresolved between exposures. The point is an approximate visible object-center vicinity, not a court coordinate or an IN/OUT ruling. Spatial tolerance reflects the final motion-blur streak and feather/cork extent.",
+  "landing_frame_interval": [
+    133,
+    134
+  ],
+  "landing_time_interval_seconds": [
+    4.433144,
+    4.466478
+  ],
+  "additional_frame_tolerance": 0,
+  "trajectory_points": [
+    {
+      "frame_index": 120,
+      "time_seconds": 3.999833,
+      "x": 660,
+      "y": 163
+    },
+    {
+      "frame_index": 124,
+      "time_seconds": 4.133156,
+      "x": 690,
+      "y": 185
+    },
+    {
+      "frame_index": 126,
+      "time_seconds": 4.199822,
+      "x": 706,
+      "y": 203
+    },
+    {
+      "frame_index": 132,
+      "time_seconds": 4.399811,
+      "x": 734,
+      "y": 258
+    },
+    {
+      "frame_index": 133,
+      "time_seconds": 4.433144,
+      "x": 740,
+      "y": 270
+    },
+    {
+      "frame_index": 135,
+      "time_seconds": 4.499811,
+      "x": 744,
+      "y": 263
+    },
+    {
+      "frame_index": 137,
+      "time_seconds": 4.566467,
+      "x": 747,
+      "y": 259
+    },
+    {
+      "frame_index": 140,
+      "time_seconds": 4.666467,
+      "x": 752,
+      "y": 257
+    }
+  ],
+  "later_bounce_observations": [],
+  "reference_source": "AI source-frame visual inspection blinded to current-round outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "ground_truth_eligible": false,
+  "predictions_or_model_outputs_inspected": false,
+  "companion_view_calibration_used": false,
+  "evidence": [
+    "/workspace/remediation/sealed_visual/8k-3-a/overview-2.jpg",
+    "/workspace/remediation/sealed_visual/8k-3-a/late-cached-0.png",
+    "/workspace/remediation/sealed_visual/8k-3-a/late-cached-1.png",
+    "/workspace/remediation/sealed_visual/8k-3-a/native-124-140-690-210-0.png",
+    "/workspace/remediation/sealed_visual/8k-3-a/native-124-140-690-210-1.png",
+    "/workspace/remediation/sealed_visual/8k-3-a/native-detail-132-135.png"
+  ],
+  "evidence_sha256": {
+    "/workspace/remediation/sealed_visual/8k-3-a/overview-2.jpg": "24aaf1a788020f65f6f1c5f19366ba5a6523280903078979c94fc4772a82d732",
+    "/workspace/remediation/sealed_visual/8k-3-a/late-cached-0.png": "81741ad54df60a931a21d99892e3ad748bb7bd416bbb342d1779229d4687f313",
+    "/workspace/remediation/sealed_visual/8k-3-a/late-cached-1.png": "e5e615c5b40089f99427cc0bc50439a177cf320391dab11b3fc3f51aad2641ac",
+    "/workspace/remediation/sealed_visual/8k-3-a/native-124-140-690-210-0.png": "3a65bd7253d02656bb33d2eef508f01f872065a1fcd125519ea4ede55f3f647e",
+    "/workspace/remediation/sealed_visual/8k-3-a/native-124-140-690-210-1.png": "6988e35de4e375d92e938f06a626c4899643724c0faa80ada916b2cb66134d93",
+    "/workspace/remediation/sealed_visual/8k-3-a/native-detail-132-135.png": "af29f1673c308695036ad3235f01b4d40712c779f713ca28401cb58771f490db"
+  },
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; normalized source timestamps from ffprobe.",
+  "inspection_decode_threads": 1
+}

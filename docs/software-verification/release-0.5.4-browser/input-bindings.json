@@ -1,0 +1,43 @@
+{
+  "scope": "Actual completed original controls and old development4A/12A only; no new8 input/reference/result opened.",
+  "core_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+  "canonical_config_serialization": "UTF8json with sort_keys=True,separators=(comma,colon)",
+  "rows": [
+    {
+      "result_path": "/workspace/remediation/release-controls-0.5.4/A/result.json",
+      "result_sha256": "247d86cf5a1e2949b927e1ac25917b46160bd7dabcf07361d1ff31bf21f1b8a3",
+      "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+      "config_equals_frozen_default": true,
+      "canonical_config_sha256": "e1f21c7835ac4d1f1be10305352b596f0c341af009f4dddb29a57eea816d56cf",
+      "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+      "verified_fresh_control_validation_sha256": "85e5019b47d5d9ccf672650c971984021040e5d1b58efe08798545aca44c9aed"
+    },
+    {
+      "result_path": "/workspace/remediation/release-controls-0.5.4/B/result.json",
+      "result_sha256": "79fedefc26a669ceddb19e163af3d0bc9c268a08285ed7da111828156a9311fa",
+      "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+      "config_equals_frozen_default": true,
+      "canonical_config_sha256": "e1f21c7835ac4d1f1be10305352b596f0c341af009f4dddb29a57eea816d56cf",
+      "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+      "verified_fresh_control_validation_sha256": "85e5019b47d5d9ccf672650c971984021040e5d1b58efe08798545aca44c9aed"
+    },
+    {
+      "result_path": "/workspace/remediation/final-fresh-0.5.4/ordinary-4-a/result.json",
+      "result_sha256": "a40c9938d37ac495605697e3db310f84633e83e6ae1b1499796c6e14fa6bf9ac",
+      "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+      "config_equals_frozen_default": true,
+      "canonical_config_sha256": "e1f21c7835ac4d1f1be10305352b596f0c341af009f4dddb29a57eea816d56cf",
+      "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+      "verified_fresh_execution_receipt_sha256": "5e66915a935351c9af439c61e0fda4ba5342b8d0c3fa7eae8bdbbcb09e738e7a"
+    },
+    {
+      "result_path": "/workspace/remediation/final-fresh-0.5.4/ordinary-12-a/result.json",
+      "result_sha256": "8d2c0680483f414562f3456b2bd4ee20bc2b4ffc2174eba24bce103ce46af717",
+      "source_sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb",
+      "config_equals_frozen_default": true,
+      "canonical_config_sha256": "e1f21c7835ac4d1f1be10305352b596f0c341af009f4dddb29a57eea816d56cf",
+      "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+      "verified_fresh_execution_receipt_sha256": "06206e886b54bef8d0a40fcdfa629109c8c2e92e9d777604d891c57bd45ba914"
+    }
+  ]
+}

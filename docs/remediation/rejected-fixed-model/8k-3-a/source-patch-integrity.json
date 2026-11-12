@@ -1,0 +1,8 @@
+{
+  "case": "8k-3-a",
+  "model_detections_sha256": "f10926c5ac6254d5353fe9e6a22e5b89e0ba9b7e687558427d4ee7fcfab2ea12",
+  "actual_gray_pixel_values_checked": 12600,
+  "observations_checked": 327,
+  "mismatches": 0,
+  "source_patch_contrast_does_not_prove_identity_motion_or_contact": true
+}
