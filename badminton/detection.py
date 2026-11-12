@@ -52,6 +52,41 @@ def _roi_mask(shape, config):
     return mask
 
 
+def _appearance_components(gray, hsv, bright, motion, foreground, local_base, config,
+                           exclusion, roi=None, *, native=False):
+    """Segment light and dark objects separately before sharing one budget.
+
+    Joining both masks can connect a white shuttle to an adjacent dark player
+    or court edge. The extra search must not erase the original light component.
+    """
+    positive = cv2.subtract(gray, local_base)
+    channels = [("bright", bright > 0, positive, float(config.get("motion_threshold", 16)),
+                 float(config.get("contrast_threshold", 8)))]
+    if config.get("include_dark_components"):
+        negative = cv2.subtract(local_base, gray)
+        threshold = float(config.get("dark_contrast_threshold", 18))
+        dark = ((negative >= threshold)
+                & (hsv[:, :, 1] <= int(config.get("dark_max_saturation", 115))))
+        channels.append(("dark", dark, negative,
+                         float(config.get("dark_motion_threshold", config.get("motion_threshold", 16))), threshold))
+    for polarity, appearance, contrast, motion_threshold, contrast_threshold in channels:
+        cue = ((motion >= motion_threshold)
+               & (foreground >= float(config.get("background_threshold", 8)))
+               & (contrast >= contrast_threshold))
+        selected = appearance & ~exclusion.astype(bool)
+        if roi is not None:
+            selected &= roi > 0
+        if not native:
+            selected &= cue
+        elif config.get("native_local_components", bool(config.get("refinement_regions"))):
+            selected &= contrast >= contrast_threshold
+        count, labels, stats, centers = cv2.connectedComponentsWithStats(selected.astype(np.uint8) * 255, 8)
+        for label in range(1, count):
+            x, y, w, h, _ = map(int, stats[label])
+            yield (polarity, stats[label], centers[label], labels[y:y+h, x:x+w] == label,
+                   contrast[y:y+h, x:x+w], cue[y:y+h, x:x+w])
+
+
 def _nms(detections, distance=3.0, limit=64):
     # Bucket accepted centres so a larger proposal pool does not require an
     # all-pairs scan. The suppression radius is at most this cell width, so the
@@ -150,6 +185,22 @@ def _refined_budget(detections, shape, limit, mode, distance, regions):
         if len(result) >= limit:
             break
     return result, len(preferred)
+
+
+def _multiscale_budget(detections, shape, limit, reserve, mode, distance, regions):
+    """Keep the global search's coverage when native texture adds proposals."""
+    global_candidates = [item for item in detections if item.get("global_resolution_observation")]
+    selected, _ = _refined_budget(global_candidates, shape, reserve, mode, distance, regions)
+    ordinary, _ = _refined_budget(detections, shape, 512, mode, distance, regions)
+    reserved_count = len(selected)
+    for item in ordinary:
+        if len(selected) >= limit:
+            break
+        if any(math.hypot(item["x"] - old["x"], item["y"] - old["y"])
+               <= max(distance, min(item["radius"], old["radius"])) for old in selected):
+            continue
+        selected.append(item)
+    return selected, sum(_inside_refinement(item, regions) for item in selected), reserved_count
 
 
 class _OnnxDetector:
@@ -296,7 +347,7 @@ class _HogPeople:
 class _NativeRoiDetector:
     """Bounded source-resolution re-detection, not resized evidence cropping.
 
-    Windows follow global candidates and recent native proposals. Two rotating
+    Windows follow global candidates and recent native proposals. Rotating
     exploration windows also examine pixels missed by the low-resolution scan.
     This deliberately reports incomplete source coverage; it is not exhaustive
     tiled detection and does not certify shuttle identity or contact.
@@ -308,10 +359,13 @@ class _NativeRoiDetector:
         self.background, self.roi = background, roi
         self.max_area = max_area
         self.size = int(config.get("highres_roi_size", 192))
+        self.analysis_size = float(config.get("highres_roi_analysis_size", 0))
         self.budget = int(config.get("highres_max_rois", 8))
         self.explore = int(config.get("highres_exploration_rois", min(2, self.budget)))
         if not 32 <= self.size <= 1024 or not 1 <= self.budget <= 64 or not 0 <= self.explore <= self.budget:
             raise ValueError("invalid high-resolution ROI size, budget, or exploration count")
+        if not math.isfinite(self.analysis_size) or not 0 <= self.analysis_size <= 128:
+            raise ValueError("highres_roi_analysis_size must be between 0 and 128")
         self.previous = None
         self.recent = []
         self.source_shape = None
@@ -319,6 +373,9 @@ class _NativeRoiDetector:
     def _boxes(self, detections, shape, index, regions=()):
         height, width = shape[:2]
         sx, sy = width / self.width, height / self.height
+        # Keep the same field of view on 4K and 8K recordings. A fixed source
+        # window otherwise shrinks around a candidate as resolution increases.
+        size = min(1024, max(self.size, round(self.analysis_size * max(sx, sy))))
         boxes = []
 
         def append(cx, cy, origin):
@@ -327,9 +384,9 @@ class _NativeRoiDetector:
             low_x, low_y = min(self.width - 1, int(cx / sx)), min(self.height - 1, int(cy / sy))
             if self.roi[low_y, low_x] == 0:
                 return
-            left = max(0, min(max(0, width - self.size), round(cx - self.size / 2)))
-            top = max(0, min(max(0, height - self.size), round(cy - self.size / 2)))
-            box = [left, top, min(self.size, width - left), min(self.size, height - top)]
+            left = max(0, min(max(0, width - size), round(cx - size / 2)))
+            top = max(0, min(max(0, height - size), round(cy - size / 2)))
+            box = [left, top, min(size, width - left), min(size, height - top)]
             # Nearby windows mostly read the same pixels. Keep separate objects
             # inside the first window, instead of spending the budget twice.
             if any(abs(left - old["bbox"][0]) < box[2] * .55
@@ -349,7 +406,7 @@ class _NativeRoiDetector:
             if len(boxes) >= focus_budget:
                 break
             x, y, w, h = region["bbox"]
-            columns, rows = max(1, math.ceil(w * sx / self.size)), max(1, math.ceil(h * sy / self.size))
+            columns, rows = max(1, math.ceil(w * sx / size)), max(1, math.ceil(h * sy / size))
             grid = [(x + w * (col + .5) / columns, y + h * (row + .5) / rows)
                     for row in range(rows) for col in range(columns)]
             for offset in range(len(grid)):
@@ -374,9 +431,9 @@ class _NativeRoiDetector:
                 break
         if self.explore == 0:
             return boxes
-        xs = list(range(0, width, self.size))
-        ys = list(range(0, height, self.size))
-        grid = [(min(width - 1, x + self.size / 2), min(height - 1, y + self.size / 2))
+        xs = list(range(0, width, size))
+        ys = list(range(0, height, size))
+        grid = [(min(width - 1, x + size / 2), min(height - 1, y + size / 2))
                 for y in ys for x in xs]
         # Fill unused proposal slots as well, making source-only detections
         # possible even when the low-resolution scan has no observations.
@@ -426,25 +483,6 @@ class _NativeRoiDetector:
             bright = cv2.inRange(hsv, np.array([0, 0, int(self.config.get("min_brightness", 155))], np.uint8),
                                  np.array([179, int(self.config.get("max_saturation", 115)), 255], np.uint8))
             local_base = cv2.GaussianBlur(gray, (0, 0), max(1.0, min(12.0, 4 * sw / 1280)))
-            contrast = (cv2.absdiff(gray, local_base) if self.config.get('include_dark_components')
-                        else cv2.subtract(gray, local_base))
-            local_components = self.config.get("native_local_components", bool(self.config.get("refinement_regions")))
-            if local_components:
-                # Bright wooden flooring may meet the colour threshold too.
-                # Without local structure segmentation, adding a dark cork to
-                # that mask joins it to the entire floor and the area filter
-                # rejects both. Preserve local objects before testing motion.
-                bright = cv2.bitwise_and(bright, np.where(
-                    cv2.subtract(gray, local_base) >= float(self.config.get("contrast_threshold", 8)),
-                    255, 0).astype(np.uint8))
-            if self.config.get('include_dark_components'):
-                # The cork is often darker than the wooden floor at impact.
-                # These remain motion proposals; a dark component is not contact evidence.
-                dark = ((cv2.subtract(local_base, gray) >= 18) & (hsv[:, :, 1] <= 115))
-                bright = np.maximum(bright, dark.astype(np.uint8) * 255)
-            cue = ((temporal >= float(self.config.get("motion_threshold", 16)))
-                   & (foreground >= float(self.config.get("background_threshold", 8)))
-                   & (contrast >= float(self.config.get("contrast_threshold", 8))))
             # Reject complete broad bright objects before edge differencing;
             # otherwise a white shirt becomes many apparent small shuttles.
             broad = np.where(patch.min(axis=2) >= int(self.config.get("broad_white_min", 205)), 255, 0).astype(np.uint8)
@@ -452,30 +490,25 @@ class _NativeRoiDetector:
             large = np.flatnonzero(broad_stats[:, cv2.CC_STAT_AREA] > area_limit * 1.5)
             large = large[large != 0]
             exclusion = np.isin(broad_labels, large) if len(large) else np.zeros_like(gray, dtype=bool)
-            # Segment the whole small bright object, then use motion/contrast
-            # as evidence for that component. Segmenting only changed pixels
-            # would move the centroid to a leading edge between frames.
-            mask = np.where((bright > 0) & ~exclusion, 255, 0).astype(np.uint8)
-            count, labels, stats, centers = cv2.connectedComponentsWithStats(mask, 8)
-            for label in range(1, count):
-                bx, by, bw, bh, area = map(int, stats[label])
-                if not 1 <= area <= area_limit or max(bw, bh) / max(1, min(bw, bh)) > 4:
+            for polarity, component, center, pixels, contrast, cue in _appearance_components(
+                    gray, hsv, bright, temporal, foreground, local_base, self.config, exclusion, native=True):
+                bx, by, bw, bh, area = map(int, component)
+                if not 1 <= area <= area_limit or max(bw, bh) / max(1, min(bw, bh)) > float(self.config.get("max_component_aspect", 4)):
                     continue
                 if max(bw, bh) > max(18.0, 34 * sw / 1280) or area / (bw * bh) < .12:
                     continue
                 if ((bx == 0 and x > 0) or (by == 0 and y > 0)
                         or (bx + bw >= w and x + w < sw) or (by + bh >= h and y + h < sh)):
                     continue  # the ROI cut through this object
-                pixels = labels[by:by + bh, bx:bx + bw] == label
-                cue_fraction = float(cue[by:by + bh, bx:bx + bw][pixels].mean())
+                cue_fraction = float(cue[pixels].mean())
                 if cue_fraction < .15:
                     continue
-                source_x, source_y = float(centers[label][0] + x), float(centers[label][1] + y)
+                source_x, source_y = float(center[0] + x), float(center[1] + y)
                 cx, cy = source_x / sx, source_y / sy
                 if not self.roi[min(self.height - 1, int(cy)), min(self.width - 1, int(cx))]:
                     continue
                 motion = float(temporal[by:by + bh, bx:bx + bw][pixels].mean())
-                local_contrast = float(contrast[by:by + bh, bx:bx + bw][pixels].mean())
+                local_contrast = float(contrast[pixels].mean())
                 score = .2 + .35 * min(1.0, motion / 90) + .3 * min(1.0, local_contrast / 65) + .15 * area / (bw * bh)
                 native.append({"x": round(cx, 3), "y": round(cy, 3),
                                "radius": round(max(.5, math.sqrt(area / math.pi) / min(sx, sy)), 3),
@@ -483,6 +516,7 @@ class _NativeRoiDetector:
                                "confidence": round(min(.95, score), 4),
                                "confidence_kind": "heuristic_rank_not_probability",
                                "method": "opencv_source_roi_component", "native_resolution_observation": True,
+                               "appearance_polarity": polarity,
                                "source_px": [round(source_x, 3), round(source_y, 3)],
                                "source_bbox": [x + bx, y + by, bw, bh],
                                "source_size": [sw, sh], "roi_origin": window["origin"],
@@ -503,7 +537,7 @@ class _NativeRoiDetector:
 
 def _merge_native(global_candidates, native_candidates, distance):
     """Prefer measured native location when both scales support one candidate."""
-    pending = list(global_candidates)
+    pending = [{**item, "global_resolution_observation": True} for item in global_candidates]
     combined = []
     for native in native_candidates:
         matches = [item for item in pending
@@ -513,6 +547,7 @@ def _merge_native(global_candidates, native_candidates, distance):
         if matches:
             best = max(matches, key=lambda item: item["confidence"])
             refined["global_confidence"] = best["confidence"]
+            refined["global_resolution_observation"] = True
             refined["native_confidence"] = native["confidence"]
             refined["confidence"] = max(best["confidence"], native["confidence"])
             refined["method"] = "opencv_source_roi_with_global_support"
@@ -531,6 +566,12 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
     hypotheses only. A ``scorer_path`` loads
     the separately trained patch classifier; learned scores change ranking only
     when ``use_learned_confidence=True`` is explicitly selected.
+
+    The application profile enables dark components as well as bright feathers:
+    a fast shuttle on pale flooring can be a dim exposure streak. Separate dark
+    contrast/motion thresholds keep this search from weakening the bright-object
+    cue. ``max_component_aspect`` admits narrow blur while area and length limits
+    still reject broad objects. These are proposals, not verified identities.
     """
     config = dict(config or {})
     _validate_inputs(frames, timestamps)
@@ -539,12 +580,22 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
     backend = config.get("backend", "opencv_candidates")
     if backend not in ("opencv_candidates", "onnx"):
         raise ValueError("backend must be opencv_candidates or onnx")
+    for key, default, low, high in (("dark_contrast_threshold", 18, 1, 255),
+                                    ("dark_motion_threshold", config.get("motion_threshold", 16), 1, 255),
+                                    ("dark_max_saturation", 115, 0, 255),
+                                    ("max_component_aspect", 4, 1, 30)):
+        value = float(config.get(key, default))
+        if not math.isfinite(value) or not low <= value <= high:
+            raise ValueError(f"{key} must be between {low} and {high}")
     height, width = frames[0].shape[:2]
     scale = width / 1280.0
     roi = _roi_mask(frames[0].shape, config)
     max_candidates = int(config.get("max_candidates", 64))
     if not 1 <= max_candidates <= 512:
         raise ValueError("max_candidates must be between 1 and 512")
+    global_reserve = int(config.get("global_candidate_reserve", 0))
+    if not 0 <= global_reserve <= max_candidates:
+        raise ValueError("global_candidate_reserve must be between zero and max_candidates")
     selection = config.get("candidate_selection", "ranked")
     if selection not in {"ranked", "spatial"}:
         raise ValueError("candidate_selection must be ranked or spatial")
@@ -565,6 +616,10 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
         "method": "bright_small_components_with_background_and_temporal_difference",
         "confidence_kind": "heuristic_rank_not_probability",
         "include_dark_components": bool(config.get('include_dark_components')),
+        "dark_contrast_threshold": float(config.get("dark_contrast_threshold", 18)),
+        "dark_motion_threshold": float(config.get("dark_motion_threshold", config.get("motion_threshold", 16))),
+        "dark_max_saturation": int(config.get("dark_max_saturation", 115)),
+        "max_component_aspect": float(config.get("max_component_aspect", 4)),
     }
     provenance.update(candidate_selection=selection, refinement_region_count=len(regions),
                       refinement_region_source="operator_or_review_supplied" if regions else None,
@@ -651,32 +706,20 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
             excluded_white = np.isin(white_labels, large_labels).astype(np.uint8) * 255 if len(large_labels) else np.zeros_like(gray)
             excluded_white = cv2.dilate(excluded_white, np.ones((3, 3), np.uint8))
             local_base = cv2.GaussianBlur(gray, (0, 0), max(1.0, 4 * scale))
-            contrast = (cv2.absdiff(gray, local_base) if config.get('include_dark_components')
-                        else cv2.subtract(gray, local_base))
-            if config.get('include_dark_components'):
-                dark = ((cv2.subtract(local_base, gray) >= 18) & (hsv[:, :, 1] <= 115))
-                bright = np.maximum(bright, dark.astype(np.uint8) * 255)
-            cue = ((motion >= float(config.get("motion_threshold", 16)))
-                   & (foreground >= float(config.get("background_threshold", 8)))
-                   & (contrast >= float(config.get("contrast_threshold", 8))))
-            mask = cv2.bitwise_and(bright, np.where(cue, 255, 0).astype(np.uint8))
-            mask = cv2.bitwise_and(mask, roi)
-            mask = cv2.bitwise_and(mask, cv2.bitwise_not(excluded_white))
-            count, labels, stats, centers = cv2.connectedComponentsWithStats(mask, 8)
             detections = []
-            for label in range(1, count):
-                x, y, w, h, area = map(int, stats[label])
-                if not min_area <= area <= max_area or max(w, h) / max(1, min(w, h)) > 4.0:
+            for polarity, component, center, pixels, contrast, cue in _appearance_components(
+                    gray, hsv, bright, motion, foreground, local_base, config, excluded_white, roi):
+                x, y, w, h, area = map(int, component)
+                if not min_area <= area <= max_area or max(w, h) / max(1, min(w, h)) > float(config.get("max_component_aspect", 4)):
                     continue
                 if max(w, h) > max(18, 34 * scale) or area / (w * h) < 0.12:
                     continue
-                pixels = labels[y:y + h, x:x + w] == label
                 local_motion = float(motion[y:y + h, x:x + w][pixels].mean())
                 background_difference = float(foreground[y:y + h, x:x + w][pixels].mean())
-                local_contrast = float(contrast[y:y + h, x:x + w][pixels].mean())
+                local_contrast = float(contrast[pixels].mean())
                 compactness = area / (w * h)
                 score = 0.2 + 0.35 * min(1.0, local_motion / 90) + 0.3 * min(1.0, local_contrast / 65) + 0.15 * compactness
-                cx, cy = map(float, centers[label])
+                cx, cy = map(float, center)
                 overlaps = any(b[0] <= cx <= b[0] + b[2] and b[1] <= cy <= b[1] + b[3]
                                for b in (region["bbox"] for region in occlusion_regions))
                 if overlaps:
@@ -684,7 +727,9 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
                 detections.append({"x": round(cx, 3), "y": round(cy, 3),
                                    "radius": round(max(1.0, math.sqrt(area / math.pi)), 3),
                                    "confidence": round(min(0.95, max(0.0, score)), 4),
-                                   "bbox": [x, y, w, h], "method": "opencv_motion_bright_component",
+                                   "bbox": [x, y, w, h], "method": "opencv_motion_" + polarity + "_component",
+                                   "appearance_polarity": polarity,
+                                   "global_resolution_observation": True,
                                    "confidence_kind": "heuristic_rank_not_probability",
                                    "foreground_difference": round(local_motion, 3),
                                    "background_difference": round(background_difference, 3),
@@ -696,6 +741,11 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
             detections = _nms(detections, max(1.0, 3 * scale),
                               512 if scorer or active_regions or selection == "spatial" else max_candidates)
         if native_detector is not None:
+            if global_reserve:
+                # Select the low-resolution observations before native texture
+                # can alter their spatial rank. Refinements inherit this slot.
+                detections, _ = _refined_budget(detections, frame.shape, global_reserve,
+                                               selection, max(1.0, 3 * scale), active_regions)
             native, high_resolution = native_detector.detect(source_frames[index], detections, index, camera_motion, active_regions)
             for item in native:
                 item["possible_occluder_overlap"] = any(
@@ -706,8 +756,12 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
             global_count = len(detections)
             detections = _merge_native(detections, native, max(1.0, 3 * scale))
             proposal_count += max(0, len(detections) - global_count)
-            detections = _nms(detections, max(1.0, 3 * scale),
-                              512 if scorer or active_regions or selection == "spatial" else max_candidates)
+            if global_reserve:
+                detections, _, _ = _multiscale_budget(detections, frame.shape, 512, global_reserve,
+                                                       selection, max(1.0, 3 * scale), active_regions)
+            else:
+                detections = _nms(detections, max(1.0, 3 * scale),
+                                  512 if scorer or active_regions or selection == "spatial" else max_candidates)
         if scorer:
             rescored = scorer.score(frame, detections, preprocessing=config.get("frame_preprocessing"))
             for old, new in zip(detections, rescored):
@@ -718,13 +772,20 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
                 else:
                     new["confidence"] = old["confidence"]
             detections = rescored
-        detections, preferred_count = _refined_budget(detections, frame.shape, max_candidates,
-                                                       selection, max(1.0, 3 * scale), active_regions)
+        reserved_count = 0
+        if native_detector is not None and global_reserve:
+            detections, preferred_count, reserved_count = _multiscale_budget(
+                detections, frame.shape, max_candidates, global_reserve, selection,
+                max(1.0, 3 * scale), active_regions)
+        else:
+            detections, preferred_count = _refined_budget(detections, frame.shape, max_candidates,
+                                                          selection, max(1.0, 3 * scale), active_regions)
         record = {"frame_index": index, "time": float(timestamp), "detections": detections,
                   "occlusion_regions": occlusion_regions, "detector": dict(provenance),
                   "person_detector": person_diagnostics, "high_resolution": high_resolution,
                   "camera_motion": camera_motion, "proposal_count_before_limit": proposal_count,
                   "candidate_limit_reached": proposal_count > max_candidates,
+                  "global_reserved_candidate_count": reserved_count,
                   "refinement": {"active_regions": active_regions, "preferred_candidates": preferred_count,
                                  "assistance_used": bool(active_regions), "coordinate_system": "analysis_pixels",
                                  "provides_contact_evidence": False, "provides_target_identity": False}}

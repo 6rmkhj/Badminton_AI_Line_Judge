@@ -13,6 +13,114 @@ import numpy as np
 from .media import probe, repair_preview_tail, _FrameProgress, _run_ffmpeg_progress
 
 
+def draw_observed_trail(canvas, observations, colour, thickness=1):
+    """Connect consecutive observations only; leave missing frames visible."""
+    segment = []
+    previous = None
+    for frame, point in observations:
+        if previous is not None and frame != previous + 1:
+            if len(segment) > 1:
+                cv2.polylines(canvas, [np.asarray(segment, dtype=np.int32)], False, colour, thickness)
+            segment = []
+        segment.append(point)
+        previous = frame
+    if len(segment) > 1:
+        cv2.polylines(canvas, [np.asarray(segment, dtype=np.int32)], False, colour, thickness)
+
+
+def write_trajectory_context(source_frames, timestamps, analysis_size, landing, output_dir):
+    """Show the approach and rebound in a fixed, trajectory-sized source crop.
+
+    These presentation crops are separate from the fixed native contact-model
+    patches. Markers indicate observed candidate centroids, never inferred
+    missing observations or a confirmed cork/floor contact.
+    """
+    width, height = analysis_size
+    event = landing.get('image_motion_event') or {}
+    observations = event.get('trajectory') or []
+    if not observations:
+        return None
+    observations = sorted(observations, key=lambda item: item['frame_index'])
+    by_frame = {int(item['frame_index']): item for item in observations}
+    centre = int(landing['frame_index'])
+    period = float(np.median(np.diff(timestamps))) if len(timestamps) > 1 else 1 / 30
+    first = max(0, centre - max(2, round(.1 / period)))
+    last = min(len(timestamps) - 1, centre + max(3, round(.133333 / period)))
+    interval = event.get('frame_interval') or [centre, centre]
+    first, last = min(first, interval[0]), max(last, interval[1])
+    # A high-frame-rate occlusion can span more than twelve frames. In that
+    # case show measured context on BOTH sides, with honest source labels,
+    # rather than filling the strip with only the unobserved gap.
+    if last - first < 12:
+        indices = list(range(first, last + 1))
+    else:
+        before = [i for i in by_frame if i < centre][-5:]
+        after = [i for i in by_frame if i > centre][:5]
+        indices = sorted(set(before + [centre] + after))
+    consecutive = all(b == a + 1 for a, b in zip(indices, indices[1:]))
+    context = [o for o in observations if o['frame_index'] in indices]
+    # A missed observation at the edge must not crop the incoming object out.
+    earlier = [o for o in observations if o['frame_index'] < indices[0]]
+    later = [o for o in observations if o['frame_index'] > indices[-1]]
+    context = earlier[-1:] + context + later[:1]
+    points = np.asarray([[o['x'], o['y']] for o in context] + [landing['candidate_px']], dtype=float)
+    margin = max(12., float(landing.get('uncertainty_px', 2)) * 2)
+    low, high = points.min(axis=0) - margin, points.max(axis=0) + margin
+    midpoint = (low + high) / 2
+    extent = np.maximum(high - low, 48)
+    low = np.maximum(0, midpoint - extent / 2)
+    high = np.minimum([width, height], midpoint + extent / 2)
+    tiles, source_roi, source_size = [], None, None
+    tile_width, tile_height = 320, 320
+    for index in indices:
+        source = source_frames[index]
+        sh, sw = source.shape[:2]
+        scale = np.array([sw / width, sh / height])
+        left, top = np.floor(low * scale).astype(int)
+        right, bottom = np.ceil(high * scale).astype(int)
+        right, bottom = min(sw, right), min(sh, bottom)
+        crop = source[top:bottom, left:right]
+        ratio = min(tile_width / crop.shape[1], (tile_height - 48) / crop.shape[0])
+        resized = cv2.resize(crop, (max(1, round(crop.shape[1] * ratio)),
+                                     max(1, round(crop.shape[0] * ratio))), interpolation=cv2.INTER_AREA)
+        canvas = np.full((tile_height, tile_width, 3), (22, 26, 32), dtype=np.uint8)
+        xoff, yoff = (tile_width - resized.shape[1]) // 2, 48
+        canvas[yoff:yoff + resized.shape[0], xoff:xoff + resized.shape[1]] = resized
+
+        def display_point(point):
+            return tuple(np.rint((np.asarray(point) * scale - [left, top]) * ratio
+                                 + [xoff, yoff]).astype(int))
+
+        if index in by_frame:
+            observation = by_frame[index]
+            point = display_point([observation['x'], observation['y']])
+            cv2.circle(canvas, point, 8, (255, 220, 50), 1, cv2.LINE_AA)
+        if index == centre:
+            cv2.drawMarker(canvas, display_point(landing['candidate_px']), (40, 100, 255),
+                           cv2.MARKER_CROSS, 22, 1, cv2.LINE_AA)
+        cv2.putText(canvas, f"FRAME {index}  |  {timestamps[index]:.3f}s", (10, 18),
+                    cv2.FONT_HERSHEY_SIMPLEX, .48, (245, 245, 245), 1, cv2.LINE_AA)
+        cv2.putText(canvas, 'MOTION ESTIMATE - CONTACT UNCONFIRMED' if consecutive else
+                    'SAMPLED CONTEXT - CONTACT UNCONFIRMED', (10, 37),
+                    cv2.FONT_HERSHEY_SIMPLEX, .34, (80, 200, 255), 1, cv2.LINE_AA)
+        tiles.append(canvas)
+        source_roi, source_size = [int(left), int(top), int(right), int(bottom)], [sw, sh]
+    while len(tiles) % 3:
+        tiles.append(np.full_like(tiles[0], (22, 26, 32)))
+    strip = np.vstack([np.hstack(tiles[i:i + 3]) for i in range(0, len(tiles), 3)])
+    relative = 'evidence/trajectory-context.jpg'
+    destination = Path(output_dir) / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if not cv2.imwrite(str(destination), strip, [cv2.IMWRITE_JPEG_QUALITY, 94]):
+        raise OSError('Could not write trajectory context evidence')
+    return {'path': relative, 'frame_indices': indices, 'times': [timestamps[i] for i in indices],
+            'analysis_size': {'width': width, 'height': height}, 'source_size': source_size,
+            'analysis_roi': [*low.tolist(), *high.tolist()], 'source_roi': source_roi,
+            'sampling': 'consecutive' if consecutive else 'observed_context_with_inferred_frame',
+            'contact_observed': False,
+            'note': 'Fixed source crop spanning the observed approach and rebound; image motion estimates contact only.'}
+
+
 def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decision,
                          output_dir, config=None, *, progress_callback=None):
     cfg = dict(config or {})
@@ -31,7 +139,7 @@ def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decis
     selected_id = str(landing.get('track_id')) if landing else None
     ordered = sorted(tracks, key=lambda track: (str(track['track_id']) != selected_id,
                                                 -len(track.get('observations', []))))
-    shown = ordered[:max(1, min(40, int(cfg.get('max_overlay_tracks', 12))))]
+    shown = ordered[:max(1, min(40, int(cfg.get('max_overlay_tracks', 1 if landing else 12))))]
     indexed = defaultdict(list)
     for track in shown:
         for observation in track.get('observations', []):
@@ -49,7 +157,7 @@ def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decis
             canvas = frames[index].copy()
             height, width = canvas.shape[:2]
             polygon = calibration.get('polygon_px')
-            if polygon:
+            if polygon and calibration.get('status') == 'ok':
                 cv2.polylines(canvas, [np.rint(polygon).astype(np.int32)], True, (0, 190, 255), 1)
             for identifier, observation in indexed[index]:
                 trails[identifier].append((index, (round(observation['x']), round(observation['y']))))
@@ -59,8 +167,7 @@ def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decis
                 if not len(points):
                     continue
                 colour = (70, 150, 255) if identifier == selected_id else (150, 230, 90)
-                if len(points) > 1:
-                    cv2.polylines(canvas, [points], False, colour, 1)
+                draw_observed_trail(canvas, trails[identifier], colour)
                 if trails[identifier][-1][0] == index:
                     cv2.circle(canvas, tuple(points[-1]), 4, colour, 1)
             if landing and abs(timestamps[index] - landing['time']) <= max(period, .08):

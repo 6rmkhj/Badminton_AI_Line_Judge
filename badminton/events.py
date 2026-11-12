@@ -59,8 +59,159 @@ def prioritize_review_candidates(candidates, regions, *, identity_first=False):
         scores = (-_value(candidate, "identity_confidence"), -_value(candidate, "confidence"))
         if not identity_first:
             scores = (scores[1],)
-        return (not bool(review_region_indices(candidate, regions)), *scores)
+        requested = candidate.get('identity_source') == 'operator_selected_track' or candidate.get('request_match') == 'selected'
+        support = candidate.get('flight_trajectory_support') or {}
+        if not isinstance(support, dict):
+            support = {}
+        flight = support.get('supported_for_review') is True
+        observed = (candidate.get('contact_observed') is True
+                    and candidate.get('contact_evidence_source') in {'human_review', 'qualified_learned_contact_localization'})
+        # Raw detector brightness/contrast scores cannot decide between a long
+        # coherent flight and a high-contrast shirt edge. Rank the measured
+        # approach extent, discounted by its path-fit residual, for review only.
+        flight_rank = max(0., _value(support, 'approach_displacement_y_px')) / (1 + max(0., _value(support, 'fit_residual_px')))
+        motion_event = candidate.get('image_motion_event') or {}
+        if isinstance(motion_event, dict) and motion_event.get('point_kind') == 'inferred_object_center':
+            flight_rank *= .7
+        return (not bool(review_region_indices(candidate, regions)), not requested, not observed, not flight,
+                -flight_rank if flight else 0., *scores)
     return sorted(candidates, key=key)
+
+
+def _flight_review_support(track, observations, index, image_width, nominal_step):
+    """Measure a dedicated trajectory's approach; never qualify its identity.
+
+    Dense body/clothing proposals can reverse direction too. A separate flight
+    hypothesis must also retain a sustained, well-fit incoming image path before
+    its rebound can consume the limited first-contact review evidence budget.
+    """
+    if not isinstance(track.get('flight_hypothesis'), dict):
+        return None
+    window = max(9, min(64, int(math.ceil(.35 / nominal_step))))
+    before = observations[max(0, index - window + 1):index + 1]
+    if len(before) < 5 or before[-1]['time'] - before[0]['time'] < .12:
+        return None
+    times = np.asarray([item['time'] - before[-1]['time'] for item in before])
+    points = np.asarray([[item['x'], item['y']] for item in before])
+    coefficients = np.polyfit(times, points, 2)
+    fitted = np.column_stack([np.polyval(coefficients[:, axis], times) for axis in range(2)])
+    residual = float(np.sqrt(np.mean(np.sum((points - fitted) ** 2, axis=1))))
+    drop = float(points[-1, 1] - points[0, 1])
+    increments = np.diff(points[:, 1])
+    radius = max(1., _value(observations[index], 'radius', 2.))
+    if (residual > max(3., radius * 1.5) or drop < max(8., image_width * .02)
+            or float(np.mean(increments > 0)) < .8):
+        return None
+    return {'supported_for_review': True, 'method': 'coherent_approach_and_image_rebound',
+            'approach_observation_count': len(before), 'fit_residual_px': round(residual, 4),
+            'approach_displacement_y_px': round(drop, 4),
+            'approach_frame_interval': [before[0]['frame_index'], before[-1]['frame_index']],
+            'verified_identity': False, 'physical_contact_verified': False}
+
+
+def _occluded_rebound_candidates(track, observations, timestamps, frames, calibration, nominal_step):
+    """Infer a bounded image-trajectory intersection across a missing interval.
+
+    Only dedicated coherent-flight hypotheses enter this path. Fits never fill
+    in track observations and cannot assert measured cork/floor contact.
+    """
+    if not isinstance(track.get('flight_hypothesis'), dict) or len(observations) < 8 or not len(timestamps):
+        return []
+    all_times = np.asarray([item['time'] for item in observations])
+    gaps = np.flatnonzero(np.diff(all_times) > nominal_step * 2.5)
+    proposals = []
+    for gap_index in gaps:
+        left, right = observations[gap_index], observations[gap_index + 1]
+        duration = right['time'] - left['time']
+        if duration > .35:
+            continue
+        start = max([int(i) + 1 for i in gaps if i < gap_index] or [0])
+        stop = min([int(i) + 1 for i in gaps if i > gap_index] or [len(observations)])
+        before = observations[max(start, gap_index - 9):gap_index + 1]
+        after = observations[gap_index + 1:min(stop, gap_index + 7)]
+        if len(before) < 5 or len(after) < 3 or before[-1]['time'] - before[0]['time'] < .12:
+            continue
+        origin = left['time']
+
+        def fit(items):
+            times = np.asarray([item['time'] - origin for item in items])
+            points = np.asarray([[item['x'], item['y']] for item in items])
+            coefficients = np.polyfit(times, points, 2)
+            fitted = np.column_stack([np.polyval(coefficients[:, axis], times) for axis in range(2)])
+            residual = float(np.sqrt(np.mean(np.sum((points - fitted) ** 2, axis=1))))
+            return coefficients, residual
+
+        incoming, before_error = fit(before)
+        outgoing, after_error = fit(after)
+        radius = max(1., _value(left, 'radius', 2.), _value(right, 'radius', 2.))
+        tolerance = max(3., radius * 1.5)
+        drop = before[-1]['y'] - before[0]['y']
+        width = frames[0].shape[1] if frames else 0
+        if (max(before_error, after_error) > tolerance or drop < max(8., width * .015)
+                or float(np.mean(np.diff([item['y'] for item in before]) > 0)) < .8):
+            continue
+        for root in sorted(np.roots(incoming[:, 1] - outgoing[:, 1]), key=lambda value: value.real):
+            if abs(root.imag) > 1e-6 or not 0 < root.real < duration:
+                continue
+            offset = float(root.real)
+            incoming_speed = float(np.polyval(np.polyder(incoming[:, 1]), offset))
+            outgoing_speed = float(np.polyval(np.polyder(outgoing[:, 1]), offset))
+            if incoming_speed <= 12 or outgoing_speed >= -12:
+                continue
+            from_before = np.asarray([np.polyval(incoming[:, axis], offset) for axis in range(2)])
+            from_after = np.asarray([np.polyval(outgoing[:, axis], offset) for axis in range(2)])
+            if abs(from_before[0] - from_after[0]) > max(4., radius * 2):
+                continue
+            point = (from_before + from_after) / 2
+            if frames and not (0 <= point[0] < frames[0].shape[1] and 0 <= point[1] < frames[0].shape[0]):
+                continue
+            estimated_time = origin + offset
+            index = int(np.argmin(np.abs(np.asarray(timestamps) - estimated_time)))
+            actual_context = before[-5:] + after[:4]
+            uncertainty = max(radius, tolerance * 2, abs(incoming_speed) * nominal_step / 2,
+                              abs(outgoing_speed) * nominal_step / 2)
+            reasons = ['OCCLUDED_IMAGE_TRAJECTORY_REBOUND', 'FIRST_CONTACT_NOT_OBSERVED',
+                       'CORK_CONTACT_REGION_UNRESOLVED', 'CONTACT_OCCLUDED_OR_MISSING',
+                       'TARGET_IDENTITY_UNVERIFIED', 'TEMPORAL_GAP_NEAR_CANDIDATE']
+            if track.get('identity_ambiguous'):
+                reasons.append('TRACK_IDENTITY_AMBIGUOUS')
+            if (calibration or {}).get('status') != 'ok':
+                reasons.append('CALIBRATION_NOT_CONFIRMED')
+            first = not proposals
+            if not first:
+                reasons.append('LATER_REBOUND_AFTER_FIRST_CANDIDATE')
+            proposals.append({
+                'track_id': track.get('track_id'), 'frame_index': index, 'time': float(timestamps[index]),
+                'candidate_px': point.tolist(), 'contact_observed': False, 'contact_px': None,
+                'contact_radius_px': radius, 'uncertainty_px': round(uncertainty, 3),
+                'identity_confidence': .15, 'identity_source': 'unverified_image_trajectory',
+                'confidence': round(float(np.mean([_value(item, 'confidence', .5) for item in actual_context])) * .4, 4),
+                'confidence_kind': 'uncalibrated_candidate_score', 'target_court_score': 0.,
+                'reason_codes': reasons, 'first_contact_missing': True, 'occluded': True,
+                'temporal_gap_seconds': duration,
+                'evidence_frame_indices': [item['frame_index'] for item in actual_context],
+                'backtrack_frame_indices': [item['frame_index'] for item in before],
+                'observed_before_seconds': estimated_time - before[0]['time'],
+                'observed_after_seconds': after[-1]['time'] - estimated_time,
+                'contiguous_observed_before_seconds': before[-1]['time'] - before[0]['time'],
+                'contiguous_observed_after_seconds': after[-1]['time'] - after[0]['time'],
+                'appearance_evidence': _patch_evidence(frames, index, *point, radius),
+                'method': 'offline_occluded_image_trajectory_intersection',
+                'image_motion_event': {'kind': 'occluded_descent_and_rebound', 'first_in_track': first,
+                    'point_kind': 'inferred_object_center', 'estimated_time': estimated_time,
+                    'frame_interval': [left['frame_index'], right['frame_index']],
+                    'time_interval': [left['time'], right['time']],
+                    'inference_only': True, 'coordinate_system': 'analysis_pixels',
+                    'trajectory': [{key: item[key] for key in ('frame_index', 'time', 'x', 'y')}
+                                   for item in actual_context]},
+                'flight_trajectory_support': {'supported_for_review': first,
+                    'method': 'coherent_trajectory_gap_intersection', 'approach_observation_count': len(before),
+                    'approach_displacement_y_px': round(float(drop), 4),
+                    'fit_residual_px': round(before_error, 4), 'rebound_fit_residual_px': round(after_error, 4),
+                    'verified_identity': False, 'physical_contact_verified': False},
+            })
+            break
+    return proposals
 
 
 def _mark_review_guidance(candidate, regions):
@@ -137,6 +288,8 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
     positive_steps = np.diff(all_times)
     positive_steps = positive_steps[np.isfinite(positive_steps) & (positive_steps > 0)]
     nominal_step = float(np.median(positive_steps)) if len(positive_steps) else 1 / 30
+    motion_window = max(2, min(8, int(math.ceil(.06 / nominal_step))))
+    plateau_limit = max(2, min(18, int(math.ceil(.08 / nominal_step))))
     candidates = []
     for track in tracks or []:
         observations = []
@@ -165,6 +318,8 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
         if not np.isfinite(speed).all() or float(np.max(speed)) < min_speed:
             continue
         hypotheses = []
+        rebounds = []
+        rebound_windows = {}
         for i in range(2, len(observations) - 2):
             previous = float(np.median(speed[max(0, i - 3):i]))
             following = float(np.median(speed[i:min(len(speed), i + 3)]))
@@ -179,6 +334,36 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
                 cosine = float(np.dot(before, after) / denom)
                 if cosine < -0.2:
                     hypotheses.append((i, min(0.6, 0.35 + 0.2 * -cosine), "DIRECTION_REVERSAL_CANDIDATE"))
+            # A shuttle can keep moving sideways after it rebounds, so the
+            # full 2-D velocity need not reverse. Preserve a separate image-y
+            # approach/rebound hypothesis, rather than preferring its much
+            # later final stop. This is an image-space inference only: a racket
+            # hit or a player's movement can also produce this shape.
+            before_window = slice(max(0, i - motion_window), i)
+            radius = max(1., _value(observations[i], "radius", 2.))
+            plateau_end = i
+            # A distant shuttle may occupy the same quantized y-coordinate in
+            # two frames at the turn. Keep the earliest plateau sample instead
+            # of missing the event because neither instantaneous slope reverses.
+            while (plateau_end + 1 < len(observations) - 1 and plateau_end - i < plateau_limit
+                   and times[plateau_end + 1] - times[i] <= .08
+                   and abs(points[plateau_end + 1, 1] - points[i, 1]) <= max(.25, radius * .25)):
+                plateau_end += 1
+            after_window = slice(plateau_end, min(len(velocity), plateau_end + motion_window))
+            approach = float(np.median(velocity[before_window, 1]))
+            rebound = float(np.median(velocity[after_window, 1]))
+            contiguous = bool(np.all(dt[i - 1:plateau_end + 1] <= nominal_step * 2.5))
+            if (contiguous and velocity[i - 1, 1] > 0 and velocity[plateau_end, 1] < 0
+                    and approach >= max(12., min_speed * .5)
+                    and rebound <= -max(12., min_speed * .5)
+                    and points[i, 1] - points[max(0, i - motion_window), 1] >= max(2., radius * 1.5)
+                    and points[i, 1] - points[min(len(points) - 1, plateau_end + motion_window), 1] >= max(1.5, radius)):
+                # Within one causal track, a later bounce cannot be its first
+                # observed approach/rebound. Keep it for review with lower rank.
+                rebounds.append(i)
+                rebound_windows[i] = plateau_end
+                hypotheses.append((i, .88 if len(rebounds) == 1 else .44,
+                                   "IMAGE_SPACE_DESCENT_AND_REBOUND"))
         if not hypotheses:
             # Track termination may be landing, a hit, or occlusion. Keep a draft.
             hypotheses.append((len(observations) - 1, 0.2, "TRACK_TERMINATED_WITHOUT_CONTACT"))
@@ -238,7 +423,7 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
                 contiguous_start -= 1
             while contiguous_end < len(times) - 1 and times[contiguous_end + 1] - times[contiguous_end] <= nominal_step * 2.5:
                 contiguous_end += 1
-            candidates.append({
+            candidate = {
                 "track_id": track.get("track_id"), "frame_index": frame_index,
                 "time": observation["time"], "candidate_px": [observation["x"], observation["y"]],
                 "contact_observed": False, "contact_px": None,
@@ -255,12 +440,37 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
                 "temporal_gap_seconds": round(largest_gap, 6),
                 "appearance_evidence": _patch_evidence(frames, frame_index, observation["x"], observation["y"], radius),
                 "method": "offline_motion_and_tracklet_candidate_search",
-            })
+            }
+            if cue == "IMAGE_SPACE_DESCENT_AND_REBOUND":
+                first = index == rebounds[0]
+                plateau_end = rebound_windows[index]
+                candidate['image_motion_event'] = {
+                    'kind': 'descent_and_rebound', 'first_in_track': first,
+                    'point_kind': 'observed_object_center',
+                    'frame_interval': [observations[index - 1]['frame_index'], observations[plateau_end + 1]['frame_index']],
+                    'time_interval': [observations[index - 1]['time'], observations[plateau_end + 1]['time']],
+                    'plateau_frame_interval': [observations[index]['frame_index'], observations[plateau_end]['frame_index']],
+                    'inference_only': True, 'coordinate_system': 'analysis_pixels',
+                    'trajectory': [{key: item[key] for key in ('frame_index', 'time', 'x', 'y')}
+                                   for item in local],
+                }
+                if not first:
+                    candidate['reason_codes'].append('LATER_REBOUND_AFTER_FIRST_CANDIDATE')
+                else:
+                    support = _flight_review_support(track, observations, index,
+                        frames[0].shape[1] if frames else 0, nominal_step)
+                    if support is not None:
+                        candidate['flight_trajectory_support'] = support
+            candidates.append(candidate)
+        for candidate in _occluded_rebound_candidates(track, observations, timestamps, frames, calibration, nominal_step):
+            if event_window is None or event_window[0] <= candidate['time'] <= event_window[1]:
+                if not rebounds or candidate['time'] < observations[rebounds[0]]['time']:
+                    candidates.append(candidate)
     candidates.sort(key=lambda item: (-item["confidence"], -item["identity_confidence"], item["time"]))
     # The global cap must not discard a reviewed region before the later native
     # evidence budget can see it. The cap and physical qualification stay intact.
+    candidates = prioritize_review_candidates(candidates, regions)
     if regions:
-        candidates = prioritize_review_candidates(candidates, regions)
         for candidate in candidates:
             _mark_review_guidance(candidate, regions)
     candidates = candidates[:max_candidates]

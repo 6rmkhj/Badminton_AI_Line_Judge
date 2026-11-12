@@ -456,6 +456,38 @@ function renderDiagnostics(result) {
     grid.append(card);
   });
 }
+function renderLandingCandidate(camera, view, player) {
+  const candidate = view.landing_candidate;
+  if (!candidate || candidate.status !== 'approximate' || candidate.inference_only !== true
+      || candidate.contact_observed !== false || !validSeconds(candidate.time_seconds)) return null;
+  const inferred = candidate.point_kind === 'inferred_object_center' || candidate.kind === 'occluded_descent_and_rebound';
+  const panel = el('section', 'landing-candidate'); panel.dataset.candidateCamera = camera;
+  const heading = el('div', 'candidate-heading');
+  heading.append(el('strong', '', inferred ? '가림 구간의 착지 추정' : '착지 추정 구간'), el('span', 'candidate-badge', '추정 · 접촉 미확인')); panel.append(heading);
+  const interval = candidate.time_interval;
+  const hasInterval = Array.isArray(interval) && interval.length === 2 && interval.every(validSeconds) && interval[0] <= interval[1];
+  const stamp = hasInterval ? `${fmt(interval[0], 2)}–${fmt(interval[1], 2)}초` : `${fmt(candidate.time_seconds, 2)}초 부근`;
+  const frames = candidate.frame_interval;
+  const hasFrames = Array.isArray(frames) && frames.length === 2 && frames.every(value => Number.isInteger(value) && value >= 0) && frames[0] <= frames[1];
+  panel.append(el('p', 'candidate-time', stamp));
+  if (hasFrames || Number.isInteger(candidate.frame_index)) panel.append(el('p', 'candidate-frames', hasFrames ? `프레임 ${frames[0]}–${frames[1]}` : `프레임 ${candidate.frame_index} 부근`));
+  const point = candidate.point_px, size = candidate.analysis_size;
+  if (Array.isArray(point) && point.length === 2 && point.every(value => typeof value === 'number' && Number.isFinite(value))
+      && size && validSeconds(size.width) && size.width > 0 && validSeconds(size.height) && size.height > 0) {
+    const x = Math.round(Math.max(0, Math.min(1, point[0] / size.width)) * 100), y = Math.round(Math.max(0, Math.min(1, point[1] / size.height)) * 100);
+    panel.append(el('p', 'candidate-position', `영상 속 추정 위치 · 왼쪽에서 ${x}% / 위에서 ${y}%`));
+  }
+  panel.append(el('p', 'candidate-note', inferred
+    ? '가림 전후의 이동 경로로 위치를 추정했습니다. 이 구간의 물체 위치와 실제 바닥 접촉은 직접 확인하지 못했습니다.'
+    : candidate.kind === 'descent_and_rebound'
+    ? '물체가 내려온 뒤 올라가는 움직임을 찾았습니다. 바닥 접촉이나 같은 랠리의 셔틀임을 확정한 것은 아닙니다.'
+    : '이동 경로에서 검토할 후보 위치를 찾았습니다. 실제 착지인지 영상에서 확인해 주세요.'));
+  if (player) {
+    const button = el('button', 'seek-button', '착지 추정 구간부터 보기'); button.type = 'button'; button.dataset.candidateSeekCamera = camera;
+    button.addEventListener('click', () => seek(player, hasInterval ? interval[0] : candidate.time_seconds)); panel.append(button);
+  }
+  return panel;
+}
 function renderView(camera, view, diagnostics) {
   const card = el('article', 'result-view');
   card.id = 'result-view-' + camera.toLowerCase();
@@ -484,6 +516,35 @@ function renderView(camera, view, diagnostics) {
   const body = el('div', 'view-body');
   if (view.error) body.append(el('p', 'message error', view.error));
   if (view.rationale) body.append(el('p', 'rationale', view.rationale));
+  const candidatePanel = renderLandingCandidate(camera, view, player);
+  if (candidatePanel) body.append(candidatePanel);
+  const trajectoryContext = safeUrl(view.trajectory_context_url);
+  if (trajectoryContext) {
+    const figure = el('figure', 'trajectory-context');
+    const link = el('a'); link.href = trajectoryContext; link.target = '_blank'; link.rel = 'noopener';
+    const image = el('img'); image.src = trajectoryContext; image.loading = 'lazy';
+    image.alt = camera + ' 시점의 이동 경로와 후보 구간 확대'; link.append(image);
+    const inferred = view.landing_candidate?.point_kind === 'inferred_object_center' || view.landing_candidate?.kind === 'occluded_descent_and_rebound';
+    figure.append(link, el('figcaption', '', candidatePanel ? inferred
+      ? '관측 경로와 가림 구간의 추정 위치 확대 ↗ · 관측과 추정을 구분해 표시했습니다. 추정 위치는 직접 확인한 바닥 접촉점이 아닙니다.'
+      : '이동 경로와 추정 위치 확대 ↗ · 표시점은 추적한 물체의 중심이며 실제 바닥 접촉점과 다를 수 있습니다.'
+      : '이동 경로와 검토 구간 확대 ↗'));
+    body.append(figure);
+  }
+  const replayUrl = safeUrl(view.trajectory_replay_url);
+  if (replayUrl) {
+    const section = el('section', 'trajectory-replay');
+    const heading = el('h4', '', '추적 경로 영상'); heading.id = 'trajectory-replay-heading-' + camera.toLowerCase();
+    section.setAttribute('aria-labelledby', heading.id); section.append(heading);
+    const replay = el('video'); replay.controls = true; replay.preload = 'metadata'; replay.playsInline = true;
+    replay.src = replayUrl; replay.setAttribute('aria-label', camera + ' 시점 추적 경로 구간 영상'); section.append(replay);
+    const origin = view.trajectory_replay_info?.source_time_origin;
+    section.append(el('p', 'replay-timeline-note', validSeconds(origin)
+      ? `원본 ${fmt(origin, 2)}초부터의 구간입니다. 영상 위 프레임·시각은 원본 기준이며, 재생 막대는 이 구간의 시작을 0초로 표시합니다.`
+      : '영상 위 프레임·시각은 원본 기준입니다. 이 영상은 원본에서 잘라낸 구간이므로 재생 막대 시간과 다릅니다.'));
+    section.append(el('p', 'replay-candidate-note', '경로는 관측한 지점만 연결하며, 누락된 프레임 사이에는 선을 잇지 않습니다. 착지 표시는 추정이며 바닥 접촉이나 IN/OUT 확정을 뜻하지 않습니다.'));
+    body.append(section);
+  }
   if (diagnostics && typeof diagnostics === 'object') {
     const observation = diagnostics.observation_status;
     const information = el('div', 'view-diagnosis');
@@ -493,12 +554,12 @@ function renderView(camera, view, diagnostics) {
     appendTextList(information, '이 시점의 후속 조치', diagnostics.follow_up_actions);
     if (information.childNodes.length) body.append(information);
   }
-  if (player && typeof diagnostics?.focus_time_seconds === 'number' && Number.isFinite(diagnostics.focus_time_seconds) && diagnostics.focus_time_seconds >= 0) {
+  if (!candidatePanel && player && typeof diagnostics?.focus_time_seconds === 'number' && Number.isFinite(diagnostics.focus_time_seconds) && diagnostics.focus_time_seconds >= 0) {
     const button = el('button', 'seek-button', `검토 구간 ${fmt(diagnostics.focus_time_seconds, 3)}초로 이동`);
     button.type = 'button'; button.dataset.reviewSeekCamera = camera;
     button.addEventListener('click', () => seek(player, diagnostics.focus_time_seconds)); body.append(button);
-  } else if (player && typeof view.contact_time_seconds === 'number' && Number.isFinite(view.contact_time_seconds) && view.contact_time_seconds >= 0) {
-    const button = el('button', 'seek-button', `이 시점의 접촉 ${fmt(view.contact_time_seconds, 3)}초로 이동`);
+  } else if (!candidatePanel && player && typeof view.contact_time_seconds === 'number' && Number.isFinite(view.contact_time_seconds) && view.contact_time_seconds >= 0) {
+    const button = el('button', 'seek-button', `${view.qualified === true ? '판정 근거' : '후보'} 구간 ${fmt(view.contact_time_seconds, 3)}초로 이동`);
     button.type = 'button'; button.dataset.seekCamera = camera;
     button.addEventListener('click', () => seek(player, view.contact_time_seconds)); body.append(button);
   }

@@ -105,6 +105,67 @@ def _finite(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
+def _landing_candidate(result):
+    """Expose a useful image-space hypothesis without promoting it to contact."""
+    landing, analysis = result.get("selected_landing") or {}, result.get("analysis") or {}
+    if not isinstance(landing, dict) or not isinstance(analysis, dict) or landing.get("contact_observed") is True:
+        return None
+    point, stamp, frame = landing.get("candidate_px"), landing.get("time"), landing.get("frame_index")
+    width, height, count = analysis.get("width"), analysis.get("height"), analysis.get("frame_count")
+    if (not isinstance(point, (list, tuple)) or len(point) != 2 or not all(_finite(v) for v in point)
+            or not _finite(width) or not _finite(height) or width <= 0 or height <= 0
+            or not 0 <= point[0] < width or not 0 <= point[1] < height
+            or not _finite(stamp) or stamp < 0 or not isinstance(frame, int) or isinstance(frame, bool)
+            or frame < 0 or not isinstance(count, int) or isinstance(count, bool) or not frame < count):
+        return None
+    motion = landing.get("image_motion_event") or {}
+    if not isinstance(motion, dict):
+        motion = {}
+    inferred = (motion.get("kind") == "occluded_descent_and_rebound"
+                or motion.get("point_kind") == "inferred_object_center"
+                or landing.get("point_kind") == "inferred_object_center")
+    kind = motion.get("kind") if motion.get("kind") in {"descent_and_rebound", "occluded_descent_and_rebound"} else "motion_candidate"
+    candidate = {"status": "approximate", "kind": kind,
+                 "time_seconds": float(stamp), "frame_index": frame, "point_px": list(point),
+                 "analysis_size": {"width": width, "height": height},
+                 "point_kind": "inferred_object_center" if inferred else "object_center",
+                 "contact_observed": False, "inference_only": True}
+    indices, times = motion.get("frame_interval"), motion.get("time_interval")
+    if (isinstance(indices, (list, tuple)) and len(indices) == 2
+            and all(isinstance(v, int) and not isinstance(v, bool) for v in indices)
+            and 0 <= indices[0] <= frame <= indices[1] < count):
+        candidate["frame_interval"] = list(indices)
+    if (isinstance(times, (list, tuple)) and len(times) == 2 and all(_finite(v) for v in times)
+            and 0 <= times[0] <= stamp <= times[1]):
+        candidate["time_interval"] = list(times)
+    return candidate
+
+
+def _trajectory_replay(output, artifacts, prefix):
+    """Expose only an existing, local MP4 and bounded source-timeline metadata."""
+    clip = artifacts.get("annotated_clip")
+    if not isinstance(clip, dict):
+        return None, None
+    relative = clip.get("path")
+    if not isinstance(relative, str) or not relative.startswith("evidence/") or Path(relative).suffix.lower() != ".mp4":
+        return None, None
+    try:
+        path = _safe(output, relative)
+        if not path.is_file() or path.stat().st_size == 0:
+            return None, None
+    except (PairWorkspaceError, OSError):
+        return None, None
+    info = {}
+    origin = clip.get("source_time_origin")
+    if _finite(origin) and origin >= 0:
+        info["source_time_origin"] = origin
+    for field in ("source_start_frame", "source_end_frame", "frame_count"):
+        value = clip.get(field)
+        if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+            info[field] = value
+    return prefix + quote(relative, safe="/"), info
+
+
 def combine_views(views, *, same_event_confirmed=False, event_source=None, different_event=False):
     """Use direct qualified evidence only; a transferred label cannot be a donor."""
     reasons = []
@@ -375,7 +436,7 @@ class PairWorkspace:
     def submit(self, body):
         if not isinstance(body, dict) or not isinstance(body.get("views"), dict) or set(body["views"]) != {"A", "B"}:
             raise PairWorkspaceError(400, "A와 B 두 시점을 함께 입력하세요.")
-        same_event, reuse = body.get("same_event_confirmed", False), body.get("reuse_review", True)
+        same_event, reuse = body.get("same_event_confirmed", False), body.get("reuse_review", False)
         refine = body.get("refine_review_regions", False)
         if not isinstance(same_event, bool) or not isinstance(reuse, bool) or not isinstance(refine, bool):
             raise PairWorkspaceError(400, "같은 랠리 확인 및 검수 재사용 값은 참/거짓이어야 합니다.")
@@ -602,6 +663,7 @@ class PairWorkspace:
         base = {"camera_id": camera, "file": selected["file"], "status": "completed", "rules": deepcopy(RULES),
                 "source_sha256": None, "automatic_decision": "REVIEW", "direct_decision": "REVIEW",
                 "assisted_decision": "REVIEW", "qualified": False, "preview_url": None, "evidence_urls": [],
+                "trajectory_replay_url": None, "trajectory_replay_info": None,
                 "contact_time_seconds": None, "reason_codes": [], "rationale": "", "_candidate_ids": []}
         try:
             original, digest, candidates, entry = self._resolve(selected, catalog)
@@ -656,20 +718,28 @@ class PairWorkspace:
                 if decision not in LABELS:
                     decision = "REVIEW"
                 prefix = f"/pair-media/jobs/{identifier}/views/{camera}/"
-                artifacts, evidence = result.get("artifacts") or {}, []
+                artifacts, evidence, trajectory_context = result.get("artifacts") or {}, [], None
                 for item in artifacts.get("evidence", []):
                     for field in ("image", "source_sequence", "source_crop"):
                         relative = item.get(field)
                         if isinstance(relative, str) and _safe(output, relative).is_file():
                             evidence.append(prefix + quote(relative, safe="/"))
+                    relative = item.get("trajectory_context")
+                    if isinstance(relative, str) and _safe(output, relative).is_file():
+                        trajectory_context = prefix + quote(relative, safe="/")
                 contact = (result.get("decision") or {}).get("contact_time_seconds")
                 if contact is None and decision != "REVIEW":
                     contact = (result.get("selected_landing") or {}).get("time")
+                if (result.get("selected_landing") or {}).get("contact_observed") is False:
+                    contact = None
+                replay_url, replay_info = _trajectory_replay(output, artifacts, prefix)
                 base.update(automatic_decision=decision, direct_decision=decision, assisted_decision=decision,
                     qualified=decision in {"IN", "OUT"}, review_source="ai_review_guided_search" if regions else "automatic",
                     processing_mode="review_guided_reanalysis" if regions else "fresh_analysis",
                     preview_url=prefix + quote(artifacts.get("preview", "preview.mp4"), safe="/"),
                     evidence_urls=evidence, contact_time_seconds=contact if _finite(contact) else None,
+                    landing_candidate=_landing_candidate(result), trajectory_context_url=trajectory_context,
+                    trajectory_replay_url=replay_url, trajectory_replay_info=replay_info,
                     reason_codes=(result.get("decision") or {}).get("reason_codes", []),
                     rationale="새 원본 분석의 접촉·경계 검증 결과입니다.", analysis_timings=result.get("timings", {}),
                     source_verification="current_original_sha256")
