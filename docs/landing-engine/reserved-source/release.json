@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "released_at_utc": "2026-11-13T07:33:20.095328+00:00",
+  "authorization": "Parent explicitly released reserved references after accepting and recording the minimal-v5 engine/configuration freeze.",
+  "accepted_freeze_path": "docs/landing-engine/accepted-freeze.json",
+  "accepted_freeze_sha256": "30eb23649da6da42b9b43a251282b1abc3652cfc1aaa01a6c17f63f7e0f71ee1",
+  "accepted_config_sha256": "64b17deb84f71abf35d2a9bc5dd9291661642528fc98a154b933c40de1d962df",
+  "original_sealed_manifest_sha256": "c3daf37b7e33bd41631f0aaf77707fdcd20f76d10fdccb45f2cafd897aa40281",
+  "original_reference_frozen_at_utc": "2026-11-13T06:40:40.776783+00:00",
+  "reference_copy_bytes_unchanged": true,
+  "original_artifact_root": "runs/landing-engine/reserved-source",
+  "tracked_reference_root": "docs/landing-engine/reserved-source",
+  "source_evidence_path_policy": "Relative evidence paths within the unchanged reference JSONs resolve against original_artifact_root; selected verification images are also copied byte-for-byte into tracked_reference_root.",
+  "tracked_evidence": [
+    {
+      "path": "docs/landing-engine/reserved-source/uhdhd-3-a-reference-full.jpg",
+      "sha256": "ea1740a92bf5a91867c1bc67a94f520548df2a36512daab06415dcd9217f5b91",
+      "original_path": "runs/landing-engine/reserved-source/uhdhd-3-a-reference-full.jpg"
+    },
+    {
+      "path": "docs/landing-engine/reserved-source/uhdhd-3-a-reference-grid.jpg",
+      "sha256": "9aee23c51e6bc4a61c628b49b03cc435c1913b8f15600824197210246bf09a08",
+      "original_path": "runs/landing-engine/reserved-source/uhdhd-3-a-reference-grid.jpg"
+    },
+    {
+      "path": "docs/landing-engine/reserved-source/uhdhd-3-a-crop-130-153-0.jpg",
+      "sha256": "374029db73be3086e76edbb97b7c61b4239a4f3a621d28154da5eafbda201bb5",
+      "original_path": "runs/landing-engine/reserved-source/uhdhd-3-a-crop-130-153-0.jpg"
+    },
+    {
+      "path": "docs/landing-engine/reserved-source/uhdhd-3-a-crop-116-192-0.jpg",
+      "sha256": "d32e2383edb36e0de7da38082a6ed9b5facff6cd724cb8b2fa016d84acef29b3",
+      "original_path": "runs/landing-engine/reserved-source/uhdhd-3-a-crop-116-192-0.jpg"
+    }
+  ],
+  "protocol_sha256": "0b8285db0c9fe478df4c3820bdb64934ace1e68937279db6527177551041f01e",
+  "unscorable_cases_remain_excluded": true,
+  "no_reference_or_configuration_tuning_after_release": true
+}

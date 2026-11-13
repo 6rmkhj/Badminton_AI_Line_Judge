@@ -267,6 +267,7 @@ def test_new_sources_run_both_views_and_keep_automatic_review(pair_fixture,monke
         calls.append(source)
         return {'source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),
                 'decision':{'decision':'REVIEW','reason_codes':['NO_CONTACT'],'contact_time_seconds':.1},
+                'assessment':{'schema_version':1,'line_verdict':'REVIEW','changes_decision':False,'stages':[]},
                 'analysis':{'width':960,'height':540,'frame_count':3},
                 'selected_landing':{'candidate_px':[361,444],'frame_index':1,'time':.1,'contact_observed':False,
                     'image_motion_event':{'kind':'descent_and_rebound','inference_only':True,
@@ -285,6 +286,7 @@ def test_new_sources_run_both_views_and_keep_automatic_review(pair_fixture,monke
     assert all(v['preview_url'].startswith('/pair-media/jobs/') for v in result['views'].values())
     for view in result['views'].values():
         assert view['qualified'] is False and view['contact_time_seconds'] is None
+        assert view['assessment']['line_verdict']=='REVIEW' and view['assessment']['changes_decision'] is False
         assert view['landing_candidate']['status']=='approximate'
         assert view['landing_candidate']['contact_observed'] is False
         assert view['landing_candidate']['point_kind']=='object_center'

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "scope": "Historical evaluator bytes are retained independently from engine source snapshots. Receipt SHA, not the original filename, identifies each execution. All current commands should use the canonical accepted evaluator unless reproducing a historical receipt.",
+  "evaluators": [
+    {
+      "name": "baseline",
+      "path": "docs/landing-engine/reproduction/evaluate_baseline.py",
+      "sha256": "f6499a171047016e8065524537d45150e0aeb2728414afad527ef9497e228408",
+      "original_execution_path": "scripts/evaluate_landing_engine.py"
+    },
+    {
+      "name": "v4",
+      "path": "docs/landing-engine/reproduction/evaluate_v4.py",
+      "sha256": "f1e99a730365f392d54231c3097582ab334c1bd6bef1c33040f3a98fc06e6eed",
+      "original_execution_path": "scripts/evaluate_landing_engine_next.py"
+    },
+    {
+      "name": "accepted_v5",
+      "path": "scripts/evaluate_landing_engine.py",
+      "sha256": "f2135ad60d351933d3075eb19a5dbefbc4bf42f53807c09f44c139089536e9b1",
+      "original_execution_path": "scripts/evaluate_landing_engine_v5.py"
+    }
+  ],
+  "archived_cli_path_note": "Archived evaluators derive defaults relative to their file. Always pass explicit --assets-root REPO --protocol REPO/docs/landing-engine/protocol.json --video-dir REPO/video --output-root REPO/runs/landing-engine when executing archived files."
+}

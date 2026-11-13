@@ -1,0 +1,37 @@
+{
+  "recorded_at": "2026-11-13T07:01:26.527695+00:00",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "architecture": "x86_64",
+  "versions": {
+    "numpy": "2.2.6",
+    "opencv": "4.12.0",
+    "scipy": "1.16.3",
+    "torch": "2.10.0+cpu"
+  },
+  "cuda_available": false,
+  "mps_available": false,
+  "cpu_quota": "400000 100000",
+  "memory_limit_bytes": 17179869184,
+  "ffmpeg": "ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers",
+  "baseline_commit": "3b9595cf6ee731f45296bd7425544e82f2eb5d65",
+  "timing_note": "Concurrent CPU development/regression jobs; per-case wall times are diagnostic, not controlled throughput benchmarks.",
+  "test_rounds": [
+    {
+      "passed": 956,
+      "skipped": 5,
+      "skipped_scope": "actual GPU hardware tests",
+      "duration_seconds": 72.68,
+      "log_sha256": "7b449a539e2c766be3bc00032320f852330836cca62411fac9950dbf42459dd7",
+      "stage": "initial_v4"
+    },
+    {
+      "stage": "accepted_v5_and_final_configuration",
+      "passed": 986,
+      "skipped": 5,
+      "skipped_scope": "actual GPU hardware tests",
+      "duration_seconds": 75.58,
+      "log_sha256": "b1031f1b41a32d6673da2143b2ae408d76b08cc718f6871a8538c76b6b38733b"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "name": "Current-round reserved source check",
+  "frozen_at_utc": "2026-11-13T06:40:40.776783+00:00",
+  "source_repository_commit": "3b9595cf6ee731f45296bd7425544e82f2eb5d65",
+  "blindness": "No engine predictions or existing annotation content for these four videos was inspected before freezing these files. All repository videos have prior AI annotations, so this is not an independent human or globally unseen holdout.",
+  "metric_scope": "First landing vicinity only, AI approximate object centre; no IN/OUT accuracy claim.",
+  "selection": "Two A/B filename groups outside the fixed 32 diagnostic clips, selected before viewing source or predictions. Do not infer that A/B numbers identify the same rally.",
+  "video_count": 4,
+  "scorable_count": 1,
+  "reference_files": [
+    {
+      "key": "ordinary-2-a",
+      "file": "video/a시점 2.mp4",
+      "sha256": "f064fde8fa78f53ad667a5f1977bcb6daaddb8e5912150593b384fb17dcd69cd",
+      "reference": "references/ordinary-2-a.json",
+      "reference_sha256": "560e1fe9841d072c8e2a4a04216cf7012afb004548be187b63a074fc39325b08",
+      "scorable": false
+    },
+    {
+      "key": "ordinary-2-b",
+      "file": "video/b시점 2.mp4",
+      "sha256": "8be748ba5ae3d29b5a62185de97716a8b7c7ca42c9aa3851dcab18e7a95cbb48",
+      "reference": "references/ordinary-2-b.json",
+      "reference_sha256": "276b24a92246e4416cfbb08f51235b0b074b651114f2737bc52d63ad3ebe8b37",
+      "scorable": false
+    },
+    {
+      "key": "uhdhd-3-a",
+      "file": "video/a시점(uhd30 hd30) 3.mp4",
+      "sha256": "c061c86a87286a0882f8a3f976d779c58c0d2755bc11432c69171ca08ef90d73",
+      "reference": "references/uhdhd-3-a.json",
+      "reference_sha256": "f1755ef2cbf26bba4d45d3b708a9fbbbfc9958f5450033a12132061835b2eefc",
+      "scorable": true
+    },
+    {
+      "key": "uhdhd-3-b",
+      "file": "video/b시점(uhd30 hd30) 3.mp4",
+      "sha256": "22f90d5ebb1e66a3750b659fda24b0df90d27e7bf3fb1ff2472467c2f497ee5f",
+      "reference": "references/uhdhd-3-b.json",
+      "reference_sha256": "71bdfba74930cce8f82d381e193f3c6c6023ce12d795024dd1171890b59c298a",
+      "scorable": false
+    }
+  ]
+}

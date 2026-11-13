@@ -18,8 +18,8 @@ def implementation_fingerprint():
     digest = hashlib.sha256()
     for name in ('media.py', 'pipeline.py', 'calibration.py', 'detection.py', 'tracking.py',
                  'events.py', 'identity.py', 'identity_continuity.py', 'candidate_identity.py',
-                 'event_continuity.py', 'observation_support.py', 'scene_context.py',
-                 'evidence.py', 'decision.py', 'learning.py',
+                 'event_continuity.py', 'event_sequence.py', 'landing_recovery.py', 'observation_support.py', 'scene_context.py',
+                 'evidence.py', 'decision.py', 'assessment.py', 'learning.py',
                  'contact_model.py', 'sync.py', 'inference.py', 'gpu_candidates.py'):
         digest.update(name.encode())
         digest.update((package / name).read_bytes())
@@ -147,6 +147,8 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
                                                        **observe('prepare'))
     detector_config = dict(config.get('detector') or {})
     event_config = dict(config.get('events') or {})
+    if not isinstance(event_config.get('native_endpoint_recovery', False), bool):
+        raise ValueError('native_endpoint_recovery must be a boolean')
     # One explicit job choice controls all supported inference stages.
     for settings in (detector_config, event_config):
         settings['inference_device'] = inference_device
@@ -191,6 +193,22 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     clock = time.perf_counter()
     report('tracking', detail='프레임 사이의 후보 궤적 연결')
     tracks = track_detections(detections, config.get('tracker'), **observe('tracking'))
+    endpoint_recovery = {'status': 'disabled'}
+    if event_config.get('native_endpoint_recovery', False):
+        if stability.get('status') != 'ok':
+            endpoint_recovery = {'status': 'skipped', 'reason_codes': ['SOURCE_CAMERA_NOT_CONFIRMED_STABLE']}
+        else:
+            from .landing_recovery import recover_rebound_tracks
+            report('tracking', detail='원본 영상에서 끊긴 반동 관측 재검사')
+            # This optional recovery pass revisits sparse frame windows. Some
+            # variable-rate MP4 decoders accept a seek timestamp but lose a
+            # later frame, so grab sequentially and retrieve only needed crops.
+            with SourceFrameSequence(source, len(frames), verified_seek=False) as originals:
+                additional_tracks, endpoint_recovery = recover_rebound_tracks(
+                    tracks, originals, timestamps, (frames[0].shape[1], frames[0].shape[0]),
+                    frame_records=detections)
+            tracks = [*tracks, *additional_tracks]
+            endpoint_recovery['status'] = 'completed'
     timings['tracking_seconds'] = time.perf_counter() - clock
     clock = time.perf_counter()
     report('contact', detail='최초 접촉 후보·라인 관계 검토')
@@ -202,6 +220,11 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     identity_config = dict(config.get('identity') or {})
     if identity_config.get('event_window_seconds') is not None:
         event_config['event_window_seconds'] = identity_config['event_window_seconds']
+    if identity_config.get('hit_anchors'):
+        # Identity assistance is applied after event generation. Do not merge
+        # its possible target into another path, or change the pre-anchor cap.
+        event_config['event_family_diversity'] = False
+        event_config['causal_first_event_ranking'] = False
     landings = estimate_landings(tracks, frames, timestamps, calibration, event_config)
     landings = apply_identity(landings, tracks, timestamps, calibration, identity_config)
     if event_config.get('source_contact_enabled', True):
@@ -296,6 +319,7 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
                 'frame_count': len(frames), 'preprocessing': preprocessing,
                 'source_scaling': 'Global source-frame scan with native ROI refinement and temporal contact evidence'},
               'timestamps': timestamps, 'calibration': calibration, 'camera_stability': stability, 'tracks': tracks,
+              'native_endpoint_recovery': endpoint_recovery,
               'detection_quality': summarize_detection_quality(detections, tracks),
               'landings': landings, 'selected_landing': selected, 'decision': decision,
               'review_refinement': review_refinement,
@@ -311,6 +335,8 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
               'validation_status': 'unvalidated_on_independent_human_ground_truth',
               'warnings': sorted(set(metadata.get('warnings', []) + presentation.get('warnings', []))),
               'scope': 'Offline research pipeline. Candidate confidence is not measured judgment accuracy.'}
+    from .assessment import assess_result
+    result['assessment'] = assess_result(result, requested_landings=requested)
     write_json(output / 'detections.json', detections)
     write_json(output / 'result.json', result)
     del frames

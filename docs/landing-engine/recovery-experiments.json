@@ -1,0 +1,511 @@
+{
+  "schema_version": 1,
+  "status": "focused_development_ablation_not_generalization_validation",
+  "reference_scope": "Frozen AI first-vicinity references; not independent human contact or line-verdict ground truth",
+  "inference_assistance": "None: all source-search windows came from baseline measured track endpoints, not references",
+  "visual_audit_scope": "Source crops intentionally use existing reference vicinity for failure diagnosis; these crops are never inference inputs",
+  "prototype_scope": "Initial recovery24 prototype preceded final metadata/budget tightening. Canonical full34 round verifies production source separately. Other scratch hypotheses are not product code.",
+  "experiment_count": 7,
+  "experiments": [
+    {
+      "key": "8k-2-b",
+      "variant": "recovery",
+      "source_sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead",
+      "reference_sha256": "72e969f9957b4eb8bb196cb933e4ed19fd287f71709df42010e836084e5f00b9",
+      "baseline_fingerprint": "c1694510a69c6ef535a10c374497c4f895828dfefdc73bb39787dd5fff9bbf81",
+      "output": "runs/landing-engine/observation-audit/8k-2-b-recovery.json",
+      "output_sha256": "e040b2715130e523aedf28e00bb59bd402c2948ffaf4369a212d29ba3ecd5e82",
+      "script": "runs/landing-engine/observation-audit/run_recovery.py",
+      "script_sha256": "66596184c4d3c80e4032d69bb11389e0258bd1e491186d9cd19f65e65d2ccf06",
+      "top1": true,
+      "recall_at_6": true,
+      "recall_at_12": true,
+      "selected": {
+        "frame": 45,
+        "candidate_px": [
+          419.3070175438597,
+          204.9561403508772
+        ],
+        "distance_px": 2.0667902742053865,
+        "matches": true
+      },
+      "scope": "Single previously exposed development clip; frozen AI first-vicinity reference, not independent contact truth.",
+      "hypothesis": "Actual bright native components around measured descending endpoints; two-sided source-frame change and local contrast, then existing bounded rebound-path search.",
+      "decision": "candidate_for_full_regression_validation",
+      "reason": "Recovered actual outgoing components and a first-vicinity selection; this positive case alone does not establish generalization.",
+      "budget_report": {
+        "method": "native_bidirectional_endpoint_recovery",
+        "approaches": 23,
+        "decoded_frames": 52,
+        "raw_components": 3880,
+        "additional_tracks": 36,
+        "identity_confirmed": false,
+        "physical_contact_confirmed": false
+      },
+      "preserved_script": "docs/landing-engine/reproduction/prototypes/run_recovery.py"
+    },
+    {
+      "key": "uhdhd-5-a",
+      "variant": "recovery",
+      "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+      "baseline_fingerprint": "c1694510a69c6ef535a10c374497c4f895828dfefdc73bb39787dd5fff9bbf81",
+      "output": "runs/landing-engine/observation-audit/uhdhd-5-a-recovery.json",
+      "output_sha256": "814b5bdfe1a4e6979a7eedbd282e958b77c68626363e55ff91d3c4587013f663",
+      "script": "runs/landing-engine/observation-audit/run_recovery.py",
+      "script_sha256": "66596184c4d3c80e4032d69bb11389e0258bd1e491186d9cd19f65e65d2ccf06",
+      "top1": false,
+      "recall_at_6": false,
+      "recall_at_12": false,
+      "selected": {
+        "frame": 55,
+        "candidate_px": [
+          864.0,
+          141.0
+        ],
+        "distance_px": 214.44113411377026,
+        "matches": false
+      },
+      "scope": "Single previously exposed development clip; frozen AI first-vicinity reference, not independent contact truth.",
+      "hypothesis": "Actual bright native components around measured descending endpoints; two-sided source-frame change and local contrast, then existing bounded rebound-path search.",
+      "decision": "rejected_as_additional_improvement_for_this_case",
+      "reason": "On uhdhd-5-a, outgoing native candidates remain fragmented between feather, cork and shadow; no first-vicinity candidate reaches top 12.",
+      "budget_report": {
+        "method": "native_bidirectional_endpoint_recovery",
+        "approaches": 24,
+        "decoded_frames": 175,
+        "raw_components": 12272,
+        "additional_tracks": 30,
+        "identity_confirmed": false,
+        "physical_contact_confirmed": false
+      },
+      "preserved_script": "docs/landing-engine/reproduction/prototypes/run_recovery.py"
+    },
+    {
+      "key": "uhdhd-5-a",
+      "variant": "recovery48",
+      "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+      "baseline_fingerprint": "c1694510a69c6ef535a10c374497c4f895828dfefdc73bb39787dd5fff9bbf81",
+      "output": "runs/landing-engine/observation-audit/uhdhd-5-a-recovery48.json",
+      "output_sha256": "084711cf7e21b9541f2ecabc327c90db384e1a495415110c5d329520a6305fc9",
+      "script": "runs/landing-engine/observation-audit/run_recovery48.py",
+      "script_sha256": "c243897035b0104795e7203996d9ecc27822ecd9e2243b7233f84f61d3f0199f",
+      "top1": false,
+      "recall_at_6": false,
+      "recall_at_12": false,
+      "selected": {
+        "frame": 55,
+        "candidate_px": [
+          864.0,
+          141.0
+        ],
+        "distance_px": 214.44113411377026,
+        "matches": false
+      },
+      "scope": "Single previously exposed development clip; frozen AI first-vicinity reference, not independent contact truth.",
+      "hypothesis": "Raise endpoint candidate budget from 24 to 48 while preserving the 128 MiB crop cap and all evidence gates.",
+      "decision": "rejected_as_additional_improvement_for_this_case",
+      "reason": "Larger budget does not add a qualifying true approach; the crop-memory cap is reached and top1/recall@12 do not improve.",
+      "budget_report": {
+        "method": "native_bidirectional_endpoint_recovery",
+        "approaches": 22,
+        "decoded_frames": 175,
+        "raw_components": 8434,
+        "additional_tracks": 26,
+        "crop_budget_bytes": 134217728,
+        "crop_bytes": 133319586,
+        "budget_skipped_windows": 8,
+        "identity_confirmed": false,
+        "physical_contact_confirmed": false
+      },
+      "preserved_script": "docs/landing-engine/reproduction/prototypes/run_recovery48.py"
+    },
+    {
+      "key": "uhdhd-5-a",
+      "variant": "prefix",
+      "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+      "baseline_fingerprint": "c1694510a69c6ef535a10c374497c4f895828dfefdc73bb39787dd5fff9bbf81",
+      "output": "runs/landing-engine/observation-audit/uhdhd-5-a-prefix.json",
+      "output_sha256": "81a509c44d9832b53f9f0555a86239d1d33ffa62761e31ab39f2b12d5916ae33",
+      "script": "runs/landing-engine/observation-audit/prefix_probe.py",
+      "script_sha256": "2baf850ff6f56e84a179f7bce50506c7711745e496259b61f2e4e3f2bb510828",
+      "top1": false,
+      "recall_at_6": false,
+      "recall_at_12": false,
+      "selected": {
+        "frame": 55,
+        "candidate_px": [
+          864.0,
+          141.0
+        ],
+        "distance_px": 214.44113411377026,
+        "matches": false
+      },
+      "scope": "Single previously exposed development clip; frozen AI first-vicinity reference, not independent contact truth.",
+      "hypothesis": "Additionally seed coherent measured prefixes before a later path-fit break; outgoing observations still require native pixels.",
+      "decision": "rejected_as_additional_improvement_for_this_case",
+      "reason": "A coherent prefix near the first impact is recovered, but the outgoing path follows a later bounce instead of the shallow first rebound.",
+      "budget_report": {
+        "method": "native_bidirectional_endpoint_recovery",
+        "approaches": 21,
+        "decoded_frames": 192,
+        "raw_components": 6732,
+        "additional_tracks": 27,
+        "crop_budget_bytes": 134217728,
+        "crop_bytes": 126904338,
+        "budget_skipped_windows": 3,
+        "identity_confirmed": false,
+        "physical_contact_confirmed": false
+      },
+      "preserved_script": "docs/landing-engine/reproduction/prototypes/prefix_probe.py"
+    },
+    {
+      "key": "uhdhd-5-a",
+      "variant": "terminal",
+      "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+      "baseline_fingerprint": "c1694510a69c6ef535a10c374497c4f895828dfefdc73bb39787dd5fff9bbf81",
+      "output": "runs/landing-engine/observation-audit/uhdhd-5-a-terminal.json",
+      "output_sha256": "20e710c12be3bb315508ee8366b5c68944b5f6b77ac964cc39d44ef9ffb81469",
+      "script": "runs/landing-engine/observation-audit/terminal_probe.py",
+      "script_sha256": "577307eda6a4724aaffe3c260f56fabec754611eb00fe795847753a7efd6d395",
+      "top1": false,
+      "recall_at_6": false,
+      "recall_at_12": false,
+      "selected": {
+        "frame": 55,
+        "candidate_px": [
+          864.0,
+          141.0
+        ],
+        "distance_px": 214.44113411377026,
+        "matches": false
+      },
+      "scope": "Single previously exposed development clip; frozen AI first-vicinity reference, not independent contact truth.",
+      "hypothesis": "Prefix recovery plus a distinct terminal mode: at least 5 actual outgoing points, at least 35% fitted 2D speed loss, bounded post-motion and compatible incoming/outgoing curve intersection.",
+      "decision": "rejected_as_additional_improvement_for_this_case",
+      "reason": "Only one terminal proposal qualifies, on the wrong distant object; true-impact outgoing pixel associations remain insufficient.",
+      "budget_report": {
+        "method": "native_bidirectional_endpoint_recovery",
+        "approaches": 21,
+        "decoded_frames": 193,
+        "raw_components": 6732,
+        "additional_tracks": 27,
+        "crop_budget_bytes": 134217728,
+        "crop_bytes": 126904338,
+        "budget_skipped_windows": 3,
+        "identity_confirmed": false,
+        "physical_contact_confirmed": false
+      },
+      "preserved_script": "docs/landing-engine/reproduction/prototypes/terminal_probe.py"
+    },
+    {
+      "key": "uhdhd-5-a",
+      "variant": "prefix-dark",
+      "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+      "baseline_fingerprint": "c1694510a69c6ef535a10c374497c4f895828dfefdc73bb39787dd5fff9bbf81",
+      "output": "runs/landing-engine/observation-audit/uhdhd-5-a-prefix-dark.json",
+      "output_sha256": "2acb007977d56604cea82cf7415ac4825877eb7099e19c4e0a85460635b0c8e4",
+      "script": "runs/landing-engine/observation-audit/prefix_dark_probe.py",
+      "script_sha256": "b072993f204ee4cc1c539a30a9c18fcf7db5c3c4781ee26bfc8bf1faa5fac0f8",
+      "top1": false,
+      "recall_at_6": false,
+      "recall_at_12": false,
+      "selected": {
+        "frame": 59,
+        "candidate_px": [
+          869.375,
+          149.5
+        ],
+        "distance_px": 211.26320225017892,
+        "matches": false
+      },
+      "scope": "Single previously exposed development clip; frozen AI first-vicinity reference, not independent contact truth.",
+      "hypothesis": "Prefix recovery with both bright and dark native components to test visible cork/floor contrast.",
+      "decision": "rejected_as_additional_improvement_for_this_case",
+      "reason": "Additional dark components do not resolve the true first event; ranking changes to another wrong distant candidate.",
+      "budget_report": {
+        "method": "native_bidirectional_endpoint_recovery",
+        "approaches": 21,
+        "decoded_frames": 193,
+        "raw_components": 15487,
+        "additional_tracks": 28,
+        "crop_budget_bytes": 134217728,
+        "crop_bytes": 126904338,
+        "budget_skipped_windows": 3,
+        "identity_confirmed": false,
+        "physical_contact_confirmed": false
+      },
+      "preserved_script": "docs/landing-engine/reproduction/prototypes/prefix_dark_probe.py"
+    },
+    {
+      "key": "uhdhd-5-a",
+      "variant": "terminal-dark",
+      "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+      "baseline_fingerprint": "c1694510a69c6ef535a10c374497c4f895828dfefdc73bb39787dd5fff9bbf81",
+      "output": "runs/landing-engine/observation-audit/uhdhd-5-a-terminal-dark.json",
+      "output_sha256": "83ff9cc24c60318899fccc055d5f07e60d0ebe34cdc587dc49b95e97ea760101",
+      "script": "runs/landing-engine/observation-audit/terminal_dark_probe.py",
+      "script_sha256": "e7004b4270019aa428d21507c3ad330f5d488f0a0736a8d0bd5d97e022cb6b05",
+      "top1": false,
+      "recall_at_6": false,
+      "recall_at_12": false,
+      "selected": {
+        "frame": 55,
+        "candidate_px": [
+          864.0,
+          141.0
+        ],
+        "distance_px": 214.44113411377026,
+        "matches": false
+      },
+      "scope": "Single previously exposed development clip; frozen AI first-vicinity reference, not independent contact truth.",
+      "hypothesis": "Combine the distinct terminal-speed-loss hypothesis with bright and dark native components.",
+      "decision": "rejected_as_additional_improvement_for_this_case",
+      "reason": "Combined terminal/dark mode still qualifies only a wrong distant terminal proposal; top1 and recall@12 remain unsuccessful.",
+      "budget_report": {
+        "method": "native_bidirectional_endpoint_recovery",
+        "approaches": 21,
+        "decoded_frames": 193,
+        "raw_components": 15487,
+        "additional_tracks": 26,
+        "crop_budget_bytes": 134217728,
+        "crop_bytes": 126904338,
+        "budget_skipped_windows": 3,
+        "identity_confirmed": false,
+        "physical_contact_confirmed": false
+      },
+      "preserved_script": "docs/landing-engine/reproduction/prototypes/terminal_dark_probe.py"
+    }
+  ],
+  "rejected_variants_are_production_code": false,
+  "overall_interpretation": "These seven case-level runs test six configurations, including base recovery on two cases. They are focused failure-analysis experiments. The separate frozen 34-clip ablation determines production acceptance; none of these ratios is formal IN/OUT accuracy.",
+  "conclusions": [
+    "8k-2-b improvement came from current native pixels supplying previously absent outgoing components.",
+    "uhdhd-5-a native signals mix feather/cork/shadow pieces near first contact; larger endpoint budget, coherent-prefix recovery, terminal speed-loss model, and extra dark polarity did not yet restore a correctly ranked first vicinity.",
+    "No physical-contact or identity gate was lowered; all motion outputs remain unverified candidates."
+  ],
+  "source_evidence_figure": {
+    "path": "docs/landing-engine/examples/8k-2-b-recovery.jpg",
+    "sha256": "230b8afaa82ff3eb2a16b5e89a25f3399d64344ed75d0ce1aa1657089a40ad43",
+    "renderer": "docs/landing-engine/reproduction/render_recovery_evidence.py",
+    "renderer_sha256": "be7e7fc97242b18bb78569077104d74b24d74b138c316fc3a60696ac9899e7f0",
+    "source_path": "video/8k 30 4k 24 b시점 2.mp4",
+    "source_sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead",
+    "source_size": [
+      3840,
+      2160
+    ],
+    "analysis_size": [
+      960,
+      540
+    ],
+    "figure_size": [
+      1600,
+      1190
+    ],
+    "reference_path": "docs/generalization/references/8k-2-b.json",
+    "reference_sha256": "72e969f9957b4eb8bb196cb933e4ed19fd287f71709df42010e836084e5f00b9",
+    "reference_coordinate_size": [
+      960,
+      540
+    ],
+    "reference_point_px": [
+      419,
+      207
+    ],
+    "reference_frame_interval": [
+      45,
+      47
+    ],
+    "reference_tolerance_px": 15,
+    "reference_distance_before_px": 309.6574870175111,
+    "reference_distance_after_px": 2.0667902742053865,
+    "baseline_result_path": "runs/landing-engine/baseline/8k-2-b/result.json",
+    "baseline_result_sha256": "b0681a8c59fca3c52a4812284c4e0e26f85924de132b105dcbf50bd1de96e706",
+    "recovered_result_path": "runs/landing-engine/full-v5/8k-2-b/result.json",
+    "recovered_result_sha256": "b98f17f02671d289f4735a08e880a6a1ec4fb85a0bb003d8a08b2e556f904379",
+    "baseline_implementation_fingerprint": "c1694510a69c6ef535a10c374497c4f895828dfefdc73bb39787dd5fff9bbf81",
+    "recovered_implementation_fingerprint": "e9c9fe063b65e376f073090a54a3d3848d1ac148a4c9e116b9b0d2dabfb5c8fc",
+    "recovered_execution_mode": "full",
+    "overview_panels": [
+      {
+        "source_frame_index": 12,
+        "candidate_analysis_px": [
+          727.421,
+          179.355
+        ],
+        "candidate_source_px": [
+          2909.684,
+          717.42
+        ],
+        "display_rect_px": [
+          32,
+          181,
+          752,
+          423
+        ],
+        "marker_display_px": [
+          601.8131166666667,
+          321.49474999999995
+        ],
+        "marker_radius_display_px": 13,
+        "contact_observed": false
+      },
+      {
+        "source_frame_index": 45,
+        "candidate_analysis_px": [
+          419.3070175438597,
+          204.9561403508772
+        ],
+        "candidate_source_px": [
+          1677.2280701754387,
+          819.8245614035088
+        ],
+        "display_rect_px": [
+          816,
+          181,
+          752,
+          423
+        ],
+        "marker_display_px": [
+          1144.45716374269,
+          341.5489766081871
+        ],
+        "marker_radius_display_px": 13,
+        "contact_observed": false
+      }
+    ],
+    "adjacent_context_panels": [
+      {
+        "source_frame_index": 44,
+        "source_crop_xyxy": [
+          1596,
+          728,
+          1768,
+          880
+        ],
+        "display_rect_px": [
+          32,
+          749,
+          372,
+          329
+        ],
+        "prediction_overlay": false
+      },
+      {
+        "source_frame_index": 45,
+        "source_crop_xyxy": [
+          1596,
+          728,
+          1768,
+          880
+        ],
+        "display_rect_px": [
+          420,
+          749,
+          372,
+          329
+        ],
+        "prediction_overlay": false
+      },
+      {
+        "source_frame_index": 46,
+        "source_crop_xyxy": [
+          1596,
+          728,
+          1768,
+          880
+        ],
+        "display_rect_px": [
+          808,
+          749,
+          372,
+          329
+        ],
+        "prediction_overlay": false
+      },
+      {
+        "source_frame_index": 47,
+        "source_crop_xyxy": [
+          1596,
+          728,
+          1768,
+          880
+        ],
+        "display_rect_px": [
+          1196,
+          749,
+          372,
+          329
+        ],
+        "prediction_overlay": false
+      }
+    ],
+    "resampling": "Pillow LANCZOS for display only; no generated or interpolated trajectory observations",
+    "scope": "Actual source frames, selected candidate markers and source-only adjacent crops; no physical-contact or target-identity certification."
+  },
+  "scratch_code_capture_scope": "Scratch scripts and output bytes were hashed after execution; their imported module state was not separately archived for every early prototype. The source-bound v5 full-pipeline execution used for the figure has a complete evaluator code/config receipt and confirms the same improved coordinates. Final efficacy is determined by the separately frozen complete ablation.",
+  "scratch_dependency_hashes": {
+    "runs/landing-engine/observation-audit/dark_component_patch.py": "2c41e7befb614ecfc60c066b6bfdb8a68aaeca2760280631e6f3b0326493c847",
+    "runs/landing-engine/observation-audit/prefix_probe.py": "2baf850ff6f56e84a179f7bce50506c7711745e496259b61f2e4e3f2bb510828"
+  },
+  "preserved_prototype_scripts": [
+    {
+      "original_path": "runs/landing-engine/observation-audit/run_recovery.py",
+      "preserved_path": "docs/landing-engine/reproduction/prototypes/run_recovery.py",
+      "sha256": "66596184c4d3c80e4032d69bb11389e0258bd1e491186d9cd19f65e65d2ccf06",
+      "bytes_unchanged": true
+    },
+    {
+      "original_path": "runs/landing-engine/observation-audit/run_recovery48.py",
+      "preserved_path": "docs/landing-engine/reproduction/prototypes/run_recovery48.py",
+      "sha256": "c243897035b0104795e7203996d9ecc27822ecd9e2243b7233f84f61d3f0199f",
+      "bytes_unchanged": true
+    },
+    {
+      "original_path": "runs/landing-engine/observation-audit/prefix_probe.py",
+      "preserved_path": "docs/landing-engine/reproduction/prototypes/prefix_probe.py",
+      "sha256": "2baf850ff6f56e84a179f7bce50506c7711745e496259b61f2e4e3f2bb510828",
+      "bytes_unchanged": true
+    },
+    {
+      "original_path": "runs/landing-engine/observation-audit/terminal_probe.py",
+      "preserved_path": "docs/landing-engine/reproduction/prototypes/terminal_probe.py",
+      "sha256": "577307eda6a4724aaffe3c260f56fabec754611eb00fe795847753a7efd6d395",
+      "bytes_unchanged": true
+    },
+    {
+      "original_path": "runs/landing-engine/observation-audit/prefix_dark_probe.py",
+      "preserved_path": "docs/landing-engine/reproduction/prototypes/prefix_dark_probe.py",
+      "sha256": "b072993f204ee4cc1c539a30a9c18fcf7db5c3c4781ee26bfc8bf1faa5fac0f8",
+      "bytes_unchanged": true
+    },
+    {
+      "original_path": "runs/landing-engine/observation-audit/terminal_dark_probe.py",
+      "preserved_path": "docs/landing-engine/reproduction/prototypes/terminal_dark_probe.py",
+      "sha256": "e7004b4270019aa428d21507c3ad330f5d488f0a0736a8d0bd5d97e022cb6b05",
+      "bytes_unchanged": true
+    },
+    {
+      "original_path": "runs/landing-engine/observation-audit/dark_component_patch.py",
+      "preserved_path": "docs/landing-engine/reproduction/prototypes/dark_component_patch.py",
+      "sha256": "2c41e7befb614ecfc60c066b6bfdb8a68aaeca2760280631e6f3b0326493c847",
+      "bytes_unchanged": true
+    }
+  ],
+  "accepted_v5_interaction_rechecks": {
+    "path": "docs/landing-engine/v5-recovery-rechecks.json",
+    "sha256": "af6b791ac9c9f9bddb3b13e425df1d8880431c8baf77be425422bb2fa9b380b6",
+    "case": "uhdhd-5-a",
+    "rejected_hypothesis_count": 5,
+    "control_count": 1,
+    "fixed_metric_gains": [],
+    "decision": "All five additional hypotheses remain rejected: no fixed top1, recall@6 or recall@12 gain on the exposed failure case under accepted v5 settings. No production engine/configuration change follows.",
+    "stopping_scope": "These declared applicable alternatives did not improve this current engine; this is not proof that every future landing model is exhausted."
+  }
+}

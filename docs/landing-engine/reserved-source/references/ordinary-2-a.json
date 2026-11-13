@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "key": "ordinary-2-a",
+  "file": "a시점 2.mp4",
+  "source_path": "video/a시점 2.mp4",
+  "source_sha256": "f064fde8fa78f53ad667a5f1977bcb6daaddb8e5912150593b384fb17dcd69cd",
+  "source_bytes": 32942270,
+  "source_size": [
+    3840,
+    2160
+  ],
+  "decoded_frame_count": 251,
+  "container_reported_frame_count": 251,
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "contact_visibility": "ambiguous",
+  "landing_frame_interval": null,
+  "landing_time_interval": null,
+  "landing_point_px": null,
+  "tolerance_px": null,
+  "frame_tolerance": 0,
+  "point_kind": null,
+  "human_verified": false,
+  "physical_contact_verified": false,
+  "reference_kind": "AI_source_only_first_vicinity",
+  "prediction_blind_current_round": true,
+  "prior_repository_ai_labels_exist": true,
+  "frozen_at_utc": "2026-11-13T06:40:40.776783+00:00",
+  "note": "The full clip and source crops around the final approach were reviewed. Target continuity near the players/net and numerous stationary shuttles could not be resolved to a defensible first-landing frame and centre. No point is assigned.",
+  "source_evidence": [
+    "ordinary-2-a-crop-64-140-0.jpg",
+    "ordinary-2-a-crop-80-128-0.jpg",
+    "ordinary-2-a-overview-0.jpg",
+    "ordinary-2-a-overview-1.jpg"
+  ]
+}
