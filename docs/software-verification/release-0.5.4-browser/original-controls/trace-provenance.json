@@ -1,0 +1,6 @@
+{
+  "scope": "Trace with media bodies is retained outside release docs. Screenshots/JSON reports copied byte-for-byte.",
+  "workspace_trace_path": "/workspace/remediation/release054-browser/checks/release054controls/trace.zip",
+  "trace_sha256": "719e852cd401565b2aacf8a2ee2493c4bb51a111e9be8c1a053c0b71e9c6290f",
+  "trace_bytes": 11878437
+}

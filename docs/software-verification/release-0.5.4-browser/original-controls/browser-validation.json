@@ -1,0 +1,906 @@
+{
+  "status": "passed",
+  "job_id": "release054controls",
+  "scope": "Completed CLI-result replay fixture only. No browser upload/inference, live progress timing, pair job elapsed time, cross-view synchronization or accuracy benchmark is tested. No pair/stage timing history is fabricated.",
+  "core_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+  "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+  "browser": {
+    "engine": "Chromium",
+    "version": "156.0.8078.79",
+    "playwright_version": "1.62.1",
+    "executable": "/usr/bin/chromium",
+    "headless": true,
+    "host": "Linux"
+  },
+  "provenance": {
+    "scope": "Completed CLI-result replay fixture only. No browser upload/inference, live progress timing, pair job elapsed time, cross-view synchronization or accuracy benchmark is tested. No pair/stage timing history is fabricated.",
+    "core_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+    "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+    "fixture_job": "release054controls",
+    "fixture_created_at": "2026-11-12T09:26:34.984869+00:00",
+    "different_source_events": false,
+    "sources": {
+      "A": {
+        "source_result_path": "/workspace/remediation/release-controls-0.5.4/A/result.json",
+        "result_sha256": "247d86cf5a1e2949b927e1ac25917b46160bd7dabcf07361d1ff31bf21f1b8a3",
+        "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+        "pipeline_version": "0.5.4",
+        "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+        "selected": {
+          "track_id": 1074,
+          "frame_index": 49,
+          "time": 1.633267,
+          "candidate_px": [
+            360.869,
+            447.182
+          ],
+          "contact_observed": false
+        },
+        "public_landing_candidate": {
+          "status": "approximate",
+          "kind": "descent_and_rebound",
+          "time_seconds": 1.633267,
+          "frame_index": 49,
+          "point_px": [
+            360.869,
+            447.182
+          ],
+          "analysis_size": {
+            "width": 960,
+            "height": 540
+          },
+          "point_kind": "object_center",
+          "contact_observed": false,
+          "inference_only": true,
+          "frame_interval": [
+            48,
+            51
+          ],
+          "time_interval": [
+            1.599933,
+            1.699933
+          ]
+        },
+        "artifact_sha256": {
+          "evidence/annotated-timing.json": "b6fbff35a8195fd6841984803e36d32975b41c86812e06d988075ebc5d9ac959",
+          "evidence/annotated.mp4": "041c11aec9d2efbfc7e677466c3b4f8c7396ad0dfd7051a1bb03a248fcba8f14",
+          "evidence/event_000.jpg": "c088982cd3008754d7b0215cddfc51365d4e34acc2473b44bb799ba6c8377c9d",
+          "evidence/event_001.jpg": "5e507c234ba1f33a5ed43d573b33110c77596acd1c17951f3d7145111518c6af",
+          "evidence/event_002.jpg": "9470645ebe5eeb581c88cff9a6500e7a64368eeb6ec96912b3edaf2a4f911a7d",
+          "evidence/event_003.jpg": "501614ac79a3117ec6c004726b6da7c23078d4b8ed8a9a0218a5b9818efa9cde",
+          "evidence/event_004.jpg": "4fc48dcda798ed65d9af7a43730c546969a1c2a71e84f50956400f24f1415752",
+          "evidence/event_005.jpg": "e7030bbcdda1801fa5c5407400f2bf0f8c40b6b1ad787d7b542ff5235411fa07",
+          "evidence/source-contact-000.jpg": "0ac5dbf4d028c62ee498cc54abd749bc6dc8de69c82cdd22350e39d4f676b483",
+          "evidence/source-contact-001.jpg": "0ac5dbf4d028c62ee498cc54abd749bc6dc8de69c82cdd22350e39d4f676b483",
+          "evidence/source-contact-002.jpg": "faff76610054f5474940ec9d93881ef0da639e4ab7c56087164132eb17197fce",
+          "evidence/source-contact-003.jpg": "ab6636d58058993bffeb90f42ff399c22481f52570b4534e8c519760fde5ca9e",
+          "evidence/source-contact-004.jpg": "ab6636d58058993bffeb90f42ff399c22481f52570b4534e8c519760fde5ca9e",
+          "evidence/source-contact-005.jpg": "4a2c0c0a22e67117aaeaf9a6638efc0587ddd40c9e729f7532743a51e5ef0f2e",
+          "evidence/trajectory-context.jpg": "896ea32ad77fc297715425051b4b69d5d28a15242f3956a70f34aed16ce0da15",
+          "preview.mp4": "c7527e66b5b01dc8b12bf9c91416d13931f03223a98317e73ff676ee414ccaa4"
+        },
+        "clip_timing_at_candidate": {
+          "replay_frame_index": 21,
+          "source_frame_index": 49,
+          "source_time": 1.633267,
+          "replay_time": 0.699967
+        },
+        "artifact_selected_candidate_agreement": true,
+        "cli_timings": {
+          "decode_and_preview_seconds": 46.64854974500122,
+          "calibration_seconds": 1.69191890699949,
+          "detection_seconds": 56.639246791000915,
+          "tracking_seconds": 9.064819756997167,
+          "events_and_decision_seconds": 14.293335903999832,
+          "total_seconds": 141.36718244200165
+        }
+      },
+      "B": {
+        "source_result_path": "/workspace/remediation/release-controls-0.5.4/B/result.json",
+        "result_sha256": "79fedefc26a669ceddb19e163af3d0bc9c268a08285ed7da111828156a9311fa",
+        "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+        "pipeline_version": "0.5.4",
+        "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+        "selected": {
+          "track_id": 730,
+          "frame_index": 42,
+          "time": 1.7922,
+          "candidate_px": [
+            396.667,
+            200.333
+          ],
+          "contact_observed": false
+        },
+        "public_landing_candidate": {
+          "status": "approximate",
+          "kind": "descent_and_rebound",
+          "time_seconds": 1.7922,
+          "frame_index": 42,
+          "point_px": [
+            396.667,
+            200.333
+          ],
+          "analysis_size": {
+            "width": 960,
+            "height": 540
+          },
+          "point_kind": "object_center",
+          "contact_observed": false,
+          "inference_only": true,
+          "frame_interval": [
+            40,
+            45
+          ],
+          "time_interval": [
+            1.708833,
+            1.917244
+          ]
+        },
+        "artifact_sha256": {
+          "evidence/annotated-timing.json": "db6199d5508665a0237caec551509f57014f5095e4dd27be5f9d86178b1ee738",
+          "evidence/annotated.mp4": "0e76cd32f1cca2ab782a0f760f28f25d8c6768f374291bc8ecda0e1394bf8838",
+          "evidence/event_000.jpg": "e2ae52149ec914dcda91cb42e1de5fde8435dc539743521ceef55d056cafc691",
+          "evidence/event_001.jpg": "70c3487d76ea95bf93b8bea03b5ee1422f1d67b9a3aa2b6e3f58585fec703f85",
+          "evidence/event_002.jpg": "1f075836c5811a5475d61d85e04e8aaa34a3faccac68e3e6cc4fdaeb735fe056",
+          "evidence/event_003.jpg": "459238d7946d8dd5f00d814bd0971b8ef302a4f13821ad094e814502b4529a1e",
+          "evidence/event_004.jpg": "5180ec4fd3acbfddd15fe2a3f262682ce18c195ca9656e4f581857cf8956bfbd",
+          "evidence/event_005.jpg": "4b2730d3998c1774d9da7a63b8d0eed86dcd07f8cc11c73856bf498957ca9000",
+          "evidence/source-contact-000.jpg": "f8aa6f7713bbde6a1f3f8271abca773b27c0668ee8a80980e2ddb85e1518838d",
+          "evidence/source-contact-001.jpg": "f8aa6f7713bbde6a1f3f8271abca773b27c0668ee8a80980e2ddb85e1518838d",
+          "evidence/source-contact-002.jpg": "f8aa6f7713bbde6a1f3f8271abca773b27c0668ee8a80980e2ddb85e1518838d",
+          "evidence/source-contact-003.jpg": "4075a912a01cfddb1450665845e31ddade8497284ab8c249896ee7d4a4ed205d",
+          "evidence/source-contact-004.jpg": "437853b19271121e5348680ab45f90a25f32b2bef03f9572676ecd9d697285c7",
+          "evidence/source-contact-005.jpg": "e0ccbd42694382850fa83f814a60b5a77029c89ab514f16bd7490bc96dfdd033",
+          "evidence/trajectory-context.jpg": "3101441434d588cf1caca2315d290b71abf28d480d582dde0b3ba711395c3b30",
+          "preview.mp4": "fa11d10c66054773cefc2c2dc291df2e77c46fc35cd3c6e8131630b074ca4da4"
+        },
+        "clip_timing_at_candidate": {
+          "replay_frame_index": 15,
+          "source_frame_index": 42,
+          "source_time": 1.7922,
+          "replay_time": 0.6668670000000001
+        },
+        "artifact_selected_candidate_agreement": true,
+        "cli_timings": {
+          "decode_and_preview_seconds": 5.876737432998198,
+          "calibration_seconds": 0.9730411860000459,
+          "detection_seconds": 22.486863299000106,
+          "tracking_seconds": 8.129298754000047,
+          "events_and_decision_seconds": 3.662023033000878,
+          "total_seconds": 43.303012368000054
+        }
+      }
+    },
+    "profile_sha256": "7db2422b6dbc6b736cdd030fec55a18f30063f32b635bcf8bd8790846e5a5615",
+    "ui_sha256": {
+      "pair.html": "d69522e7814e00c64c37577bae75a2177c14ca0c5a8e46891efca2b567672d36",
+      "pair.js": "c969a8435838062b556b68c8cc52aaffe52a711b9cc41b51ff530b59c63462b0",
+      "pair.css": "745d72082195faac2494583b450bd15498a887bf9b662c79bbbe46a254e007ea"
+    },
+    "server_sha256": {
+      "web.py": "99e20e901b6653e31cc5e1b353a4f81288973265f152ae05085d0fe994bbc67b",
+      "pair_workspace.py": "5d1a4fca74dd15df6187970b14d1eac0630a987cbfd08563c278949974008506"
+    },
+    "new_holdout_inputs_or_references_opened": false,
+    "control_validation": {
+      "path": "/workspace/remediation/release-controls-0.5.4/validation.json",
+      "sha256": "85e5019b47d5d9ccf672650c971984021040e5d1b58efe08798545aca44c9aed"
+    }
+  },
+  "checks": [
+    {
+      "camera": "A",
+      "source_result_sha256": "247d86cf5a1e2949b927e1ac25917b46160bd7dabcf07361d1ff31bf21f1b8a3",
+      "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+      "selected": {
+        "track_id": 1074,
+        "frame_index": 49,
+        "time": 1.633267,
+        "candidate_px": [
+          360.869,
+          447.182
+        ],
+        "contact_observed": false
+      },
+      "public_candidate": {
+        "status": "approximate",
+        "kind": "descent_and_rebound",
+        "time_seconds": 1.633267,
+        "frame_index": 49,
+        "point_px": [
+          360.869,
+          447.182
+        ],
+        "analysis_size": {
+          "width": 960,
+          "height": 540
+        },
+        "point_kind": "object_center",
+        "contact_observed": false,
+        "inference_only": true,
+        "frame_interval": [
+          48,
+          51
+        ],
+        "time_interval": [
+          1.599933,
+          1.699933
+        ]
+      },
+      "candidate_text": "착지 추정 구간\n추정 · 접촉 미확인\n\n1.60–1.70초\n\n프레임 48–51\n\n영상 속 추정 위치 · 왼쪽에서 38% / 위에서 83%\n\n물체가 내려온 뒤 올라가는 움직임을 찾았습니다. 바닥 접촉이나 같은 랠리의 셔틀임을 확정한 것은 아닙니다.\n\n착지 추정 구간부터 보기",
+      "seek_button_target": 1.599933,
+      "seek_button_actual": 1.599933,
+      "source_playback": {
+        "current_time": 0.2038,
+        "width": 960,
+        "height": 540,
+        "decoded_frames": 66
+      },
+      "replay_playback": {
+        "current_time": 0.146,
+        "width": 960,
+        "height": 540,
+        "decoded_frames": 4
+      },
+      "selected_source": {
+        "current_time": 1.633767,
+        "width": 960,
+        "height": 540,
+        "ready_state": 4,
+        "decoded_frames": 119,
+        "requested_candidate_time": 1.633267,
+        "presentation_epsilon_seconds": 0.0005,
+        "presented_media_time": 1.633267,
+        "presented_frames": 9
+      },
+      "selected_replay": {
+        "current_time": 0.700467,
+        "width": 960,
+        "height": 540,
+        "ready_state": 4,
+        "decoded_frames": 29,
+        "requested_candidate_time": 0.699967,
+        "presentation_epsilon_seconds": 0.0005,
+        "presented_media_time": 0.699967,
+        "presented_frames": 2
+      },
+      "replay_source_time_origin": 0.9333,
+      "replay_timeline_note": "원본 0.93초부터의 구간입니다. 영상 위 프레임·시각은 원본 기준이며, 재생 막대는 이 구간의 시작을 0초로 표시합니다.",
+      "selected_artifact_metadata_agreement": true
+    },
+    {
+      "camera": "B",
+      "source_result_sha256": "79fedefc26a669ceddb19e163af3d0bc9c268a08285ed7da111828156a9311fa",
+      "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+      "selected": {
+        "track_id": 730,
+        "frame_index": 42,
+        "time": 1.7922,
+        "candidate_px": [
+          396.667,
+          200.333
+        ],
+        "contact_observed": false
+      },
+      "public_candidate": {
+        "status": "approximate",
+        "kind": "descent_and_rebound",
+        "time_seconds": 1.7922,
+        "frame_index": 42,
+        "point_px": [
+          396.667,
+          200.333
+        ],
+        "analysis_size": {
+          "width": 960,
+          "height": 540
+        },
+        "point_kind": "object_center",
+        "contact_observed": false,
+        "inference_only": true,
+        "frame_interval": [
+          40,
+          45
+        ],
+        "time_interval": [
+          1.708833,
+          1.917244
+        ]
+      },
+      "candidate_text": "착지 추정 구간\n추정 · 접촉 미확인\n\n1.71–1.92초\n\n프레임 40–45\n\n영상 속 추정 위치 · 왼쪽에서 41% / 위에서 37%\n\n물체가 내려온 뒤 올라가는 움직임을 찾았습니다. 바닥 접촉이나 같은 랠리의 셔틀임을 확정한 것은 아닙니다.\n\n착지 추정 구간부터 보기",
+      "seek_button_target": 1.708833,
+      "seek_button_actual": 1.708833,
+      "source_playback": {
+        "current_time": 0.1837,
+        "width": 960,
+        "height": 540,
+        "decoded_frames": 52
+      },
+      "replay_playback": {
+        "current_time": 0.1805,
+        "width": 960,
+        "height": 540,
+        "decoded_frames": 4
+      },
+      "selected_source": {
+        "current_time": 1.7927,
+        "width": 960,
+        "height": 540,
+        "ready_state": 4,
+        "decoded_frames": 98,
+        "requested_candidate_time": 1.7922,
+        "presentation_epsilon_seconds": 0.0005,
+        "presented_media_time": 1.7922,
+        "presented_frames": 7
+      },
+      "selected_replay": {
+        "current_time": 0.667367,
+        "width": 960,
+        "height": 540,
+        "ready_state": 4,
+        "decoded_frames": 23,
+        "requested_candidate_time": 0.6668670000000001,
+        "presentation_epsilon_seconds": 0.0005,
+        "presented_media_time": 0.666867,
+        "presented_frames": 2
+      },
+      "replay_source_time_origin": 1.125333,
+      "replay_timeline_note": "원본 1.13초부터의 구간입니다. 영상 위 프레임·시각은 원본 기준이며, 재생 막대는 이 구간의 시작을 0초로 표시합니다.",
+      "selected_artifact_metadata_agreement": true
+    }
+  ],
+  "http_assets": [
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/preview.mp4",
+      "status": 200,
+      "content_type": "video/mp4",
+      "source_sha256": "c7527e66b5b01dc8b12bf9c91416d13931f03223a98317e73ff676ee414ccaa4"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/trajectory-context.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "896ea32ad77fc297715425051b4b69d5d28a15242f3956a70f34aed16ce0da15"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/annotated.mp4",
+      "status": 200,
+      "content_type": "video/mp4",
+      "source_sha256": "041c11aec9d2efbfc7e677466c3b4f8c7396ad0dfd7051a1bb03a248fcba8f14"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/event_000.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "c088982cd3008754d7b0215cddfc51365d4e34acc2473b44bb799ba6c8377c9d"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/source-contact-000.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "0ac5dbf4d028c62ee498cc54abd749bc6dc8de69c82cdd22350e39d4f676b483"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/event_001.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "5e507c234ba1f33a5ed43d573b33110c77596acd1c17951f3d7145111518c6af"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/source-contact-001.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "0ac5dbf4d028c62ee498cc54abd749bc6dc8de69c82cdd22350e39d4f676b483"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/event_002.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "9470645ebe5eeb581c88cff9a6500e7a64368eeb6ec96912b3edaf2a4f911a7d"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/source-contact-002.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "faff76610054f5474940ec9d93881ef0da639e4ab7c56087164132eb17197fce"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/event_003.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "501614ac79a3117ec6c004726b6da7c23078d4b8ed8a9a0218a5b9818efa9cde"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/source-contact-003.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "ab6636d58058993bffeb90f42ff399c22481f52570b4534e8c519760fde5ca9e"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/event_004.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "4fc48dcda798ed65d9af7a43730c546969a1c2a71e84f50956400f24f1415752"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/source-contact-004.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "ab6636d58058993bffeb90f42ff399c22481f52570b4534e8c519760fde5ca9e"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/event_005.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "e7030bbcdda1801fa5c5407400f2bf0f8c40b6b1ad787d7b542ff5235411fa07"
+    },
+    {
+      "camera": "A",
+      "url": "/pair-media/jobs/release054controls/views/A/evidence/source-contact-005.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "4a2c0c0a22e67117aaeaf9a6638efc0587ddd40c9e729f7532743a51e5ef0f2e"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/preview.mp4",
+      "status": 200,
+      "content_type": "video/mp4",
+      "source_sha256": "fa11d10c66054773cefc2c2dc291df2e77c46fc35cd3c6e8131630b074ca4da4"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/trajectory-context.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "3101441434d588cf1caca2315d290b71abf28d480d582dde0b3ba711395c3b30"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/annotated.mp4",
+      "status": 200,
+      "content_type": "video/mp4",
+      "source_sha256": "0e76cd32f1cca2ab782a0f760f28f25d8c6768f374291bc8ecda0e1394bf8838"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/event_000.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "e2ae52149ec914dcda91cb42e1de5fde8435dc539743521ceef55d056cafc691"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/source-contact-000.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "f8aa6f7713bbde6a1f3f8271abca773b27c0668ee8a80980e2ddb85e1518838d"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/event_001.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "70c3487d76ea95bf93b8bea03b5ee1422f1d67b9a3aa2b6e3f58585fec703f85"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/source-contact-001.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "f8aa6f7713bbde6a1f3f8271abca773b27c0668ee8a80980e2ddb85e1518838d"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/event_002.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "1f075836c5811a5475d61d85e04e8aaa34a3faccac68e3e6cc4fdaeb735fe056"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/source-contact-002.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "f8aa6f7713bbde6a1f3f8271abca773b27c0668ee8a80980e2ddb85e1518838d"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/event_003.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "459238d7946d8dd5f00d814bd0971b8ef302a4f13821ad094e814502b4529a1e"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/source-contact-003.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "4075a912a01cfddb1450665845e31ddade8497284ab8c249896ee7d4a4ed205d"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/event_004.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "5180ec4fd3acbfddd15fe2a3f262682ce18c195ca9656e4f581857cf8956bfbd"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/source-contact-004.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "437853b19271121e5348680ab45f90a25f32b2bef03f9572676ecd9d697285c7"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/event_005.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "4b2730d3998c1774d9da7a63b8d0eed86dcd07f8cc11c73856bf498957ca9000"
+    },
+    {
+      "camera": "B",
+      "url": "/pair-media/jobs/release054controls/views/B/evidence/source-contact-005.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "source_sha256": "e0ccbd42694382850fa83f814a60b5a77029c89ab514f16bd7490bc96dfdd033"
+    }
+  ],
+  "reload_restoration": true,
+  "mobile": [
+    {
+      "width": 375,
+      "height": 844,
+      "horizontal_overflow": false,
+      "both_candidates_fit": true,
+      "review_wording_preserved": true,
+      "video_checks": [
+        {
+          "camera": "a",
+          "source_playback": {
+            "current_time": 0.1498,
+            "width": 960,
+            "height": 540,
+            "decoded_frames": 10
+          },
+          "replay_playback": {
+            "current_time": 0.2821,
+            "width": 960,
+            "height": 540,
+            "decoded_frames": 11
+          },
+          "selected_source": {
+            "current_time": 1.633767,
+            "width": 960,
+            "height": 540,
+            "ready_state": 4,
+            "decoded_frames": 63,
+            "requested_candidate_time": 1.633267,
+            "presentation_epsilon_seconds": 0.0005,
+            "presented_media_time": 1.633267,
+            "presented_frames": 7
+          },
+          "selected_replay": {
+            "current_time": 0.700467,
+            "width": 960,
+            "height": 540,
+            "ready_state": 4,
+            "decoded_frames": 36,
+            "requested_candidate_time": 0.699967,
+            "presentation_epsilon_seconds": 0.0005,
+            "presented_media_time": 0.699967,
+            "presented_frames": 3
+          }
+        },
+        {
+          "camera": "b",
+          "source_playback": {
+            "current_time": 0.1408,
+            "width": 960,
+            "height": 540,
+            "decoded_frames": 8
+          },
+          "replay_playback": {
+            "current_time": 0.1409,
+            "width": 960,
+            "height": 540,
+            "decoded_frames": 4
+          },
+          "selected_source": {
+            "current_time": 1.7927,
+            "width": 960,
+            "height": 540,
+            "ready_state": 4,
+            "decoded_frames": 54,
+            "requested_candidate_time": 1.7922,
+            "presentation_epsilon_seconds": 0.0005,
+            "presented_media_time": 1.7922,
+            "presented_frames": 5
+          },
+          "selected_replay": {
+            "current_time": 0.667367,
+            "width": 960,
+            "height": 540,
+            "ready_state": 4,
+            "decoded_frames": 23,
+            "requested_candidate_time": 0.6668670000000001,
+            "presentation_epsilon_seconds": 0.0005,
+            "presented_media_time": 0.666867,
+            "presented_frames": 2
+          }
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "horizontal_overflow": false,
+      "both_candidates_fit": true,
+      "review_wording_preserved": true,
+      "video_checks": [
+        {
+          "camera": "a",
+          "source_playback": {
+            "current_time": 0.1463,
+            "width": 960,
+            "height": 540,
+            "decoded_frames": 9
+          },
+          "replay_playback": {
+            "current_time": 0.1294,
+            "width": 960,
+            "height": 540,
+            "decoded_frames": 4
+          },
+          "selected_source": {
+            "current_time": 1.633767,
+            "width": 960,
+            "height": 540,
+            "ready_state": 4,
+            "decoded_frames": 62,
+            "requested_candidate_time": 1.633267,
+            "presentation_epsilon_seconds": 0.0005,
+            "presented_media_time": 1.633267,
+            "presented_frames": 6
+          },
+          "selected_replay": {
+            "current_time": 0.700467,
+            "width": 960,
+            "height": 540,
+            "ready_state": 4,
+            "decoded_frames": 29,
+            "requested_candidate_time": 0.699967,
+            "presentation_epsilon_seconds": 0.0005,
+            "presented_media_time": 0.699967,
+            "presented_frames": 2
+          }
+        },
+        {
+          "camera": "b",
+          "source_playback": {
+            "current_time": 0.1429,
+            "width": 960,
+            "height": 540,
+            "decoded_frames": 8
+          },
+          "replay_playback": {
+            "current_time": 0.1418,
+            "width": 960,
+            "height": 540,
+            "decoded_frames": 4
+          },
+          "selected_source": {
+            "current_time": 1.7927,
+            "width": 960,
+            "height": 540,
+            "ready_state": 4,
+            "decoded_frames": 54,
+            "requested_candidate_time": 1.7922,
+            "presentation_epsilon_seconds": 0.0005,
+            "presented_media_time": 1.7922,
+            "presented_frames": 5
+          },
+          "selected_replay": {
+            "current_time": 0.667367,
+            "width": 960,
+            "height": 540,
+            "ready_state": 4,
+            "decoded_frames": 23,
+            "requested_candidate_time": 0.6668670000000001,
+            "presentation_epsilon_seconds": 0.0005,
+            "presented_media_time": 0.666867,
+            "presented_frames": 2
+          }
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "/workspace/remediation/release054-browser/checks/release054controls/desktop-replay-A.png",
+      "sha256": "0a142c4ab94fd4e1cecb5c01547e0ef096e6745233ca26dec51d6cdd722a2874",
+      "viewport": [
+        1440,
+        1050
+      ],
+      "camera": "A",
+      "displayed_replay_time": 0.700467,
+      "capture": "selected replay frame presented onscreen"
+    },
+    {
+      "path": "/workspace/remediation/release054-browser/checks/release054controls/desktop-view-A.png",
+      "sha256": "30b9c3b1257497476565057b4b126d8f5fb38673ddb5e5ce0419e15c6efbe97f",
+      "viewport": [
+        1440,
+        1050
+      ],
+      "camera": "A",
+      "displayed_source_time": 1.633767,
+      "displayed_replay_time": 0.700467
+    },
+    {
+      "path": "/workspace/remediation/release054-browser/checks/release054controls/desktop-replay-B.png",
+      "sha256": "e3cebc24b69acc5cc998ff10521d456586211945c220f442687b70f70a1b55f8",
+      "viewport": [
+        1440,
+        1050
+      ],
+      "camera": "B",
+      "displayed_replay_time": 0.667367,
+      "capture": "selected replay frame presented onscreen"
+    },
+    {
+      "path": "/workspace/remediation/release054-browser/checks/release054controls/desktop-view-B.png",
+      "sha256": "6f30b604941793c2df6a2d414bec11171417a8f29e12c0c061ea170e9dcd65d8",
+      "viewport": [
+        1440,
+        1050
+      ],
+      "camera": "B",
+      "displayed_source_time": 1.7927,
+      "displayed_replay_time": 0.667367
+    },
+    {
+      "path": "/workspace/remediation/release054-browser/checks/release054controls/mobile-375.png",
+      "sha256": "f79d9a5dea1d3b65170d16a5da83a9b4e91f13a945dfaff3d9a32f317def735d",
+      "viewport": [
+        375,
+        844
+      ],
+      "is_mobile_emulation": true
+    },
+    {
+      "path": "/workspace/remediation/release054-browser/checks/release054controls/mobile-390.png",
+      "sha256": "b307c372148943713f1c2ec40287f44d95ccd86c0825fd34bb9918cef81a81a9",
+      "viewport": [
+        390,
+        844
+      ],
+      "is_mobile_emulation": true
+    }
+  ],
+  "javascript_errors": [],
+  "console_errors": [
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://127.0.0.1:8784/favicon.ico",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    }
+  ],
+  "failed_requests": [],
+  "http_errors": [],
+  "expected_video_seek_cancellations": [
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/A/evidence/annotated.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/A/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/evidence/annotated.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/A/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/A/evidence/annotated.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/evidence/annotated.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/A/evidence/annotated.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/A/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/evidence/annotated.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/A/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/evidence/annotated.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/A/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/A/evidence/annotated.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/evidence/annotated.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8784/pair-media/jobs/release054controls/views/B/preview.mp4",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "browser_mutation_requests": [],
+  "new_holdout_inputs_or_references_opened": false,
+  "limits": [
+    "Completed CLI results replayed; browser upload/inference/live progress and browser-job timing not tested.",
+    "Desktop Chromium and mobile viewport/touch emulation, not a physical phone or Windows codec test.",
+    "REVIEW output remains estimated image-space evidence; rendering/playback checks do not validate identity, floor contact, target court or accuracy.",
+    "Independent ordinary4A/12A display slots do not establish same-rally correspondence; no cross-view mapping is claimed."
+  ]
+}

@@ -1,0 +1,483 @@
+{
+  "scope": "Two accepted development gains rechecked with full fresh source/detector/calibration/native-contact/evidence execution; separate from old24 stage count and new8 holdout metrics.",
+  "source_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+  "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+  "canonical_config_sha256": "e1f21c7835ac4d1f1be10305352b596f0c341af009f4dddb29a57eea816d56cf",
+  "preinspection_freeze_sha256": "2c996ba611227a9fbedcc1afcf791e43e1dc9309d408d9b2ecf88d684a6c4284",
+  "metrics": {
+    "declared_videos": 2,
+    "declared_development_videos": 2,
+    "declared_holdout_videos": 0,
+    "audited_outputs": 2,
+    "pending_or_invalid_outputs": 0,
+    "status_counts": {
+      "audited": 2
+    },
+    "reference_visibility_counts": {
+      "visible": 2
+    },
+    "selection_category_counts": {
+      "correct_first_vicinity": 2
+    },
+    "diagnostic_failure_stage_counts": {
+      "none_selected_first_vicinity": 2
+    },
+    "causal_failure_category_counts": {
+      "none_selected_first_vicinity": 2
+    },
+    "automatic_decision_counts": {
+      "REVIEW": 2
+    },
+    "first_vicinity_match_count": 2,
+    "first_vicinity_denominator": 2,
+    "first_vicinity_fraction": 1.0,
+    "decision_abstention_count": 2,
+    "decision_abstention_denominator": 2,
+    "candidate_abstention_count": 0,
+    "candidate_abstention_denominator": 2,
+    "independent_contact_accuracy": null,
+    "independent_line_judgment_accuracy": null
+  },
+  "cases": [
+    {
+      "key": "ordinary-4-a",
+      "group": "ordinary",
+      "view": "A",
+      "split": "development",
+      "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+      "reference_path": "/workspace/remediation/regression_references/ordinary-4-a.json",
+      "reference_sha256": "b3861193dd347788cbf5de0efb46ab80c04bb28443e5c3b810a1c7ef86e9c29e",
+      "reference_snapshot": "/workspace/remediation/final-reference-snapshots/ordinary-4-a/b3861193dd347788cbf5de0efb46ab80c04bb28443e5c3b810a1c7ef86e9c29e.json",
+      "contact_visibility": "visible",
+      "reference_interval": [
+        188,
+        191
+      ],
+      "reference_point": [
+        603,
+        243
+      ],
+      "coordinate_size": [
+        960,
+        540
+      ],
+      "tolerance_px": 8,
+      "frame_tolerance": null,
+      "reference_version_count": 1,
+      "effective_frame_tolerance": 0.0,
+      "localization_scorable": true,
+      "status": "audited",
+      "result_path": "/workspace/remediation/final-fresh-0.5.4/ordinary-4-a/result.json",
+      "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+      "analysis_config_sha256": "e1f21c7835ac4d1f1be10305352b596f0c341af009f4dddb29a57eea816d56cf",
+      "pipeline_version": "0.5.4",
+      "selection_category": "correct_first_vicinity",
+      "validation_mode": "full_pipeline",
+      "validation_run": null,
+      "timing_scope": "full_pipeline",
+      "automatic_decision": "REVIEW",
+      "decision_abstention": true,
+      "candidate_abstention": false,
+      "selected_comparison": {
+        "frame_index": 188,
+        "reference_coordinate_point": [
+          602.7496043657603,
+          240.64656956344658
+        ],
+        "distance_px": 2.3667,
+        "frame_error": 0,
+        "within_spatial_tolerance": true,
+        "within_frame_tolerance": true,
+        "matches_first_vicinity": true
+      },
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 3551,
+        "frame_index": 188,
+        "time": 3.171144,
+        "candidate_px": [
+          602.7496043657602,
+          240.64656956344658
+        ],
+        "contact_observed": false,
+        "method": "offline_occluded_image_trajectory_intersection",
+        "reason_codes": [
+          "OCCLUDED_IMAGE_TRAJECTORY_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "CONTACT_OCCLUDED_OR_MISSING",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TEMPORAL_GAP_NEAR_CANDIDATE",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "elapsed_seconds": 166.00009064000187,
+      "diagnosis": {
+        "failure_stage": "none_selected_first_vicinity",
+        "causal_failure_category": "none_selected_first_vicinity",
+        "matching_first_vicinity_event_ids": [
+          "event_000"
+        ],
+        "matching_first_vicinity_candidate_count": 1,
+        "detection_artifact_available": true,
+        "raw_contact_hit_frames": [
+          {
+            "frame_index": 188,
+            "candidate_count": 1
+          },
+          {
+            "frame_index": 189,
+            "candidate_count": 2
+          },
+          {
+            "frame_index": 190,
+            "candidate_count": 2
+          },
+          {
+            "frame_index": 191,
+            "candidate_count": 2
+          }
+        ],
+        "contact_hit_track_ids": [
+          2485,
+          2575,
+          3551
+        ],
+        "reference_trajectory_point_count": 10,
+        "raw_trajectory_hit_count": 7,
+        "raw_trajectory_hit_frames": [
+          138,
+          144,
+          168,
+          171,
+          174,
+          189,
+          195
+        ],
+        "best_track_trajectory_hit_count": 4,
+        "best_track_trajectory_hit_frames": [
+          168,
+          171,
+          174,
+          189
+        ],
+        "best_track_trajectory_id": 3551,
+        "selected_track_trajectory_hit_count": 4,
+        "selected_track_trajectory_hit_frames": [
+          168,
+          171,
+          174,
+          189
+        ],
+        "selected_track": {
+          "track_id": 3551,
+          "method": "coherent_free_flight_hypothesis",
+          "identity_ambiguous": true,
+          "observation_count": 28
+        },
+        "selected_track_has_flight_hypothesis": true,
+        "selected_track_continuity": {
+          "identity_switch_or_occluder_extension_suspected": false,
+          "occluder_entry_observations": [],
+          "limits": "Appearance/polarity changes and possible person overlap are diagnostic association risks, not independently confirmed identity switches."
+        },
+        "diagnostic_limits": "Spatial/temporal proximity to an AI visual reference does not prove object identity or physical contact."
+      },
+      "result_sha256": "a40c9938d37ac495605697e3db310f84633e83e6ae1b1499796c6e14fa6bf9ac",
+      "detections_sha256": "0d81aab2d6f747f17b9fadb222dff4e454c6a2fe24918d31da53d4a368454736",
+      "assistance_used": false,
+      "automatic_evaluation_eligible": true,
+      "execution_scope": "full_fresh_pipeline",
+      "execution_receipt_sha256": "5e66915a935351c9af439c61e0fda4ba5342b8d0c3fa7eae8bdbbcb09e738e7a",
+      "matches_accepted_stage_frame_point": true,
+      "candidate_kind": "inferred_object_center",
+      "artifacts": {
+        "preview.mp4": {
+          "sha256": "020792ccab6453b081068a7e4535397dc3095758f40400ba42c54039581b501c",
+          "bytes": 815394
+        },
+        "overview.jpg": {
+          "sha256": "cf3c7f6eb8d2a5ccf0239b2ac41ef2bee63dc5b77721bb0ad9f0160c8a00d835",
+          "bytes": 205068
+        },
+        "evidence/event_001.jpg": {
+          "sha256": "4418fc665dabad63af68e4f64acba2f1c5c952a20ed665ece9857d2bd89c98d4",
+          "bytes": 198335
+        },
+        "evidence/source-contact-002.jpg": {
+          "sha256": "5441f5c853fb3fe985fd8134823a15949669553643e82ff721b443aac856f819",
+          "bytes": 18761
+        },
+        "evidence/source-contact-001.jpg": {
+          "sha256": "3d24d927c389cd5844523bf07e0c56db8d12b71beac3ff2bcc22628c308d5834",
+          "bytes": 17223
+        },
+        "evidence/trajectory-context.jpg": {
+          "sha256": "9fc41f3c0f29cd43c7e6080cce395d38b8c26a92540f31d57ec7f476508b46e3",
+          "bytes": 226913
+        },
+        "evidence/event_000.jpg": {
+          "sha256": "cf3c7f6eb8d2a5ccf0239b2ac41ef2bee63dc5b77721bb0ad9f0160c8a00d835",
+          "bytes": 205068
+        },
+        "evidence/annotated.mp4": {
+          "sha256": "eccd6936141dc8b97df1453e3cfc7eddc4f63868155c2a92df15128c7250a115",
+          "bytes": 238897
+        },
+        "evidence/event_003.jpg": {
+          "sha256": "21e4e798be76ad1b17ab945a6c7fa35cd455974f06f7bccb7328c5d8152be546",
+          "bytes": 204093
+        },
+        "evidence/event_002.jpg": {
+          "sha256": "71bbe505e97f0c6793176c4882133bf24c8310d0ddc0b4d8b43b30dcf461f255",
+          "bytes": 205283
+        },
+        "evidence/event_005.jpg": {
+          "sha256": "03c3c4043cca1680e2b0b21b69d92119c8b4752be3bc4d356c2720cc1d19358a",
+          "bytes": 203472
+        },
+        "evidence/source-contact-004.jpg": {
+          "sha256": "516dec8177278e948e467c0bfbfc86c3afacbec667439c846de5e57a4f8566be",
+          "bytes": 23829
+        },
+        "evidence/event_004.jpg": {
+          "sha256": "6ad1d711a2d043c081c386d797e1dc1eeeb776508c05f551ff9fbf9b01bd7933",
+          "bytes": 204183
+        },
+        "evidence/source-contact-008.jpg": {
+          "sha256": "4f3fed3c5a304bc93330a9300dc00469b90545367ad2a3a45e4a8a540ac35d00",
+          "bytes": 26115
+        },
+        "evidence/source-contact-000.jpg": {
+          "sha256": "a4f1f16a23a3c2902e67a38d88f3aabad67af7044e07fa5982b9c7e1c9e9bc5d",
+          "bytes": 20039
+        },
+        "evidence/source-contact-005.jpg": {
+          "sha256": "58eb792a356ebd1aa91e21036803ae6d02729271f24845acb8cfec17655634f6",
+          "bytes": 24131
+        }
+      }
+    },
+    {
+      "key": "ordinary-12-a",
+      "group": "ordinary",
+      "view": "A",
+      "split": "development",
+      "source_sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb",
+      "reference_path": "/workspace/remediation/regression_references/ordinary-12-a.json",
+      "reference_sha256": "619a834d2eb3c5c2ddd442adcfa3fd0dcfce49bd8b110b46b52f90c98559f8ec",
+      "reference_snapshot": "/workspace/remediation/final-reference-snapshots/ordinary-12-a/619a834d2eb3c5c2ddd442adcfa3fd0dcfce49bd8b110b46b52f90c98559f8ec.json",
+      "contact_visibility": "visible",
+      "reference_interval": [
+        150,
+        153
+      ],
+      "reference_point": [
+        482,
+        215
+      ],
+      "coordinate_size": [
+        960,
+        540
+      ],
+      "tolerance_px": 6,
+      "frame_tolerance": null,
+      "reference_version_count": 1,
+      "effective_frame_tolerance": 0.0,
+      "localization_scorable": true,
+      "status": "audited",
+      "result_path": "/workspace/remediation/final-fresh-0.5.4/ordinary-12-a/result.json",
+      "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+      "analysis_config_sha256": "e1f21c7835ac4d1f1be10305352b596f0c341af009f4dddb29a57eea816d56cf",
+      "pipeline_version": "0.5.4",
+      "selection_category": "correct_first_vicinity",
+      "validation_mode": "full_pipeline",
+      "validation_run": null,
+      "timing_scope": "full_pipeline",
+      "automatic_decision": "REVIEW",
+      "decision_abstention": true,
+      "candidate_abstention": false,
+      "selected_comparison": {
+        "frame_index": 151,
+        "reference_coordinate_point": [
+          481.934,
+          210.755
+        ],
+        "distance_px": 4.2455,
+        "frame_error": 0,
+        "within_spatial_tolerance": true,
+        "within_frame_tolerance": true,
+        "matches_first_vicinity": true
+      },
+      "selected": {
+        "event_id": "event_000",
+        "track_id": 2359,
+        "frame_index": 151,
+        "time": 2.547044,
+        "candidate_px": [
+          481.934,
+          210.755
+        ],
+        "contact_observed": false,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "reason_codes": [
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "TRACK_IDENTITY_AMBIGUOUS",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "CALIBRATION_NOT_CONFIRMED"
+        ]
+      },
+      "elapsed_seconds": 147.2149292210015,
+      "diagnosis": {
+        "failure_stage": "none_selected_first_vicinity",
+        "causal_failure_category": "none_selected_first_vicinity",
+        "matching_first_vicinity_event_ids": [
+          "event_000",
+          "event_001"
+        ],
+        "matching_first_vicinity_candidate_count": 2,
+        "detection_artifact_available": true,
+        "raw_contact_hit_frames": [
+          {
+            "frame_index": 151,
+            "candidate_count": 1
+          },
+          {
+            "frame_index": 152,
+            "candidate_count": 2
+          }
+        ],
+        "contact_hit_track_ids": [
+          1307,
+          1409,
+          2359,
+          2372,
+          2373
+        ],
+        "reference_trajectory_point_count": 11,
+        "raw_trajectory_hit_count": 10,
+        "raw_trajectory_hit_frames": [
+          104,
+          110,
+          116,
+          122,
+          144,
+          147,
+          149,
+          151,
+          154,
+          158
+        ],
+        "best_track_trajectory_hit_count": 5,
+        "best_track_trajectory_hit_frames": [
+          144,
+          147,
+          149,
+          151,
+          154
+        ],
+        "best_track_trajectory_id": 2359,
+        "selected_track_trajectory_hit_count": 5,
+        "selected_track_trajectory_hit_frames": [
+          144,
+          147,
+          149,
+          151,
+          154
+        ],
+        "selected_track": {
+          "track_id": 2359,
+          "method": "coherent_free_flight_hypothesis",
+          "identity_ambiguous": true,
+          "observation_count": 28
+        },
+        "selected_track_has_flight_hypothesis": true,
+        "selected_track_continuity": {
+          "identity_switch_or_occluder_extension_suspected": false,
+          "occluder_entry_observations": [],
+          "limits": "Appearance/polarity changes and possible person overlap are diagnostic association risks, not independently confirmed identity switches."
+        },
+        "diagnostic_limits": "Spatial/temporal proximity to an AI visual reference does not prove object identity or physical contact."
+      },
+      "result_sha256": "8d2c0680483f414562f3456b2bd4ee20bc2b4ffc2174eba24bce103ce46af717",
+      "detections_sha256": "f90d5a0aead2f680e7fad24b1193f096dce6e1ac5cf7f5251e209a94f0405a21",
+      "assistance_used": false,
+      "automatic_evaluation_eligible": true,
+      "execution_scope": "full_fresh_pipeline",
+      "execution_receipt_sha256": "06206e886b54bef8d0a40fcdfa629109c8c2e92e9d777604d891c57bd45ba914",
+      "matches_accepted_stage_frame_point": true,
+      "candidate_kind": "observed_object_center",
+      "artifacts": {
+        "preview.mp4": {
+          "sha256": "34a8a79bc6fb0d0400f12b32a580aa395c01a0d6ea7127306b5877ddb36d2f9f",
+          "bytes": 455603
+        },
+        "overview.jpg": {
+          "sha256": "e21f4e942c35b06c49ca725ff643ff1c0d8bc536047da7e0171b3b564a263f4d",
+          "bytes": 205623
+        },
+        "evidence/event_001.jpg": {
+          "sha256": "1af3addd925821821aad98a19eb5519837e10c53d4a0f33c3efb034ad1ced5c1",
+          "bytes": 205634
+        },
+        "evidence/source-contact-002.jpg": {
+          "sha256": "bfb4bb16dbc0e568facdcf30ccf0da01835ebfe9ea2cf24a988e214c2cbf16d0",
+          "bytes": 22380
+        },
+        "evidence/source-contact-001.jpg": {
+          "sha256": "856d3bc592ac7a3bdfbdadb9bc556f0e729dac647ac0710ab5464927e6530ffa",
+          "bytes": 20283
+        },
+        "evidence/trajectory-context.jpg": {
+          "sha256": "61993f0b17478b8a1b5ec287a2c0cc9c79f37aa1fd286708991106a1f64d7bb5",
+          "bytes": 185223
+        },
+        "evidence/event_000.jpg": {
+          "sha256": "e21f4e942c35b06c49ca725ff643ff1c0d8bc536047da7e0171b3b564a263f4d",
+          "bytes": 205623
+        },
+        "evidence/annotated.mp4": {
+          "sha256": "a64295008998e6b754c284a18c3cde5b78d9c0d0748deffddcba82c4b230a108",
+          "bytes": 172919
+        },
+        "evidence/event_003.jpg": {
+          "sha256": "76a5bde0e16a81551710372634542aca4b23fc89055e36d6156eeadc283cca51",
+          "bytes": 206590
+        },
+        "evidence/event_002.jpg": {
+          "sha256": "4467c96b13e72016e0a8c190bc12dc0087f22d62d606c27ea0575eb59cee4006",
+          "bytes": 206555
+        },
+        "evidence/event_005.jpg": {
+          "sha256": "2e31d6114496ce825b1d1e56f8269e52714f72e551d5d96976070da28a38c858",
+          "bytes": 205851
+        },
+        "evidence/source-contact-004.jpg": {
+          "sha256": "f9fe3eb845fb239915aaf15e6ab65a30ff0d067f5b382ac6c11796aa393e9d90",
+          "bytes": 21633
+        },
+        "evidence/event_004.jpg": {
+          "sha256": "bc6bfdd047980458a9c18933a1afe12321b0529d107ec09c873e27a9bea5cf7c",
+          "bytes": 205408
+        },
+        "evidence/source-contact-000.jpg": {
+          "sha256": "323ea71adaf6328e0057ce37cd9493cfb71482880296954e01629f513100d406",
+          "bytes": 20347
+        },
+        "evidence/source-contact-003.jpg": {
+          "sha256": "1f4bf3cdc0bf9d478033ec1d53bab3ca6cd3e98edfca6f828bb4607d0d19d484",
+          "bytes": 23659
+        },
+        "evidence/source-contact-005.jpg": {
+          "sha256": "7f846b2aa1762e0642ef6f8146c8536490e1865b84cd42aebd860724993acec9",
+          "bytes": 21094
+        }
+      }
+    }
+  ]
+}

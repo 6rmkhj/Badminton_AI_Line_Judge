@@ -1,0 +1,103 @@
+{
+  "key": "ordinary-4-a",
+  "file": "a시점 4.mp4",
+  "source_path": "/workspace/generalization/input/a시점 4.mp4",
+  "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+  "split": "development",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    3840,
+    2160
+  ],
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    188,
+    191
+  ],
+  "landing_time_interval_seconds": [
+    3.191144,
+    3.241756
+  ],
+  "landing_point_px": [
+    603,
+    243
+  ],
+  "tolerance_px": 8,
+  "trajectory_points": [
+    {
+      "frame_index": 132,
+      "time_seconds": 2.246556,
+      "x": 428,
+      "y": 137
+    },
+    {
+      "frame_index": 138,
+      "time_seconds": 2.347756,
+      "x": 457,
+      "y": 130
+    },
+    {
+      "frame_index": 144,
+      "time_seconds": 2.448967,
+      "x": 483,
+      "y": 129
+    },
+    {
+      "frame_index": 168,
+      "time_seconds": 2.853789,
+      "x": 562,
+      "y": 167
+    },
+    {
+      "frame_index": 171,
+      "time_seconds": 2.9044,
+      "x": 569,
+      "y": 178
+    },
+    {
+      "frame_index": 174,
+      "time_seconds": 2.955,
+      "x": 578,
+      "y": 190
+    },
+    {
+      "frame_index": 177,
+      "time_seconds": 3.0056,
+      "x": 584,
+      "y": 204
+    },
+    {
+      "frame_index": 189,
+      "time_seconds": 3.208022,
+      "x": 603,
+      "y": 241
+    },
+    {
+      "frame_index": 195,
+      "time_seconds": 3.309222,
+      "x": 607,
+      "y": 234
+    },
+    {
+      "frame_index": 200,
+      "time_seconds": 3.393567,
+      "x": 609,
+      "y": 229
+    }
+  ],
+  "later_bounce_observations": [],
+  "notes": "Main-court shuttle travels from far white-shirt player toward the right of near gray-shirt player. Its middle approach is hidden behind that player (approximately frames 149–167); the shuttle then reappears, descends to visible floor, and rebounds. Numerous stationary spare shuttles behind the landing region and adjacent-court activity are distractors. The floor rebound is visible in native crops; landing point and interval are approximate visual estimates, not certified physical contact measurements.",
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "evidence": [
+    "/workspace/generalization/visual/ordinary-4-a/native-180-203-0.png",
+    "/workspace/generalization/visual/ordinary-4-a/native-180-203-1.png",
+    "/workspace/generalization/visual/ordinary-4-a/crop-165-200-0.jpg",
+    "/workspace/generalization/visual/ordinary-4-a/crop-165-200-1.jpg",
+    "/workspace/generalization/visual/ordinary-4-a/crop-165-200-2.jpg"
+  ],
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; native crops use sequential decoding. Source timestamps from ffprobe. Contact-sheet time labels based on mean FPS are illustrative only."
+}

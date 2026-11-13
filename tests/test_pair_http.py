@@ -74,6 +74,7 @@ def pair_server(tmp_path):
     (root / 'index.json').write_text(json.dumps({'videos': [], 'pairs': []}))
     fake = FakePairWorkspace(root)
     server = create_server(root, port=0)
+    server.configure_resources(server.resources_status()['settings'])
     server.pair_workspace = fake
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -128,6 +129,16 @@ def test_pair_submission_preserves_both_sources_and_returns_job_handle(pair_serv
     assert fake.calls == [('submit', body)]
     status, _, result = request(server, '/api/pair-jobs', 'POST', {'force_busy': True})
     assert status == 409 and '이미 진행' in result['error']
+
+
+def test_pair_submission_preserves_optional_per_camera_region_without_rewriting_coordinates(pair_server):
+    server, fake = pair_server
+    body = {'views': {'A': {'upload_id':'upload-a', 'review_region':{'x':0,'y':.125,'width':1,'height':.75}},
+                      'B': {'video_id':'v_b','review_region':None}},
+            'reuse_review':False, 'refine_review_regions':True}
+    status, _, result = request(server, '/api/pair-jobs', 'POST', body)
+    assert status == 202 and result['job_id']=='new-job'
+    assert fake.calls == [('submit', body)]
 
 
 def test_raw_video_upload_stream_preserves_binary_bytes_and_unicode_name(pair_server):

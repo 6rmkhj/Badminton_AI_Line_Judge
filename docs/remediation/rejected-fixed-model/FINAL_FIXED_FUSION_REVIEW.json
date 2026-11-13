@@ -1,0 +1,360 @@
+{
+  "schema_version": 1,
+  "status": "completed_bounded_two_case_development_experiment",
+  "decision": "Stop widening and do not adopt this fixed fusion as default. Neither primary landing succeeds; first-case approach selection improves but switches to a shoe, and second-case target selection moves to a distant unrelated trajectory. Report partial approach evidence honestly.",
+  "scope": "These two cases were evaluated only after explicit auditor reference release and are now DEVELOPMENT for this model experiment. Original7306 new8 result and references remain immutable; this is not a fresh holdout accuracy result.",
+  "source_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+  "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+  "model_sha256": "b0ed780c3cc2c4f8eab6efa08d1489667381ecdcced7fad52abccbd176204ed6",
+  "adapter_sha256": "225d62c6add396fcc0b5db6b070af893ec8c0511ebde8903ed19996646ce7da4",
+  "fixed_grid_threshold_proposal_budget_unchanged": true,
+  "original_model_license_provenance": "/workspace/remediation/model/PROVENANCE.json; MIT upstream checkpoint license; downloaded mirror bytes pinned; no redistribution.",
+  "new_hyperparameters_or_gt_inference_crops": false,
+  "interpolated_observations_created": false,
+  "scene_context_on_for_all_replay_methods": true,
+  "cpu_threads_per_process": 1,
+  "maximum_concurrent_case_processes": 2,
+  "frozen_reference_primary_approximation": {
+    "cv_only": {
+      "matches": 0,
+      "scorable_cases": 2
+    },
+    "model_only": {
+      "matches": 0,
+      "scorable_cases": 2
+    },
+    "fusion": {
+      "matches": 0,
+      "scorable_cases": 2
+    }
+  },
+  "model_elapsed_seconds_total": 432.0421421329993,
+  "total_original_cv_observations_preserved": 29824,
+  "total_added_model_observations": 621,
+  "total_actual_patch_gray_pixels_verified": 24523,
+  "cases": [
+    {
+      "key": "8k-3-a",
+      "source_sha256": "9d29a7841610b8adf20acc41d63432027dcf6d157c4108b390af3982672e07c8",
+      "cache_sha256": "c8238a806cd96ad48b99a64a8ebe88d1ce7c728ab9dba22fb7e40a4b9188e72f",
+      "baseline_result_sha256": "9306fabc2ff01a163fd139b767e4d5d6f2552a6f6d8b9c047797082de8889826",
+      "baseline_detections_sha256": "9c9438a5f26367118c07a808bfa70efdeae83206e5087881256aeb21d8445fdf",
+      "baseline_artifacts_unchanged": true,
+      "original_cv_candidates_preserved": true,
+      "original_cv_candidate_count": 11520,
+      "added_model_candidate_count": 327,
+      "all_cache_pixels_and_source_pts_verified": true,
+      "actual_patch_gray_pixels_verified": 12600,
+      "patch_pixel_mismatches": 0,
+      "model_elapsed_seconds": 165.51481594800134,
+      "inference_seconds": 161.7357261559955,
+      "model_max_rss_mb": 1357.4140625,
+      "comparisons": [
+        {
+          "mode": "cv_only",
+          "primary": {
+            "exists": true,
+            "frame_index": 99,
+            "time": 3.299856,
+            "point_px": [
+              432.25,
+              209.125
+            ],
+            "track_id": 1232,
+            "point_kind": "observed_object_center",
+            "distance_to_approximate_landing_px": 313.712970922466,
+            "within_frame_interval": false,
+            "within_frozen_approximation": false,
+            "contact_observed": false,
+            "identity_source": "unverified_image_space_consistency",
+            "identity_confidence": 0.15,
+            "flight_supported": true,
+            "event_id": "event_000"
+          },
+          "checkpoint_count": 8,
+          "raw_proposal_checkpoint_matches": 5,
+          "selected_track_checkpoint_matches": 0,
+          "posthoc_best_track_checkpoint_matches": 5,
+          "matching_exported_events": [],
+          "timings": {
+            "tracking_seconds": 14.215002455999638,
+            "events_seconds": 1.690196510997339,
+            "total_seconds": 15.90526499599946
+          }
+        },
+        {
+          "mode": "model_only",
+          "primary": {
+            "exists": true,
+            "frame_index": 70,
+            "time": 2.333233,
+            "point_px": [
+              420.1875,
+              129.9375
+            ],
+            "track_id": 160,
+            "point_kind": "observed_object_center",
+            "distance_to_approximate_landing_px": 349.13828071768353,
+            "within_frame_interval": false,
+            "within_frozen_approximation": false,
+            "contact_observed": false,
+            "identity_source": "unverified_image_space_consistency",
+            "identity_confidence": 0.15,
+            "flight_supported": true,
+            "event_id": "event_000"
+          },
+          "checkpoint_count": 8,
+          "raw_proposal_checkpoint_matches": 4,
+          "selected_track_checkpoint_matches": 0,
+          "posthoc_best_track_checkpoint_matches": 4,
+          "matching_exported_events": [],
+          "timings": {
+            "tracking_seconds": 0.5178013349977846,
+            "events_seconds": 0.3921864679978171,
+            "total_seconds": 0.909989013998711
+          }
+        },
+        {
+          "mode": "fusion",
+          "primary": {
+            "exists": true,
+            "frame_index": 130,
+            "time": 4.333144,
+            "point_px": [
+              724.571,
+              236.714
+            ],
+            "track_id": 1098,
+            "point_kind": "observed_object_center",
+            "distance_to_approximate_landing_px": 36.68803397567113,
+            "within_frame_interval": false,
+            "within_frozen_approximation": false,
+            "contact_observed": false,
+            "identity_source": "unverified_image_space_consistency",
+            "identity_confidence": 0.15,
+            "flight_supported": true,
+            "event_id": "event_000"
+          },
+          "checkpoint_count": 8,
+          "raw_proposal_checkpoint_matches": 5,
+          "selected_track_checkpoint_matches": 3,
+          "posthoc_best_track_checkpoint_matches": 5,
+          "matching_exported_events": [],
+          "timings": {
+            "tracking_seconds": 14.458976834001078,
+            "events_seconds": 1.72663863300113,
+            "total_seconds": 16.1856163880002
+          }
+        }
+      ]
+    },
+    {
+      "key": "ordinary-1-a",
+      "source_sha256": "aa5e23a6400121849b7994664fd9dc942c9034b9e34180117a8973f10d83be76",
+      "cache_sha256": "c9bab2fdcab7d48dede5bb11e5649e64e7d426b9b84c3c8eadafa17117945ba0",
+      "baseline_result_sha256": "f44db99faf05221c128c9c3192431dbde5e2e4b2acf29300e57651bc42de0f1c",
+      "baseline_detections_sha256": "094903b342360f781be9dd4eaf6b6ee1cb52d7e0000b34f14aaa8ae08508ab72",
+      "baseline_artifacts_unchanged": true,
+      "original_cv_candidates_preserved": true,
+      "original_cv_candidate_count": 18304,
+      "added_model_candidate_count": 294,
+      "all_cache_pixels_and_source_pts_verified": true,
+      "actual_patch_gray_pixels_verified": 11923,
+      "patch_pixel_mismatches": 0,
+      "model_elapsed_seconds": 266.52732618499795,
+      "inference_seconds": 261.2831412520136,
+      "model_max_rss_mb": 1503.95703125,
+      "comparisons": [
+        {
+          "mode": "cv_only",
+          "primary": {
+            "exists": true,
+            "frame_index": 187,
+            "time": 3.154278,
+            "point_px": [
+              182.0,
+              342.625
+            ],
+            "track_id": 2254,
+            "point_kind": "observed_object_center",
+            "distance_to_approximate_landing_px": 28.00697457777259,
+            "within_frame_interval": false,
+            "within_frozen_approximation": false,
+            "contact_observed": false,
+            "identity_source": "unverified_image_space_consistency",
+            "identity_confidence": 0.25,
+            "flight_supported": true,
+            "event_id": "event_000"
+          },
+          "checkpoint_count": 7,
+          "raw_proposal_checkpoint_matches": 6,
+          "selected_track_checkpoint_matches": 0,
+          "posthoc_best_track_checkpoint_matches": 4,
+          "matching_exported_events": [
+            {
+              "exists": true,
+              "frame_index": 158,
+              "time": 2.665111,
+              "point_px": [
+                209.95499951326042,
+                332.87061611294234
+              ],
+              "track_id": 2134,
+              "point_kind": "inferred_object_center",
+              "distance_to_approximate_landing_px": 4.119764433951718,
+              "within_frame_interval": true,
+              "within_frozen_approximation": true,
+              "contact_observed": false,
+              "identity_source": "unverified_image_trajectory",
+              "identity_confidence": 0.15,
+              "flight_supported": true,
+              "event_id": "event_002"
+            }
+          ],
+          "timings": {
+            "tracking_seconds": 21.668056065998826,
+            "events_seconds": 2.6212119289994007,
+            "total_seconds": 24.28927000800104
+          }
+        },
+        {
+          "mode": "model_only",
+          "primary": {
+            "exists": true,
+            "frame_index": 175,
+            "time": 2.951867,
+            "point_px": [
+              673.125,
+              206.4375
+            ],
+            "track_id": 36,
+            "point_kind": "observed_object_center",
+            "distance_to_approximate_landing_px": 482.2242289964804,
+            "within_frame_interval": false,
+            "within_frozen_approximation": false,
+            "contact_observed": false,
+            "identity_source": "unverified_image_space_consistency",
+            "identity_confidence": 0.15,
+            "flight_supported": true,
+            "event_id": "event_000"
+          },
+          "checkpoint_count": 7,
+          "raw_proposal_checkpoint_matches": 2,
+          "selected_track_checkpoint_matches": 0,
+          "posthoc_best_track_checkpoint_matches": 2,
+          "matching_exported_events": [],
+          "timings": {
+            "tracking_seconds": 0.8869158380002773,
+            "events_seconds": 0.33782537400111323,
+            "total_seconds": 1.2247421130014118
+          }
+        },
+        {
+          "mode": "fusion",
+          "primary": {
+            "exists": true,
+            "frame_index": 175,
+            "time": 2.951867,
+            "point_px": [
+              672.877,
+              205.774
+            ],
+            "track_id": 2195,
+            "point_kind": "observed_object_center",
+            "distance_to_approximate_landing_px": 482.1550354450319,
+            "within_frame_interval": false,
+            "within_frozen_approximation": false,
+            "contact_observed": false,
+            "identity_source": "unverified_image_space_consistency",
+            "identity_confidence": 0.15,
+            "flight_supported": true,
+            "event_id": "event_000"
+          },
+          "checkpoint_count": 7,
+          "raw_proposal_checkpoint_matches": 6,
+          "selected_track_checkpoint_matches": 0,
+          "posthoc_best_track_checkpoint_matches": 3,
+          "matching_exported_events": [
+            {
+              "exists": true,
+              "frame_index": 158,
+              "time": 2.665111,
+              "point_px": [
+                208.7520757394926,
+                334.5558890823918
+              ],
+              "track_id": 2135,
+              "point_kind": "inferred_object_center",
+              "distance_to_approximate_landing_px": 4.881177596438712,
+              "within_frame_interval": true,
+              "within_frozen_approximation": true,
+              "contact_observed": false,
+              "identity_source": "unverified_image_trajectory",
+              "identity_confidence": 0.15,
+              "flight_supported": true,
+              "event_id": "event_002"
+            },
+            {
+              "exists": true,
+              "frame_index": 158,
+              "time": 2.665111,
+              "point_px": [
+                209.7649062629638,
+                331.9949241241741
+              ],
+              "track_id": 2139,
+              "point_kind": "inferred_object_center",
+              "distance_to_approximate_landing_px": 3.409461673664642,
+              "within_frame_interval": true,
+              "within_frozen_approximation": true,
+              "contact_observed": false,
+              "identity_source": "unverified_image_trajectory",
+              "identity_confidence": 0.15,
+              "flight_supported": true,
+              "event_id": "event_004"
+            }
+          ],
+          "timings": {
+            "tracking_seconds": 18.836712067997723,
+            "events_seconds": 2.2456139479982085,
+            "total_seconds": 21.08232697799758
+          }
+        }
+      ]
+    }
+  ],
+  "not_run": [
+    "remaining2 newly scorable failures",
+    "broader protected-case model tests",
+    "any new parameter/model experiment"
+  ],
+  "production_code_changed": false,
+  "weights_shipped": false,
+  "limitations": [
+    "Frozen references are AI source inspection, not independent human truth.",
+    "Sparse trajectory checkpoints do not establish continuous identity or global detection precision.",
+    "Replay excludes fresh CV detection, native source-contact refinement and evidence-video generation; compare stage outputs only.",
+    "One method can contain a correct approximate alternative yet fail the automatically selected primary.",
+    "Inference timings use1CPU per process; full baseline pipeline timings use different included stages and cannot be substituted."
+  ],
+  "artifact_sha256": {
+    "8k-3-a/run.json": "104d355291e995db1e0bc05354f3420febf9ea6036713a2f80d5394a0d774026",
+    "8k-3-a/cache-verification.json": "67c75035a9e3a64d637e2c1a6a14ee806c778872599863d4c50f0d12f052f222",
+    "8k-3-a/source-patch-integrity.json": "2e9a48f7b5fba173e69d39bac74eb769b819c052faca741145ecfa096c8d9f9a",
+    "8k-3-a/posthoc-comparison.json": "bcc39b4b5d265bf7698cf45541b1e0817685d18e64d6783569a6d5cb85df1287",
+    "8k-3-a/source-review.json": "6fe2289db88a27b6998a72d9355eaaba5e9d39a78256398b9a64a077effaa412",
+    "8k-3-a/selected-source-review.jpg": "bbdd56729a1378dee18435f859c08c6361c4ddcf40fddb9a09912e6d463ad933",
+    "8k-3-a/selected-track-switch-review.jpg": "ae2da115bca3a7f1554955cb4fe9dc995844cc620ac246da9b68b5d84b06eb7f",
+    "ordinary-1-a/run.json": "6997041340a479e9e8fa7f6e7d4bbdbfbb2c35296767d1f8ce6ae200992d9034",
+    "ordinary-1-a/cache-verification.json": "9ce31228af5e00554cdeea3e84b5b601483ca571668b62845b90cc8db80c4f09",
+    "ordinary-1-a/source-patch-integrity.json": "f277b7df5d281a84215f121898dce124b05fe3254ba6c518625c3c41f5ebede5",
+    "ordinary-1-a/posthoc-comparison.json": "b20defd98484423f89cf833c64679905c4e61d12ca15365c91bdab092619c8a1",
+    "ordinary-1-a/source-review.json": "268cc55eea5bcc2af99b16301f4857d9e974cba7ff88012197b18886f35513e2",
+    "ordinary-1-a/selected-source-review.jpg": "b594b460badab7977ebdf9fb8dd58fd88d8a6f054956b5796df1689720316278",
+    "FROZEN_EXPERIMENT.json": "eac0b6f1ed6fe8087945cb2bf6098884642724c9617c800fb143bdd942ed1967",
+    "REFERENCE_RELEASE.json": "d5e61a212ffbcab3963925efe485c40361546345f0e60e9c3cbb9b8bba10f03f",
+    "run_fixed_fusion.py": "67577d063068ada03844921c9ac78ed030ab1dcad31296c7503a376a80e92e54",
+    "evaluate_fixed_fusion.py": "8abed92e15e94f95b97561198fc18a452c0ea1a1e0bed85ba7bc743fef4e70e4",
+    "render_review.py": "0bee2cb22675a877603a4d07a0afdeece6656f583dd4cf5b88f3e323daf13fea"
+  }
+}

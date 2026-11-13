@@ -1,0 +1,32 @@
+{
+  "cases": [
+    {
+      "key": "ordinary-12-a",
+      "result_sha256": "20d9e3544207a58f85aebc55e52ab0475911305198791b1ed9a8bd608b28e856",
+      "reference_sha256": "619a834d2eb3c5c2ddd442adcfa3fd0dcfce49bd8b110b46b52f90c98559f8ec",
+      "selection": {
+        "frame_index": 151,
+        "candidate_px": [
+          481.934,
+          210.755
+        ]
+      },
+      "status": "same_shuttle_first_floor_vicinity",
+      "reviewer": "independent agent /root/detector_finalize",
+      "source_sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb",
+      "evidence": [
+        {
+          "path": "/workspace/generalization/visual/ordinary-12-a/native-144-167-0.png",
+          "sha256": "d54b1e0debf4a3e4db4c1013e696ce96ab49a4263d16c6d37584f3e7236e7722"
+        },
+        {
+          "path": "/workspace/generalization/visual/ordinary-12-a/native-144-167-1.png",
+          "sha256": "df4aeab9f23bef38353f215e2e58492579b77a37faf86e7259a5ac55cdb7c870"
+        }
+      ],
+      "conclusion": "White shuttle descends144-151 beside blue divider, turns151-152, rises153-162. Measured candidate path146-157 follows same object. f151 candidate center is above approximate cork/floor reference; numeric tolerance gain is not a background coincidence.",
+      "physical_contact_certified": false,
+      "scope": "Fixed frozen-observation uncapped tracking/event component ablation only; current detector/native-contact stage not validated."
+    }
+  ]
+}

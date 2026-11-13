@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-11-12T10:00:07.738534+00:00",
+  "decision": "REJECTED_NOT_IMPLEMENTED_OR_SHIPPED",
+  "core_commit_retained": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+  "scope": "Bounded read-only diagnosis of released ordinary-1-a, now development. Existing saved result, raw observations and already-created source evidence only. No prospective6 pixels, new references, code edits or ranking/threshold changes.",
+  "diagnosis": {
+    "path": "/workspace/remediation/ordinary1a-episode-order-diagnosis.json",
+    "sha256": "bc164d15f012c7b7fae384622eef0333482a8344fc408a50864366bc685aec8c"
+  },
+  "established_findings": {
+    "first_candidate_already_in_production_top12": {
+      "rank": 3,
+      "track_id": 2134,
+      "frame_index": 158,
+      "time": 2.665111,
+      "point_px": [
+        209.95499951326042,
+        332.87061611294234
+      ],
+      "point_kind": "inferred_object_center",
+      "first_in_track": true,
+      "supported_for_review": true,
+      "confidence": 0.2202,
+      "fit_residual_px": 2.2563,
+      "approach_displacement_y_px": 82.802,
+      "raw_flight_rank": 25.4282467831588,
+      "inferred_point_rank_factor": 0.7,
+      "scene_rank_factor": 1.0,
+      "effective_flight_rank": 17.79977274821116,
+      "contact_observed": false
+    },
+    "selected_later_candidate": {
+      "rank": 1,
+      "track_id": 2254,
+      "frame_index": 187,
+      "time": 3.154278,
+      "point_px": [
+        182.0,
+        342.625
+      ],
+      "point_kind": "observed_object_center",
+      "first_in_track": true,
+      "supported_for_review": true,
+      "confidence": 0.3739,
+      "fit_residual_px": 0.9675,
+      "approach_displacement_y_px": 37.339,
+      "raw_flight_rank": 18.977890724269376,
+      "inferred_point_rank_factor": 1.0,
+      "scene_rank_factor": 1.0,
+      "effective_flight_rank": 18.977890724269376,
+      "contact_observed": false
+    },
+    "first_candidate_distance_to_frozen_vicinity_px": 4.119764433951718,
+    "exact_bridge": {
+      "track_id": 1472,
+      "continuous_measured_frame_interval": [
+        159,
+        176
+      ],
+      "shared_earlier_rebound_frames": [
+        159,
+        160,
+        161,
+        162,
+        164,
+        165
+      ],
+      "shared_later_approach_frames": [
+        173,
+        174,
+        175,
+        176
+      ],
+      "all_signature_matches_validated_against_raw_pool": true,
+      "no_interpolated_or_proximity_join": true
+    },
+    "interpretation": "Existing measurements connect the same visible mover after the earlier turn to the later bounce. Per-hypothesis first-in-track flags and independent review ranking lose that episode relationship. This does not establish what caused the earlier turn."
+  },
+  "unresolved_causal_gate": {
+    "earlier_candidate_kind": "inferred_object_center",
+    "contact_observed": false,
+    "first_contact_missing": true,
+    "missing_earlier_track_frame_interval": [
+      146,
+      158
+    ],
+    "scene_status": "ambiguous_image_context",
+    "floor_verified": false,
+    "hog_observation_age_at_frame158": 14,
+    "hog_independently_validated": false,
+    "why_exact_bridge_is_insufficient": "The exact bridge begins after the unobserved turn. A low racket return can also produce the same-object local rising/falling arc and changing feather/cork appearance. Neither absent occluder overlap nor bottom-connected color establishes racket absence or floor contact."
+  },
+  "independent_review": {
+    "reviewer": "/root/pipeline_progress",
+    "decision": "STOP_GROUPING_FOR_LANDING_PRIORITY",
+    "conclusion": "Shared measured motion after frame159 does not identify the impulse during missing146–158. Transferring the later episode rank to an earliest candidate could promote an earlier racket stroke.",
+    "existing_counterexample": {
+      "path": "/workspace/remediation/old24-experiment-uncapped-v1/ordinary-4-b/result.json",
+      "sha256": "47760d990c3ec822960e687b6ffdfae7e9e7e6a8d3bc24343d437ea6fdaef432",
+      "track_id": 4957,
+      "frame_index": 142,
+      "source_review_assessment": "Previously source-reviewed ordinary4B racket turn, reported by the independent tracker reviewer; no new source pixels opened for this counterexample.",
+      "flight_supported_for_review": true,
+      "approach_clear_observation_count": 20,
+      "support_clear_observation_count": 25,
+      "post_observation_count": 5,
+      "track_possible_occluder_overlap_true_count": 0,
+      "limitation": "This directly refutes clear-overlap flags as a racket-exclusion guarantee; it is not a complete same-bridge grouping counterexample."
+    }
+  },
+  "alternatives_considered_but_not_adopted": [
+    {
+      "method": "Bounded later-event rank penalty",
+      "reason": "An unrelated retained candidate at frame175, track2204, already ranks18.7463 above the earlier candidate17.7998. Penalizing only the proven later bounce cannot make the first candidate primary; it instead promotes the unrelated event."
+    },
+    {
+      "method": "Preserve maximum episode rank and use earliest qualified representative",
+      "reason": "This avoids the unrelated-event promotion but requires defensible evidence that the earlier reversal belongs to a floor-bounce episode rather than a racket return. That gate is not established by existing saved fields."
+    }
+  ],
+  "actions_not_taken": {
+    "prototype_algorithm_implemented": false,
+    "old24_releasednew8_control_comparison_run": false,
+    "uncapped_replay_run": false,
+    "event_eligibility_relaxed": false,
+    "candidate_coordinate_or_confidence_changed": false,
+    "first_inferred_point_recast_as_measurement": false,
+    "physical_contact_certified": false,
+    "release_source_changed": false,
+    "prospective6_opened": false
+  },
+  "validation_scope": "Saved raw signatures, source/cache bindings and immutable input hashes were checked in the linked diagnosis. No algorithm tests or new accuracy comparison are claimed for this rejected ordering idea.",
+  "final_disposition": "Keep core7306 and existing frozen evaluation/reference bytes. Preserve the diagnosis as a known ordering limitation; do not force an ordinary1A gain or transfer confidence to an earlier unverified event."
+}

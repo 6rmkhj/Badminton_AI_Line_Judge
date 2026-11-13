@@ -102,7 +102,114 @@ def _identifier(value):
 
 
 def _finite(value):
-    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+    try:
+        return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+    except OverflowError:
+        return False
+
+
+def _review_region(value):
+    """Validate an optional displayed-video rectangle before any job is created."""
+    if value is None:
+        return None
+    fields = ("x", "y", "width", "height")
+    if (not isinstance(value, dict) or set(value) != set(fields)
+            or not all(_finite(value[field]) for field in fields)):
+        raise PairWorkspaceError(400, "분석 영역은 x, y, width, height 네 개의 유한한 숫자여야 합니다.")
+    x, y, width, height = (float(value[field]) for field in fields)
+    if (not 0 <= x < 1 or not 0 <= y < 1 or not 0 < width <= 1 or not 0 < height <= 1
+            or x + width > 1 or y + height > 1):
+        raise PairWorkspaceError(400, "분석 영역은 영상 안의 0~1 좌표이며 너비와 높이는 0보다 커야 합니다.")
+    return dict(zip(fields, (x, y, width, height)))
+
+
+def _manual_review_regions(region, metadata, analysis_width=1280):
+    """Map display-oriented coordinates to the same even dimensions as prepare_preview.
+
+    Round outward to retain small edge selections within at least one analysis
+    pixel. This is a search prior across the full source timeline, not a court
+    calibration, object identity, or contact annotation.
+    """
+    region = _review_region(region)
+    if region is None:
+        return []
+    width = min(int(analysis_width), metadata["width"])
+    if width < 160:
+        raise PairWorkspaceError(400, "분석 영상 너비는 160픽셀 이상이어야 합니다.")
+    width -= width % 2
+    height = max(2, round(metadata["height"] * width / metadata["width"] / 2) * 2)
+    def edge(value, rounding):
+        # Normalizing an integer pixel and multiplying back can add a few ULPs;
+        # those are not a requested extra row/column of search area.
+        nearest = round(value)
+        return nearest if abs(value - nearest) <= 1e-9 else rounding(value)
+    left = min(width - 1, edge(region["x"] * width, math.floor))
+    top = min(height - 1, edge(region["y"] * height, math.floor))
+    right = min(width, max(left + 1, edge((region["x"] + region["width"]) * width, math.ceil)))
+    bottom = min(height, max(top + 1, edge((region["y"] + region["height"]) * height, math.ceil)))
+    return [{"frame_start": 0, "frame_end": metadata["frame_count"] - 1,
+             "bbox": [left, top, right - left, bottom - top]}]
+
+
+def _landing_candidate(result):
+    """Expose a useful image-space hypothesis without promoting it to contact."""
+    landing, analysis = result.get("selected_landing") or {}, result.get("analysis") or {}
+    if not isinstance(landing, dict) or not isinstance(analysis, dict) or landing.get("contact_observed") is True:
+        return None
+    point, stamp, frame = landing.get("candidate_px"), landing.get("time"), landing.get("frame_index")
+    width, height, count = analysis.get("width"), analysis.get("height"), analysis.get("frame_count")
+    if (not isinstance(point, (list, tuple)) or len(point) != 2 or not all(_finite(v) for v in point)
+            or not _finite(width) or not _finite(height) or width <= 0 or height <= 0
+            or not 0 <= point[0] < width or not 0 <= point[1] < height
+            or not _finite(stamp) or stamp < 0 or not isinstance(frame, int) or isinstance(frame, bool)
+            or frame < 0 or not isinstance(count, int) or isinstance(count, bool) or not frame < count):
+        return None
+    motion = landing.get("image_motion_event") or {}
+    if not isinstance(motion, dict):
+        motion = {}
+    inferred = (motion.get("kind") == "occluded_descent_and_rebound"
+                or motion.get("point_kind") == "inferred_object_center"
+                or landing.get("point_kind") == "inferred_object_center")
+    kind = motion.get("kind") if motion.get("kind") in {"descent_and_rebound", "occluded_descent_and_rebound"} else "motion_candidate"
+    candidate = {"status": "approximate", "kind": kind,
+                 "time_seconds": float(stamp), "frame_index": frame, "point_px": list(point),
+                 "analysis_size": {"width": width, "height": height},
+                 "point_kind": "inferred_object_center" if inferred else "object_center",
+                 "contact_observed": False, "inference_only": True}
+    indices, times = motion.get("frame_interval"), motion.get("time_interval")
+    if (isinstance(indices, (list, tuple)) and len(indices) == 2
+            and all(isinstance(v, int) and not isinstance(v, bool) for v in indices)
+            and 0 <= indices[0] <= frame <= indices[1] < count):
+        candidate["frame_interval"] = list(indices)
+    if (isinstance(times, (list, tuple)) and len(times) == 2 and all(_finite(v) for v in times)
+            and 0 <= times[0] <= stamp <= times[1]):
+        candidate["time_interval"] = list(times)
+    return candidate
+
+
+def _trajectory_replay(output, artifacts, prefix):
+    """Expose only an existing, local MP4 and bounded source-timeline metadata."""
+    clip = artifacts.get("annotated_clip")
+    if not isinstance(clip, dict):
+        return None, None
+    relative = clip.get("path")
+    if not isinstance(relative, str) or not relative.startswith("evidence/") or Path(relative).suffix.lower() != ".mp4":
+        return None, None
+    try:
+        path = _safe(output, relative)
+        if not path.is_file() or path.stat().st_size == 0:
+            return None, None
+    except (PairWorkspaceError, OSError):
+        return None, None
+    info = {}
+    origin = clip.get("source_time_origin")
+    if _finite(origin) and origin >= 0:
+        info["source_time_origin"] = origin
+    for field in ("source_start_frame", "source_end_frame", "frame_count"):
+        value = clip.get(field)
+        if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+            info[field] = value
+    return prefix + quote(relative, safe="/"), info
 
 
 def combine_views(views, *, same_event_confirmed=False, event_source=None, different_event=False):
@@ -147,7 +254,7 @@ def combine_views(views, *, same_event_confirmed=False, event_source=None, diffe
         "event_correspondence_source": event_source if same_event_confirmed else None,
         "source_camera_ids": list(qualified) if label != "REVIEW" else [],
         "views": public_views, "rules": deepcopy(RULES), "court_position_m": None,
-        "assistance_used": True, "automatic_benchmark_eligible": False,
+        "assistance_used": True, "automatic_benchmark_eligible": False, "evaluation_eligible": False,
         "ground_truth_created": False, "human_verified": False,
         "scope": "A/B verdict linkage; no 3D reconstruction or common pixel coordinates.",
     }
@@ -158,7 +265,7 @@ def combine_views(views, *, same_event_confirmed=False, event_source=None, diffe
 
 
 class PairWorkspace:
-    def __init__(self, project_root, workspace_root, library_root=None):
+    def __init__(self, project_root, workspace_root, library_root=None, resource_settings_provider=None):
         self.project = Path(project_root).resolve()
         self.root = Path(workspace_root).resolve()
         self.library_root = Path(library_root).resolve() if library_root is not None else self.project / "runs/integrated-poc"
@@ -173,6 +280,7 @@ class PairWorkspace:
         self._stage_clocks = {}
         self._progress_writes = {}
         self._closed = False
+        self.resource_settings_provider = resource_settings_provider
         for path in sorted((self.root / "jobs").glob("*/job.json")):
             try:
                 job = _read(path)
@@ -310,6 +418,19 @@ class PairWorkspace:
                     "duration_seconds": None, "width": None, "height": None,
                     "direct_decision": row.get("decision", "REVIEW"), "assisted_decision": row.get("decision", "REVIEW"),
                     "source": "automatic", "has_review": False})
+        for video in videos:
+            # Use original-source metadata only; a preview may have been resized.
+            stored = _read(self.library_root / "videos" / video["id"] / "result.json", {})
+            metadata = deepcopy(stored.get("metadata") or {})
+            metadata.pop("timestamps", None)
+            metadata.setdefault("extension", Path(video["file"]).suffix.lower())
+            for dimension in ("width", "height"):
+                if video.get(dimension) is not None:
+                    metadata.setdefault(dimension, video[dimension])
+            video["metadata"] = metadata
+            video["duration_seconds"] = metadata.get("duration", metadata.get("duration_seconds"))
+            video["width"] = metadata.get("width", video["width"])
+            video["height"] = metadata.get("height", video["height"])
         videos.sort(key=lambda row: row["file"])
         return {"videos": videos, "limits": {"max_upload_bytes": MAX_UPLOAD_BYTES, "max_frames": MAX_FRAMES},
                 "rules": deepcopy(RULES)}
@@ -356,26 +477,32 @@ class PairWorkspace:
         except Exception as error:
             shutil.rmtree(folder, ignore_errors=True)
             raise PairWorkspaceError(400, "업로드한 파일에서 유효한 영상 프레임을 읽지 못했습니다.") from error
-        return {key: deepcopy(record[key]) for key in ("upload_id", "file", "sha256", "metadata")}
+        return {key: deepcopy(record[key]) for key in ("upload_id", "file", "sha256", "metadata", "bytes")}
 
     def _input(self, value, catalog):
-        if not isinstance(value, dict) or set(value) not in ({"video_id"}, {"upload_id"}):
+        if (not isinstance(value, dict)
+                or set(value) - {"review_region"} not in ({"video_id"}, {"upload_id"})):
             raise PairWorkspaceError(400, "A와 B에 각각 영상 목록 ID 또는 업로드 ID 하나를 지정하세요.")
+        region = _review_region(value.get("review_region"))
+        guidance = {"review_region": region} if region is not None else {}
         if "video_id" in value:
             identifier = _identifier(value["video_id"])
             if identifier not in catalog:
                 raise PairWorkspaceError(404, "영상 목록에 없는 영상입니다.")
-            return {"video_id": identifier, "file": catalog[identifier]["row"].get("file", identifier)}
+            return {"video_id": identifier, "file": catalog[identifier]["row"].get("file", identifier), **guidance}
         identifier = _identifier(value["upload_id"])
         upload = _read(_safe(self.root, f"uploads/{identifier}/upload.json"))
         if not upload or upload.get("upload_id") != identifier:
             raise PairWorkspaceError(404, "업로드한 영상을 찾을 수 없습니다.")
-        return {"upload_id": identifier, "file": upload["file"]}
+        metadata = deepcopy(upload.get("metadata") or {})
+        metadata.pop("timestamps", None)
+        return {"upload_id": identifier, "file": upload["file"], "metadata": metadata, **guidance}
 
     def submit(self, body):
+        resources = self.resource_settings_provider() if self.resource_settings_provider else None
         if not isinstance(body, dict) or not isinstance(body.get("views"), dict) or set(body["views"]) != {"A", "B"}:
             raise PairWorkspaceError(400, "A와 B 두 시점을 함께 입력하세요.")
-        same_event, reuse = body.get("same_event_confirmed", False), body.get("reuse_review", True)
+        same_event, reuse = body.get("same_event_confirmed", False), body.get("reuse_review", False)
         refine = body.get("refine_review_regions", False)
         if not isinstance(same_event, bool) or not isinstance(reuse, bool) or not isinstance(refine, bool):
             raise PairWorkspaceError(400, "같은 랠리 확인 및 검수 재사용 값은 참/거짓이어야 합니다.")
@@ -385,6 +512,8 @@ class PairWorkspace:
             raise PairWorkspaceError(400, "현재 A/B 작업은 복식 랠리 경계를 사용합니다.")
         catalog = self._catalog()
         selected = {camera: self._input(body["views"][camera], catalog) for camera in ("A", "B")}
+        if reuse and any(value.get("review_region") is not None for value in selected.values()):
+            raise PairWorkspaceError(400, "지정한 영역은 기존 판정 재사용을 끈 새 분석으로 실행하세요.")
         with self.lock:
             if self._closed:
                 raise PairWorkspaceError(503, "분석 서버가 종료 중입니다.")
@@ -401,6 +530,8 @@ class PairWorkspace:
                    "result": None, "request": {"views": selected, "same_event_confirmed": same_event,
                                               "reuse_review": reuse, "refine_review_regions": refine, "rules": deepcopy(RULES)}}
             self.jobs[identifier] = job
+            if resources is not None:
+                job["request"]["resource_settings"] = deepcopy(resources)
             self._persist(job)
             self.executor.submit(self._run, identifier)
         return {"job_id": identifier, "status": "queued"}
@@ -597,11 +728,13 @@ class PairWorkspace:
         return original, digest, matches, entry
 
     def _view(self, identifier, camera, selected, reuse, catalog, refine=False):
+        from .inference import InferenceDeviceError
         started = time.perf_counter()
         self._progress(identifier, camera, "running")
         base = {"camera_id": camera, "file": selected["file"], "status": "completed", "rules": deepcopy(RULES),
                 "source_sha256": None, "automatic_decision": "REVIEW", "direct_decision": "REVIEW",
                 "assisted_decision": "REVIEW", "qualified": False, "preview_url": None, "evidence_urls": [],
+                "trajectory_replay_url": None, "trajectory_replay_info": None,
                 "contact_time_seconds": None, "reason_codes": [], "rationale": "", "_candidate_ids": []}
         try:
             original, digest, candidates, entry = self._resolve(selected, catalog)
@@ -635,18 +768,41 @@ class PairWorkspace:
                 from .media import probe
                 import cv2
                 metadata = probe(original)
+                base["metadata"] = {key: value for key, value in metadata.items() if key != "timestamps"}
                 if not 1 <= metadata["frame_count"] <= MAX_FRAMES:
                     raise PairWorkspaceError(413, f"영상 한 개는 {MAX_FRAMES}프레임 이하여야 합니다.")
                 config = _read(self.project / "configs/poc.json", {"analysis_width": 960, "max_frames": MAX_FRAMES})
                 config.update(video_id=f"pair_{identifier}_{camera.lower()}", rules=deepcopy(RULES), max_frames=MAX_FRAMES)
-                regions = review_regions(hint, min(metadata["width"], config.get("analysis_width", 960)),
-                                         metadata["frame_count"]) if refine else []
+                resources = self.jobs[identifier]["request"].get("resource_settings")
+                if resources is not None:
+                    config["resource_settings"] = deepcopy(resources)
+                    config["opencv_threads"] = resources["cpu_threads"]
+                manual_region = selected.get("review_region")
+                if manual_region is not None:
+                    regions = _manual_review_regions(manual_region, metadata, config.get("analysis_width", 1280))
+                elif refine:
+                    regions = review_regions(hint, min(metadata["width"], config.get("analysis_width", 960)),
+                                             metadata["frame_count"])
+                else:
+                    regions = []
                 if regions:
                     config.setdefault("detector", {}).update(refinement_regions=regions, include_dark_components=True)
-                    base["refinement"] = {"source": "ai_visual_review", "source_sha256": digest,
+                    config.setdefault("events", {})["review_refinement_regions"] = deepcopy(regions)
+                    base["refinement"] = {"source": "operator_review_region" if manual_region is not None else "ai_visual_review",
+                        "source_sha256": digest,
                         "regions": regions, "assistance_used": True, "automatic_benchmark_eligible": False,
-                        "scope": "검수 좌표는 후보 검색에만 사용하며 기존 판정·접촉 확정을 복사하지 않습니다."}
-                cv2.setNumThreads(max(1, min(2, int(config.get("opencv_threads", 2)))))
+                        "evaluation_eligible": False,
+                        "scope": "영역은 후보 검색에만 사용하며 코트 보정·셔틀콕 식별·접촉 확정 근거가 아닙니다."}
+                    base.update(assistance_used=True, evaluation_eligible=False)
+                    if manual_region is not None:
+                        base["refinement"].update(normalized_region=deepcopy(manual_region),
+                            coordinate_system="displayed_video_normalized", mapping="outward_integer_analysis_pixels",
+                            ai_visual_refinement_requested=refine, ai_visual_refinement_applied=False,
+                            ai_visual_refinement_available=base["refinement_available"],
+                            priority="operator_region_over_ai_visual_review")
+                        config.setdefault("request_context", {})["review_region_guidance"] = deepcopy(base["refinement"])
+                if resources is None:
+                    cv2.setNumThreads(max(1, min(2, int(config.get("opencv_threads", 2)))))
                 output = self.root / "jobs" / identifier / "views" / camera
                 result = analyze_video(original, output, config=config,
                     progress_callback=lambda event: self._analysis_progress(identifier, camera, event))
@@ -656,27 +812,39 @@ class PairWorkspace:
                 if decision not in LABELS:
                     decision = "REVIEW"
                 prefix = f"/pair-media/jobs/{identifier}/views/{camera}/"
-                artifacts, evidence = result.get("artifacts") or {}, []
+                artifacts, evidence, trajectory_context = result.get("artifacts") or {}, [], None
                 for item in artifacts.get("evidence", []):
                     for field in ("image", "source_sequence", "source_crop"):
                         relative = item.get(field)
                         if isinstance(relative, str) and _safe(output, relative).is_file():
                             evidence.append(prefix + quote(relative, safe="/"))
+                    relative = item.get("trajectory_context")
+                    if isinstance(relative, str) and _safe(output, relative).is_file():
+                        trajectory_context = prefix + quote(relative, safe="/")
                 contact = (result.get("decision") or {}).get("contact_time_seconds")
                 if contact is None and decision != "REVIEW":
                     contact = (result.get("selected_landing") or {}).get("time")
+                if (result.get("selected_landing") or {}).get("contact_observed") is False:
+                    contact = None
+                replay_url, replay_info = _trajectory_replay(output, artifacts, prefix)
                 base.update(automatic_decision=decision, direct_decision=decision, assisted_decision=decision,
-                    qualified=decision in {"IN", "OUT"}, review_source="ai_review_guided_search" if regions else "automatic",
-                    processing_mode="review_guided_reanalysis" if regions else "fresh_analysis",
+                    qualified=decision in {"IN", "OUT"},
+                    review_source=("operator_region_guided_search" if manual_region is not None else
+                                   "ai_review_guided_search" if regions else "automatic"),
+                    processing_mode=("user_region_reanalysis" if manual_region is not None else
+                                     "review_guided_reanalysis" if regions else "fresh_analysis"),
                     preview_url=prefix + quote(artifacts.get("preview", "preview.mp4"), safe="/"),
                     evidence_urls=evidence, contact_time_seconds=contact if _finite(contact) else None,
+                    landing_candidate=_landing_candidate(result), trajectory_context_url=trajectory_context,
+                    trajectory_replay_url=replay_url, trajectory_replay_info=replay_info,
                     reason_codes=(result.get("decision") or {}).get("reason_codes", []),
                     rationale="새 원본 분석의 접촉·경계 검증 결과입니다.", analysis_timings=result.get("timings", {}),
+                    execution=deepcopy(result.get("execution")),
                     source_verification="current_original_sha256")
             return self._finish_view(identifier, camera, base)
         except Exception as error:
             base.update(status="failed", reason_codes=["VIEW_ANALYSIS_FAILED"], review_source="none",
-                        processing_mode="failed", error=str(error) if isinstance(error, PairWorkspaceError) else f"영상 분석 실패: {type(error).__name__}",
+                        processing_mode="failed", error=str(error) if isinstance(error, (PairWorkspaceError, ValueError, InferenceDeviceError)) else f"영상 분석 실패: {type(error).__name__}",
                         elapsed_seconds=round(time.perf_counter() - started, 6))
             return self._finish_view(identifier, camera, base)
 
@@ -722,7 +890,8 @@ class PairWorkspace:
             request = deepcopy(job["request"])
         try:
             catalog = self._catalog()
-            with ThreadPoolExecutor(max_workers=2, thread_name_prefix="pair-view") as pool:
+            parallel_views = (request.get("resource_settings") or {}).get("parallel_views", 2)
+            with ThreadPoolExecutor(max_workers=parallel_views, thread_name_prefix="pair-view") as pool:
                 futures = {pool.submit(self._view, identifier, camera, selected, request["reuse_review"], catalog,
                                        request.get("refine_review_regions", False)): camera
                            for camera, selected in request["views"].items()}
@@ -739,6 +908,8 @@ class PairWorkspace:
             result = combine_views(views, same_event_confirmed=confirmed, event_source=source, different_event=rejected)
             result.update(matched_actions=actions, clock_synchronization_claimed=False,
                           refinement_requested=request.get("refine_review_regions", False),
+                          user_region_camera_ids=[camera for camera, selected in request["views"].items()
+                                                  if selected.get("review_region") is not None],
                           refinement_applied_camera_ids=[camera for camera, view in views.items() if view.get("refinement")],
                           elapsed_seconds=round(time.perf_counter() - started, 6), completed_at=_now())
             with self.lock:

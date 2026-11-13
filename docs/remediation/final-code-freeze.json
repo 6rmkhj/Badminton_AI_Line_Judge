@@ -1,0 +1,20 @@
+{
+  "status": "accepted_code_frozen_before_holdout",
+  "source_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+  "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+  "source_path": "/workspace/badminton-release-0.5.4",
+  "config_sha256": "7db2422b6dbc6b736cdd030fec55a18f30063f32b635bcf8bd8790846e5a5615",
+  "version": "0.5.4",
+  "new_holdout_results_or_reference_positions_seen_by_root": false,
+  "included": [
+    "shared observed descent peak continuity",
+    "bounded scene context ranking",
+    "valid observed/background metadata safeguards"
+  ],
+  "excluded": [
+    "native residual recovery",
+    "review support wrapper",
+    "experimental measured chain tracking",
+    "TrackNet adapter"
+  ]
+}

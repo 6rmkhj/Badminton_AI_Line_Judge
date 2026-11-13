@@ -1,0 +1,15 @@
+{
+  "source_commit": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+  "python_tests": {
+    "status": "passed",
+    "count": 496,
+    "reported_seconds": 44.85,
+    "process_exit_code": 0,
+    "log_sha256": "2d3a5dd6e2ce10dcd7102456caace49e162ec02cd68c42f7f7dc6a4a4b455711"
+  },
+  "browser_report": "browser-validation.json",
+  "browser_report_sha256": "fc0a2e30f8f3292e2d1f1ea7629637a9e0f21564e2d5a42a0cc42a98d86fb935",
+  "windows_binaries_executed_in_this_environment": false,
+  "scope": "Historical test and browser record for source_commit 920f7445; not the final integrated source test count.",
+  "latest_integrated_verification": "../software-verification/verification.json"
+}

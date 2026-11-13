@@ -1,0 +1,88 @@
+{
+  "scope": "Post-release development evidence, separate from immutable 7306 CV evaluation. Model rejected; no runtime adoption or model redistribution.",
+  "report_path": "rejected-fixed-model/FINAL_FIXED_FUSION_REVIEW.json",
+  "report_sha256": "20bd7f4aa5ec42e904d082805360c6e38e1e2bee59f3f588a4228dd0a548d117",
+  "files": [
+    {
+      "path": "rejected-fixed-model/FINAL_FIXED_FUSION_REVIEW.json",
+      "sha256": "20bd7f4aa5ec42e904d082805360c6e38e1e2bee59f3f588a4228dd0a548d117",
+      "bytes": 15439
+    },
+    {
+      "path": "rejected-fixed-model/8k-3-a/run.json",
+      "sha256": "104d355291e995db1e0bc05354f3420febf9ea6036713a2f80d5394a0d774026",
+      "bytes": 5200
+    },
+    {
+      "path": "rejected-fixed-model/8k-3-a/cache-verification.json",
+      "sha256": "67c75035a9e3a64d637e2c1a6a14ee806c778872599863d4c50f0d12f052f222",
+      "bytes": 10722
+    },
+    {
+      "path": "rejected-fixed-model/8k-3-a/source-patch-integrity.json",
+      "sha256": "2e9a48f7b5fba173e69d39bac74eb769b819c052faca741145ecfa096c8d9f9a",
+      "bytes": 290
+    },
+    {
+      "path": "rejected-fixed-model/8k-3-a/posthoc-comparison.json",
+      "sha256": "bcc39b4b5d265bf7698cf45541b1e0817685d18e64d6783569a6d5cb85df1287",
+      "bytes": 50216
+    },
+    {
+      "path": "rejected-fixed-model/8k-3-a/source-review.json",
+      "sha256": "6fe2289db88a27b6998a72d9355eaaba5e9d39a78256398b9a64a077effaa412",
+      "bytes": 2440
+    },
+    {
+      "path": "rejected-fixed-model/8k-3-a/selected-source-review.jpg",
+      "sha256": "bbdd56729a1378dee18435f859c08c6361c4ddcf40fddb9a09912e6d463ad933",
+      "bytes": 499971
+    },
+    {
+      "path": "rejected-fixed-model/8k-3-a/selected-track-switch-review.jpg",
+      "sha256": "ae2da115bca3a7f1554955cb4fe9dc995844cc620ac246da9b68b5d84b06eb7f",
+      "bytes": 313248
+    },
+    {
+      "path": "rejected-fixed-model/ordinary-1-a/run.json",
+      "sha256": "6997041340a479e9e8fa7f6e7d4bbdbfbb2c35296767d1f8ce6ae200992d9034",
+      "bytes": 5234
+    },
+    {
+      "path": "rejected-fixed-model/ordinary-1-a/cache-verification.json",
+      "sha256": "9ce31228af5e00554cdeea3e84b5b601483ca571668b62845b90cc8db80c4f09",
+      "bytes": 16842
+    },
+    {
+      "path": "rejected-fixed-model/ordinary-1-a/source-patch-integrity.json",
+      "sha256": "f277b7df5d281a84215f121898dce124b05fe3254ba6c518625c3c41f5ebede5",
+      "bytes": 296
+    },
+    {
+      "path": "rejected-fixed-model/ordinary-1-a/posthoc-comparison.json",
+      "sha256": "b20defd98484423f89cf833c64679905c4e61d12ca15365c91bdab092619c8a1",
+      "bytes": 51252
+    },
+    {
+      "path": "rejected-fixed-model/ordinary-1-a/source-review.json",
+      "sha256": "268cc55eea5bcc2af99b16301f4857d9e974cba7ff88012197b18886f35513e2",
+      "bytes": 1951
+    },
+    {
+      "path": "rejected-fixed-model/ordinary-1-a/selected-source-review.jpg",
+      "sha256": "b594b460badab7977ebdf9fb8dd58fd88d8a6f054956b5796df1689720316278",
+      "bytes": 446470
+    },
+    {
+      "path": "rejected-fixed-model/FROZEN_EXPERIMENT.json",
+      "sha256": "eac0b6f1ed6fe8087945cb2bf6098884642724c9617c800fb143bdd942ed1967",
+      "bytes": 2151
+    },
+    {
+      "path": "rejected-fixed-model/REFERENCE_RELEASE.json",
+      "sha256": "d5e61a212ffbcab3963925efe485c40361546345f0e60e9c3cbb9b8bba10f03f",
+      "bytes": 833
+    }
+  ],
+  "research_execution_modules_or_weights_bundled": false
+}

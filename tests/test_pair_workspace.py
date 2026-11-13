@@ -9,7 +9,7 @@ import time
 import pytest
 
 from badminton.pair_workspace import (PairWorkspace, PairWorkspaceError, combine_views, MAX_UPLOAD_BYTES,
-                                      MAX_FRAMES, RULES, _write)
+                                      MAX_FRAMES, RULES, _write, _landing_candidate, _trajectory_replay)
 
 
 def wait_job(workspace, job_id):
@@ -116,7 +116,7 @@ def pair_fixture(tmp_path):
 
 
 def submit_fixture(workspace, **kwargs):
-    return workspace.submit({'views':{'A':{'video_id':'v_a'},'B':{'video_id':'v_b'}}, **kwargs})['job_id']
+    return workspace.submit({'views':{'A':{'video_id':'v_a'},'B':{'video_id':'v_b'}}, 'reuse_review':True, **kwargs})['job_id']
 
 
 def test_stored_pair_resolves_from_one_direct_view_and_persists(pair_fixture):
@@ -128,6 +128,7 @@ def test_stored_pair_resolves_from_one_direct_view_and_persists(pair_fixture):
     assert result['event_correspondence_source'] == 'verified_ai_action_correspondence'
     assert result['source_camera_ids'] == ['A']
     assert result['views']['A']['processing_mode'] == 'stored_ai_review'
+    assert result['views']['A']['trajectory_replay_url'] is None
     assert result['views']['B']['direct_decision'] == 'REVIEW'
     assert result['views']['B']['assisted_decision'] == 'IN'
     assert result['views']['B']['contact_time_seconds'] is None
@@ -191,7 +192,7 @@ def test_upload_matches_original_hash_even_when_file_is_renamed(pair_fixture,mon
     workspace, root, _ = pair_fixture
     monkeypatch.setattr('badminton.media.probe',lambda path:{'frame_count':10,'width':3840,'height':2160,'duration':1,'timestamps':[0]})
     staged = workspace.stage_upload(io.BytesIO(b'first-source'),len(b'first-source'),'renamed.mp4')
-    job_id = workspace.submit({'views':{'A':{'upload_id':staged['upload_id']},'B':{'video_id':'v_b'}}})['job_id']
+    job_id = workspace.submit({'views':{'A':{'upload_id':staged['upload_id']},'B':{'video_id':'v_b'}},'reuse_review':True})['job_id']
     result = wait_job(workspace,job_id)['result']
     assert result['decision'] == 'IN'
     assert result['views']['A']['file'] == 'renamed.mp4'
@@ -260,10 +261,20 @@ def test_new_sources_run_both_views_and_keep_automatic_review(pair_fixture,monke
         barrier.wait()
         output.mkdir(parents=True)
         (output/'preview.mp4').write_bytes(b'preview')
+        (output/'evidence').mkdir()
+        (output/'evidence/trajectory-context.jpg').write_bytes(b'context-image')
+        (output/'evidence/annotated.mp4').write_bytes(b'candidate-replay')
         calls.append(source)
         return {'source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),
-                'decision':{'decision':'REVIEW','reason_codes':['NO_CONTACT']},
-                'artifacts':{'preview':'preview.mp4','evidence':[]},'timings':{'total_seconds':.1}}
+                'decision':{'decision':'REVIEW','reason_codes':['NO_CONTACT'],'contact_time_seconds':.1},
+                'analysis':{'width':960,'height':540,'frame_count':3},
+                'selected_landing':{'candidate_px':[361,444],'frame_index':1,'time':.1,'contact_observed':False,
+                    'image_motion_event':{'kind':'descent_and_rebound','inference_only':True,
+                        'frame_interval':[0,2],'time_interval':[0,.2]}},
+                'artifacts':{'preview':'preview.mp4','evidence':[{'trajectory_context':'evidence/trajectory-context.jpg'}],
+                    'annotated_clip':{'path':'evidence/annotated.mp4','source_time_origin':.05,
+                        'source_start_frame':1,'source_end_frame':2,'frame_count':2}},
+                'timings':{'total_seconds':.1}}
     monkeypatch.setattr('badminton.pipeline.analyze_video',analyze)
     a=workspace.stage_upload(io.BytesIO(b'new-a'),5,'new-a.mp4')
     b=workspace.stage_upload(io.BytesIO(b'new-b'),5,'new-b.mp4')
@@ -272,6 +283,18 @@ def test_new_sources_run_both_views_and_keep_automatic_review(pair_fixture,monke
     assert len(calls)==2 and result['decision']=='REVIEW'
     assert all(v['processing_mode']=='fresh_analysis' for v in result['views'].values())
     assert all(v['preview_url'].startswith('/pair-media/jobs/') for v in result['views'].values())
+    for view in result['views'].values():
+        assert view['qualified'] is False and view['contact_time_seconds'] is None
+        assert view['landing_candidate']['status']=='approximate'
+        assert view['landing_candidate']['contact_observed'] is False
+        assert view['landing_candidate']['point_kind']=='object_center'
+        assert view['landing_candidate']['point_px']==[361,444]
+        assert view['landing_candidate']['frame_interval']==[0,2]
+        assert view['landing_candidate']['time_interval']==[0,.2]
+        assert view['trajectory_context_url'].endswith('/evidence/trajectory-context.jpg')
+        assert view['trajectory_replay_url'].endswith('/evidence/annotated.mp4')
+        assert view['trajectory_replay_info']['source_time_origin']==.05
+        assert view['preview_url'] != view['trajectory_replay_url']
 
 
 def test_duplicate_hash_upload_does_not_choose_arbitrary_review_identity(pair_fixture,monkeypatch):
@@ -291,7 +314,8 @@ def test_duplicate_hash_upload_does_not_choose_arbitrary_review_identity(pair_fi
     assert set(candidates)=={'v_b','v_b_duplicate'} and entry is None
 
 
-def test_fresh_mode_does_not_reuse_verified_ai_event_link(pair_fixture,monkeypatch):
+@pytest.mark.parametrize('options', [{}, {'reuse_review':False}])
+def test_fresh_mode_does_not_reuse_verified_ai_event_link(pair_fixture,monkeypatch,options):
     workspace, _, _ = pair_fixture
     def fresh(identifier,camera,selected,reuse,catalog,refine=False):
         assert reuse is False
@@ -300,7 +324,10 @@ def test_fresh_mode_does_not_reuse_verified_ai_event_link(pair_fixture,monkeypat
         return source_view('REVIEW', _candidate_ids=[selected['video_id']],
                            source_sha256=row['source_sha256'])
     monkeypatch.setattr(workspace,'_view',fresh)
-    result=wait_job(workspace,submit_fixture(workspace,reuse_review=False))['result']
+    identifier=workspace.submit({'views':{'A':{'video_id':'v_a'},'B':{'video_id':'v_b'}},**options})['job_id']
+    job=wait_job(workspace,identifier)
+    assert job['request']['reuse_review'] is False
+    result=job['result']
     assert result['same_event_confirmed'] is False
     assert result['event_correspondence_source'] is None
     assert result['matched_actions'] == []
@@ -575,3 +602,211 @@ def test_linking_failure_preserves_stopped_phase_completed_views_and_frozen_time
         assert all(view['status'] == 'completed' for view in saved['views'].values())
     finally:
         restored.close()
+
+
+def test_landing_candidate_without_rebound_stays_a_single_approximate_position():
+    candidate = _landing_candidate({'selected_landing':{'candidate_px':[123,234],'time':.5,
+        'frame_index':5,'contact_observed':False},'analysis':{'width':960,'height':540,'frame_count':20}})
+    assert candidate['kind']=='motion_candidate' and candidate['time_seconds']==.5
+    assert candidate['inference_only'] is True and candidate['contact_observed'] is False
+    assert 'time_interval' not in candidate and 'frame_interval' not in candidate
+
+
+@pytest.mark.parametrize('change', [
+    {'candidate_px':[float('nan'),100]}, {'candidate_px':[961,100]},
+    {'frame_index':True}, {'frame_index':20}, {'time':float('inf')}, {'contact_observed':True},
+])
+def test_invalid_or_observed_contact_is_not_exposed_as_an_approximation(change):
+    assert _landing_candidate({'selected_landing':{'candidate_px':[123,234],'time':.5,
+        'frame_index':5,'contact_observed':False,**change},
+        'analysis':{'width':960,'height':540,'frame_count':20}}) is None
+
+
+def test_occluded_landing_candidate_preserves_inferred_location_and_time_interval():
+    candidate = _landing_candidate({'selected_landing':{'candidate_px':[397,202],'time':1.8,
+        'frame_index':43,'contact_observed':False,
+        'image_motion_event':{'kind':'occluded_descent_and_rebound','inference_only':True,
+            'point_kind':'inferred_object_center','frame_interval':[41,47],'time_interval':[1.71,1.97]}},
+        'analysis':{'width':960,'height':540,'frame_count':82}})
+    assert candidate['kind']=='occluded_descent_and_rebound'
+    assert candidate['point_kind']=='inferred_object_center'
+    assert candidate['frame_interval']==[41,47] and candidate['time_interval']==[1.71,1.97]
+    assert candidate['contact_observed'] is False and candidate['inference_only'] is True
+
+
+@pytest.mark.parametrize('relative', ['../escape.mp4','/private/escape.mp4',
+    'evidence/../escape.mp4','evidence/missing.mp4','evidence/result.json'])
+def test_optional_replay_never_exposes_unsafe_or_missing_asset(tmp_path, relative):
+    (tmp_path/'evidence').mkdir()
+    (tmp_path/'evidence/result.json').write_text('{}')
+    assert _trajectory_replay(tmp_path, {'annotated_clip':{'path':relative}}, '/pair-media/test/')==(None,None)
+
+
+def test_optional_replay_rejects_symlinks_and_nonfinite_timeline(tmp_path):
+    (tmp_path/'evidence').mkdir()
+    (tmp_path/'target.mp4').write_bytes(b'replay')
+    (tmp_path/'evidence/link.mp4').symlink_to(tmp_path/'target.mp4')
+    assert _trajectory_replay(tmp_path, {'annotated_clip':{'path':'evidence/link.mp4'}}, '/pair-media/test/')==(None,None)
+    (tmp_path/'evidence/actual.mp4').write_bytes(b'replay')
+    url, info = _trajectory_replay(tmp_path, {'annotated_clip':{'path':'evidence/actual.mp4',
+        'source_time_origin':float('nan'),'source_start_frame':True}}, '/pair-media/test/')
+    assert url.endswith('/evidence/actual.mp4') and info=={}
+
+
+@pytest.mark.parametrize('region', [
+    {}, [], True, {'x':0,'y':0,'width':1},
+    {'x':0,'y':0,'width':1,'height':1,'contact_observed':True},
+    {'x':False,'y':0,'width':1,'height':1},
+    {'x':0,'y':0,'width':'1','height':1},
+    {'x':float('nan'),'y':0,'width':1,'height':1},
+    {'x':0,'y':0,'width':float('inf'),'height':1},
+    {'x':0,'y':0,'width':10**400,'height':1},
+    {'x':-.01,'y':0,'width':1,'height':1},
+    {'x':0,'y':1,'width':1,'height':.1},
+    {'x':0,'y':0,'width':0,'height':1},
+    {'x':0,'y':0,'width':1,'height':-1},
+    {'x':.9,'y':0,'width':.2,'height':1},
+    {'x':0,'y':.5,'width':1,'height':.6},
+])
+def test_user_region_rejects_invalid_second_view_before_creating_any_job(pair_fixture, region):
+    workspace, _, _ = pair_fixture
+    before = set(workspace.root.rglob('*'))
+    with pytest.raises(PairWorkspaceError) as error:
+        workspace.submit({'views': {'A': {'video_id':'v_a', 'review_region':{'x':0,'y':0,'width':1,'height':1}},
+                                   'B': {'video_id':'v_b', 'review_region':region}}})
+    assert error.value.status == 400
+    assert not workspace.jobs
+    assert set(workspace.root.rglob('*')) == before
+
+
+def test_user_region_requires_new_processing_before_job_creation(pair_fixture):
+    workspace, _, _ = pair_fixture
+    with pytest.raises(PairWorkspaceError) as error:
+        workspace.submit({'views': {'A': {'video_id':'v_a','review_region':{'x':0,'y':0,'width':.5,'height':1}},
+                                   'B': {'video_id':'v_b'}}, 'reuse_review':True})
+    assert error.value.status == 400 and not workspace.jobs
+    assert not (workspace.root/'jobs').exists()
+
+
+@pytest.mark.parametrize('metadata,target,region,expected', [
+    ({'width':3840,'height':2160,'frame_count':24}, 960,
+     {'x':0,'y':0,'width':.5,'height':.5}, [0,0,480,270]),
+    ({'width':3840,'height':2160,'frame_count':24}, 960,
+     {'x':200/960,'y':30/540,'width':500/960,'height':480/540}, [200,30,500,480]),
+    # probe has already applied display rotation: coded dimensions must not be used.
+    ({'width':1080,'height':1920,'coded_width':1920,'coded_height':1080,
+      'rotation_degrees':90,'frame_count':24}, 960,
+     {'x':.5,'y':.5,'width':.5,'height':.5}, [480,853,480,853]),
+    ({'width':961,'height':541,'frame_count':24}, 959,
+     {'x':0,'y':0,'width':1,'height':1}, [0,0,958,540]),
+    ({'width':640,'height':360,'frame_count':24}, 960,
+     {'x':.9999,'y':.9999,'width':.0001,'height':.0001}, [639,359,1,1]),
+])
+def test_user_region_maps_full_timeline_and_oriented_even_pixel_bounds(metadata, target, region, expected):
+    from badminton.pair_workspace import _manual_review_regions
+    from badminton.detection import _refinement_regions
+    actual = _manual_review_regions(region, metadata, target)
+    assert actual == [{'frame_start':0,'frame_end':23,'bbox':expected}]
+    width = min(target, metadata['width'])
+    width -= width % 2
+    height = max(2, round(metadata['height']*width/metadata['width']/2)*2)
+    assert _refinement_regions({'refinement_regions':actual}, (height,width,3), 24) == actual
+
+
+def test_user_region_overrides_ai_hints_and_persists_assistance_without_contact_claim(pair_fixture, monkeypatch):
+    workspace, root, _ = pair_fixture
+    configs = {}
+    monkeypatch.setattr('badminton.media.probe', lambda _: {'frame_count':20,'width':3840,'height':2160})
+    # Existing candidate/runtime budgets must survive manual guidance unchanged.
+    detector = {'max_candidates':80,'highres_max_rois':16,'native_temporal_history':1,
+                'native_motion_feedback':'legacy','guided_recovery_enabled':False}
+    _write(root/'configs/poc.json', {'analysis_width':960,'detector':detector,'events':{'source_contact_max_candidates':6}})
+    def analyze(source, output, config, progress_callback=None):
+        configs[source.name] = deepcopy(config)
+        return {'source_sha256':hashlib.sha256(Path(source).read_bytes()).hexdigest(),
+                'decision':{'decision':'REVIEW','reason_codes':['FIRST_CONTACT_NOT_OBSERVED']},
+                'analysis':{'width':960,'height':540,'frame_count':20},
+                'selected_landing':{'candidate_px':[720,300],'frame_index':3,'time':.3,'contact_observed':False},
+                'artifacts':{},'timings':{}}
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    region = {'x':.5,'y':.25,'width':.5,'height':.5}
+    identifier = workspace.submit({'views':{'A':{'video_id':'v_a','review_region':region},'B':{'video_id':'v_b'}},
+                                   'refine_review_regions':True,'same_event_confirmed':True})['job_id']
+    job = wait_job(workspace, identifier)
+    manual = configs['a.mp4']
+    expected = [{'frame_start':0,'frame_end':19,'bbox':[480,135,480,270]}]
+    assert manual['detector']['refinement_regions'] == expected
+    assert manual['events']['review_refinement_regions'] == expected
+    assert all(manual['detector'][key] == value for key,value in detector.items())
+    assert manual['events']['source_contact_max_candidates'] == 6
+    assert 'court_hint' not in manual and 'identity' not in manual
+    provenance = manual['request_context']['review_region_guidance']
+    assert provenance['source']=='operator_review_region'
+    assert provenance['normalized_region']==region and provenance['regions']==expected
+    assert provenance['ai_visual_refinement_requested'] is True
+    assert provenance['ai_visual_refinement_available'] is True
+    assert provenance['ai_visual_refinement_applied'] is False
+    assert provenance['priority']=='operator_region_over_ai_visual_review'
+    assert provenance['assistance_used'] is True and provenance['evaluation_eligible'] is False
+    result, view = job['result'], job['result']['views']['A']
+    assert result['decision']=='REVIEW' and result['user_region_camera_ids']==['A']
+    assert view['processing_mode']=='user_region_reanalysis'
+    assert view['review_source']=='operator_region_guided_search'
+    assert view['assistance_used'] is True and view['evaluation_eligible'] is False
+    assert view['refinement']==provenance and view['qualified'] is False
+    assert view['contact_time_seconds'] is None and view['landing_candidate']['contact_observed'] is False
+    assert 'refinement_regions' not in configs['b.mp4']['detector']
+    workspace.close()
+    restored = PairWorkspace(root, workspace.root)
+    try:
+        saved = restored.get_job(identifier)
+        assert saved['request']['views']['A']['review_region']==region
+        assert saved['result']['views']['A']['refinement']==provenance
+    finally:
+        restored.close()
+
+
+def test_absent_and_null_user_region_leave_automatic_config_unchanged(pair_fixture, monkeypatch):
+    workspace, root, _ = pair_fixture
+    monkeypatch.setattr('badminton.media.probe', lambda _: {'frame_count':20,'width':640,'height':360})
+    base_config = {'analysis_width':640,'detector':{'max_candidates':80},'events':{'source_contact_max_candidates':6}}
+    _write(root/'configs/poc.json', base_config)
+    configs = []
+    def analyze(source, output, config, progress_callback=None):
+        configs.append(config)
+        return {'source_sha256':hashlib.sha256(Path(source).read_bytes()).hexdigest(),
+                'decision':{'decision':'REVIEW'},'artifacts':{}}
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    identifier = workspace.submit({'views':{'A':{'video_id':'v_a','review_region':None},'B':{'video_id':'v_b'}}})['job_id']
+    job = wait_job(workspace, identifier)
+    assert len(configs)==2
+    for config in configs:
+        assert {key:config[key] for key in base_config} == base_config
+        assert 'request_context' not in config
+    assert all('review_region' not in view for view in job['request']['views'].values())
+    assert all(view['processing_mode']=='fresh_analysis' for view in job['result']['views'].values())
+    assert job['result']['event_correspondence_source'] is None
+
+
+def test_uploaded_region_rerun_uses_fresh_output_and_updated_config(pair_fixture, monkeypatch):
+    workspace, _, _ = pair_fixture
+    monkeypatch.setattr('badminton.media.probe', lambda _: {'frame_count':20,'width':960,'height':540})
+    uploaded = workspace.stage_upload(io.BytesIO(b'new-region-source'),17,'new-region.mp4')
+    calls = []
+    def analyze(source, output, config, progress_callback=None):
+        if config.get('request_context'):
+            calls.append((output, deepcopy(config)))
+        return {'source_sha256':hashlib.sha256(Path(source).read_bytes()).hexdigest(),
+                'decision':{'decision':'REVIEW'},'artifacts':{}}
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    regions = [{'x':0,'y':0,'width':.5,'height':1}, {'x':.5,'y':0,'width':.5,'height':1}]
+    jobs = []
+    for region in regions:
+        identifier = workspace.submit({'views':{'A':{'upload_id':uploaded['upload_id'],'review_region':region},
+                                               'B':{'video_id':'v_b'}}})['job_id']
+        jobs.append(wait_job(workspace, identifier))
+    assert len(calls)==2 and calls[0][0]!=calls[1][0]
+    assert calls[0][1]['detector']['refinement_regions']!=calls[1][1]['detector']['refinement_regions']
+    assert calls[0][1]['request_context']!=calls[1][1]['request_context']
+    assert all(job['request']['views']['A']['upload_id']==uploaded['upload_id'] for job in jobs)
+    assert [job['request']['views']['A']['review_region'] for job in jobs]==regions

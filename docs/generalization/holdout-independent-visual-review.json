@@ -1,0 +1,203 @@
+{
+  "reviewed_at": "2026-11-12T08:03:38.794110+00:00",
+  "review_started_after_release": true,
+  "release_receipt": "/workspace/generalization/holdout-inspection-release-20261112T080012Z.json",
+  "release_receipt_sha256": "ff878bdd524f17504abae79a54432d245b9ea07d633e38e27f0740237de0cb98",
+  "production_commit": "d7f3d3303daa40c699d579c17e40269173220937",
+  "scope": "Independent read-only source/context-image audit of one representative heldout A/B pair after all8 fresh heldout runs completed and release receipt authorized inspection. This is AI visual review, not independent human ground truth.",
+  "code_reference_or_criteria_changes": false,
+  "cases": [
+    {
+      "key": "ordinary-18-b",
+      "source_sha256": "c2b3e5cd92940e93598163c454c831c0a25df07dd347c1f9b67f5e27acd0d831",
+      "coordinate_size": [
+        960,
+        540
+      ],
+      "reference_path": "/workspace/generalization/references/ordinary-18-b.json",
+      "reference_sha256": "a36596b9d3ca8018037b081269e43650c3c2fdeee960cd6183ea0d9f64a79d44",
+      "reference_frame_interval": [
+        185,
+        188
+      ],
+      "reference_point_px": [
+        349,
+        310
+      ],
+      "tolerance_px": 6,
+      "outputs": {
+        "baseline": {
+          "path": "/workspace/generalization/baseline/ordinary-18-b/result.json",
+          "result_sha256": "ab9d7f9ea81117bf5149b2ec8226221012f13f23326aa2f1c01b8a488a7bdf26",
+          "frame_index": 167,
+          "time_seconds": 2.784156,
+          "candidate_px": [
+            314.452,
+            135.887
+          ],
+          "distance_to_frozen_reference_px": 177.5074676541807,
+          "contact_observed": false,
+          "decision": "REVIEW"
+        },
+        "release": {
+          "path": "/workspace/generalization/release/ordinary-18-b/result.json",
+          "result_sha256": "c86f3a7d9f6819580a05a068444a528dbd1a71123da6c6f564d874ca04e4b77b",
+          "frame_index": 186,
+          "time_seconds": 3.100922,
+          "candidate_px": [
+            348.0,
+            313.333
+          ],
+          "distance_to_frozen_reference_px": 3.479782895526699,
+          "contact_observed": false,
+          "decision": "REVIEW"
+        }
+      },
+      "qualitative_finding": "Genuine first-vicinity gain; not an unrelated object merely falling inside the spatial tolerance.",
+      "source_observation": "The selected measurements follow the same faint descending shuttle at frames181-186 and its visible cork/plume rebound188-193. Consecutive native source crops show the turn between186 and187. Baseline frame167 switches onto a player upper-body/racket region before the actual landing.",
+      "limits": "The selected dark-component centroid is3.48 analysis pixels from the frozen AI contact estimate. Fine physical cork/floor contact is not certified; frame187 is not a selected-track observation, and this audit does not measure all-frame tracking accuracy.",
+      "evidence": [
+        "/workspace/generalization/release/ordinary-18-b/evidence/trajectory-context.jpg",
+        "/workspace/generalization/release/ordinary-18-b/evidence/source-contact-000.jpg",
+        "/workspace/generalization/visual/ordinary-18-b/native-contact-sheet-180.jpg",
+        "/workspace/generalization/visual/ordinary-18-b/native-contact-sheet-189.jpg",
+        "/workspace/generalization/baseline/ordinary-18-b/evidence/trajectory-context.jpg"
+      ]
+    },
+    {
+      "key": "ordinary-18-a",
+      "source_sha256": "dd04f1a5a96ce2ba9ad1c14eb750396fbd4537b23cc09749fc065f0b2a260c9d",
+      "coordinate_size": [
+        960,
+        540
+      ],
+      "reference_path": "/workspace/generalization/references/ordinary-18-a.json",
+      "reference_sha256": "521f231a6233578231c3f978c11afd3f09cea48d708c488613784654a54ba07b",
+      "reference_frame_interval": [
+        131,
+        133
+      ],
+      "reference_point_px": [
+        405,
+        201
+      ],
+      "tolerance_px": 6,
+      "outputs": {
+        "baseline": {
+          "path": "/workspace/generalization/baseline/ordinary-18-a/result.json",
+          "result_sha256": "d78c7737bbba94932390d854ae9cba0e6b17d6bbfbac6044f229331d551bc297",
+          "frame_index": 25,
+          "time_seconds": 0.4217,
+          "candidate_px": [
+            221.546,
+            81.512
+          ],
+          "distance_to_frozen_reference_px": 218.93549794402918,
+          "contact_observed": false,
+          "decision": "REVIEW"
+        },
+        "release": {
+          "path": "/workspace/generalization/release/ordinary-18-a/result.json",
+          "result_sha256": "ebddbb0ef6646c3ef68ccac8dd7edf02cbac82b0459f10967ddd1c002a4e3aa9",
+          "frame_index": 67,
+          "time_seconds": 1.130144,
+          "candidate_px": [
+            521.25,
+            188.875
+          ],
+          "distance_to_frozen_reference_px": 116.88061483838969,
+          "contact_observed": false,
+          "decision": "REVIEW"
+        }
+      },
+      "qualitative_finding": "Remaining wrong-event/background-association failure; neither baseline nor release selects the actual main-shuttle first landing.",
+      "source_observation": "Release frame67 terminates around a racket stroke and then net-post/barrier/background features. The true main shuttle descends beside the navy-shirt player and turns near frame132 at[405,201], with a later bounce near159 that must remain separate.",
+      "limits": "Raw candidates already follow the early main flight at80/90/95, but most final-descent/contact checkpoints are absent. At132 the nearest raw candidate is22.75px away even though native ROIs cover the target; saved proposals cannot distinguish segmentation rejection from candidate-cap pruning.",
+      "raw_candidate_checkpoints": [
+        {
+          "frame_index": 80,
+          "nearest_raw_candidate_distance_px": 0.6490893621066572,
+          "covering_native_roi_origins": [
+            "previous_native_candidate"
+          ]
+        },
+        {
+          "frame_index": 90,
+          "nearest_raw_candidate_distance_px": 0.8042791803845234,
+          "covering_native_roi_origins": [
+            "global_candidate"
+          ]
+        },
+        {
+          "frame_index": 95,
+          "nearest_raw_candidate_distance_px": 0.9562531045701187,
+          "covering_native_roi_origins": []
+        },
+        {
+          "frame_index": 123,
+          "nearest_raw_candidate_distance_px": 21.93171219946131,
+          "covering_native_roi_origins": []
+        },
+        {
+          "frame_index": 125,
+          "nearest_raw_candidate_distance_px": 13.46291201783626,
+          "covering_native_roi_origins": [
+            "global_candidate"
+          ]
+        },
+        {
+          "frame_index": 128,
+          "nearest_raw_candidate_distance_px": 21.588845291029347,
+          "covering_native_roi_origins": [
+            "global_candidate"
+          ]
+        },
+        {
+          "frame_index": 130,
+          "nearest_raw_candidate_distance_px": 15.147630738831754,
+          "covering_native_roi_origins": [
+            "observed_motion_search",
+            "global_candidate"
+          ]
+        },
+        {
+          "frame_index": 131,
+          "nearest_raw_candidate_distance_px": 4.155192534648665,
+          "covering_native_roi_origins": [
+            "observed_motion_search",
+            "global_candidate"
+          ]
+        },
+        {
+          "frame_index": 132,
+          "nearest_raw_candidate_distance_px": 22.75,
+          "covering_native_roi_origins": [
+            "observed_motion_search",
+            "global_candidate"
+          ]
+        },
+        {
+          "frame_index": 134,
+          "nearest_raw_candidate_distance_px": 15.41668972250526,
+          "covering_native_roi_origins": [
+            "observed_motion_search",
+            "global_candidate"
+          ]
+        },
+        {
+          "frame_index": 137,
+          "nearest_raw_candidate_distance_px": 16.64331697709324,
+          "covering_native_roi_origins": [
+            "observed_motion_search"
+          ]
+        }
+      ],
+      "evidence": [
+        "/workspace/generalization/release/ordinary-18-a/overview.jpg",
+        "/workspace/generalization/release/ordinary-18-a/evidence/trajectory-context.jpg",
+        "/workspace/generalization/visual/ordinary-18-a/contact-close-124-139.jpg",
+        "/workspace/generalization/visual/ordinary-18-a/contact-grid-130-133.jpg"
+      ]
+    }
+  ]
+}

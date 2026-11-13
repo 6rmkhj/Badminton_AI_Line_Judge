@@ -1,0 +1,1592 @@
+{
+  "key": "ordinary-1-a",
+  "scope": "Post-release DEVELOPMENT comparison, not a held-out result. Frozen AI visual points are not independent human ground truth.",
+  "source_sha256": "aa5e23a6400121849b7994664fd9dc942c9034b9e34180117a8973f10d83be76",
+  "reference_sha256": "07e8f40d61b802e535ee8737c8846d95dd7c2c60e8cdb4bcc6b0df1eff14a979",
+  "reference_split_original_unchanged": "holdout",
+  "reference_tolerance_px_unchanged": 8,
+  "reference_landing_frame_interval_unchanged": [
+    158,
+    160
+  ],
+  "reference_landing_point_px_unchanged": [
+    207,
+    330
+  ],
+  "immutable_frozen_primary": {
+    "exists": true,
+    "frame_index": 187,
+    "time": 3.154278,
+    "point_px": [
+      182.0,
+      342.625
+    ],
+    "track_id": 2254,
+    "point_kind": "observed_object_center",
+    "distance_to_approximate_landing_px": 28.00697457777259,
+    "within_frame_interval": false,
+    "within_frozen_approximation": false,
+    "contact_observed": false,
+    "identity_source": "unverified_image_space_consistency",
+    "identity_confidence": 0.25,
+    "flight_supported": true,
+    "event_id": "event_000"
+  },
+  "comparisons": [
+    {
+      "mode": "cv_only",
+      "primary": {
+        "exists": true,
+        "frame_index": 187,
+        "time": 3.154278,
+        "point_px": [
+          182.0,
+          342.625
+        ],
+        "track_id": 2254,
+        "point_kind": "observed_object_center",
+        "distance_to_approximate_landing_px": 28.00697457777259,
+        "within_frame_interval": false,
+        "within_frozen_approximation": false,
+        "contact_observed": false,
+        "identity_source": "unverified_image_space_consistency",
+        "identity_confidence": 0.25,
+        "flight_supported": true,
+        "event_id": "event_000"
+      },
+      "checkpoint_count": 7,
+      "raw_proposal_checkpoint_matches": 6,
+      "selected_track_checkpoint_matches": 0,
+      "checkpoints": [
+        {
+          "frame_index": 154,
+          "source_time": 2.597644,
+          "reference_point_px": [
+            215,
+            283
+          ],
+          "nearest_proposal": {
+            "distance_px": 36.833299567103666,
+            "point_px": [
+              194.639,
+              252.306
+            ],
+            "method": "opencv_source_roi_component",
+            "model_observation": false,
+            "appearance_polarity": "bright"
+          },
+          "proposal_within_reference_tolerance": false,
+          "selected_track_observation": null,
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 156,
+          "source_time": 2.631378,
+          "reference_point_px": [
+            211,
+            298
+          ],
+          "nearest_proposal": {
+            "distance_px": 4.47213595499958,
+            "point_px": [
+              209.0,
+              294.0
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": null,
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 158,
+          "source_time": 2.665111,
+          "reference_point_px": [
+            209,
+            316
+          ],
+          "nearest_proposal": {
+            "distance_px": 3.640054944640259,
+            "point_px": [
+              210.0,
+              319.5
+            ],
+            "method": "opencv_motion_bright_component",
+            "model_observation": false,
+            "appearance_polarity": "bright"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": null,
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 159,
+          "source_time": 2.681978,
+          "reference_point_px": [
+            207,
+            330
+          ],
+          "nearest_proposal": {
+            "distance_px": 0.9504677795695922,
+            "point_px": [
+              207.25,
+              330.917
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": null,
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 162,
+          "source_time": 2.732589,
+          "reference_point_px": [
+            204,
+            321
+          ],
+          "nearest_proposal": {
+            "distance_px": 0.19999999999998863,
+            "point_px": [
+              204.2,
+              321.0
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": null,
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 165,
+          "source_time": 2.783189,
+          "reference_point_px": [
+            201,
+            314
+          ],
+          "nearest_proposal": {
+            "distance_px": 0.673145600891813,
+            "point_px": [
+              201.25,
+              313.375
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": null,
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 168,
+          "source_time": 2.833789,
+          "reference_point_px": [
+            196,
+            308
+          ],
+          "nearest_proposal": {
+            "distance_px": 2.62797450520358,
+            "point_px": [
+              198.625,
+              308.125
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": null,
+          "selected_track_within_reference_tolerance": false
+        }
+      ],
+      "posthoc_best_track": {
+        "track_id": "1472",
+        "checkpoint_matches": 4,
+        "checkpoints": [
+          null,
+          null,
+          null,
+          {
+            "distance_px": 0.9504677795695922,
+            "point_px": [
+              207.25,
+              330.917
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          {
+            "distance_px": 0.19999999999998863,
+            "point_px": [
+              204.2,
+              321.0
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          {
+            "distance_px": 0.673145600891813,
+            "point_px": [
+              201.25,
+              313.375
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          {
+            "distance_px": 2.62797450520358,
+            "point_px": [
+              198.625,
+              308.125
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          }
+        ],
+        "observations": 18,
+        "model_observations": 0,
+        "identity_ambiguous": true
+      },
+      "matching_exported_events": [
+        {
+          "exists": true,
+          "frame_index": 158,
+          "time": 2.665111,
+          "point_px": [
+            209.95499951326042,
+            332.87061611294234
+          ],
+          "track_id": 2134,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 4.119764433951718,
+          "within_frame_interval": true,
+          "within_frozen_approximation": true,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_002"
+        }
+      ],
+      "all_exported_events": [
+        {
+          "exists": true,
+          "frame_index": 187,
+          "time": 3.154278,
+          "point_px": [
+            182.0,
+            342.625
+          ],
+          "track_id": 2254,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 28.00697457777259,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.25,
+          "flight_supported": true,
+          "event_id": "event_000"
+        },
+        {
+          "exists": true,
+          "frame_index": 175,
+          "time": 2.951867,
+          "point_px": [
+            671.7174393459244,
+            206.87695243435172
+          ],
+          "track_id": 2204,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 480.7510616463429,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_001"
+        },
+        {
+          "exists": true,
+          "frame_index": 158,
+          "time": 2.665111,
+          "point_px": [
+            209.95499951326042,
+            332.87061611294234
+          ],
+          "track_id": 2134,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 4.119764433951718,
+          "within_frame_interval": true,
+          "within_frozen_approximation": true,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_002"
+        },
+        {
+          "exists": true,
+          "frame_index": 188,
+          "time": 3.171144,
+          "point_px": [
+            181.75,
+            340.75
+          ],
+          "track_id": 2253,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 27.443123000125187,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.25,
+          "flight_supported": true,
+          "event_id": "event_003"
+        },
+        {
+          "exists": true,
+          "frame_index": 84,
+          "time": 1.4169,
+          "point_px": [
+            294.5,
+            189.5
+          ],
+          "track_id": 2233,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 165.51888109819978,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_004"
+        },
+        {
+          "exists": true,
+          "frame_index": 84,
+          "time": 1.4169,
+          "point_px": [
+            294.5,
+            189.5
+          ],
+          "track_id": 2232,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 165.51888109819978,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_005"
+        },
+        {
+          "exists": true,
+          "frame_index": 68,
+          "time": 1.147011,
+          "point_px": [
+            131.5,
+            239.0
+          ],
+          "track_id": 2239,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 118.24233590385467,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.1944,
+          "flight_supported": true,
+          "event_id": "event_006"
+        },
+        {
+          "exists": true,
+          "frame_index": 154,
+          "time": 2.597644,
+          "point_px": [
+            826.5,
+            269.25
+          ],
+          "track_id": 1049,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 622.4715354937927,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": null,
+          "event_id": "event_007"
+        },
+        {
+          "exists": true,
+          "frame_index": 184,
+          "time": 3.103678,
+          "point_px": [
+            370.545,
+            150.267
+          ],
+          "track_id": 1643,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 243.00394711609113,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": null,
+          "event_id": "event_008"
+        },
+        {
+          "exists": true,
+          "frame_index": 131,
+          "time": 2.209678,
+          "point_px": [
+            701.25,
+            192.0
+          ],
+          "track_id": 993,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 513.1540338923587,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": null,
+          "event_id": "event_009"
+        },
+        {
+          "exists": true,
+          "frame_index": 178,
+          "time": 3.002467,
+          "point_px": [
+            378.5,
+            190.0
+          ],
+          "track_id": 1438,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 221.38710441215858,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.105,
+          "flight_supported": null,
+          "event_id": "event_010"
+        },
+        {
+          "exists": true,
+          "frame_index": 139,
+          "time": 2.344622,
+          "point_px": [
+            293.161,
+            197.571
+          ],
+          "track_id": 1250,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 157.99100595287064,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": null,
+          "event_id": "event_011"
+        }
+      ],
+      "timings": {
+        "tracking_seconds": 21.668056065998826,
+        "events_seconds": 2.6212119289994007,
+        "total_seconds": 24.28927000800104
+      },
+      "result_sha256": "fcf7f8d3cb2f57e2513516a44b36043667b82cac212c1d414fea4ceec0c2d297"
+    },
+    {
+      "mode": "model_only",
+      "primary": {
+        "exists": true,
+        "frame_index": 175,
+        "time": 2.951867,
+        "point_px": [
+          673.125,
+          206.4375
+        ],
+        "track_id": 36,
+        "point_kind": "observed_object_center",
+        "distance_to_approximate_landing_px": 482.2242289964804,
+        "within_frame_interval": false,
+        "within_frozen_approximation": false,
+        "contact_observed": false,
+        "identity_source": "unverified_image_space_consistency",
+        "identity_confidence": 0.15,
+        "flight_supported": true,
+        "event_id": "event_000"
+      },
+      "checkpoint_count": 7,
+      "raw_proposal_checkpoint_matches": 2,
+      "selected_track_checkpoint_matches": 0,
+      "checkpoints": [
+        {
+          "frame_index": 154,
+          "source_time": 2.597644,
+          "reference_point_px": [
+            215,
+            283
+          ],
+          "nearest_proposal": {
+            "distance_px": 421.51542546655395,
+            "point_px": [
+              612.9375,
+              144.0
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "proposal_within_reference_tolerance": false,
+          "selected_track_observation": {
+            "distance_px": 486.0325108081763,
+            "point_px": [
+              681.5625,
+              146.8125
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 156,
+          "source_time": 2.631378,
+          "reference_point_px": [
+            211,
+            298
+          ],
+          "nearest_proposal": {
+            "distance_px": 5.211540679108242,
+            "point_px": [
+              211.5,
+              303.1875
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": {
+            "distance_px": 492.02483820052214,
+            "point_px": [
+              681.0,
+              152.4375
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 158,
+          "source_time": 2.665111,
+          "reference_point_px": [
+            209,
+            316
+          ],
+          "nearest_proposal": {
+            "distance_px": 3.0650499588098072,
+            "point_px": [
+              212.0625,
+              316.125
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": {
+            "distance_px": 497.3686423632374,
+            "point_px": [
+              680.4375,
+              157.5
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 159,
+          "source_time": 2.681978,
+          "reference_point_px": [
+            207,
+            330
+          ],
+          "nearest_proposal": {
+            "distance_px": 491.0829749454261,
+            "point_px": [
+              643.3125,
+              104.625
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "proposal_within_reference_tolerance": false,
+          "selected_track_observation": {
+            "distance_px": 501.4901933861718,
+            "point_px": [
+              679.3125,
+              161.4375
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 162,
+          "source_time": 2.732589,
+          "reference_point_px": [
+            204,
+            321
+          ],
+          "nearest_proposal": {
+            "distance_px": 497.32256964796,
+            "point_px": [
+              677.625,
+              169.3125
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "proposal_within_reference_tolerance": false,
+          "selected_track_observation": {
+            "distance_px": 497.32256964796,
+            "point_px": [
+              677.625,
+              169.3125
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 165,
+          "source_time": 2.783189,
+          "reference_point_px": [
+            201,
+            314
+          ],
+          "nearest_proposal": {
+            "distance_px": 495.0218192792112,
+            "point_px": [
+              677.0625,
+              178.3125
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "proposal_within_reference_tolerance": false,
+          "selected_track_observation": {
+            "distance_px": 495.0218192792112,
+            "point_px": [
+              677.0625,
+              178.3125
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 168,
+          "source_time": 2.833789,
+          "reference_point_px": [
+            196,
+            308
+          ],
+          "nearest_proposal": {
+            "distance_px": 493.9260801539538,
+            "point_px": [
+              674.8125,
+              186.75
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "proposal_within_reference_tolerance": false,
+          "selected_track_observation": {
+            "distance_px": 493.9260801539538,
+            "point_px": [
+              674.8125,
+              186.75
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        }
+      ],
+      "posthoc_best_track": {
+        "track_id": "6",
+        "checkpoint_matches": 2,
+        "checkpoints": [
+          null,
+          {
+            "distance_px": 5.211540679108242,
+            "point_px": [
+              211.5,
+              303.1875
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "dark"
+          },
+          {
+            "distance_px": 3.0650499588098072,
+            "point_px": [
+              212.0625,
+              316.125
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "dark"
+          },
+          null,
+          null,
+          null,
+          null
+        ],
+        "observations": 7,
+        "model_observations": 7,
+        "identity_ambiguous": false
+      },
+      "matching_exported_events": [],
+      "all_exported_events": [
+        {
+          "exists": true,
+          "frame_index": 175,
+          "time": 2.951867,
+          "point_px": [
+            673.125,
+            206.4375
+          ],
+          "track_id": 36,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 482.2242289964804,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_000"
+        },
+        {
+          "exists": true,
+          "frame_index": 174,
+          "time": 2.935,
+          "point_px": [
+            673.941114717366,
+            204.35349486199334
+          ],
+          "track_id": 39,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 483.55046155173034,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_001"
+        },
+        {
+          "exists": true,
+          "frame_index": 174,
+          "time": 2.935,
+          "point_px": [
+            672.8246467294691,
+            205.73954366740304
+          ],
+          "track_id": 37,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 482.11332952804776,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_002"
+        },
+        {
+          "exists": true,
+          "frame_index": 174,
+          "time": 2.935,
+          "point_px": [
+            672.6533107428189,
+            206.09642937806066
+          ],
+          "track_id": 66,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 481.8558919621241,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_003"
+        },
+        {
+          "exists": true,
+          "frame_index": 174,
+          "time": 2.935,
+          "point_px": [
+            673.707077275333,
+            205.44783651444598
+          ],
+          "track_id": 31,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 483.04113428135264,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_004"
+        },
+        {
+          "exists": true,
+          "frame_index": 174,
+          "time": 2.935,
+          "point_px": [
+            672.5997502103135,
+            204.9882497288659
+          ],
+          "track_id": 33,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 482.09030803549524,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_005"
+        },
+        {
+          "exists": true,
+          "frame_index": 174,
+          "time": 2.935,
+          "point_px": [
+            673.1585797498664,
+            206.31792685331448
+          ],
+          "track_id": 44,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 482.2873383080615,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_006"
+        },
+        {
+          "exists": true,
+          "frame_index": 174,
+          "time": 2.935,
+          "point_px": [
+            672.9132356358714,
+            207.8362922278655
+          ],
+          "track_id": 43,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 481.66286408371,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_007"
+        },
+        {
+          "exists": true,
+          "frame_index": 174,
+          "time": 2.935,
+          "point_px": [
+            672.6614302360395,
+            206.14188287183154
+          ],
+          "track_id": 41,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 481.8520528004513,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_008"
+        },
+        {
+          "exists": true,
+          "frame_index": 173,
+          "time": 2.918133,
+          "point_px": [
+            673.3106717556892,
+            205.30814071329343
+          ],
+          "track_id": 46,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 482.6942120697305,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_009"
+        },
+        {
+          "exists": true,
+          "frame_index": 95,
+          "time": 1.602444,
+          "point_px": [
+            340.3125,
+            167.0625
+          ],
+          "track_id": 2,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 210.52518035261247,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": null,
+          "event_id": "event_010"
+        },
+        {
+          "exists": true,
+          "frame_index": 208,
+          "time": 3.5085,
+          "point_px": [
+            679.3125,
+            206.4375
+          ],
+          "track_id": 3,
+          "point_kind": null,
+          "distance_to_approximate_landing_px": 488.20773146530564,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": null,
+          "event_id": "event_011"
+        }
+      ],
+      "timings": {
+        "tracking_seconds": 0.8869158380002773,
+        "events_seconds": 0.33782537400111323,
+        "total_seconds": 1.2247421130014118
+      },
+      "result_sha256": "c9d99f268e0d298b90ce5396e20545550314fbe12fed4b1f1de75238cdd91750"
+    },
+    {
+      "mode": "fusion",
+      "primary": {
+        "exists": true,
+        "frame_index": 175,
+        "time": 2.951867,
+        "point_px": [
+          672.877,
+          205.774
+        ],
+        "track_id": 2195,
+        "point_kind": "observed_object_center",
+        "distance_to_approximate_landing_px": 482.1550354450319,
+        "within_frame_interval": false,
+        "within_frozen_approximation": false,
+        "contact_observed": false,
+        "identity_source": "unverified_image_space_consistency",
+        "identity_confidence": 0.15,
+        "flight_supported": true,
+        "event_id": "event_000"
+      },
+      "checkpoint_count": 7,
+      "raw_proposal_checkpoint_matches": 6,
+      "selected_track_checkpoint_matches": 0,
+      "checkpoints": [
+        {
+          "frame_index": 154,
+          "source_time": 2.597644,
+          "reference_point_px": [
+            215,
+            283
+          ],
+          "nearest_proposal": {
+            "distance_px": 36.833299567103666,
+            "point_px": [
+              194.639,
+              252.306
+            ],
+            "method": "opencv_source_roi_component",
+            "model_observation": false,
+            "appearance_polarity": "bright"
+          },
+          "proposal_within_reference_tolerance": false,
+          "selected_track_observation": {
+            "distance_px": 486.0325108081763,
+            "point_px": [
+              681.5625,
+              146.8125
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 156,
+          "source_time": 2.631378,
+          "reference_point_px": [
+            211,
+            298
+          ],
+          "nearest_proposal": {
+            "distance_px": 4.47213595499958,
+            "point_px": [
+              209.0,
+              294.0
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": {
+            "distance_px": 492.02483820052214,
+            "point_px": [
+              681.0,
+              152.4375
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 158,
+          "source_time": 2.665111,
+          "reference_point_px": [
+            209,
+            316
+          ],
+          "nearest_proposal": {
+            "distance_px": 3.0650499588098072,
+            "point_px": [
+              212.0625,
+              316.125
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": {
+            "distance_px": 497.3686423632374,
+            "point_px": [
+              680.4375,
+              157.5
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 159,
+          "source_time": 2.681978,
+          "reference_point_px": [
+            207,
+            330
+          ],
+          "nearest_proposal": {
+            "distance_px": 0.9504677795695922,
+            "point_px": [
+              207.25,
+              330.917
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": {
+            "distance_px": 501.68117365514127,
+            "point_px": [
+              679.0,
+              160.0
+            ],
+            "method": "opencv_motion_bright_component",
+            "model_observation": false,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 162,
+          "source_time": 2.732589,
+          "reference_point_px": [
+            204,
+            321
+          ],
+          "nearest_proposal": {
+            "distance_px": 0.19999999999998863,
+            "point_px": [
+              204.2,
+              321.0
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": {
+            "distance_px": 497.8155626695493,
+            "point_px": [
+              677.88,
+              168.494
+            ],
+            "method": "opencv_source_roi_with_global_support",
+            "model_observation": false,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 165,
+          "source_time": 2.783189,
+          "reference_point_px": [
+            201,
+            314
+          ],
+          "nearest_proposal": {
+            "distance_px": 0.673145600891813,
+            "point_px": [
+              201.25,
+              313.375
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": {
+            "distance_px": 494.8155995368375,
+            "point_px": [
+              676.603,
+              177.456
+            ],
+            "method": "opencv_source_roi_with_global_support",
+            "model_observation": false,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        },
+        {
+          "frame_index": 168,
+          "source_time": 2.833789,
+          "reference_point_px": [
+            196,
+            308
+          ],
+          "nearest_proposal": {
+            "distance_px": 2.62797450520358,
+            "point_px": [
+              198.625,
+              308.125
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          "proposal_within_reference_tolerance": true,
+          "selected_track_observation": {
+            "distance_px": 493.9260801539538,
+            "point_px": [
+              674.8125,
+              186.75
+            ],
+            "method": "tracknetv3_fixed_grid_image_heatmap_with_source_patch",
+            "model_observation": true,
+            "appearance_polarity": "bright"
+          },
+          "selected_track_within_reference_tolerance": false
+        }
+      ],
+      "posthoc_best_track": {
+        "track_id": "1390",
+        "checkpoint_matches": 3,
+        "checkpoints": [
+          null,
+          {
+            "distance_px": 7.027846398435298,
+            "point_px": [
+              211.625,
+              305.0
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          {
+            "distance_px": 3.640054944640259,
+            "point_px": [
+              210.0,
+              319.5
+            ],
+            "method": "opencv_motion_bright_component",
+            "model_observation": false,
+            "appearance_polarity": "bright"
+          },
+          {
+            "distance_px": 0.9504677795695922,
+            "point_px": [
+              207.25,
+              330.917
+            ],
+            "method": "opencv_motion_dark_component",
+            "model_observation": false,
+            "appearance_polarity": "dark"
+          },
+          null,
+          null,
+          null
+        ],
+        "observations": 4,
+        "model_observations": 0,
+        "identity_ambiguous": true
+      },
+      "matching_exported_events": [
+        {
+          "exists": true,
+          "frame_index": 158,
+          "time": 2.665111,
+          "point_px": [
+            208.7520757394926,
+            334.5558890823918
+          ],
+          "track_id": 2135,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 4.881177596438712,
+          "within_frame_interval": true,
+          "within_frozen_approximation": true,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_002"
+        },
+        {
+          "exists": true,
+          "frame_index": 158,
+          "time": 2.665111,
+          "point_px": [
+            209.7649062629638,
+            331.9949241241741
+          ],
+          "track_id": 2139,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 3.409461673664642,
+          "within_frame_interval": true,
+          "within_frozen_approximation": true,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_004"
+        }
+      ],
+      "all_exported_events": [
+        {
+          "exists": true,
+          "frame_index": 175,
+          "time": 2.951867,
+          "point_px": [
+            672.877,
+            205.774
+          ],
+          "track_id": 2195,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 482.1550354450319,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_000"
+        },
+        {
+          "exists": true,
+          "frame_index": 175,
+          "time": 2.951867,
+          "point_px": [
+            672.6353638355325,
+            208.0768812881192
+          ],
+          "track_id": 2193,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 481.33308522340343,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_001"
+        },
+        {
+          "exists": true,
+          "frame_index": 158,
+          "time": 2.665111,
+          "point_px": [
+            208.7520757394926,
+            334.5558890823918
+          ],
+          "track_id": 2135,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 4.881177596438712,
+          "within_frame_interval": true,
+          "within_frozen_approximation": true,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_002"
+        },
+        {
+          "exists": true,
+          "frame_index": 187,
+          "time": 3.154278,
+          "point_px": [
+            182.0,
+            342.625
+          ],
+          "track_id": 2249,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 28.00697457777259,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.25,
+          "flight_supported": true,
+          "event_id": "event_003"
+        },
+        {
+          "exists": true,
+          "frame_index": 158,
+          "time": 2.665111,
+          "point_px": [
+            209.7649062629638,
+            331.9949241241741
+          ],
+          "track_id": 2139,
+          "point_kind": "inferred_object_center",
+          "distance_to_approximate_landing_px": 3.409461673664642,
+          "within_frame_interval": true,
+          "within_frozen_approximation": true,
+          "contact_observed": false,
+          "identity_source": "unverified_image_trajectory",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_004"
+        },
+        {
+          "exists": true,
+          "frame_index": 188,
+          "time": 3.171144,
+          "point_px": [
+            181.75,
+            340.75
+          ],
+          "track_id": 2248,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 27.443123000125187,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.25,
+          "flight_supported": true,
+          "event_id": "event_005"
+        },
+        {
+          "exists": true,
+          "frame_index": 84,
+          "time": 1.4169,
+          "point_px": [
+            294.5,
+            189.5
+          ],
+          "track_id": 2225,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 165.51888109819978,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_006"
+        },
+        {
+          "exists": true,
+          "frame_index": 84,
+          "time": 1.4169,
+          "point_px": [
+            294.5,
+            189.5
+          ],
+          "track_id": 2224,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 165.51888109819978,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": true,
+          "event_id": "event_007"
+        },
+        {
+          "exists": true,
+          "frame_index": 68,
+          "time": 1.147011,
+          "point_px": [
+            131.5,
+            239.0
+          ],
+          "track_id": 2230,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 118.24233590385467,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.1944,
+          "flight_supported": true,
+          "event_id": "event_008"
+        },
+        {
+          "exists": true,
+          "frame_index": 178,
+          "time": 3.002467,
+          "point_px": [
+            674.102,
+            202.162
+          ],
+          "track_id": 1554,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 484.27970497224015,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": null,
+          "event_id": "event_009"
+        },
+        {
+          "exists": true,
+          "frame_index": 150,
+          "time": 2.530167,
+          "point_px": [
+            837.0,
+            251.5
+          ],
+          "track_id": 1163,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 634.8718374601286,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.105,
+          "flight_supported": null,
+          "event_id": "event_010"
+        },
+        {
+          "exists": true,
+          "frame_index": 106,
+          "time": 1.787989,
+          "point_px": [
+            506.0,
+            304.5
+          ],
+          "track_id": 883,
+          "point_kind": "observed_object_center",
+          "distance_to_approximate_landing_px": 300.08540451011606,
+          "within_frame_interval": false,
+          "within_frozen_approximation": false,
+          "contact_observed": false,
+          "identity_source": "unverified_image_space_consistency",
+          "identity_confidence": 0.15,
+          "flight_supported": null,
+          "event_id": "event_011"
+        }
+      ],
+      "timings": {
+        "tracking_seconds": 18.836712067997723,
+        "events_seconds": 2.2456139479982085,
+        "total_seconds": 21.08232697799758
+      },
+      "result_sha256": "da74b857e0a26f5bdb6cf0340b28740b7adbefc0b186b55a8e1aa4323d63f030"
+    }
+  ],
+  "run_sha256": "6997041340a479e9e8fa7f6e7d4bbdbfbb2c35296767d1f8ce6ae200992d9034",
+  "evaluation_script_sha256": "8abed92e15e94f95b97561198fc18a452c0ea1a1e0bed85ba7bc743fef4e70e4",
+  "limits": [
+    "Sparse checkpoint proximity is not continuous identity verification or global precision.",
+    "Posthoc best-track lookup uses references for diagnostics only; it is not the automatic selected track.",
+    "A matching inferred point remains inferred; no exact cork contact or legal line claim.",
+    "Native source-contact refinement was not rerun. All methods share the same replay scope."
+  ]
+}

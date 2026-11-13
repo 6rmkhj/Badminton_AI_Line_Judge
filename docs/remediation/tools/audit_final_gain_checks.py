@@ -1,0 +1,14 @@
+from pathlib import Path
+import hashlib,importlib.util,json
+R=Path('/workspace/remediation')
+def load(p):return json.loads(p.read_text())
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+freeze=load(R/'final-evaluation-freeze.json');spec=importlib.util.spec_from_file_location('audit','/workspace/generalization/audit.py');a=importlib.util.module_from_spec(spec);spec.loader.exec_module(a);rows={x['key']:x for x in load(R/'regression-manifest.json')['videos']};cases=[]
+for key in ['ordinary-4-a','ordinary-12-a']:
+ folder=R/'final-fresh-0.5.4'/key;receipt=load(folder/'execution-receipt.json');result=load(folder/'result.json');stage=load(R/'final-old24-stage-v1'/key/'result.json');assert receipt['status']=='completed' and receipt['mode']=='full_fresh_pipeline' and receipt['detector_stage_reused'] is False;assert receipt['result_sha256']==sha(folder/'result.json');assert receipt['freeze_sha256']==sha(R/'final-evaluation-freeze.json');assert result['implementation_fingerprint']==freeze['accepted_core']['implementation_fingerprint'];assert result['config']==freeze['config'];assert result['source_sha256']==rows[key]['sha256'];assert result['assistance_used'] is False and result['automatic_evaluation_eligible'] is True
+ c=a.audit_video(rows[key],R/'final-fresh-0.5.4',R/'regression_references',R/'final-reference-snapshots',split='development');s=result['selected_landing'];t=stage['selected_landing'];c.update(result_sha256=sha(folder/'result.json'),detections_sha256=sha(folder/'detections.json'),assistance_used=False,automatic_evaluation_eligible=True,execution_scope='full_fresh_pipeline',execution_receipt_sha256=sha(folder/'execution-receipt.json'),matches_accepted_stage_frame_point=(s['frame_index'],s['candidate_px'])==(t['frame_index'],t['candidate_px']),candidate_kind=s.get('image_motion_event',{}).get('point_kind'),artifacts={})
+ for file in folder.rglob('*'):
+  if file.is_file() and file.suffix.lower() in ['.jpg','.jpeg','.png','.mp4']:
+   c['artifacts'][str(file.relative_to(folder))]={'sha256':sha(file),'bytes':file.stat().st_size}
+ assert c['selection_category']=='correct_first_vicinity' and c['matches_accepted_stage_frame_point'];cases.append(c)
+out={'scope':'Two accepted development gains rechecked with full fresh source/detector/calibration/native-contact/evidence execution; separate from old24 stage count and new8 holdout metrics.','source_commit':freeze['accepted_core']['source_commit'],'implementation_fingerprint':freeze['accepted_core']['implementation_fingerprint'],'canonical_config_sha256':freeze['canonical_config_sha256'],'preinspection_freeze_sha256':sha(R/'final-evaluation-freeze.json'),'metrics':a.metrics(cases),'cases':cases};(R/'final-fresh-gain-audit.json').write_text(json.dumps(out,indent=2)+'\n');print([(c['key'],c['selection_category'],c['selected']['frame_index'],c['candidate_kind']) for c in cases])

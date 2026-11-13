@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "fixture": "Synthetic media and mocked API; no analysis executed",
+  "checks": [
+    "automatic payload unchanged",
+    "drag selection",
+    "keyboard selection",
+    "native preview seeking",
+    "portrait letterboxing",
+    "escape cancellation",
+    "per-view normalized payload",
+    "manual provenance",
+    "reload restoration",
+    "375/390px no overflow",
+    "resize preservation",
+    "upload ID reuse",
+    "refine preservation",
+    "clear/reset"
+  ],
+  "submissions": 6,
+  "uploads": 1,
+  "javascript_errors": []
+}

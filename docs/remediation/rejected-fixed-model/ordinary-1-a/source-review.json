@@ -1,0 +1,21 @@
+{
+  "key": "ordinary-1-a",
+  "scope": "Post-release development source review. No independent human ground-truth claim and no model/threshold/crop tuning.",
+  "frozen_cv_primary": "f187 [182,342.625] is a later front-left floor-object candidate, outside the first-landing158\u2013160 interval. Its location is near the target flight area but does not identify first contact.",
+  "model_only_primary": "f175 [673.125,206.4375] is in the distant rear bench/shuttle-pile area, spatially unrelated to the main front-left landing.",
+  "fusion_primary": "f175 [672.877,205.774] follows the same distant bright-object path as model-only. It is482.16px from the frozen approximate main landing, while the prior selected floor candidate was28.01px away at a later time.",
+  "main_trajectory_proposals": "The model supplies near-reference points at156 and158, but misses159 and the162/165/168 rebound checkpoints. Existing CV supplies6/7 frozen checkpoints.",
+  "selection_failure": "A matching inferred event is already exported by CV as event002 atf158 [209.955,332.871]. Fusion still contains matching inferred events002/004 but promotes the other trajectory instead. Candidate existence is not successful automatic selection.",
+  "strict_approximate_primary_success": false,
+  "selected_main_trajectory_checkpoint_matches": 0,
+  "qualitative_target_selection_worsened": true,
+  "identity_of_distant_object_independently_verified": false,
+  "source_review_artifacts": {
+    "posthoc-comparison.json": "b20defd98484423f89cf833c64679905c4e61d12ca15365c91bdab092619c8a1",
+    "selected-source-review.jpg": "b594b460badab7977ebdf9fb8dd58fd88d8a6f054956b5796df1689720316278"
+  },
+  "limits": [
+    "The remote object can be another shuttle or nearby bright content; this review establishes it is not the main target landing, not its exact identity.",
+    "All candidates keep contact_observed false; inferred alternatives remain approximate image centers."
+  ]
+}

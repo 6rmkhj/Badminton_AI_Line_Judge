@@ -333,15 +333,25 @@ def train_candidate_scorer(manifest, annotations_dir, video_dir, output_path, ep
 
 
 class CandidateScorer:
-    def __init__(self, model, metadata, weights_sha256):
-        self.model = model.eval()
+    def __init__(self, model, metadata, weights_sha256, device="cpu"):
+        from .inference import device_error, resolve_device
+        self.device = resolve_device(device)
+        try:
+            self.model = model.eval().to(self.device)
+        except (RuntimeError, OSError, AssertionError) as error:
+            if self.device != "cpu":
+                raise device_error(self.device, error) from error
+            raise
         self.patch_size = metadata["patch_size"]
-        self.provenance = {"method": "supervised_candidate_patch_classifier", "weights_sha256": weights_sha256,
-                           **metadata}
+        self.last_inference_executed = False
+        self.provenance = {**metadata, "method": "supervised_candidate_patch_classifier",
+                           "weights_sha256": weights_sha256, "inference_device": self.device}
 
     def predict(self, patches):
         """Return uncalibrated class scores for N,H,W,3 uint8 RGB patches."""
+        self.last_inference_executed = False
         import torch
+        from .inference import device_error
         patches = np.asarray(patches)
         if patches.ndim != 4 or patches.shape[-1] != 3 or patches.dtype != np.uint8:
             raise ValueError("patches must be an N,H,W,3 uint8 RGB array")
@@ -349,12 +359,20 @@ class CandidateScorer:
             return []
         if patches.shape[1:3] != (self.patch_size, self.patch_size):
             raise ValueError("Patch dimensions differ from the trained model")
-        inputs = torch.from_numpy(patches.transpose(0, 3, 1, 2).copy()).float() / 255
-        with torch.no_grad():
-            return torch.sigmoid(self.model(inputs).squeeze(1)).numpy().astype(float).tolist()
+        try:
+            inputs = torch.from_numpy(patches.transpose(0, 3, 1, 2).copy()).to(self.device, dtype=torch.float32) / 255
+            with torch.inference_mode():
+                values = torch.sigmoid(self.model(inputs).squeeze(1)).detach().cpu().numpy().astype(float).tolist()
+            self.last_inference_executed = True
+            return values
+        except (RuntimeError, OSError, AssertionError) as error:
+            if self.device != "cpu":
+                raise device_error(self.device, error) from error
+            raise
 
     def score(self, frame, detections, preprocessing=None):
         """Score only frames matching the reviewed training preprocessing domain."""
+        self.last_inference_executed = False
         if not detections:
             return []
         if frame is None or frame.ndim != 3 or frame.shape[2] != 3 or frame.dtype != np.uint8:
@@ -375,8 +393,10 @@ class CandidateScorer:
                 for d, score in zip(detections, scores)]
 
 
-def load_candidate_scorer(path):
+def load_candidate_scorer(path, device="cpu"):
     """Load only this versioned tensor checkpoint using safe weights-only loading."""
+    from .inference import resolve_device
+    device = resolve_device(device)
     import torch
     path = Path(path)
     checkpoint = torch.load(path, map_location="cpu", weights_only=True)
@@ -390,4 +410,4 @@ def load_candidate_scorer(path):
         raise ValueError("Unsupported candidate scorer checkpoint")
     model = _network()
     model.load_state_dict(checkpoint["state_dict"], strict=True)
-    return CandidateScorer(model, metadata, hashlib.sha256(path.read_bytes()).hexdigest())
+    return CandidateScorer(model, metadata, hashlib.sha256(path.read_bytes()).hexdigest(), device=device)

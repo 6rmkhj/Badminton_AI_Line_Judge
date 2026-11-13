@@ -1,0 +1,26 @@
+{
+  "released_at": "2026-11-12T08:00:12.953456+00:00",
+  "authorization": "Root explicitly authorized conditional inspection only after all8 fresh holdouts successfully completed and source/config freeze matched. Those conditions are now verified.",
+  "source_commit": "d7f3d3303daa40c699d579c17e40269173220937",
+  "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "freeze_path": "/workspace/generalization/freeze-release.json",
+  "freeze_sha256": "81fe1f5682a32eb263efb8f727ce1669872888114d20c9c8e52108b4fb4e9c6c",
+  "preserved_preinspection_freeze": "/workspace/generalization/freeze-release.preinspection.json",
+  "preserved_preinspection_sha256": "81fe1f5682a32eb263efb8f727ce1669872888114d20c9c8e52108b4fb4e9c6c",
+  "blind_execution_log_sha256": "d400ee385ca88bc69e6f8d2f472776230d2a03b1a4cec013f2376b163196aaa2",
+  "completed_holdout_keys": [
+    "8k-7-a",
+    "8k-7-b",
+    "ordinary-18-a",
+    "ordinary-18-b",
+    "uhd4k-3-a",
+    "uhd4k-3-b",
+    "uhdhd-5-a",
+    "uhdhd-5-b"
+  ],
+  "holdout_count": 8,
+  "full_fresh": true,
+  "reference_or_prediction_files_opened_before_receipt": false,
+  "criteria_changes_permitted": false,
+  "production_changes_permitted": false
+}

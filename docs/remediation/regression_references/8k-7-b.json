@@ -1,0 +1,32 @@
+{
+  "key": "8k-7-b",
+  "contact_visibility": "ambiguous",
+  "landing_frame_interval": null,
+  "landing_point_px": null,
+  "tolerance_px": null,
+  "confidence": "low for first impact; no unique image-space landing reference asserted",
+  "trajectory_points": [],
+  "notes": [
+    "The main court and final white/blue player's overhead stroke are identifiable, but the distant terminal shuttle cannot be followed continuously to an unambiguous first floor contact in this B view.",
+    "Foreground arm/racket passes through the view, the image shakes/blurs in the late rally, and far-player body/racket overlaps plausible small floorward motion.",
+    "Native far-court crops around the final stroke and subsequent movement were inspected before any pipeline predictions. Tiny white floor objects, shoes and later walking/racket motion were not promoted to a shuttle impact.",
+    "No coordinate or impact interval is asserted. The clear-looking sibling A result was not used to manufacture a B contact annotation.",
+    "AI visual reference only; ambiguous contact cannot establish a localization pass/fail or physical IN/OUT accuracy."
+  ],
+  "evidence": [
+    "visual/8k-7-b/crop-56-74-0.jpg",
+    "visual/8k-7-b/crop-56-74-1.jpg",
+    "visual/8k-7-b/crop-60-77-0.jpg",
+    "visual/8k-7-b/crop-60-77-1.jpg",
+    "visual/8k-7-b/crop-60-77-2.jpg"
+  ],
+  "file": "8k 30 4k 24 b시점 7.mp4",
+  "source_sha256": "c8c2fa52ef709de4c8084c8fdc456d2cf6cdb4b44924f32ec08b406d2acfe4d7",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "ground_truth_eligible": false,
+  "split": "holdout"
+}

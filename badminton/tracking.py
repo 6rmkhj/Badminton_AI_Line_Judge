@@ -2,9 +2,14 @@
 from __future__ import annotations
 
 import math
+from collections import defaultdict
+from functools import lru_cache
+from statistics import median
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
+
+from .observation_support import rejects_moving_association, observation_support_status
 
 
 def _inside(point, region):
@@ -35,6 +40,7 @@ class _Track:
         self.ambiguous = False
         self.ambiguity_events = []
         self.reconnections = []
+        self.motion_model_changes = []
 
     def predict(self, time, acceleration):
         dt = time - self.time
@@ -44,8 +50,23 @@ class _Track:
         self.covariance = transition @ self.covariance @ transition.T + noise_gain @ noise_gain.T * acceleration ** 2
         self.time = time
 
-    def observe(self, observation):
+    def observe(self, observation, adapt_maneuver=True):
         measurement = np.array([observation["x"], observation["y"]])
+        last = self.observations[-1]
+        dt = observation["time"] - last["time"]
+        displacement = measurement - np.array([last["x"], last["y"]])
+        incoming = _velocity(self.observations)
+        minimum_motion = max(3., 2 * max(float(last.get("radius", 2)), float(observation.get("radius", 2))))
+        # A constant-velocity posterior otherwise keeps moving through a clear
+        # observed reversal and can attach the *next* frame to a distractor on
+        # its old path. Adapt only with consecutive, sufficiently resolved
+        # observations. Missing-interval reconnections retain their old rules.
+        reverse = (adapt_maneuver and not self.misses and len(self.observations) >= 3
+                   and observation["frame_index"] == last["frame_index"] + 1 and dt > 0
+                   and float(np.linalg.norm(displacement)) >= minimum_motion
+                   and float(np.linalg.norm(incoming)) * dt >= 2 * minimum_motion
+                   and float(displacement @ self.state[2:]) < 0
+                   and float(displacement @ incoming) < -0.5 * float(np.linalg.norm(displacement) * np.linalg.norm(incoming)))
         projection = np.array([[1, 0, 0, 0], [0, 1, 0, 0]], dtype=float)
         variance = max(2.0, float(observation.get("radius", 2))) ** 2
         innovation = measurement - projection @ self.state
@@ -57,6 +78,15 @@ class _Track:
             dt = observation["time"] - self.observations[-1]["time"]
             if dt > 0:
                 self.state[2:] = (measurement - np.array([self.observations[-1]["x"], self.observations[-1]["y"]])) / dt
+        if reverse:
+            self.state[:2] = measurement
+            self.state[2:] = displacement / dt
+            velocity_variance = 4 * variance / dt ** 2
+            self.covariance = np.diag([variance, variance, velocity_variance, velocity_variance])
+            self.motion_model_changes.append({"frame_index": observation["frame_index"], "time": observation["time"],
+                "reason": "observed_direction_reversal", "incoming_velocity_px_per_second": incoming.tolist(),
+                "updated_velocity_px_per_second": self.state[2:].tolist(),
+                "verified_identity": False, "contact_confirmed": False})
         if self.misses:
             gap = {"start_frame": self.misses[0]["frame_index"], "end_frame": self.misses[-1]["frame_index"],
                    "missing_frame_count": len(self.misses),
@@ -81,6 +111,7 @@ class _Track:
         return {"track_id": self.track_id, "observations": self.observations, "gaps": gaps,
                 "identity_ambiguous": self.ambiguous, "ambiguity_events": self.ambiguity_events,
                 "reconnections": self.reconnections, "source_track_ids": [self.track_id],
+                "motion_model_changes": self.motion_model_changes,
                 "reconnection_hypotheses": [], "method": "gated_kalman_hungarian_tracklets"}
 
 
@@ -89,15 +120,22 @@ def _offline_links(tracks, config):
     max_gap = float(config.get("offline_max_gap_seconds", 0.6))
     max_residual = float(config.get("offline_max_residual_px", 28.0))
     links = []
+    background_starts = {id(track): rejects_moving_association(track['observations'][0])
+                         for track in tracks if track.get('observations')}
     for before in tracks:
         if len(before["observations"]) < 3 or before["identity_ambiguous"]:
             continue
         end = before["observations"][-1]
         velocity_before = _velocity(before["observations"])
+        moving_before = float(np.linalg.norm(velocity_before)) >= 25.
         for after in tracks:
             if before is after or len(after["observations"]) < 3 or after["identity_ambiguous"]:
                 continue
             start = after["observations"][0]
+            # A known persistent image feature may remain a stationary
+            # diagnostic track. It cannot complete a moving-object gap link.
+            if moving_before and background_starts.get(id(after), False):
+                continue
             dt = start["time"] - end["time"]
             if not 0 < dt <= max_gap or start["frame_index"] <= end["frame_index"] + 1:
                 continue
@@ -155,13 +193,364 @@ def _offline_links(tracks, config):
         before["observations"].extend(after["observations"])
         before["gaps"].extend(after["gaps"])
         before["reconnections"].extend([dict(edge), *after["reconnections"]])
+        before.setdefault("motion_model_changes", []).extend(after.get("motion_model_changes", []))
         before["source_track_ids"].extend(after["source_track_ids"])
         before["reconnection_hypotheses"].extend(after["reconnection_hypotheses"])
         parent[right] = left
     return [track for track in tracks if leader(track["track_id"]) == track["track_id"]]
 
 
-def track_detections(frame_records, config=None):
+@lru_cache(maxsize=4096)
+def _flight_coefficients(samples):
+    """Reuse an identical measured history, never a predicted observation."""
+    xy = np.asarray([[x, y] for _, x, y in samples], dtype=float)
+    times = np.asarray([time for time, _, _ in samples], dtype=float)
+    times -= times[-1]
+    degree = 2 if len(samples) >= 4 else 1
+    design = np.column_stack([times ** i for i in range(degree + 1)])
+    coefficients = np.linalg.lstsq(design, xy, rcond=None)[0]
+    residual = float(np.sqrt(np.mean(np.sum((design @ coefficients - xy) ** 2, axis=1))))
+    coefficients.setflags(write=False)
+    return coefficients, residual
+
+
+def _flight_fit(observations, timestamp, window=6):
+    recent = observations[-window:]
+    samples = tuple((o['time'], o['x'], o['y']) for o in recent)
+    coefficients, residual = _flight_coefficients(samples)
+    dt = timestamp - recent[-1]['time']
+    predicted = np.asarray([dt ** i for i in range(len(coefficients))]) @ coefficients
+    return predicted, coefficients[1].copy(), residual
+
+
+def _path_travel(observations):
+    return sum(math.hypot(b["x"] - a["x"], b["y"] - a["y"]) for a, b in zip(observations, observations[1:]))
+
+
+def _flight_rank(beam):
+    observations, error, travel = beam
+    span = observations[-1]["frame_index"] - observations[0]["frame_index"] + 1
+    coverage = len(observations) / max(1, span)
+    return (len(observations) + min(travel, 300.) * .06 * coverage
+            - error / max(1, len(observations) - 2) * 4 - (span - len(observations)) * .6)
+
+
+def _spatial_flight_order(beams):
+    """Reserve endpoint coverage before spending the budget on similar paths.
+
+    Long overlapping prefixes of one bright object otherwise fill the archive
+    and displace a short, fast descent in a different part of the image.
+    """
+    cells = defaultdict(list)
+    for beam in sorted(beams, key=_flight_rank, reverse=True):
+        endpoint = beam[0][-1]
+        cells[(int(endpoint['x'] / 48), int(endpoint['y'] / 48))].append(beam)
+    for depth in range(max((len(group) for group in cells.values()), default=0)):
+        for group in cells.values():
+            if depth < len(group):
+                yield group[depth]
+
+
+def _continuation_indices(points, distances, history, tolerance, limit=2, *, transient_indices=None):
+    """Keep nearest geometry plus one currently pixel-supported alternative.
+
+    Positive transience is not object identity: it only reserves an existing
+    branch slot inside the unchanged motion gate. With no current positive
+    evidence, ordering is exactly the original nearest-neighbor ordering.
+    """
+    chosen = [int(index) for index in np.argsort(distances)[:limit] if distances[index] <= tolerance]
+    if len(chosen) < limit or limit < 2:
+        return chosen
+    if transient_indices is None:
+        transient_indices = [index for index, point in enumerate(points)
+                             if observation_support_status(point) == 'transient']
+    transient = [index for index in transient_indices if distances[index] <= tolerance]
+    if not transient:
+        return chosen
+    baseline = max(.1, float(np.median([row.get('radius', 2.) for row in history[-5:]])))
+
+    def score(index):
+        radius = max(.1, float(points[index].get('radius', 2.)))
+        # Match the existing bounded Kalman appearance cost; neither detector
+        # confidence nor a transient body/racket pixel confirms a shuttle.
+        size_penalty = min(.35, abs(math.log(radius / baseline)) * .08)
+        return (distances[index] / tolerance + size_penalty, distances[index], index)
+
+    preferred = min(transient, key=score)
+    if preferred not in chosen:
+        chosen[-1] = preferred
+    return chosen
+
+
+def _rebound_extensions(approach, rows):
+    """Retain bounded observed alternatives near a free-flight endpoint.
+
+    This proposes a piecewise motion path, not an identity reconnection or a
+    physical bounce. The event stage independently checks the two segments.
+    """
+    end = approach[-1]
+    _, velocity, _ = _flight_fit(approach, end["time"])
+    if velocity[1] < 12:
+        return []
+    radius = max(1., float(np.median([o.get("radius", 2.) for o in approach[-5:]])))
+    nearby = [row for row in rows if 0 < row[0] - end["time"] <= .5][:64]
+    active, finished = [], []
+    for timestamp, points in nearby:
+        points = [point for point in points if not rejects_moving_association(point)]
+        pixel_supported = tuple(index for index, point in enumerate(points)
+                                if observation_support_status(point) == 'transient')
+        fresh = []
+        for observations, error in active:
+            gap = timestamp - observations[-1]["time"]
+            if gap > .13:
+                continue
+            if len(observations) < 2:
+                prediction = np.array([observations[-1]["x"], observations[-1]["y"]])
+            else:
+                prediction, _, _ = _flight_fit(observations, timestamp)
+            distances = [math.hypot(p["x"] - prediction[0], p["y"] - prediction[1]) for p in points]
+            for j in _continuation_indices(points, distances, approach[-5:] + observations,
+                                           max(7., radius * 3), transient_indices=pixel_supported):
+                fresh.append((observations + [points[j]], error + distances[j] ** 2))
+            fresh.append((observations, error))
+        if timestamp - end["time"] <= .35:
+            dt = timestamp - end["time"]
+            predicted_x = end["x"] + velocity[0] * dt
+            predicted, _, _ = _flight_fit(approach, timestamp)
+            # The missing interval can span more than .15 seconds, especially
+            # when a small shuttle crosses a low-contrast floor. Bound the
+            # possible turn by its incoming motion at this timestamp instead
+            # of a fixed distance from the last detection. Only real measured
+            # points enter a branch; the event stage must fit both segments.
+            fall = max(0., float(predicted[1]) - end['y'], float(velocity[1]) * dt)
+            lower_y = end['y'] - max(12., min(60., fall * .5))
+            upper_y = end['y'] + max(12., fall) + radius * 3
+            seeds = [p for p in points if abs(p["x"] - predicted_x) <= max(6., radius * 3)
+                     and lower_y <= p['y'] <= upper_y]
+            seeds.sort(key=lambda p: abs(p["x"] - predicted_x) + abs(p["y"] - end["y"]) * .2)
+            fresh.extend(([p], 0.) for p in seeds[:3])
+        # Both working history and branch count are bounded independently of
+        # video length. Original observations are never interpolated.
+        unique = {}
+        for observations, error in fresh:
+            observations = observations[:6]
+            key = tuple((p["frame_index"], p["x"], p["y"]) for p in observations)
+            unique[key] = (observations, error)
+        active = sorted(unique.values(), key=lambda b: (len(b[0]) - b[1] * .03), reverse=True)[:24]
+        for observations, error in active:
+            if len(observations) >= 3 and observations[-1]["y"] < observations[0]["y"] - .5:
+                _, _, residual = _flight_fit(observations, observations[-1]["time"], window=6)
+                if residual <= max(3., radius * 1.5):
+                    finished.append((observations, error, residual))
+    def connection_rank(branch):
+        observations, error, _ = branch
+        # A longer unrelated post-motion must not consume both alternatives
+        # before the event stage sees a short first rebound. Check that the
+        # measured incoming/outgoing curves can actually meet near the gap.
+        origin = end['time']
+        incoming = np.polyfit([o['time'] - origin for o in approach[-10:]],
+                              [[o['x'], o['y']] for o in approach[-10:]], 2)
+        outgoing = np.polyfit([o['time'] - origin for o in observations],
+                              [[o['x'], o['y']] for o in observations], 2)
+        steps = np.diff([o['time'] for o in approach[-6:]])
+        step = float(np.median(steps)) if len(steps) else 1 / 30
+        compatible = False
+        for root in np.roots(incoming[:, 1] - outgoing[:, 1]):
+            if abs(root.imag) > 1e-6 or not 0 <= root.real <= observations[0]['time'] - origin + step * .5:
+                continue
+            t = float(root.real)
+            dx = abs(float(np.polyval(incoming[:, 0], t) - np.polyval(outgoing[:, 0], t)))
+            if (dx <= max(6., radius * 3) and np.polyval(np.polyder(incoming[:, 1]), t) > 12
+                    and np.polyval(np.polyder(outgoing[:, 1]), t) < -12):
+                compatible = True
+                break
+        return (not compatible, observations[0]['time'], -len(observations), error)
+
+    finished.sort(key=connection_rank)
+    selected = []
+    for observations, _, residual in finished:
+        if any(abs(observations[0]["time"] - old[0][0]["time"]) < .08
+               and math.hypot(observations[0]["x"] - old[0][0]["x"], observations[0]["y"] - old[0][0]["y"]) < 3
+               for old in selected):
+            continue
+        selected.append((observations, residual))
+        if len(selected) == 2:
+            break
+    return selected
+
+
+def _flight_hypotheses(frame_records, config, first_id, progress_callback=None):
+    """Bounded offline alternatives to mixed constant-velocity track histories.
+
+    These paths rank coherent image motion for review. They do not establish
+    which object is the shuttle, first contact, or continuity through a gap.
+    """
+    max_beams = min(2048, max(32, int(config.get("flight_max_beams", 1600))))
+    max_hypotheses = min(160, max(1, int(config.get("flight_max_hypotheses", 160))))
+    steps = np.diff([float(record["time"]) for record in frame_records])
+    nominal_step = float(np.median(steps[steps > 0])) if np.any(steps > 0) else 1 / 30
+    history_limit = min(64, max(18, int(math.ceil(.35 / nominal_step)) + 1))
+    rows = []
+    for record in frame_records:
+        points = []
+        for raw in record.get("detections", []):
+            if raw.get('observed') is False or raw.get('interpolated') is True:
+                continue
+            if not all(math.isfinite(float(raw.get(key, math.nan))) for key in ("x", "y", "confidence")):
+                continue
+            radius = float(raw.get("radius", 2.))
+            confidence = float(raw["confidence"])
+            if not math.isfinite(radius) or radius <= 0 or not 0 <= confidence <= 1:
+                continue
+            point = {**raw, "x": float(raw["x"]), "y": float(raw["y"]), "confidence": confidence,
+                     "radius": radius, "frame_index": int(record["frame_index"]),
+                     "time": float(record["time"]), "observed": True}
+            # Preserve the raw record and ordinary diagnostic tracklets; only
+            # dedicated moving-flight hypotheses exclude this strong negative
+            # pixel evidence. Unknown/stale support changes nothing.
+            if not rejects_moving_association(point):
+                points.append(point)
+        rows.append((float(record["time"]), points[:256]))
+    beams, archive = [], {}
+    from .media import _FrameProgress
+    reporter = _FrameProgress(progress_callback, len(rows), '일관된 비행 궤적 탐색')
+    reporter.report(0, force=True)
+    for order, (timestamp, points) in enumerate(rows):
+        coordinates = np.asarray([[p["x"], p["y"]] for p in points], dtype=float).reshape(-1, 2)
+        pixel_supported = tuple(index for index, point in enumerate(points)
+                                if observation_support_status(point) == 'transient')
+        fresh = []
+        for observations, error, travel in beams:
+            gap = int(frame_records[order]["frame_index"]) - observations[-1]["frame_index"]
+            if not 1 <= gap <= 3:
+                continue
+            prediction, _, _ = _flight_fit(observations, timestamp)
+            tolerance = 4 + min(4., median(o['radius'] for o in observations[-4:])) * 1.3 + (gap - 1) * 2
+            if len(observations) < 4:
+                # Two samples cannot resolve acceleration. A fast object with
+                # an early missing frame needs bounded velocity-scaled seed
+                # uncertainty until enough actual samples define its curve.
+                step_speed = travel / max(1, observations[-1]['frame_index'] - observations[0]['frame_index'])
+                tolerance = max(tolerance, min(24., step_speed * .5 * gap))
+            distances = np.linalg.norm(coordinates - prediction, axis=1)
+            for j in _continuation_indices(points, distances, observations, tolerance,
+                                           transient_indices=pixel_supported):
+                extended = (observations + [points[j]])[-history_limit:]
+                fresh.append((extended, error * .94 + float((distances[j] / tolerance) ** 2), _path_travel(extended)))
+            if gap < 3:
+                fresh.append((observations, error, travel))
+        if order and points and rows[order - 1][1]:
+            previous = rows[order - 1][1]
+            previous_xy = np.asarray([[p["x"], p["y"]] for p in previous])
+            for j, point in enumerate(points):
+                distances = np.linalg.norm(previous_xy - coordinates[j], axis=1)
+                eligible = np.where((distances >= 2) & (distances <= 80))[0]
+                for k in eligible[np.argsort(distances[eligible])[:6]]:
+                    fresh.append(([previous[k], point], 0., float(distances[k])))
+        buckets = {}
+        for beam in fresh:
+            a, b = beam[0][-2:]
+            vx, vy = b["x"] - a["x"], b["y"] - a["y"]
+            key = (b["frame_index"], b["x"], b["y"], int((math.atan2(vy, vx) + math.pi) / (math.pi / 4)),
+                   int(math.log2(max(1., math.hypot(vx, vy)))))
+            if key not in buckets or _flight_rank(beam) > _flight_rank(buckets[key]):
+                buckets[key] = beam
+        regions = defaultdict(list)
+        for beam in sorted(buckets.values(), key=_flight_rank, reverse=True):
+            point = beam[0][-1]
+            regions[(int(point["x"] / 48), int(point["y"] / 48))].append(beam)
+        # Fair spatial allocation keeps old clothing paths from monopolizing
+        # the finite search budget before a new free-flight object appears.
+        beams = []
+        for depth in range(64):
+            for region in regions.values():
+                if len(region) > depth:
+                    beams.append(region[depth])
+                    if len(beams) == max_beams:
+                        break
+            if len(beams) == max_beams:
+                break
+        for observations, error, _ in _spatial_flight_order(beams):
+            direction = observations[-1]["y"] - observations[-2]["y"]
+            ys = [o["y"] for o in observations]
+            extremum = int(np.argmin(ys)) if direction > 0 else int(np.argmax(ys))
+            observations = observations[extremum:]
+            travel = _path_travel(observations)
+            if len(observations) < 6 or observations[-1]["time"] - observations[0]["time"] < .16 or travel < 18:
+                continue
+            net = math.hypot(observations[-1]["x"] - observations[0]["x"], observations[-1]["y"] - observations[0]["y"])
+            if net / travel < .8:
+                continue
+            key = tuple((o["frame_index"], o["x"], o["y"]) for o in (observations[0], observations[-1]))
+            candidate = (observations, error, travel)
+            if key not in archive or _flight_rank(candidate) > _flight_rank(archive[key]):
+                archive[key] = candidate
+        if len(archive) > 2048:
+            # Keep strong completed approaches even when their endpoint cell
+            # is crowded; spend the other half on spatial coverage. Repeated
+            # all-spatial pruning can erase a good approach before its rebound
+            # is examined at the end of the video.
+            retained = sorted(archive.values(), key=_flight_rank, reverse=True)[:1024]
+            included = {id(beam) for beam in retained}
+            for beam in _spatial_flight_order(archive.values()):
+                if id(beam) not in included:
+                    retained.append(beam)
+                    included.add(id(beam))
+                if len(retained) >= 2048:
+                    break
+            archive = {tuple((o['frame_index'], o['x'], o['y']) for o in (beam[0][0], beam[0][-1])): beam
+                       for beam in retained}
+        reporter.report(order + 1, force=order + 1 == len(rows))
+    selected = []
+    # Preserve globally strong approaches as well as endpoint coverage. Pure
+    # spatial ordering can itself discard a late endpoint of a good trajectory
+    # when an unrelated motion shares its cell.
+    for ordering, budget in ((sorted(archive.values(), key=_flight_rank, reverse=True),
+                              max(1, int(max_hypotheses * .6))),
+                             (_spatial_flight_order(archive.values()), max_hypotheses)):
+        for beam in ordering:
+            if len(selected) >= budget:
+                break
+            observations = beam[0]
+            identifiers = {(o["frame_index"], o["x"], o["y"]) for o in observations}
+            if any(len(identifiers & old_ids) / min(len(identifiers), len(old_ids)) > .65
+                   and abs(observations[-1]["frame_index"] - old[0][-1]["frame_index"]) <= 1
+                   and math.hypot(observations[-1]["x"] - old[0][-1]["x"], observations[-1]["y"] - old[0][-1]["y"]) < 5
+                   for old, old_ids in selected):
+                continue
+            selected.append((beam, identifiers))
+    paths = []
+    if progress_callback is not None:
+        progress_callback({'detail': '비행·반동 궤적 연결 검토'})
+    for beam, _ in selected:
+        approach = beam[0]
+        _, _, residual = _flight_fit(approach, approach[-1]["time"], window=history_limit)
+        paths.append((approach, len(approach), residual))
+        if residual <= max(3., float(np.median([o["radius"] for o in approach])) * 1.5):
+            for rebound, _ in _rebound_extensions(approach, rows):
+                paths.append((approach + rebound, len(approach), residual))
+    output = []
+    for offset, (observations, approach_count, residual) in enumerate(paths):
+        identifier = first_id + offset
+        gaps = [{"start_frame": a["frame_index"] + 1, "end_frame": b["frame_index"] - 1,
+                 "missing_frame_count": b["frame_index"] - a["frame_index"] - 1,
+                 "duration_s": b["time"] - a["time"], "resolved": False,
+                 "possible_occlusion": False, "cause": "unresolved_candidate_association",
+                 "observations_interpolated": False}
+                for a, b in zip(observations, observations[1:]) if b["frame_index"] > a["frame_index"] + 1]
+        output.append({"track_id": identifier, "observations": observations, "gaps": gaps,
+            "identity_ambiguous": True, "ambiguity_events": [{"reason": "unverified_free_flight_hypothesis"}],
+            "reconnections": [], "reconnection_hypotheses": [], "source_track_ids": [identifier],
+            "method": "coherent_free_flight_hypothesis", "motion_model_changes": [],
+            "flight_hypothesis": {"method": "coherent_free_flight_search", "fit_residual_px": residual,
+                "inlier_count": approach_count, "observed_span_seconds": observations[approach_count - 1]["time"] - observations[0]["time"],
+                "travel_px": _path_travel(observations[:approach_count]), "approach_count": approach_count,
+                "rebound_count": len(observations) - approach_count, "verified_identity": False,
+                "physical_contact_confirmed": False, "observations_interpolated": False}})
+    return output
+
+
+def track_detections(frame_records, config=None, *, progress_callback=None):
     """Track all viable candidates without treating prediction as observation.
 
     Hungarian matches are geometrically gated. Two plausible choices after a
@@ -169,6 +558,8 @@ def track_detections(frame_records, config=None):
     uncertainty; none establishes physical shuttle identity or first contact.
     """
     config = dict(config or {})
+    if config.get("flight_search_enabled", False) or progress_callback is not None:
+        frame_records = list(frame_records)
     max_gap = float(config.get("max_gap_seconds", 0.22))
     max_misses = int(config.get("max_missed_frames", 10))
     base_gate = float(config.get("base_gate_px", 35.0))
@@ -179,9 +570,13 @@ def track_detections(frame_records, config=None):
     if not all(math.isfinite(value) for value in (max_gap, base_gate, max_gate, acceleration, ambiguity_margin)) or max_gap <= 0 or max_misses < 0 or base_gate <= 0 or max_gate < base_gate or acceleration <= 0 or min_observations < 1:
         raise ValueError("Invalid tracker time, gate, or acceleration configuration")
     active, finished = [], []
+    from .media import _FrameProgress
+    reporter = _FrameProgress(progress_callback, len(frame_records) if progress_callback is not None else 0,
+                              '프레임 사이의 후보 궤적 연결')
+    reporter.report(0, force=True)
     next_id = 1
     previous_time, previous_frame = None, None
-    for record in frame_records:
+    for processed_count, record in enumerate(frame_records, 1):
         timestamp, frame_index = float(record["time"]), int(record["frame_index"])
         if not math.isfinite(timestamp) or previous_time is not None and timestamp <= previous_time:
             raise ValueError("Frame timestamps must be finite and strictly increasing")
@@ -190,6 +585,8 @@ def track_detections(frame_records, config=None):
         previous_time, previous_frame = timestamp, frame_index
         candidates = []
         for raw in record.get("detections", []):
+            if raw.get('observed') is False or raw.get('interpolated') is True:
+                continue
             if not all(math.isfinite(float(raw[k])) for k in ("x", "y", "confidence")):
                 continue
             if not 0 <= float(raw["confidence"]) <= 1:
@@ -199,6 +596,7 @@ def track_detections(frame_records, config=None):
             candidates.append({**raw, "x": float(raw["x"]), "y": float(raw["y"]),
                                "confidence": float(raw["confidence"]), "radius": float(raw.get("radius", 2.0)),
                                "frame_index": frame_index, "time": timestamp, "observed": True})
+        background_candidates = [rejects_moving_association(candidate) for candidate in candidates]
         surviving = []
         for track in active:
             if timestamp - track.observations[-1]["time"] > max_gap or len(track.misses) > max_misses:
@@ -218,6 +616,8 @@ def track_detections(frame_records, config=None):
             for j, candidate in enumerate(candidates):
                 distance = math.hypot(candidate["x"] - track.state[0], candidate["y"] - track.state[1])
                 if distance > gate:
+                    continue
+                if speed >= 25. and background_candidates[j]:
                     continue
                 size_penalty = min(0.35, abs(math.log(max(0.1, candidate["radius"]) / last_radius)) * 0.08)
                 costs[i, j] = distance / gate + size_penalty + (1 - candidate["confidence"]) * 0.15
@@ -241,7 +641,7 @@ def track_detections(frame_records, config=None):
                                                        "reason": "competing_tracks", "after_gap": bool(active[i].misses)})
                     if active[i].misses:
                         continue
-                active[i].observe(candidates[j])
+                active[i].observe(candidates[j], adapt_maneuver=config.get("maneuver_adaptation", True))
                 assigned_tracks.add(i)
                 assigned_candidates.add(j)
         for i, track in enumerate(active):
@@ -252,9 +652,15 @@ def track_detections(frame_records, config=None):
             if j not in assigned_candidates:
                 active.append(_Track(next_id, candidate))
                 next_id += 1
+        if progress_callback is not None:
+            reporter.report(processed_count)
     finished.extend(track.output() for track in active)
     finished = [track for track in finished if len(track["observations"]) >= min_observations]
     finished = _offline_links(finished, config)
+    if progress_callback is not None:
+        reporter.report(len(frame_records), force=True)
+    if config.get("flight_search_enabled", False):
+        finished.extend(_flight_hypotheses(frame_records, config, next_id, progress_callback))
     for track in finished:
         observations = track["observations"]
         count = len(observations)
@@ -269,4 +675,13 @@ def track_detections(frame_records, config=None):
                       "observation_count": count, "observed_frame_fraction": round(coverage, 4),
                       "motion_span_px": round(float(np.linalg.norm(xy.max(axis=0) - xy.min(axis=0))), 3),
                       "target_court_confirmed": False})
+        background = [o['frame_index'] for o in observations if rejects_moving_association(o)]
+        transient = [o['frame_index'] for o in observations if observation_support_status(o) == 'transient']
+        track['moving_observation_support'] = {
+            'method': 'coordinate_matched_source_pixel_evidence',
+            'persistent_background_observation_count': len(background),
+            'persistent_background_frame_indices': background,
+            'transient_observation_count': len(transient), 'transient_frame_indices': transient,
+            'unknown_observation_count': len(observations) - len(background) - len(transient),
+            'raw_input_records_unmodified': True, 'identity_verified': False, 'physical_contact_verified': False}
     return sorted(finished, key=lambda track: track["track_id"])

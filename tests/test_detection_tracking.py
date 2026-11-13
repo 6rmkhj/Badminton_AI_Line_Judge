@@ -176,3 +176,48 @@ def test_dark_cork_proposals_are_opt_in_and_ignore_static_dark_lines():
         assert not any(abs(d['y']-150) < 3 for d in record['detections'])
         assert record['detector']['trained_model'] is False
         assert record['detector']['include_dark_components'] is True
+
+
+def test_low_contrast_motion_blur_survives_without_turning_static_lines_into_shuttles():
+    frames = []
+    for index in range(8):
+        frame = np.full((540, 960, 3), 175, np.uint8)
+        cv2.line(frame, (0, 160), (959, 160), (60, 60, 60), 2)
+        # A long exposure can make the shuttle a dim, thin streak rather than
+        # a round white spot. Its local contrast is below the old dark cutoff.
+        cv2.rectangle(frame, (30 + index * 25, 55), (31 + index * 25, 67), (162, 162, 162), -1)
+        frames.append(frame)
+    config = {'person_backend': 'none', 'include_dark_components': True,
+              'dark_contrast_threshold': 8, 'dark_motion_threshold': 8, 'max_component_aspect': 12,
+              'candidate_selection': 'spatial'}
+    records = detect_sequence(frames, [index / 30 for index in range(8)], config)
+    for index, record in enumerate(records):
+        assert any(abs(item['x'] - (30.5 + index * 25)) < 1 and abs(item['y'] - 61) < 2
+                   for item in record['detections'])
+        assert all(abs(item['y'] - 160) > 3 for item in record['detections'])
+
+
+@pytest.mark.parametrize('key,value', [('dark_contrast_threshold', 0),
+                                       ('dark_max_saturation', 256),
+                                       ('max_component_aspect', float('nan'))])
+def test_dark_component_configuration_is_bounded(key, value):
+    with pytest.raises(ValueError, match=key):
+        detect_sequence([np.zeros((40, 60, 3), np.uint8)], [0], {key: value})
+
+
+def test_dark_search_keeps_a_bright_shuttle_touching_a_dark_foreground_edge():
+    frames = []
+    for index in range(8):
+        frame = np.full((180, 320, 3), 175, np.uint8)
+        cv2.rectangle(frame, (60 + 12 * index, 40), (105 + 12 * index, 140), (65, 65, 65), -1)
+        cv2.circle(frame, (105 + 12 * index, 90), 3, (250, 250, 250), -1)
+        frames.append(frame)
+    stamps = [index / 30 for index in range(8)]
+    for dark_search in (False, True):
+        records = detect_sequence(frames, stamps, {'person_backend': 'none',
+            'include_dark_components': dark_search, 'dark_contrast_threshold': 8,
+            'dark_motion_threshold': 8, 'candidate_selection': 'spatial'})
+        for index, record in enumerate(records):
+            item = next(item for item in record['detections']
+                        if abs(item['x'] - (105 + 12 * index)) < 2 and abs(item['y'] - 90) < 2)
+            assert item['appearance_polarity'] == 'bright'

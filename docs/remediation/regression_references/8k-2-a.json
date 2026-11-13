@@ -1,0 +1,69 @@
+{
+  "key": "8k-2-a",
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    83,
+    85
+  ],
+  "landing_point_px": [
+    287,
+    362
+  ],
+  "tolerance_px": 15,
+  "confidence": "high for first impact interval, approximate centre location",
+  "trajectory_points": [
+    {
+      "frame_index": 80,
+      "x": 290,
+      "y": 270,
+      "time_seconds": 2.666556
+    },
+    {
+      "frame_index": 82,
+      "x": 288,
+      "y": 318,
+      "time_seconds": 2.733222
+    },
+    {
+      "frame_index": 84,
+      "x": 287,
+      "y": 362,
+      "time_seconds": 2.799889
+    },
+    {
+      "frame_index": 86,
+      "x": 283,
+      "y": 351,
+      "time_seconds": 2.866544
+    },
+    {
+      "frame_index": 88,
+      "x": 278,
+      "y": 341,
+      "time_seconds": 2.933211
+    }
+  ],
+  "notes": [
+    "Main-court final shot descends towards near-left blue sideline in A view.",
+    "f82 is still descending above the floor; f84 reaches the blue sideline region and f86/f88 move upward/left after the first bounce. Do not substitute later floor/rest position.",
+    "Approximate image-space object centre is provided, not an independently measured cork footprint or IN/OUT label.",
+    "Other active court and static shuttle/bottle objects must not replace this final shot."
+  ],
+  "evidence": [
+    "visual/8k-2-a/crop-66-90-1.jpg",
+    "visual/8k-2-a/contact-zoom.jpg"
+  ],
+  "file": "8k 30 4k 24 a시점 2.mp4",
+  "source_sha256": "311b814ee7f7347dfa244e56d6c5f3b9d94be8fc4de29dada2adc89858167492",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "ground_truth_eligible": false,
+  "split": "development",
+  "landing_time_interval_seconds": [
+    2.766556,
+    2.833222
+  ]
+}

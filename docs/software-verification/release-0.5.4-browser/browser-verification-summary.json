@@ -1,0 +1,578 @@
+{
+  "status": "passed",
+  "scope": "Actual completed CLI-result UI replay only. Fresh source analyses are evidenced by producer receipts/validation, not executed in the browser. No browser upload/inference/live progress or pair-job timing is claimed.",
+  "cases": [
+    {
+      "job": "release054controls",
+      "report": "original-controls/browser-validation.json",
+      "provenance": "original-controls/fixture-provenance.json",
+      "core_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+      "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+      "browser": {
+        "engine": "Chromium",
+        "version": "156.0.8078.79",
+        "playwright_version": "1.62.1",
+        "executable": "/usr/bin/chromium",
+        "headless": true,
+        "host": "Linux"
+      },
+      "mobile": [
+        {
+          "width": 375,
+          "height": 844,
+          "horizontal_overflow": false,
+          "both_candidates_fit": true,
+          "review_wording_preserved": true,
+          "video_checks": [
+            {
+              "camera": "a",
+              "source_playback": {
+                "current_time": 0.1498,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 10
+              },
+              "replay_playback": {
+                "current_time": 0.2821,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 11
+              },
+              "selected_source": {
+                "current_time": 1.633767,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 63,
+                "requested_candidate_time": 1.633267,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 1.633267,
+                "presented_frames": 7
+              },
+              "selected_replay": {
+                "current_time": 0.700467,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 36,
+                "requested_candidate_time": 0.699967,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 0.699967,
+                "presented_frames": 3
+              }
+            },
+            {
+              "camera": "b",
+              "source_playback": {
+                "current_time": 0.1408,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 8
+              },
+              "replay_playback": {
+                "current_time": 0.1409,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 4
+              },
+              "selected_source": {
+                "current_time": 1.7927,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 54,
+                "requested_candidate_time": 1.7922,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 1.7922,
+                "presented_frames": 5
+              },
+              "selected_replay": {
+                "current_time": 0.667367,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 23,
+                "requested_candidate_time": 0.6668670000000001,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 0.666867,
+                "presented_frames": 2
+              }
+            }
+          ]
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "horizontal_overflow": false,
+          "both_candidates_fit": true,
+          "review_wording_preserved": true,
+          "video_checks": [
+            {
+              "camera": "a",
+              "source_playback": {
+                "current_time": 0.1463,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 9
+              },
+              "replay_playback": {
+                "current_time": 0.1294,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 4
+              },
+              "selected_source": {
+                "current_time": 1.633767,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 62,
+                "requested_candidate_time": 1.633267,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 1.633267,
+                "presented_frames": 6
+              },
+              "selected_replay": {
+                "current_time": 0.700467,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 29,
+                "requested_candidate_time": 0.699967,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 0.699967,
+                "presented_frames": 2
+              }
+            },
+            {
+              "camera": "b",
+              "source_playback": {
+                "current_time": 0.1429,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 8
+              },
+              "replay_playback": {
+                "current_time": 0.1418,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 4
+              },
+              "selected_source": {
+                "current_time": 1.7927,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 54,
+                "requested_candidate_time": 1.7922,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 1.7922,
+                "presented_frames": 5
+              },
+              "selected_replay": {
+                "current_time": 0.667367,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 23,
+                "requested_candidate_time": 0.6668670000000001,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 0.666867,
+                "presented_frames": 2
+              }
+            }
+          ]
+        }
+      ],
+      "javascript_errors": [],
+      "console_resource_warnings": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "location": {
+            "url": "http://127.0.0.1:8784/favicon.ico",
+            "line": 0,
+            "column": 0,
+            "lineNumber": 0,
+            "columnNumber": 0
+          }
+        }
+      ],
+      "sources": [
+        {
+          "camera": "A",
+          "source_result_sha256": "247d86cf5a1e2949b927e1ac25917b46160bd7dabcf07361d1ff31bf21f1b8a3",
+          "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+          "selected": {
+            "track_id": 1074,
+            "frame_index": 49,
+            "time": 1.633267,
+            "candidate_px": [
+              360.869,
+              447.182
+            ],
+            "contact_observed": false
+          },
+          "public_candidate": {
+            "status": "approximate",
+            "kind": "descent_and_rebound",
+            "time_seconds": 1.633267,
+            "frame_index": 49,
+            "point_px": [
+              360.869,
+              447.182
+            ],
+            "analysis_size": {
+              "width": 960,
+              "height": 540
+            },
+            "point_kind": "object_center",
+            "contact_observed": false,
+            "inference_only": true,
+            "frame_interval": [
+              48,
+              51
+            ],
+            "time_interval": [
+              1.599933,
+              1.699933
+            ]
+          }
+        },
+        {
+          "camera": "B",
+          "source_result_sha256": "79fedefc26a669ceddb19e163af3d0bc9c268a08285ed7da111828156a9311fa",
+          "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+          "selected": {
+            "track_id": 730,
+            "frame_index": 42,
+            "time": 1.7922,
+            "candidate_px": [
+              396.667,
+              200.333
+            ],
+            "contact_observed": false
+          },
+          "public_candidate": {
+            "status": "approximate",
+            "kind": "descent_and_rebound",
+            "time_seconds": 1.7922,
+            "frame_index": 42,
+            "point_px": [
+              396.667,
+              200.333
+            ],
+            "analysis_size": {
+              "width": 960,
+              "height": 540
+            },
+            "point_kind": "object_center",
+            "contact_observed": false,
+            "inference_only": true,
+            "frame_interval": [
+              40,
+              45
+            ],
+            "time_interval": [
+              1.708833,
+              1.917244
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "job": "release054gains",
+      "report": "ordinary-gains/browser-validation.json",
+      "provenance": "ordinary-gains/fixture-provenance.json",
+      "core_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+      "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+      "browser": {
+        "engine": "Chromium",
+        "version": "156.0.8078.79",
+        "playwright_version": "1.62.1",
+        "executable": "/usr/bin/chromium",
+        "headless": true,
+        "host": "Linux"
+      },
+      "mobile": [
+        {
+          "width": 375,
+          "height": 844,
+          "horizontal_overflow": false,
+          "both_candidates_fit": true,
+          "review_wording_preserved": true,
+          "video_checks": [
+            {
+              "camera": "a",
+              "source_playback": {
+                "current_time": 0.1416,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 13
+              },
+              "replay_playback": {
+                "current_time": 0.2742,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 19
+              },
+              "selected_source": {
+                "current_time": 3.171644,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 205,
+                "requested_candidate_time": 3.171144,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 3.171144,
+                "presented_frames": 10
+              },
+              "selected_replay": {
+                "current_time": 0.692077,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 64,
+                "requested_candidate_time": 0.6915770000000001,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 0.691577,
+                "presented_frames": 3
+              }
+            },
+            {
+              "camera": "b",
+              "source_playback": {
+                "current_time": 0.1364,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 13
+              },
+              "replay_playback": {
+                "current_time": 0.1431,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 4
+              },
+              "selected_source": {
+                "current_time": 2.547544,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 168,
+                "requested_candidate_time": 2.547044,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 2.547044,
+                "presented_frames": 10
+              },
+              "selected_replay": {
+                "current_time": 0.692088,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 49,
+                "requested_candidate_time": 0.6915880000000001,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 0.691588,
+                "presented_frames": 2
+              }
+            }
+          ]
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "horizontal_overflow": false,
+          "both_candidates_fit": true,
+          "review_wording_preserved": true,
+          "video_checks": [
+            {
+              "camera": "a",
+              "source_playback": {
+                "current_time": 0.1421,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 14
+              },
+              "replay_playback": {
+                "current_time": 0.1446,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 4
+              },
+              "selected_source": {
+                "current_time": 3.171644,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 206,
+                "requested_candidate_time": 3.171144,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 3.171144,
+                "presented_frames": 11
+              },
+              "selected_replay": {
+                "current_time": 0.692077,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 49,
+                "requested_candidate_time": 0.6915770000000001,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 0.691577,
+                "presented_frames": 2
+              }
+            },
+            {
+              "camera": "b",
+              "source_playback": {
+                "current_time": 0.1394,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 13
+              },
+              "replay_playback": {
+                "current_time": 0.1451,
+                "width": 960,
+                "height": 540,
+                "decoded_frames": 4
+              },
+              "selected_source": {
+                "current_time": 2.547544,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 168,
+                "requested_candidate_time": 2.547044,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 2.547044,
+                "presented_frames": 10
+              },
+              "selected_replay": {
+                "current_time": 0.692088,
+                "width": 960,
+                "height": 540,
+                "ready_state": 4,
+                "decoded_frames": 49,
+                "requested_candidate_time": 0.6915880000000001,
+                "presentation_epsilon_seconds": 0.0005,
+                "presented_media_time": 0.691588,
+                "presented_frames": 2
+              }
+            }
+          ]
+        }
+      ],
+      "javascript_errors": [],
+      "console_resource_warnings": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "location": {
+            "url": "http://127.0.0.1:8784/favicon.ico",
+            "line": 0,
+            "column": 0,
+            "lineNumber": 0,
+            "columnNumber": 0
+          }
+        }
+      ],
+      "sources": [
+        {
+          "camera": "A",
+          "source_result_sha256": "a40c9938d37ac495605697e3db310f84633e83e6ae1b1499796c6e14fa6bf9ac",
+          "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+          "selected": {
+            "track_id": 3551,
+            "frame_index": 188,
+            "time": 3.171144,
+            "candidate_px": [
+              602.7496043657602,
+              240.64656956344658
+            ],
+            "contact_observed": false
+          },
+          "public_candidate": {
+            "status": "approximate",
+            "kind": "occluded_descent_and_rebound",
+            "time_seconds": 3.171144,
+            "frame_index": 188,
+            "point_px": [
+              602.7496043657602,
+              240.64656956344658
+            ],
+            "analysis_size": {
+              "width": 960,
+              "height": 540
+            },
+            "point_kind": "inferred_object_center",
+            "contact_observed": false,
+            "inference_only": true,
+            "frame_interval": [
+              183,
+              189
+            ],
+            "time_interval": [
+              3.086811,
+              3.188022
+            ]
+          }
+        },
+        {
+          "camera": "B",
+          "source_result_sha256": "8d2c0680483f414562f3456b2bd4ee20bc2b4ffc2174eba24bce103ce46af717",
+          "source_sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb",
+          "selected": {
+            "track_id": 2359,
+            "frame_index": 151,
+            "time": 2.547044,
+            "candidate_px": [
+              481.934,
+              210.755
+            ],
+            "contact_observed": false
+          },
+          "public_candidate": {
+            "status": "approximate",
+            "kind": "descent_and_rebound",
+            "time_seconds": 2.547044,
+            "frame_index": 151,
+            "point_px": [
+              481.934,
+              210.755
+            ],
+            "analysis_size": {
+              "width": 960,
+              "height": 540
+            },
+            "point_kind": "object_center",
+            "contact_observed": false,
+            "inference_only": true,
+            "frame_interval": [
+              150,
+              152
+            ],
+            "time_interval": [
+              2.530167,
+              2.563911
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "new_holdout_inputs_or_references_opened": false,
+  "production_source_edits": false,
+  "limits": [
+    "Linux headless Chromium; mobile viewport/touch emulation, not physical phone/Windows verification.",
+    "Browser display/playback consistency does not establish shuttle identity, target court, physical floor contact or accuracy.",
+    "No stage history or pair-job elapsed time was invented; only actual CLI total time is displayed per view.",
+    "Chromium automatically requested an absent favicon; resource404 is logged separately from zero JavaScript exceptions."
+  ],
+  "input_bindings": "input-bindings.json",
+  "capture_method": {
+    "method": "Players scrolled onscreen; requestVideoFrameCallback waits for selected media timestamp before capture. Separate onscreen replay screenshots included.",
+    "reason": "currentTime/readyState can precede paused-video compositing in headless Chromium.",
+    "presentation_epsilon_seconds": 0.0005,
+    "epsilon_scope": "Capture only, below a millisecond to avoid rounded encoded-PTS boundary selecting previous frame; candidate values and app seek-button checks unchanged.",
+    "presented_times_match_selected_source_pts": true
+  }
+}

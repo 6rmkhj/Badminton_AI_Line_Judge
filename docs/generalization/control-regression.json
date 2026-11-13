@@ -1,0 +1,685 @@
+{
+  "status": "passed",
+  "source_commit": "d7f3d3303daa40c699d579c17e40269173220937",
+  "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "config": {
+    "analysis_width": 960,
+    "workers": 2,
+    "opencv_threads": 2,
+    "max_frames": 3000,
+    "source_crop_count": 0,
+    "rules": {
+      "game": "doubles",
+      "phase": "rally"
+    },
+    "detector": {
+      "backend": "opencv_candidates",
+      "source_analysis_enabled": true,
+      "candidate_selection": "spatial",
+      "max_candidates": 80,
+      "global_candidate_reserve": 64,
+      "temporal_candidate_memory": true,
+      "native_motion_recovery": true,
+      "include_dark_components": true,
+      "dark_contrast_threshold": 8,
+      "dark_motion_threshold": 8,
+      "dark_max_saturation": 190,
+      "max_component_aspect": 12,
+      "native_local_components": true,
+      "highres_enabled": true,
+      "highres_max_rois": 16,
+      "highres_roi_size": 192,
+      "highres_roi_analysis_size": 48,
+      "highres_exploration_rois": 4,
+      "person_backend": "hog",
+      "person_width": 960,
+      "person_interval": 16
+    },
+    "tracker": {
+      "flight_search_enabled": true
+    },
+    "events": {
+      "source_contact_enabled": true,
+      "source_contact_max_candidates": 6,
+      "source_contact_patch_size": 96
+    },
+    "evidence": {
+      "annotated_clip": true,
+      "seconds_before": 0.7,
+      "seconds_after": 0.7
+    }
+  },
+  "config_sha256": "e6af6941079658182dfc824ba9d2a8b33cb2d72091847c3f76993629700a7089",
+  "reference_script_sha256": "9f378d467227e36c18cfe7c746f3b912580480caff7cf76afa0284ee2d45c207",
+  "reference_provenance": "Frozen AI source-frame visual references; original development controls, not independent human ground truth",
+  "fresh_original_analysis": true,
+  "cached_results_reused": false,
+  "holdout_files_opened": false,
+  "source_freeze_scope": "Exact code commit and unchanged runtime/config/tests; pending README/docs allowed",
+  "runtime_thread_limits": {
+    "opencv": 1,
+    "openblas": 1,
+    "omp": 1,
+    "mkl": 1,
+    "concurrent_videos": 1
+  },
+  "runner_sha256": "0b8148447e022bde527540f0e8bf5cf7037d06b751517a63dccda80d8a4b4ec9",
+  "started_at": "2026-11-12T07:43:19.973727+00:00",
+  "views": {
+    "A": {
+      "status": "passed",
+      "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+      "reference": {
+        "frames": [
+          48,
+          50
+        ],
+        "point": [
+          361,
+          442
+        ],
+        "radius": 12,
+        "points": {
+          "43": [
+            359,
+            277
+          ],
+          "44": [
+            360,
+            299
+          ],
+          "45": [
+            360,
+            322
+          ],
+          "47": [
+            360,
+            380
+          ],
+          "48": [
+            360,
+            412
+          ],
+          "49": [
+            361,
+            440
+          ],
+          "50": [
+            362,
+            430
+          ],
+          "51": [
+            363,
+            424
+          ],
+          "52": [
+            363,
+            417
+          ],
+          "53": [
+            363,
+            416
+          ]
+        }
+      },
+      "selected_frame": 49,
+      "selected_time": 1.633267,
+      "selected_px": [
+        360.869,
+        447.182
+      ],
+      "point_discrepancy_px": 5.184,
+      "within_approximate_reference": true,
+      "selected_track_id": 1074,
+      "track_method": "coherent_free_flight_hypothesis",
+      "contact_observed": false,
+      "decision": "REVIEW",
+      "assistance_used": false,
+      "all_selected_observations_measured": true,
+      "selected_observation_count": 24,
+      "gaps_interpolated": false,
+      "normalized_source_pts_verified": true,
+      "selected_frame_time_verified": true,
+      "coordinate_size_verified": true,
+      "trajectory_checks": [
+        {
+          "frame_index": 43,
+          "visible_reference_px": [
+            359,
+            277
+          ],
+          "observed_px": [
+            359.571,
+            268.0
+          ],
+          "error_px": 9.018
+        },
+        {
+          "frame_index": 44,
+          "visible_reference_px": [
+            360,
+            299
+          ],
+          "observed_px": [
+            359.833,
+            293.333
+          ],
+          "error_px": 5.669
+        },
+        {
+          "frame_index": 45,
+          "visible_reference_px": [
+            360,
+            322
+          ],
+          "observed_px": [
+            361.25,
+            321.875
+          ],
+          "error_px": 1.256
+        },
+        {
+          "frame_index": 47,
+          "visible_reference_px": [
+            360,
+            380
+          ],
+          "observed_px": [
+            360.5,
+            382.5
+          ],
+          "error_px": 2.55
+        },
+        {
+          "frame_index": 48,
+          "visible_reference_px": [
+            360,
+            412
+          ],
+          "observed_px": [
+            360.857,
+            412.429
+          ],
+          "error_px": 0.958
+        },
+        {
+          "frame_index": 49,
+          "visible_reference_px": [
+            361,
+            440
+          ],
+          "observed_px": [
+            360.869,
+            447.182
+          ],
+          "error_px": 7.183
+        },
+        {
+          "frame_index": 50,
+          "visible_reference_px": [
+            362,
+            430
+          ],
+          "observed_px": null,
+          "error_px": null
+        },
+        {
+          "frame_index": 51,
+          "visible_reference_px": [
+            363,
+            424
+          ],
+          "observed_px": [
+            361.923,
+            427.712
+          ],
+          "error_px": 3.865
+        },
+        {
+          "frame_index": 52,
+          "visible_reference_px": [
+            363,
+            417
+          ],
+          "observed_px": [
+            362.215,
+            423.078
+          ],
+          "error_px": 6.128
+        },
+        {
+          "frame_index": 53,
+          "visible_reference_px": [
+            363,
+            416
+          ],
+          "observed_px": [
+            363.917,
+            418.917
+          ],
+          "error_px": 3.058
+        }
+      ],
+      "image_motion_event": {
+        "kind": "descent_and_rebound",
+        "first_in_track": true,
+        "point_kind": "observed_object_center",
+        "frame_interval": [
+          48,
+          51
+        ],
+        "time_interval": [
+          1.599933,
+          1.699933
+        ],
+        "plateau_frame_interval": [
+          49,
+          49
+        ],
+        "inference_only": true,
+        "coordinate_system": "analysis_pixels",
+        "trajectory": [
+          {
+            "frame_index": 43,
+            "time": 1.433278,
+            "x": 359.571,
+            "y": 268.0
+          },
+          {
+            "frame_index": 44,
+            "time": 1.466611,
+            "x": 359.833,
+            "y": 293.333
+          },
+          {
+            "frame_index": 45,
+            "time": 1.499944,
+            "x": 361.25,
+            "y": 321.875
+          },
+          {
+            "frame_index": 47,
+            "time": 1.5666,
+            "x": 360.5,
+            "y": 382.5
+          },
+          {
+            "frame_index": 48,
+            "time": 1.599933,
+            "x": 360.857,
+            "y": 412.429
+          },
+          {
+            "frame_index": 49,
+            "time": 1.633267,
+            "x": 360.869,
+            "y": 447.182
+          },
+          {
+            "frame_index": 51,
+            "time": 1.699933,
+            "x": 361.923,
+            "y": 427.712
+          },
+          {
+            "frame_index": 52,
+            "time": 1.733267,
+            "x": 362.215,
+            "y": 423.078
+          },
+          {
+            "frame_index": 53,
+            "time": 1.7666,
+            "x": 363.917,
+            "y": 418.917
+          }
+        ]
+      },
+      "selected_flight_support": {
+        "supported_for_review": true,
+        "method": "coherent_approach_and_image_rebound",
+        "approach_observation_count": 9,
+        "fit_residual_px": 1.381,
+        "approach_displacement_y_px": 264.526,
+        "approach_frame_interval": [
+          39,
+          49
+        ],
+        "post_observation_count": 3,
+        "upward_interval_count": 3,
+        "initial_upward_interval_count": 3,
+        "initial_rebound_displacement_y_px": 28.265,
+        "rebound_displacement_y_px": 28.265,
+        "post_motion_fit_validated": true,
+        "post_motion_fit_residual_px": 0.4749,
+        "rebound_frame_interval": [
+          49,
+          53
+        ],
+        "reason_codes": [],
+        "approach_wholly_overlaps_possible_occluder": false,
+        "approach_occluder_overlap_count": 0,
+        "approach_clear_observation_count": 9,
+        "approach_unknown_occluder_count": 0,
+        "support_wholly_overlaps_possible_occluder": false,
+        "support_clear_observation_count": 12,
+        "support_unknown_occluder_count": 0,
+        "verified_identity": false,
+        "physical_contact_verified": false
+      },
+      "timings": {
+        "decode_and_preview_seconds": 51.943200175999664,
+        "calibration_seconds": 1.655330588000652,
+        "detection_seconds": 63.866154900000765,
+        "tracking_seconds": 8.433455529999264,
+        "events_and_decision_seconds": 12.465175232000547,
+        "total_seconds": 151.15961720500127
+      },
+      "result_sha256": "e759546d58005b20ca38e167dfb59d4694f54dfb4d23ad3582d5afe3d2b8d010",
+      "detections_sha256": "9b3a62c95804ca7e000e056653d197851eb8761f8f163100a4e62ee59b6556d4",
+      "evidence_paths": [
+        "evidence/event_000.jpg",
+        "evidence/source-contact-000.jpg",
+        "evidence/trajectory-context.jpg"
+      ],
+      "artifacts": {
+        "overview": {
+          "path": "examples/control-A-overview.jpg",
+          "sha256": "c088982cd3008754d7b0215cddfc51365d4e34acc2473b44bb799ba6c8377c9d"
+        },
+        "context": {
+          "path": "examples/control-A-context.jpg",
+          "sha256": "896ea32ad77fc297715425051b4b69d5d28a15242f3956a70f34aed16ce0da15"
+        }
+      },
+      "input_provenance": {
+        "attachment_bytes_verified": false,
+        "source_scope_document": "../SHUTTLE_TRACKING_FIX.md",
+        "basis": "Repository same-name source used because attachment transfer exceeded32MiB. Byte identity to uploaded A was not verified."
+      }
+    },
+    "B": {
+      "status": "passed",
+      "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+      "reference": {
+        "frames": [
+          41,
+          47
+        ],
+        "point": [
+          397,
+          202
+        ],
+        "radius": 15,
+        "points": {
+          "26": [
+            407.5,
+            129
+          ],
+          "30": [
+            402,
+            141
+          ],
+          "34": [
+            399,
+            158
+          ],
+          "36": [
+            398.5,
+            167.5
+          ],
+          "38": [
+            398,
+            178
+          ],
+          "40": [
+            397.8,
+            188.8
+          ],
+          "41": [
+            397.5,
+            195
+          ]
+        }
+      },
+      "selected_frame": 42,
+      "selected_time": 1.7922,
+      "selected_px": [
+        396.667,
+        200.333
+      ],
+      "point_discrepancy_px": 1.7,
+      "within_approximate_reference": true,
+      "selected_track_id": 730,
+      "track_method": "coherent_free_flight_hypothesis",
+      "contact_observed": false,
+      "decision": "REVIEW",
+      "assistance_used": false,
+      "all_selected_observations_measured": true,
+      "selected_observation_count": 22,
+      "gaps_interpolated": false,
+      "normalized_source_pts_verified": true,
+      "selected_frame_time_verified": true,
+      "coordinate_size_verified": true,
+      "trajectory_checks": [
+        {
+          "frame_index": 26,
+          "visible_reference_px": [
+            407.5,
+            129
+          ],
+          "observed_px": [
+            407.481,
+            128.356
+          ],
+          "error_px": 0.644
+        },
+        {
+          "frame_index": 30,
+          "visible_reference_px": [
+            402,
+            141
+          ],
+          "observed_px": [
+            401.773,
+            141.148
+          ],
+          "error_px": 0.271
+        },
+        {
+          "frame_index": 34,
+          "visible_reference_px": [
+            399,
+            158
+          ],
+          "observed_px": null,
+          "error_px": null
+        },
+        {
+          "frame_index": 36,
+          "visible_reference_px": [
+            398.5,
+            167.5
+          ],
+          "observed_px": [
+            398.479,
+            167.497
+          ],
+          "error_px": 0.021
+        },
+        {
+          "frame_index": 38,
+          "visible_reference_px": [
+            398,
+            178
+          ],
+          "observed_px": [
+            397.667,
+            177.333
+          ],
+          "error_px": 0.746
+        },
+        {
+          "frame_index": 40,
+          "visible_reference_px": [
+            397.8,
+            188.8
+          ],
+          "observed_px": [
+            397.447,
+            188.861
+          ],
+          "error_px": 0.358
+        },
+        {
+          "frame_index": 41,
+          "visible_reference_px": [
+            397.5,
+            195
+          ],
+          "observed_px": null,
+          "error_px": null
+        }
+      ],
+      "image_motion_event": {
+        "kind": "descent_and_rebound",
+        "first_in_track": true,
+        "point_kind": "observed_object_center",
+        "frame_interval": [
+          40,
+          45
+        ],
+        "time_interval": [
+          1.708833,
+          1.917244
+        ],
+        "plateau_frame_interval": [
+          42,
+          43
+        ],
+        "inference_only": true,
+        "coordinate_system": "analysis_pixels",
+        "trajectory": [
+          {
+            "frame_index": 36,
+            "time": 1.542133,
+            "x": 398.479,
+            "y": 167.497
+          },
+          {
+            "frame_index": 37,
+            "time": 1.583811,
+            "x": 398.151,
+            "y": 172.66
+          },
+          {
+            "frame_index": 38,
+            "time": 1.625489,
+            "x": 397.667,
+            "y": 177.333
+          },
+          {
+            "frame_index": 39,
+            "time": 1.667156,
+            "x": 397.4,
+            "y": 182.8
+          },
+          {
+            "frame_index": 40,
+            "time": 1.708833,
+            "x": 397.447,
+            "y": 188.861
+          },
+          {
+            "frame_index": 42,
+            "time": 1.7922,
+            "x": 396.667,
+            "y": 200.333
+          },
+          {
+            "frame_index": 43,
+            "time": 1.833878,
+            "x": 396.333,
+            "y": 200.333
+          },
+          {
+            "frame_index": 45,
+            "time": 1.917244,
+            "x": 396.077,
+            "y": 198.125
+          },
+          {
+            "frame_index": 46,
+            "time": 1.958922,
+            "x": 395.724,
+            "y": 197.697
+          }
+        ]
+      },
+      "selected_flight_support": {
+        "supported_for_review": true,
+        "method": "coherent_approach_and_image_rebound",
+        "approach_observation_count": 7,
+        "fit_residual_px": 0.2285,
+        "approach_displacement_y_px": 37.884,
+        "approach_frame_interval": [
+          35,
+          42
+        ],
+        "post_observation_count": 3,
+        "upward_interval_count": 3,
+        "initial_upward_interval_count": 3,
+        "initial_rebound_displacement_y_px": 3.833,
+        "rebound_displacement_y_px": 3.833,
+        "post_motion_fit_validated": true,
+        "post_motion_fit_residual_px": 0.207,
+        "rebound_frame_interval": [
+          43,
+          47
+        ],
+        "reason_codes": [],
+        "approach_wholly_overlaps_possible_occluder": false,
+        "approach_occluder_overlap_count": 0,
+        "approach_clear_observation_count": 7,
+        "approach_unknown_occluder_count": 0,
+        "support_wholly_overlaps_possible_occluder": false,
+        "support_clear_observation_count": 11,
+        "support_unknown_occluder_count": 0,
+        "verified_identity": false,
+        "physical_contact_verified": false
+      },
+      "timings": {
+        "decode_and_preview_seconds": 6.424927965001189,
+        "calibration_seconds": 0.9241895190007199,
+        "detection_seconds": 21.571718011000485,
+        "tracking_seconds": 6.892269511999984,
+        "events_and_decision_seconds": 2.8360700060002273,
+        "total_seconds": 40.204848560000755
+      },
+      "result_sha256": "ae679d071ed94e273893ea898f5785bcf5678b352e1ec85259a08875fe0b8cfc",
+      "detections_sha256": "2c6765b4bad7aede5454f7f1f89d049feec705fa18c3813f19a46806ed226dfc",
+      "evidence_paths": [
+        "evidence/event_000.jpg",
+        "evidence/source-contact-000.jpg",
+        "evidence/trajectory-context.jpg"
+      ],
+      "artifacts": {
+        "overview": {
+          "path": "examples/control-B-overview.jpg",
+          "sha256": "e2ae52149ec914dcda91cb42e1de5fde8435dc539743521ceef55d056cafc691"
+        },
+        "context": {
+          "path": "examples/control-B-context.jpg",
+          "sha256": "3101441434d588cf1caca2315d290b71abf28d480d582dde0b3ba711395c3b30"
+        }
+      },
+      "input_provenance": {
+        "attachment_bytes_verified": true,
+        "source_scope_document": "../SHUTTLE_TRACKING_FIX.md",
+        "basis": "Actual uploaded B used; its Git blob matched the repository source. Source SHA256 is retained in this control record."
+      }
+    }
+  },
+  "finished_at": "2026-11-12T07:46:33.330444+00:00",
+  "wall_seconds": 193.35631434899915
+}

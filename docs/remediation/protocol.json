@@ -1,0 +1,48 @@
+{
+  "round": "false_positive_remediation_after_0.5.3",
+  "base_commit": "868b1e38700ad3613f83835b71857ae36d898814",
+  "baseline_core_commit": "d7f3d3303daa40c699d579c17e40269173220937",
+  "baseline_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "baseline_full_run": "/workspace/generalization/release",
+  "regression_scope": {
+    "files": 24,
+    "visible_strict_denominator": 13,
+    "strict_baseline_matches": 5,
+    "all_prior_holdouts_now_development": true,
+    "references": "regression_references",
+    "criteria": "Original reference bytes, visibility, first-floor frame intervals, coordinates and spatial tolerances are immutable. No near miss is promoted and no visibility denominator is changed after predictions.",
+    "qualitative_protection": "Preserve all five strict baseline successes and the independently source-reviewed ordinary12A borderline true object. Strict misses remain misses; wrong-object regressions must not hide behind miss-to-miss counts."
+  },
+  "new_holdout_scope": {
+    "files": 8,
+    "pairs": 4,
+    "manifest": "holdout-manifest.json",
+    "reference_directory": "sealed_references",
+    "visual_directory": "sealed_visual",
+    "release": "No reference positions, frame intervals, per-video visibility conclusions or predictions are exposed to algorithm agents/root before a new code/configuration freeze and explicit root release.",
+    "limits": "Same-project, current-round heldouts only. Historical project-wide inventory/CV/AI exposure may exist. No globally unseen or independent-human-ground-truth claim."
+  },
+  "stage_replay": {
+    "zero_or_dummy_frames_forbidden": true,
+    "real_frames_required": "Verified original BGR analysis pixels, exact source SHA/frame count/shape/timestamps/preprocessing; immutable array hash and sequence digest.",
+    "source_snapshot_required": true,
+    "detector_reuse": "Only when detector code/configuration and preprocessing are identical to the source of reused observations. Changed detector paths need fresh measured candidates with separate input/model provenance.",
+    "calibration_reuse": "Only unchanged calibration code/configuration; otherwise fresh calibration required.",
+    "default_scope": "Tracking, event proposals, identity application and review selection on actual cached pixels; no fresh detector/native-contact/evidence passes. Compare with the same-stage baseline; do not call this a full fresh pipeline accuracy measurement.",
+    "final_scope": "Final accepted code must revalidate all changed stages. Eight new heldouts and original A1/B1 controls require fresh complete execution after freeze."
+  },
+  "pair_consistency": {
+    "filename_pairing_is_not_event_confirmation": true,
+    "clock_mapping": "t_B = scale * t_A + offset_seconds",
+    "required_calibration": ["source_sha256_A", "source_sha256_B", "scale", "offset_seconds", "uncertainty_seconds", "method", "independent_source_cues", "recorded_before_predictions", "landing_reference_used=false"],
+    "allowed_cues": "Raw-source audio synchronization or independently recognizable non-landing actions; calibration must be declared before scoring and must not use frozen landing labels/predictions to choose the alignment.",
+    "unverified_pair_behavior": "Keep views independent; do not assume equal source start times, frame indices or a shared landing event.",
+    "spatial_consistency": "No cross-view pixel-distance comparison without independently verified common court/world calibration."
+  },
+  "reporting": {
+    "separate": ["observed object-center candidates", "inferred object-center candidates", "physical contact observed", "strict first-vicinity agreement", "qualitative object identity", "candidate abstention", "automatic IN/OUT abstention", "stage-only timing", "full fresh timing", "assisted experiments", "model-only/fused experiments"],
+    "new_strict_gains_require_source_review": true,
+    "all_observations_measured_does_not_prove_same_object": true,
+    "reference_labels_are_not_algorithm_inputs": true
+  }
+}

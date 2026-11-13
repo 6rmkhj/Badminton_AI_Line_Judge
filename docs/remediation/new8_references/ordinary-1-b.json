@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "key": "ordinary-1-b",
+  "file": "b시점 1.mp4",
+  "source_path": "/workspace/remediation/input/b시점 1.mp4",
+  "source_sha256": "cc576acd32f449a02d2b3c5de6a85ed25b2f380a008d83a98a243f782156c330",
+  "split": "holdout",
+  "round_holdout": true,
+  "round": "false_positive_remediation_after_0.5.3",
+  "scope": "Eight same-project/current-round holdout video files, four filename A/B pairs; not globally unseen data or independent human ground truth.",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    3840,
+    2160
+  ],
+  "contact_visibility": "occluded",
+  "landing_point_px": null,
+  "tolerance_px": null,
+  "notes": "The far green-shirt player moves toward the front-right of the main court, but the near white-shirt player covers the relevant view with their torso and legs. A moving main-rally shuttle at the floorward turn is not distinguishable in the inspected source sequence. Stationary white objects on the floor are not assigned to the rally. No interval, location, or synthetic trajectory is supplied, and no companion-camera timing or coordinate transfer is used.",
+  "landing_frame_interval": null,
+  "landing_time_interval_seconds": null,
+  "additional_frame_tolerance": 0,
+  "trajectory_points": [],
+  "later_bounce_observations": [],
+  "reference_source": "AI source-frame visual inspection blinded to current-round outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "ground_truth_eligible": false,
+  "predictions_or_model_outputs_inspected": false,
+  "companion_view_calibration_used": false,
+  "evidence": [
+    "/workspace/remediation/sealed_visual/ordinary-1-b/overview-0.jpg",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/overview-1.jpg",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/overview-2.jpg",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/far-cached-1.png",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/far-cached-2.png",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/native-142-192-370-120-0.png",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/native-142-192-370-120-1.png"
+  ],
+  "evidence_sha256": {
+    "/workspace/remediation/sealed_visual/ordinary-1-b/overview-0.jpg": "9e3dd624d942f9268b28ab855b7bcac90525290c05f95b471cbd466ad43da6fc",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/overview-1.jpg": "e61034010e69d064947f90d2a20721b2e6f4746cec8b269b6a8d4f981faccc5f",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/overview-2.jpg": "69b4c5b28d2726ae9c4e82a2980b5642e769c6e91d2f9fc5c95facec60f0063f",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/far-cached-1.png": "d14212db2f998fb12021a05479de9a145be8f382543bef97748604da43dfe46a",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/far-cached-2.png": "e9ae342ef1eb88d1caa062acf33cc92c7f12ddb15f9d2941195656ff948184a0",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/native-142-192-370-120-0.png": "3249ca8e1dc545436ecc2f411a451251adec7972bb4b71b83e1a9cb74f9cb48e",
+    "/workspace/remediation/sealed_visual/ordinary-1-b/native-142-192-370-120-1.png": "43cf4fe3e8ad85b534ada6877c5cd4997eb3df8b3c7617434313cd85f0fb6c58"
+  },
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; normalized source timestamps from ffprobe.",
+  "inspection_decode_threads": 1
+}

@@ -1,0 +1,304 @@
+{
+  "version": "0.5.2",
+  "date": "2026-11-12",
+  "reference_provenance": "AI visual inspection of development clips, not independently annotated ground truth",
+  "analysis_size": [
+    960,
+    540
+  ],
+  "manual_hints_used": false,
+  "job_elapsed_seconds": 117.421282,
+  "views": {
+    "A": {
+      "file": "source.mp4",
+      "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+      "source_size": [
+        7680,
+        4320
+      ],
+      "frame_count": 108,
+      "baseline": {
+        "frame_index": 76,
+        "time": 2.533233,
+        "candidate_px": [
+          400.6,
+          459.6
+        ]
+      },
+      "revised": {
+        "frame_index": 49,
+        "time": 1.633267,
+        "candidate_px": [
+          360.869,
+          447.182
+        ],
+        "contact_observed": false,
+        "contact_px": null,
+        "uncertainty_px": 32.477,
+        "image_motion_event": {
+          "kind": "descent_and_rebound",
+          "first_in_track": true,
+          "point_kind": "observed_object_center",
+          "frame_interval": [
+            48,
+            51
+          ],
+          "time_interval": [
+            1.599933,
+            1.699933
+          ],
+          "plateau_frame_interval": [
+            49,
+            49
+          ],
+          "inference_only": true,
+          "coordinate_system": "analysis_pixels",
+          "trajectory": [
+            {
+              "frame_index": 42,
+              "time": 1.399944,
+              "x": 359.5,
+              "y": 252.0
+            },
+            {
+              "frame_index": 43,
+              "time": 1.433278,
+              "x": 359.556,
+              "y": 276.778
+            },
+            {
+              "frame_index": 44,
+              "time": 1.466611,
+              "x": 359.692,
+              "y": 301.077
+            },
+            {
+              "frame_index": 45,
+              "time": 1.499944,
+              "x": 359.625,
+              "y": 330.75
+            },
+            {
+              "frame_index": 48,
+              "time": 1.599933,
+              "x": 360.857,
+              "y": 412.429
+            },
+            {
+              "frame_index": 49,
+              "time": 1.633267,
+              "x": 360.869,
+              "y": 447.182
+            },
+            {
+              "frame_index": 51,
+              "time": 1.699933,
+              "x": 362.697,
+              "y": 425.606
+            },
+            {
+              "frame_index": 52,
+              "time": 1.733267,
+              "x": 363.25,
+              "y": 421.85
+            },
+            {
+              "frame_index": 53,
+              "time": 1.7666,
+              "x": 363.917,
+              "y": 418.917
+            }
+          ]
+        },
+        "flight_trajectory_support": {
+          "supported_for_review": true,
+          "method": "coherent_approach_and_image_rebound",
+          "approach_observation_count": 11,
+          "fit_residual_px": 1.6528,
+          "approach_displacement_y_px": 318.522,
+          "approach_frame_interval": [
+            35,
+            49
+          ],
+          "verified_identity": false,
+          "physical_contact_verified": false
+        }
+      },
+      "assistance_used": false,
+      "decision": "REVIEW",
+      "selected_observation_count": 24,
+      "every_selected_observation_exists_in_detections": true,
+      "missing_observation_interpolated": false,
+      "timings": {
+        "decode_and_preview_seconds": 45.78827304100014,
+        "calibration_seconds": 0.952468391000366,
+        "detection_seconds": 36.19985558799999,
+        "tracking_seconds": 10.497764200999882,
+        "events_and_decision_seconds": 11.11547627500022,
+        "total_seconds": 116.4816605620008
+      },
+      "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+      "annotated_clip": {
+        "path": "evidence/annotated.mp4",
+        "timing_path": "evidence/annotated-timing.json",
+        "frame_count": 43,
+        "source_start_frame": 28,
+        "source_end_frame": 70,
+        "source_time_origin": 0.9333,
+        "timestamp_alignment_max_error_seconds": 2.220446049250313e-16,
+        "overlay_track_count": 1,
+        "total_track_count": 845,
+        "note": "Candidate overlays and native timestamps are evidence for review, not ground-truth contacts."
+      }
+    },
+    "B": {
+      "file": "source.mp4",
+      "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+      "source_size": [
+        3840,
+        2160
+      ],
+      "frame_count": 82,
+      "baseline": {
+        "frame_index": 59,
+        "time": 2.500756,
+        "candidate_px": [
+          356.453,
+          180.547
+        ]
+      },
+      "revised": {
+        "frame_index": 42,
+        "time": 1.7922,
+        "candidate_px": [
+          396.667,
+          200.333
+        ],
+        "contact_observed": false,
+        "contact_px": null,
+        "uncertainty_px": 1.5,
+        "image_motion_event": {
+          "kind": "descent_and_rebound",
+          "first_in_track": true,
+          "point_kind": "observed_object_center",
+          "frame_interval": [
+            40,
+            45
+          ],
+          "time_interval": [
+            1.708833,
+            1.917244
+          ],
+          "plateau_frame_interval": [
+            42,
+            43
+          ],
+          "inference_only": true,
+          "coordinate_system": "analysis_pixels",
+          "trajectory": [
+            {
+              "frame_index": 36,
+              "time": 1.542133,
+              "x": 398.479,
+              "y": 167.497
+            },
+            {
+              "frame_index": 37,
+              "time": 1.583811,
+              "x": 398.151,
+              "y": 172.66
+            },
+            {
+              "frame_index": 38,
+              "time": 1.625489,
+              "x": 397.667,
+              "y": 177.333
+            },
+            {
+              "frame_index": 39,
+              "time": 1.667156,
+              "x": 397.4,
+              "y": 182.8
+            },
+            {
+              "frame_index": 40,
+              "time": 1.708833,
+              "x": 397.447,
+              "y": 188.861
+            },
+            {
+              "frame_index": 42,
+              "time": 1.7922,
+              "x": 396.667,
+              "y": 200.333
+            },
+            {
+              "frame_index": 43,
+              "time": 1.833878,
+              "x": 396.333,
+              "y": 200.333
+            },
+            {
+              "frame_index": 45,
+              "time": 1.917244,
+              "x": 396.077,
+              "y": 198.125
+            },
+            {
+              "frame_index": 46,
+              "time": 1.958922,
+              "x": 395.724,
+              "y": 197.697
+            }
+          ]
+        },
+        "flight_trajectory_support": {
+          "supported_for_review": true,
+          "method": "coherent_approach_and_image_rebound",
+          "approach_observation_count": 9,
+          "fit_residual_px": 0.3907,
+          "approach_displacement_y_px": 51.649,
+          "approach_frame_interval": [
+            32,
+            42
+          ],
+          "verified_identity": false,
+          "physical_contact_verified": false
+        }
+      },
+      "assistance_used": false,
+      "decision": "REVIEW",
+      "selected_observation_count": 22,
+      "every_selected_observation_exists_in_detections": true,
+      "missing_observation_interpolated": false,
+      "timings": {
+        "decode_and_preview_seconds": 6.149629272000311,
+        "calibration_seconds": 0.7645004729993161,
+        "detection_seconds": 12.650645148999502,
+        "tracking_seconds": 8.31068765100008,
+        "events_and_decision_seconds": 2.122584863999691,
+        "total_seconds": 31.886428157999944
+      },
+      "implementation_fingerprint": "8255c379dc854d27d170d93ad7699b971d965210a8d289f99c343b59cfaf721f",
+      "annotated_clip": {
+        "path": "evidence/annotated.mp4",
+        "timing_path": "evidence/annotated-timing.json",
+        "frame_count": 32,
+        "source_start_frame": 27,
+        "source_end_frame": 58,
+        "source_time_origin": 1.125333,
+        "timestamp_alignment_max_error_seconds": 2.220446049250313e-16,
+        "overlay_track_count": 1,
+        "total_track_count": 578,
+        "note": "Candidate overlays and native timestamps are evidence for review, not ground-truth contacts."
+      }
+    }
+  },
+  "software_validation": {
+    "full_pytest_passed": 468,
+    "browser_javascript_errors": 0,
+    "actual_two_video_upload_and_analysis": true,
+    "separate_replay_ui": "actual completed MP4s with new metadata supplied to the browser fixture",
+    "windows_runtime_executed_in_this_environment": false
+  }
+}

@@ -1,0 +1,727 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-11-12T09:42:48.384930+00:00",
+  "scope": "Independent source/context review of all four numerically scorable final current-round new8 failures after conditional release. Same assistant authored source-only references before predictions; this is not independent human ground truth or a claim of globally unseen footage.",
+  "release_receipt": {
+    "path": "/workspace/remediation/new8-release-receipt.json",
+    "sha256": "174a9b0835f3def17bf5cbb43c5d2fcd2199c6cb7276276ffff858074d3f003a",
+    "bytes": 3327,
+    "role": "authorized_post_freeze_release"
+  },
+  "source_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+  "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+  "frozen_reference_inventory_sha256": "6e7dcd7e609fc0537f230e810d9399e36c76d04ea70353e0f5374aad1f4d7096",
+  "inspection_policy": {
+    "source_code_changed": false,
+    "reference_bytes_changed": false,
+    "scoring_criteria_changed": false,
+    "new_inference_runs": false,
+    "companion_calibration_used": false,
+    "fresh_heavy_decode": false,
+    "decode_threads": 1,
+    "existing_raw_source_cache_and_native_evidence_only": true,
+    "physical_contact_or_legal_line_call_certified": false
+  },
+  "summary": {
+    "total_new_files": 8,
+    "scorable": 4,
+    "first_floor_matches": 0,
+    "frozen_occluded_excluded": 4,
+    "source_failure_classes": {
+      "person_clothing_edge": 1,
+      "main_shuttle_later_bounce": 1,
+      "green_background_after_airborne_shuttle": 1,
+      "far_player_shoe": 1
+    },
+    "all_selected_results_remain": "REVIEW"
+  },
+  "cases": [
+    {
+      "key": "8k-3-a",
+      "result_path": "/workspace/remediation/final-fresh-0.5.4/8k-3-a/result.json",
+      "result_sha256": "9306fabc2ff01a163fd139b767e4d5d6f2552a6f6d8b9c047797082de8889826",
+      "detections_sha256": "9c9438a5f26367118c07a808bfa70efdeae83206e5087881256aeb21d8445fdf",
+      "execution_receipt_sha256": "473de58eff4e00f510e38a7de7df2296493c849c326183e6df2c67e796927636",
+      "reference_path": "/workspace/remediation/sealed_references/8k-3-a.json",
+      "reference_sha256": "4ea2a4fcb2e97523456db69088ed3ca114d03ba7d3d13891692b9c52c0f9ed21",
+      "source_sha256": "9d29a7841610b8adf20acc41d63432027dcf6d157c4108b390af3982672e07c8",
+      "source_metadata_sha256": "b4b8916ee097b37dec27175e654842834af3f9ff350bad7500f40aaee7b5aa91",
+      "coordinate_size": [
+        960,
+        540
+      ],
+      "selection": {
+        "frame_index": 99,
+        "time_seconds": 3.299856,
+        "candidate_px": [
+          432.25,
+          209.125
+        ],
+        "point_kind": "observed_object_center",
+        "event_inference_only": true,
+        "contact_observed": false,
+        "decision": "REVIEW",
+        "exact_stored_detection": {
+          "x": 432.25,
+          "y": 209.125,
+          "radius": 0.5,
+          "bbox": [
+            432.25,
+            209.125,
+            0.125,
+            0.125
+          ],
+          "confidence": 0.5823,
+          "confidence_kind": "heuristic_rank_not_probability",
+          "method": "opencv_source_roi_with_global_support",
+          "native_resolution_observation": true,
+          "appearance_polarity": "dark",
+          "source_px": [
+            3458.0,
+            1673.0
+          ],
+          "source_bbox": [
+            3458,
+            1673,
+            1,
+            1
+          ],
+          "source_size": [
+            7680,
+            4320
+          ],
+          "roi_origin": "observed_motion_search",
+          "motion_supported_fraction": 1.0,
+          "foreground_difference": 9.0,
+          "local_contrast": 80.0,
+          "native_motion_recovery": true,
+          "possible_occluder_overlap": true,
+          "global_confidence": 0.4437,
+          "global_resolution_observation": true,
+          "native_confidence": 0.5823,
+          "temporal_search_support": 10.0541,
+          "temporal_search_observations": 8,
+          "temporal_search_confirms_identity": false
+        },
+        "distance_to_stored_detection_px": 0.0
+      },
+      "frozen_reference": {
+        "landing_frame_interval": [
+          133,
+          134
+        ],
+        "landing_point_px": [
+          740,
+          270
+        ],
+        "tolerance_px": 12,
+        "contact_visibility": "visible",
+        "reference_status": "AI estimate; not human ground truth"
+      },
+      "unchanged_criterion_check": {
+        "frame_distance_to_interval": 34,
+        "point_error_px": 313.712970922466,
+        "frame_matches": false,
+        "point_matches": false,
+        "first_floor_match": false
+      },
+      "status": "failure_wrong_person_edge",
+      "actual_selected_object": "A very small dark image component on the left waist/shorts boundary of the near navy-shirt player; no distinct shuttle is supported at the selected point.",
+      "object_class": "person_clothing_edge",
+      "failure_cause": "Identity switches to a navy-shirt player clothing/body edge before the main shuttle first floorward reversal.",
+      "source_judgment": "The native frames 96–103 place the selected and alleged rebound points on or immediately beside the moving navy clothing/arm outline. This is not the main shuttle floor event. The source-only sequence at 132–135 shows the main shuttle descending and then rising near the later frozen first-floor vicinity on the right.",
+      "trajectory_support_judgment": "The alleged image rebound is produced by person-edge continuation. Smooth before/after measurements do not preserve shuttle identity.",
+      "observed_vs_inferred": {
+        "measured_image_component": true,
+        "synthetically_interpolated_selected_point": false,
+        "meaning": "Selected coordinate exactly matches a stored image detection. This proves an image component was measured, not shuttle identity, a physical object center, floor contact, or first-contact order. The descent/rebound event remains inference-only.",
+        "physical_contact_certified": false,
+        "reference_is_ai_approximation": true
+      },
+      "evidence": [
+        {
+          "path": "/workspace/remediation/final-new8-review-visual/8k-3-a/overview-comparison.jpg",
+          "sha256": "f522554966714c5133d5a7d324223bd9b2ad3213b1d79476b5eaca39950f4ba4",
+          "bytes": 210475,
+          "role": "diagnostic_whole_source_frame_comparison",
+          "source_frames": [
+            99,
+            133
+          ],
+          "markers": "Orange: selected image coordinate. Cyan: frozen AI approximate first-floor vicinity. Overlays added for this report only; no crop or model-input change."
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/8k-3-a/evidence/trajectory-context.jpg",
+          "sha256": "be0ba9266d77452fc9e995fda17c3ea4bdecb4b0e2a2ed436546c48735bd2408",
+          "bytes": 212138,
+          "role": "final_selected_native_context_prediction_overlay"
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/8k-3-a/evidence/source-contact-000.jpg",
+          "sha256": "8fe0fbff0e7d4171b1dc0605c51a0824400656ca27223756080ee48d64cd61c8",
+          "bytes": 17583,
+          "role": "final_selected_native_source_strip"
+        },
+        {
+          "path": "/workspace/remediation/sealed_visual/8k-3-a/native-detail-132-135.png",
+          "sha256": "af29f1673c308695036ad3235f01b4d40712c779f713ca28401cb58771f490db",
+          "bytes": 1444669,
+          "role": "frozen_source_first_rebound_context"
+        },
+        {
+          "path": "/workspace/remediation/sealed_visual/8k-3-a/native-124-140-690-210-0.png",
+          "sha256": "3a65bd7253d02656bb33d2eef508f01f872065a1fcd125519ea4ede55f3f647e",
+          "bytes": 4248296,
+          "role": "frozen_source_supporting_context"
+        },
+        {
+          "path": "/workspace/remediation/sealed_visual/8k-3-a/native-124-140-690-210-1.png",
+          "sha256": "6988e35de4e375d92e938f06a626c4899643724c0faa80ada916b2cb66134d93",
+          "bytes": 1797368,
+          "role": "frozen_source_supporting_context"
+        }
+      ],
+      "recommended_docs_evidence": {
+        "full_overview": "/workspace/remediation/final-new8-review-visual/8k-3-a/overview-comparison.jpg",
+        "selected_native_context": "/workspace/remediation/final-fresh-0.5.4/8k-3-a/evidence/trajectory-context.jpg",
+        "source_first_floor_native": "/workspace/remediation/sealed_visual/8k-3-a/native-detail-132-135.png",
+        "source_first_floor_extra_native": "/workspace/remediation/sealed_visual/8k-3-a/native-124-140-690-210-0.png"
+      }
+    },
+    {
+      "key": "ordinary-1-a",
+      "result_path": "/workspace/remediation/final-fresh-0.5.4/ordinary-1-a/result.json",
+      "result_sha256": "f44db99faf05221c128c9c3192431dbde5e2e4b2acf29300e57651bc42de0f1c",
+      "detections_sha256": "094903b342360f781be9dd4eaf6b6ee1cb52d7e0000b34f14aaa8ae08508ab72",
+      "execution_receipt_sha256": "b6f82b8b32bcf6a409f06ffb50a7fedddbd5aa360fc751c1084a2133d4ab7d99",
+      "reference_path": "/workspace/remediation/sealed_references/ordinary-1-a.json",
+      "reference_sha256": "07e8f40d61b802e535ee8737c8846d95dd7c2c60e8cdb4bcc6b0df1eff14a979",
+      "source_sha256": "aa5e23a6400121849b7994664fd9dc942c9034b9e34180117a8973f10d83be76",
+      "source_metadata_sha256": "fd04c7317131d3fc281ab4e17527b2d3de9321af1a2a638a1efe6993b1f1a232",
+      "coordinate_size": [
+        960,
+        540
+      ],
+      "selection": {
+        "frame_index": 187,
+        "time_seconds": 3.154278,
+        "candidate_px": [
+          182.0,
+          342.625
+        ],
+        "point_kind": "observed_object_center",
+        "event_inference_only": true,
+        "contact_observed": false,
+        "decision": "REVIEW",
+        "exact_stored_detection": {
+          "x": 182.0,
+          "y": 342.625,
+          "radius": 0.5,
+          "bbox": [
+            182.0,
+            342.5,
+            0.25,
+            0.5
+          ],
+          "confidence": 0.5095,
+          "confidence_kind": "heuristic_rank_not_probability",
+          "method": "opencv_source_roi_component",
+          "native_resolution_observation": true,
+          "appearance_polarity": "bright",
+          "source_px": [
+            728.0,
+            1370.5
+          ],
+          "source_bbox": [
+            728,
+            1370,
+            1,
+            2
+          ],
+          "source_size": [
+            3840,
+            2160
+          ],
+          "roi_origin": "observed_motion_search",
+          "motion_supported_fraction": 1.0,
+          "foreground_difference": 15.5,
+          "local_contrast": 21.5,
+          "native_motion_recovery": true,
+          "possible_occluder_overlap": false
+        },
+        "distance_to_stored_detection_px": 0.0
+      },
+      "frozen_reference": {
+        "landing_frame_interval": [
+          158,
+          160
+        ],
+        "landing_point_px": [
+          207,
+          330
+        ],
+        "tolerance_px": 8,
+        "contact_visibility": "visible",
+        "reference_status": "AI estimate; not human ground truth"
+      },
+      "unchanged_criterion_check": {
+        "frame_distance_to_interval": 27,
+        "point_error_px": 28.00697457777259,
+        "frame_matches": false,
+        "point_matches": false,
+        "first_floor_match": false
+      },
+      "status": "failure_later_bounce",
+      "actual_selected_object": "The visible main shuttle near the floor during a later small bounce. The exact selected component is an image measurement within/at the edge of that small blurred object, not a calibrated cork contact point.",
+      "object_class": "main_shuttle_later_bounce",
+      "failure_cause": "The selected event is the same main shuttle later/second floorward rebound rather than its first visible floorward reversal.",
+      "source_judgment": "Source frames 154–165 show the initial incoming shuttle reaching its first low turn around 158–160, then rising. Frames 166,168,171,174 show the same shuttle rebounding leftward. The final selected context at 181–190 shows its subsequent descent and another upward turn near 187–188. Therefore the final candidate is a real later bounce, not random background, but it fails the unchanged first-floor criterion.",
+      "trajectory_support_judgment": "Local approach and rebound evidence is real for the later bounce; event ordering, not simply missing object identity, is the failure.",
+      "observed_vs_inferred": {
+        "measured_image_component": true,
+        "synthetically_interpolated_selected_point": false,
+        "meaning": "Selected coordinate exactly matches a stored image detection. This proves an image component was measured, not shuttle identity, a physical object center, floor contact, or first-contact order. The descent/rebound event remains inference-only.",
+        "physical_contact_certified": false,
+        "reference_is_ai_approximation": true
+      },
+      "evidence": [
+        {
+          "path": "/workspace/remediation/final-new8-review-visual/ordinary-1-a/overview-comparison.jpg",
+          "sha256": "3b6f62b23c027b79c79778dcab30602b181345503c939b1a053e24597f13d598",
+          "bytes": 203389,
+          "role": "diagnostic_whole_source_frame_comparison",
+          "source_frames": [
+            187,
+            159
+          ],
+          "markers": "Orange: selected image coordinate. Cyan: frozen AI approximate first-floor vicinity. Overlays added for this report only; no crop or model-input change."
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/ordinary-1-a/evidence/trajectory-context.jpg",
+          "sha256": "2538a86fbf06a0c1f8e6497760a85ffe0566f32382198d5b138ceb978340d186",
+          "bytes": 126767,
+          "role": "final_selected_native_context_prediction_overlay"
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/ordinary-1-a/evidence/source-contact-000.jpg",
+          "sha256": "afa2e43727de4c29daa380da29fbb585940c2788d8bab58fb9658373356c89ad",
+          "bytes": 13073,
+          "role": "final_selected_native_source_strip"
+        },
+        {
+          "path": "/workspace/remediation/sealed_visual/ordinary-1-a/native-154-174-180-270-0.png",
+          "sha256": "573299830394de8c84656691bb645223bb5f46e90aa67a42194d73cd1ded0562",
+          "bytes": 1528652,
+          "role": "frozen_source_first_rebound_context"
+        },
+        {
+          "path": "/workspace/remediation/sealed_visual/ordinary-1-a/native-154-174-180-270-1.png",
+          "sha256": "6a6b40b025adcfbc657952659df94d2736fc5fd62bcd131c0c5599b59e6aeb03",
+          "bytes": 526638,
+          "role": "frozen_source_supporting_context"
+        },
+        {
+          "path": "/workspace/remediation/sealed_visual/ordinary-1-a/approach-cached-1.png",
+          "sha256": "e34aab517bab93d93606a78a05385249706eb1033bc7eca45e4092dd3d0114bc",
+          "bytes": 1835646,
+          "role": "frozen_source_supporting_context"
+        },
+        {
+          "path": "/workspace/remediation/final-new8-review-visual/ordinary-1-a/reference-first-rebound-native.png",
+          "sha256": "69f27841503e5ae38a9e9e12ef3f5332ad822cb1f429b56b13bab7ec1a449ab7",
+          "bytes": 499314,
+          "role": "compact_native_first_rebound_row",
+          "derived_from": "/workspace/remediation/sealed_visual/ordinary-1-a/native-154-174-180-270-0.png",
+          "operation": "Exact middle-row pixel crop of the frozen source contact sheet; frame labels retained, no pixel retouching."
+        }
+      ],
+      "recommended_docs_evidence": {
+        "full_overview": "/workspace/remediation/final-new8-review-visual/ordinary-1-a/overview-comparison.jpg",
+        "selected_native_context": "/workspace/remediation/final-fresh-0.5.4/ordinary-1-a/evidence/trajectory-context.jpg",
+        "source_first_floor_native": "/workspace/remediation/final-new8-review-visual/ordinary-1-a/reference-first-rebound-native.png",
+        "source_first_floor_extra_native": "/workspace/remediation/sealed_visual/ordinary-1-a/native-154-174-180-270-1.png"
+      }
+    },
+    {
+      "key": "uhd4k-1-b",
+      "result_path": "/workspace/remediation/final-fresh-0.5.4/uhd4k-1-b/result.json",
+      "result_sha256": "5776cb9f58b06e8d58572346dd1bfac20ffaac343f46f4ee75ec5e7059154f4a",
+      "detections_sha256": "9d1348fb0731268bcc2064864face0d2271d1267751f943a3251faec4bd7e756",
+      "execution_receipt_sha256": "dff39d03d65078e8b8c50ccbafa670584ee2bc5f32cc0ece41603e95a41eb0a8",
+      "reference_path": "/workspace/remediation/sealed_references/uhd4k-1-b.json",
+      "reference_sha256": "3224f9895b39ebf83041d7c05c1ba17ed03349cb5a5b69d0a6ccf9e153618358",
+      "source_sha256": "3f3f685323bc7c4a81c850e89624cc7b2fe635b99f037938b28e6fb5beb558f7",
+      "source_metadata_sha256": "db6bfb3ec5ace98f3f022b726c74c9bc6d98813d2acf2968e650d1f15ef19ebb",
+      "coordinate_size": [
+        960,
+        540
+      ],
+      "selection": {
+        "frame_index": 38,
+        "time_seconds": 1.266667,
+        "candidate_px": [
+          475.5,
+          109.625
+        ],
+        "point_kind": "observed_object_center",
+        "event_inference_only": true,
+        "contact_observed": false,
+        "decision": "REVIEW",
+        "exact_stored_detection": {
+          "x": 475.5,
+          "y": 109.625,
+          "radius": 1.596,
+          "confidence": 0.3973,
+          "bbox": [
+            475,
+            108,
+            3,
+            5
+          ],
+          "method": "opencv_motion_dark_component",
+          "appearance_polarity": "dark",
+          "global_resolution_observation": true,
+          "confidence_kind": "heuristic_rank_not_probability",
+          "foreground_difference": 14.0,
+          "background_difference": 9.25,
+          "local_contrast": 13.625,
+          "possible_occluder_overlap": false,
+          "temporal_search_support": 16.0848,
+          "temporal_search_observations": 8,
+          "temporal_search_confirms_identity": false
+        },
+        "distance_to_stored_detection_px": 0.0
+      },
+      "frozen_reference": {
+        "landing_frame_interval": [
+          107,
+          109
+        ],
+        "landing_point_px": [
+          462,
+          349
+        ],
+        "tolerance_px": 12,
+        "contact_visibility": "visible",
+        "reference_status": "AI estimate; not human ground truth"
+      },
+      "unchanged_criterion_check": {
+        "frame_distance_to_interval": 69,
+        "point_error_px": 239.7553766341852,
+        "frame_matches": false,
+        "point_matches": false,
+        "first_floor_match": false
+      },
+      "status": "failure_background_continuation_after_return",
+      "actual_selected_object": "A dark image component on the green wall/structural beam area; the selected point and subsequent upward support do not show the distinct incoming shuttle.",
+      "object_class": "green_background_after_airborne_shuttle",
+      "failure_cause": "A real incoming shuttle track continues onto green wall/beam texture around an overhead return, creating an unsupported image rebound far above the floor.",
+      "source_judgment": "Native frames 35–37 clearly show the incoming white shuttle in the air. At 38 the full source shows the near players attempting an overhead return; the selected point lies on green background while the shuttle/racket motion is elsewhere and blurred. Frames 39–42 keep the alleged support on wall/beam texture. The actual first-floor vicinity occurs much later, visible in source frames 104–113 near the front player feet.",
+      "trajectory_support_judgment": "Incoming real-shuttle observations are followed by unrelated background observations. Neither the overhead action nor this synthetic track reversal is a first floor event; the exact racket-contact instant is not certified.",
+      "observed_vs_inferred": {
+        "measured_image_component": true,
+        "synthetically_interpolated_selected_point": false,
+        "meaning": "Selected coordinate exactly matches a stored image detection. This proves an image component was measured, not shuttle identity, a physical object center, floor contact, or first-contact order. The descent/rebound event remains inference-only.",
+        "physical_contact_certified": false,
+        "reference_is_ai_approximation": true
+      },
+      "evidence": [
+        {
+          "path": "/workspace/remediation/final-new8-review-visual/uhd4k-1-b/overview-comparison.jpg",
+          "sha256": "e3e2a2706d5e91736ede58636dbc5ef16756ee49baa81fcb0086aa8e38fb643c",
+          "bytes": 221790,
+          "role": "diagnostic_whole_source_frame_comparison",
+          "source_frames": [
+            38,
+            108
+          ],
+          "markers": "Orange: selected image coordinate. Cyan: frozen AI approximate first-floor vicinity. Overlays added for this report only; no crop or model-input change."
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/uhd4k-1-b/evidence/trajectory-context.jpg",
+          "sha256": "17adee3c21ac4e02a92aea73ac198ed415c84de492844d2867d8d5e6270973d8",
+          "bytes": 185374,
+          "role": "final_selected_native_context_prediction_overlay"
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/uhd4k-1-b/evidence/source-contact-000.jpg",
+          "sha256": "dc8dae21eb7e468d92259d2d441cf83e34caafa3bddf98a550737c6ed28b0dd2",
+          "bytes": 21404,
+          "role": "final_selected_native_source_strip"
+        },
+        {
+          "path": "/workspace/remediation/sealed_visual/uhd4k-1-b/native-102-114-410-260-0.png",
+          "sha256": "99637576bddc21a0e32c3ea32f672d4761d9845892dec6895653a12e774a7d50",
+          "bytes": 3311136,
+          "role": "frozen_source_first_rebound_context"
+        },
+        {
+          "path": "/workspace/remediation/sealed_visual/uhd4k-1-b/native-102-114-410-260-1.png",
+          "sha256": "9aaac500b3d8c79957a7a4865be1b86cd746daf3ccba667db5ea1cbf419de9b1",
+          "bytes": 286092,
+          "role": "frozen_source_supporting_context"
+        },
+        {
+          "path": "/workspace/remediation/final-new8-review-visual/uhd4k-1-b/reference-first-rebound-native.png",
+          "sha256": "06eca9981c968d057fb637fb903d9a168422b8e417b38f8c19a80da71878d899",
+          "bytes": 1083228,
+          "role": "compact_native_first_rebound_row",
+          "derived_from": "/workspace/remediation/sealed_visual/uhd4k-1-b/native-102-114-410-260-0.png",
+          "operation": "Exact middle-row pixel crop of the frozen source contact sheet; frame labels retained, no pixel retouching."
+        }
+      ],
+      "recommended_docs_evidence": {
+        "full_overview": "/workspace/remediation/final-new8-review-visual/uhd4k-1-b/overview-comparison.jpg",
+        "selected_native_context": "/workspace/remediation/final-fresh-0.5.4/uhd4k-1-b/evidence/trajectory-context.jpg",
+        "source_first_floor_native": "/workspace/remediation/final-new8-review-visual/uhd4k-1-b/reference-first-rebound-native.png",
+        "source_first_floor_extra_native": "/workspace/remediation/sealed_visual/uhd4k-1-b/native-102-114-410-260-1.png"
+      }
+    },
+    {
+      "key": "uhdhd-1-a",
+      "result_path": "/workspace/remediation/final-fresh-0.5.4/uhdhd-1-a/result.json",
+      "result_sha256": "bf1ea3f6c025ee8d31c6228c17a9a75a28af6e8531c803d3103b75eda064996b",
+      "detections_sha256": "efa91dd6d4f010b1eecd4fac7b51594fa49d08173ca9c3129f05f57a8633d001",
+      "execution_receipt_sha256": "e1f5f704f0930868950f18156bbd94d39d91cc9c6273dbd9c9bbcfe52a06d777",
+      "reference_path": "/workspace/remediation/sealed_references/uhdhd-1-a.json",
+      "reference_sha256": "85109a5a2cab12ff3d11d8f3590af41107aa7183a704403d9757a15bf35d604d",
+      "source_sha256": "8c41d422456f4d9103667fc61b91b208327a03639f9281b1c654c4cb05127771",
+      "source_metadata_sha256": "7e082025fc901468d5d6673a6582cc2552758adeaf96adf9c2ac60a9695fe1ea",
+      "coordinate_size": [
+        960,
+        540
+      ],
+      "selection": {
+        "frame_index": 107,
+        "time_seconds": 1.804856,
+        "candidate_px": [
+          334.733,
+          176.161
+        ],
+        "point_kind": "observed_object_center",
+        "event_inference_only": true,
+        "contact_observed": false,
+        "decision": "REVIEW",
+        "exact_stored_detection": {
+          "x": 334.733,
+          "y": 176.161,
+          "radius": 1.773,
+          "bbox": [
+            330.25,
+            174.5,
+            7.5,
+            3.0
+          ],
+          "confidence": 0.7645,
+          "confidence_kind": "heuristic_rank_not_probability",
+          "method": "opencv_source_roi_with_global_support",
+          "native_resolution_observation": true,
+          "appearance_polarity": "dark",
+          "source_px": [
+            1338.93,
+            704.646
+          ],
+          "source_bbox": [
+            1321,
+            698,
+            30,
+            12
+          ],
+          "source_size": [
+            3840,
+            2160
+          ],
+          "roi_origin": "global_candidate",
+          "motion_supported_fraction": 0.7848,
+          "foreground_difference": 37.823,
+          "local_contrast": 51.861,
+          "possible_occluder_overlap": false,
+          "global_confidence": 0.7645,
+          "global_resolution_observation": true,
+          "native_confidence": 0.6523
+        },
+        "distance_to_stored_detection_px": 0.0
+      },
+      "frozen_reference": {
+        "landing_frame_interval": [
+          195,
+          196
+        ],
+        "landing_point_px": [
+          685,
+          349
+        ],
+        "tolerance_px": 12,
+        "contact_visibility": "visible",
+        "reference_status": "AI estimate; not human ground truth"
+      },
+      "unchanged_criterion_check": {
+        "frame_distance_to_interval": 88,
+        "point_error_px": 390.58967115119674,
+        "frame_matches": false,
+        "point_matches": false,
+        "first_floor_match": false
+      },
+      "status": "failure_identity_switch_to_shoe",
+      "actual_selected_object": "The far black-shirt player shoe/sole at the exact selected coordinate; the true incoming shuttle blur is already below/left of it.",
+      "object_class": "far_player_shoe",
+      "failure_cause": "The incoming shuttle track switches to the far player shoe/leg/background before the genuine shuttle has reached the first floor vicinity.",
+      "source_judgment": "Native frames 101–104 show the descending white shuttle. By 106–107 the selected points are contaminated by the far player lower leg/shoe. At selected frame 107 the exact point lies on the shoe/sole while a separate shuttle blur continues lower/left. In 108–110 the asserted upward branch climbs back along the player/nearby background, while the actual shuttle still continues downward toward the near player racket. The source-only sequence 191–198 shows the later genuine first-floor vicinity near the blue line on the right.",
+      "trajectory_support_judgment": "The apparent rebound is a switch in object identity, not observed upward flight of the same shuttle. The approach can contain real shuttle observations without validating the selected point or outgoing branch.",
+      "observed_vs_inferred": {
+        "measured_image_component": true,
+        "synthetically_interpolated_selected_point": false,
+        "meaning": "Selected coordinate exactly matches a stored image detection. This proves an image component was measured, not shuttle identity, a physical object center, floor contact, or first-contact order. The descent/rebound event remains inference-only.",
+        "physical_contact_certified": false,
+        "reference_is_ai_approximation": true
+      },
+      "evidence": [
+        {
+          "path": "/workspace/remediation/final-new8-review-visual/uhdhd-1-a/overview-comparison.jpg",
+          "sha256": "054fd76a27a133c78b293075214f6f96d1b61e903ab4a519702cb6dc4d6ebd8c",
+          "bytes": 200272,
+          "role": "diagnostic_whole_source_frame_comparison",
+          "source_frames": [
+            107,
+            196
+          ],
+          "markers": "Orange: selected image coordinate. Cyan: frozen AI approximate first-floor vicinity. Overlays added for this report only; no crop or model-input change."
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/uhdhd-1-a/evidence/trajectory-context.jpg",
+          "sha256": "72b76e3ded7feda9c591bbb1e15da589d77f9fdd94d85b51e916e1c0b60c7633",
+          "bytes": 181300,
+          "role": "final_selected_native_context_prediction_overlay"
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/uhdhd-1-a/evidence/source-contact-000.jpg",
+          "sha256": "3f3f763b31c63ddea93794413fca7d2d215d865f87eb5713b494352bea0fc59b",
+          "bytes": 18866,
+          "role": "final_selected_native_source_strip"
+        },
+        {
+          "path": "/workspace/remediation/sealed_visual/uhdhd-1-a/native-detail-195-198.png",
+          "sha256": "7b2ee4f017e6476012857eb72fc41f85fd49abdbe1354e6595e5b1d2b510adcc",
+          "bytes": 758664,
+          "role": "frozen_source_first_rebound_context"
+        },
+        {
+          "path": "/workspace/remediation/sealed_visual/uhdhd-1-a/native-detail-191-194.png",
+          "sha256": "ae2fdac854528ed7573754d3d21e45ce63da7d6996f23c04f8d89b8422462e8b",
+          "bytes": 743747,
+          "role": "frozen_source_supporting_context"
+        },
+        {
+          "path": "/workspace/remediation/sealed_visual/uhdhd-1-a/native-184-206-620-245-1.png",
+          "sha256": "ca5c888495441711f54e07ea143d350a9904710e8a076a181bd2fb73e6d615cc",
+          "bytes": 1000589,
+          "role": "frozen_source_supporting_context"
+        },
+        {
+          "path": "/workspace/remediation/final-new8-review-visual/uhdhd-1-a/diagnostic-selected-point.png",
+          "sha256": "7ce278a0b4989979ed004a8e2a0b34b8fadf580ab1add8ad43fd4acca9dfddda",
+          "bytes": 41782,
+          "role": "diagnostic_nearest_neighbor_source960_crop",
+          "note": "Exact selected coordinate orange marker on raw source960 crop; for localization inspection only."
+        }
+      ],
+      "recommended_docs_evidence": {
+        "full_overview": "/workspace/remediation/final-new8-review-visual/uhdhd-1-a/overview-comparison.jpg",
+        "selected_native_context": "/workspace/remediation/final-fresh-0.5.4/uhdhd-1-a/evidence/trajectory-context.jpg",
+        "source_first_floor_native": "/workspace/remediation/sealed_visual/uhdhd-1-a/native-detail-195-198.png",
+        "source_first_floor_extra_native": "/workspace/remediation/sealed_visual/uhdhd-1-a/native-detail-191-194.png"
+      }
+    }
+  ],
+  "excluded_cases": [
+    {
+      "key": "8k-3-b",
+      "status": "excluded_frozen_occlusion",
+      "numeric_score": null,
+      "reference_sha256": "f5e40fee5c61c708946464156ea1da91b31cd32a0eb93cb9a4e0b1661414d0e1",
+      "result_sha256": "b1d6916614070d719c61f98c71fcdcbd6bf6f95d30426a00c8fbb2b6ffae999e",
+      "reason": "Frozen source-only reference has no locatable first-floor target. No retrospective numeric target or success/failure score is assigned.",
+      "recommended_docs_evidence": [
+        {
+          "path": "/workspace/remediation/sealed_visual/8k-3-b/overview-1.jpg",
+          "sha256": "f147f537d7e5b22528c90edee5252f912b7e0dfd0950d5f9719589985e0e108c",
+          "bytes": 787380,
+          "role": "frozen_source_overview"
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/8k-3-b/evidence/trajectory-context.jpg",
+          "sha256": "834fd50ecfffc973c099bb491117b5f4643ff0af168c89aff337ce5189add96d",
+          "bytes": 168966,
+          "role": "final_selected_native_context_prediction_overlay"
+        }
+      ]
+    },
+    {
+      "key": "ordinary-1-b",
+      "status": "excluded_frozen_occlusion",
+      "numeric_score": null,
+      "reference_sha256": "3b3eddef60f421ccdffdbc5859ab0c5bc2c974cbd4e787da2dff503cb4a1202c",
+      "result_sha256": "bb6a64f127d5664a0d411df60ee290a037c9da7fab8bd6da84e7f640ab0800d8",
+      "reason": "Frozen source-only reference has no locatable first-floor target. No retrospective numeric target or success/failure score is assigned.",
+      "recommended_docs_evidence": [
+        {
+          "path": "/workspace/remediation/sealed_visual/ordinary-1-b/overview-0.jpg",
+          "sha256": "9e3dd624d942f9268b28ab855b7bcac90525290c05f95b471cbd466ad43da6fc",
+          "bytes": 786909,
+          "role": "frozen_source_overview"
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/ordinary-1-b/evidence/trajectory-context.jpg",
+          "sha256": "2f8cebb2aa64847444c1779d6700aad83b299bddfde2d5c6fb2d9e72d58dd5e4",
+          "bytes": 197996,
+          "role": "final_selected_native_context_prediction_overlay"
+        }
+      ]
+    },
+    {
+      "key": "uhd4k-1-a",
+      "status": "excluded_frozen_occlusion",
+      "numeric_score": null,
+      "reference_sha256": "6a303d76d4623387e5927ee61312daa1cf157b60bb65b492c9b203edf1d26c61",
+      "result_sha256": "b946feb509e658b7301d409e4d8fbbcdd24ec0d1de272ddb9f8c0879d87c8330",
+      "reason": "Frozen source-only reference has no locatable first-floor target. No retrospective numeric target or success/failure score is assigned.",
+      "recommended_docs_evidence": [
+        {
+          "path": "/workspace/remediation/sealed_visual/uhd4k-1-a/overview-2.jpg",
+          "sha256": "cbc47e71c438d8c064bf00a5e4e5baa25ef6f1f3110766ba62751aca87123325",
+          "bytes": 754732,
+          "role": "frozen_source_overview"
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/uhd4k-1-a/evidence/trajectory-context.jpg",
+          "sha256": "f561be52a8cdf24a21711fe75d82e95edf69c9101353000b15e62b418e88f3d1",
+          "bytes": 135240,
+          "role": "final_selected_native_context_prediction_overlay"
+        }
+      ]
+    },
+    {
+      "key": "uhdhd-1-b",
+      "status": "excluded_frozen_occlusion",
+      "numeric_score": null,
+      "reference_sha256": "ecbd5ec407c2da39bf77e302d44d5f77feb14047c60f45f0c7eb9699befdee74",
+      "result_sha256": "d0717e8541dc29bfcded8ae1a8a155a8595467912d99e40f7b4a07efe8ce393e",
+      "reason": "Frozen source-only reference has no locatable first-floor target. No retrospective numeric target or success/failure score is assigned.",
+      "recommended_docs_evidence": [
+        {
+          "path": "/workspace/remediation/sealed_visual/uhdhd-1-b/overview-1.jpg",
+          "sha256": "03a5612118efb3c203de2bbd31f6313773d790a9defbf88aa4b859c72f64bf93",
+          "bytes": 805261,
+          "role": "frozen_source_overview"
+        },
+        {
+          "path": "/workspace/remediation/final-fresh-0.5.4/uhdhd-1-b/evidence/trajectory-context.jpg",
+          "sha256": "44dd37bea3ead9c8428dd801e0f7dbd13e1edd6014c5c0b70505ea7ec7ba1eff",
+          "bytes": 216306,
+          "role": "final_selected_native_context_prediction_overlay"
+        }
+      ]
+    }
+  ],
+  "review_script_sha256": "adede676ea39f732da7e122fa048197f1c49eecae1cd8bb54b93db33128fe1b8"
+}

@@ -1,0 +1,69 @@
+{
+  "key": "uhdhd-4-a",
+  "file": "a시점(uhd30 hd30) 4.mp4",
+  "source_sha256": "c143093bc59937dcd50343a6c09628a031d71c726e313a6f1330c6a6c04c06d6",
+  "split": "development",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "human_verified": false,
+  "reference_frozen": true,
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    142,
+    144
+  ],
+  "landing_point_px": [
+    332,
+    182
+  ],
+  "tolerance_px": 6,
+  "trajectory_points": [
+    {
+      "frame_index": 120,
+      "x": 338,
+      "y": 130,
+      "time": 2.024133
+    },
+    {
+      "frame_index": 130,
+      "x": 334,
+      "y": 150,
+      "time": 2.192811
+    },
+    {
+      "frame_index": 138,
+      "x": 333,
+      "y": 169,
+      "time": 2.327756
+    },
+    {
+      "frame_index": 141,
+      "x": 332,
+      "y": 176,
+      "time": 2.378356
+    },
+    {
+      "frame_index": 143,
+      "x": 332,
+      "y": 182,
+      "time": 2.412089
+    },
+    {
+      "frame_index": 147,
+      "x": 331,
+      "y": 179,
+      "time": 2.479567
+    }
+  ],
+  "notes": [
+    "Original4K crops expose the shuttle descending in front of the far black-shirt player, then reaching the floor immediately beside that player's left image-side shoe and reversing upward.",
+    "First-contact interval142–144 and approximate point[332,182] are visual estimates. The nearby white shoe limits precise cork localization; use6px tolerance and do not treat the shoe or its motion as shuttle evidence."
+  ],
+  "evidence_images": [
+    "visual/uhdhd-4-a/native-120-145-295-110.jpg",
+    "visual/uhdhd-4-a/native-136-159-315-160.jpg"
+  ]
+}

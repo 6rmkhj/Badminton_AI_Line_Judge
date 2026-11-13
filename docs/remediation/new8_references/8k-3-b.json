@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "key": "8k-3-b",
+  "file": "8k 30 4k 24 b시점 3.mp4",
+  "source_path": "/workspace/remediation/input/8k 30 4k 24 b시점 3.mp4",
+  "source_sha256": "ad2a4c498cd7ddf1e746a139e262578523d3ed7c5dd320a0245eca1a73e2fb52",
+  "split": "holdout",
+  "round_holdout": true,
+  "round": "false_positive_remediation_after_0.5.3",
+  "scope": "Eight same-project/current-round holdout video files, four filename A/B pairs; not globally unseen data or independent human ground truth.",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    3840,
+    2160
+  ],
+  "contact_visibility": "occluded",
+  "landing_point_px": null,
+  "tolerance_px": null,
+  "notes": "The main shuttle is visible descending against the white air conditioner beside the left net-post assembly. Its final low segment closely overlaps the foreground post and the air-conditioner base, and the first reversal cannot be reliably separated from these edges in this view. Later low shuttle pixels do not identify the first contact. No landing interval or coordinate is inferred from the approach, a stationary/end position, or the companion camera. Listed points are only the visible approach observations.",
+  "landing_frame_interval": null,
+  "landing_time_interval_seconds": null,
+  "additional_frame_tolerance": 0,
+  "trajectory_points": [
+    {
+      "frame_index": 46,
+      "time_seconds": 1.917278,
+      "x": 184,
+      "y": 141
+    },
+    {
+      "frame_index": 48,
+      "time_seconds": 2.000611,
+      "x": 182,
+      "y": 157
+    },
+    {
+      "frame_index": 51,
+      "time_seconds": 2.125633,
+      "x": 179,
+      "y": 179
+    },
+    {
+      "frame_index": 53,
+      "time_seconds": 2.209011,
+      "x": 178,
+      "y": 188
+    },
+    {
+      "frame_index": 55,
+      "time_seconds": 2.292356,
+      "x": 177,
+      "y": 200
+    }
+  ],
+  "later_bounce_observations": [],
+  "reference_source": "AI source-frame visual inspection blinded to current-round outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "ground_truth_eligible": false,
+  "predictions_or_model_outputs_inspected": false,
+  "companion_view_calibration_used": false,
+  "evidence": [
+    "/workspace/remediation/sealed_visual/8k-3-b/overview-1.jpg",
+    "/workspace/remediation/sealed_visual/8k-3-b/candidate-cached-0.png",
+    "/workspace/remediation/sealed_visual/8k-3-b/candidate-cached-1.png",
+    "/workspace/remediation/sealed_visual/8k-3-b/native-45-65-155-140-0.png",
+    "/workspace/remediation/sealed_visual/8k-3-b/native-45-65-155-140-1.png",
+    "/workspace/remediation/sealed_visual/8k-3-b/native-detail-53-56.png",
+    "/workspace/remediation/sealed_visual/8k-3-b/native-detail-57-60.png"
+  ],
+  "evidence_sha256": {
+    "/workspace/remediation/sealed_visual/8k-3-b/overview-1.jpg": "f147f537d7e5b22528c90edee5252f912b7e0dfd0950d5f9719589985e0e108c",
+    "/workspace/remediation/sealed_visual/8k-3-b/candidate-cached-0.png": "d219589f1bfc56dc2c670c6896f5cc546e5cc7d7a8937a4864b8b34864c9bd01",
+    "/workspace/remediation/sealed_visual/8k-3-b/candidate-cached-1.png": "24e3b01db432c023d74fca0a1e03496747d6d059580f045daf6f221f0c20cd15",
+    "/workspace/remediation/sealed_visual/8k-3-b/native-45-65-155-140-0.png": "bb90ddd70d11a83b01d19d0547c211e795c6b3cad078a41003a8bc5eb3ab9365",
+    "/workspace/remediation/sealed_visual/8k-3-b/native-45-65-155-140-1.png": "d66e14119c657f04b5c5fe9e1723eca43ab97ba8c7a632f1cd9e82b90297dbb7",
+    "/workspace/remediation/sealed_visual/8k-3-b/native-detail-53-56.png": "437e45724ac948bc9a307c5e2609637f845cbc1bd37f9b53ed63c2035be907d6",
+    "/workspace/remediation/sealed_visual/8k-3-b/native-detail-57-60.png": "9a0011833a7c089528a82a70aa1f3cb1d289e3e54e335875a738aa57194f5908"
+  },
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; normalized source timestamps from ffprobe.",
+  "inspection_decode_threads": 1
+}

@@ -1,0 +1,89 @@
+{
+  "scope": "AI source-visual development review of B2; not independent human ground truth, holdout evaluation, physical cork/floor measurement, or IN/OUT qualification.",
+  "reviewed_at": "2026-11-12T07:42:19.921925+00:00",
+  "key": "8k-2-b",
+  "holdout_accessed": false,
+  "frozen_reference_edited": false,
+  "verdict": "Useful corrected first-bounce approximation supported by actual source object motion, not coordinate proximity alone.",
+  "primary": {
+    "frame_index": 45,
+    "time_seconds": 1.875522,
+    "candidate_px": [
+      419.625,
+      206.4375
+    ],
+    "coordinate_size": [
+      960,
+      540
+    ],
+    "contact_observed": false,
+    "physical_contact_verified": false
+  },
+  "source_observations": [
+    "Sequential native frames39–45 show the same main-shuttle terminal descent; frames36–38 are partly obscured by the foreground white-shirt player.",
+    "Frames42–45 clearly descend to the low point near45; the visible racket is separated from this turn point. There is no source-supported earlier racket turn on this inspected terminal segment.",
+    "The actual cork/plume rises in46–52 and drops again by53. Model-only46/47/49–51 follows that moving object.",
+    "A separate stationary white floor feature is already visible before contact near the moving trajectory; the lossless detail sequence distinguishes it from the rebounding shuttle."
+  ],
+  "fusion_association_caveat": {
+    "frame_index": 46,
+    "fusion_point_px": [
+      416.534,
+      197.233
+    ],
+    "model_only_point_px": [
+      420.75,
+      203.0625
+    ],
+    "finding": "The CV fusion sample is on the stationary white floor feature; the model-only sample follows the rising shuttle. Fusion returns to the moving shuttle by48. Thus the ensemble primary is useful, but not every selected observation has verified same-object identity."
+  },
+  "adapter_provenance": {
+    "archived_adapter": "/workspace/generalization/next/model-research/fusion_experiment_v1.py",
+    "adapter_sha256_matches_metadata": true,
+    "adapter_sha256": "4c2e0a4529fd6e7e897427a92b1bb9bb987c7c91e1681717ffe2b110b7c4ba13",
+    "model_sha256_matches_bytes": true,
+    "model_sha256": "b0ed780c3cc2c4f8eab6efa08d1489667381ecdcced7fad52abccbd176204ed6",
+    "source_sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead",
+    "cache_sha256_recorded": "fde97fb9838d1377a42d7983021a254a9160d70e7523c60f0b99b70720299bb3",
+    "inference_input": "Full development clip, four fixed unhinted overlapping tiles, batches of8 actual source frames plus full-clip median background; no reference coordinates/event windows enter inference or selection.",
+    "padding": "Final batch repeats last real frame for input padding; only outputs for real frame indices are retained.",
+    "coordinate_kind": "Image-conditioned learned heatmap-component box centre, with raw-image contrast support nearby. It is not a directly measured native cork centre.",
+    "appearance_limitation": "Source-patch radius/polarity may describe a nearby background/occluder component (notably broad dark support at48). A supported patch does not independently establish shuttle identity.",
+    "occluder_metadata_limitation": "Learned proposals retain unknown per-observation possible_occluder_overlap; retained record-level occlusion regions do not by themselves label each model sample.",
+    "uncalibrated": true,
+    "inpaintnet_used": false,
+    "original_cv_candidates_preserved": true,
+    "extra_candidate_limit_per_frame": 8,
+    "inference_seconds": 78.30046731600487,
+    "max_rss_mb": 1284.48828125,
+    "threads": 1,
+    "upstream_original_checkpoint_identity": "The recorded mirror/model hash is reproducible; upstream-original checkpoint bit identity is not independently verified."
+  },
+  "source_evidence": {
+    "provenance": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-provenance.json",
+    "decode": "Sequential original3840x2160 ffmpeg decode, exact zero-based frame selection36–53, threads2, native300x260 crop without resize; enlarged detail uses nearest-neighbor only.",
+    "images": [
+      {
+        "path": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-36-44-raw.png",
+        "sha256": "9cb38b30da8dc722b3b6ecbfa5044b2fffb16d94805f91544a0c923fb0574732"
+      },
+      {
+        "path": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-45-53-raw.png",
+        "sha256": "9296c17437ae49c42f543090d54b17586f59c7554035b1f05b6e8991dd132a7d"
+      },
+      {
+        "path": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-36-44-marked.png",
+        "sha256": "122b5b89caa55c4604febc75709adbc84dd296e554e823f87a2621a921e82f26"
+      },
+      {
+        "path": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-45-53-marked.png",
+        "sha256": "861d199d56ce81583d3ac7f4c377ff34c6d7fd97fa00dfdf72593d9228e4800c"
+      },
+      {
+        "path": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-floor-detail-raw.png",
+        "sha256": "7a2f7f11e70d840cf9f5679f9e52bdaf4707bbb4dd87ebbf6aa6071d9f472bd4"
+      }
+    ]
+  },
+  "release_scope": "Research evidence only. No ML weights bundle is recommended for the current CV release based on this limited development result; broader controls/generalization remain necessary."
+}

@@ -1,0 +1,6 @@
+{
+  "reviewed_media_sha256": "b509e267deea34661e9d51550d38836b951db40b5c3ef7ec2ba69777134de1b1",
+  "reviewed_source_commit_base": "920f7445cb6ebe7fc3055dcd33c6785dbd97316d",
+  "finding": "SourceFrameSequence adds verified random seeking for skips>=32. Unchanged detection.py calls source_frames[index] for each sequential index0..N; first read starts0 and subsequent steps1, so this detector never enters the seek branch. Other media preprocessing AST is required unchanged by runner.",
+  "limits": "Compatibility is code-reviewed and supported by separate media equality tests, not an assertion that all native frames were freshly decoded during replay."
+}

@@ -5,7 +5,8 @@ import cv2
 import numpy as np
 import pytest
 
-from badminton.detection import _HogPeople, detect_sequence, summarize_detection_quality
+from badminton.detection import (_HogPeople, _NativeRoiDetector, _merge_native,
+                                 _multiscale_budget, detect_sequence, summarize_detection_quality)
 
 
 class LazyFrames:
@@ -148,3 +149,56 @@ def test_native_source_geometry_and_configuration_are_validated():
         detect_sequence(analysis, timestamps, {"source_frames": original, "highres_max_rois": 0})
     with pytest.raises(ValueError, match="person_backend"):
         detect_sequence(analysis, timestamps, {"person_backend": "unknown"})
+
+
+def test_native_windows_keep_the_same_analysis_field_of_view_at_4k_and_8k():
+    shape = (540, 960)
+    detector = _NativeRoiDetector({'highres_roi_size': 192, 'highres_roi_analysis_size': 48,
+                                   'highres_max_rois': 8, 'highres_exploration_rois': 2},
+                                  shape, np.zeros(shape, np.uint8), np.full(shape, 255, np.uint8), 100)
+    proposal = {'x': 400, 'y': 350, 'confidence': .4, 'radius': 2}
+    for scale in (4, 8):
+        boxes = detector._boxes([proposal], (540 * scale, 960 * scale, 3), 0)
+        assert len(boxes) <= 8
+        first = boxes[0]['bbox']
+        assert first[2:] == [48 * scale, 48 * scale]
+        assert (first[0] + first[2] / 2) / scale == proposal['x']
+        assert (first[1] + first[3] / 2) / scale == proposal['y']
+
+
+def test_native_local_segmentation_recovers_dark_cork_on_bright_floor():
+    original = []
+    for index in range(6):
+        frame = np.full((256, 384, 3), 175, np.uint8)
+        cv2.circle(frame, (40 + index * 12, 40), 2, (50, 50, 50), -1)
+        original.append(frame)
+    analysis = [cv2.resize(frame, (96, 64), interpolation=cv2.INTER_AREA) for frame in original]
+    records = detect_sequence(analysis, [index / 30 for index in range(6)],
+                               {'source_frames': original, 'person_backend': 'none',
+                                'include_dark_components': True, 'native_local_components': True,
+                                'highres_roi_size': 128})
+    for index, record in enumerate(records):
+        item = next(item for item in record['detections']
+                    if abs(item['x'] - (40 + index * 12) / 4) < 1 and abs(item['y'] - 10) < 1)
+        assert item['native_resolution_observation']
+        assert record['high_resolution']['local_component_segmentation']
+
+
+def test_native_clutter_cannot_evict_reserved_global_observations():
+    global_candidates = [{'x': 20.0 + i * 25, 'y': 140.0, 'radius': 1.0, 'confidence': .35}
+                         for i in range(4)]
+    native = [{'x': 10.0 + i * 5, 'y': 20.0, 'radius': .5, 'confidence': .95,
+               'native_resolution_observation': True} for i in range(30)]
+    # Native refinement retains the global observation's reserved slot.
+    native.append({'x': 20.5, 'y': 140.2, 'radius': .5, 'confidence': .6,
+                   'native_resolution_observation': True})
+    merged = _merge_native(global_candidates, native, 2)
+    selected, _, count = _multiscale_budget(merged, (180, 320), 8, 4, 'spatial', 2, [])
+    assert len(selected) == 8 and count == 4
+    for target in global_candidates:
+        assert any(np.hypot(item['x'] - target['x'], item['y'] - target['y']) < 1
+                   and item.get('global_resolution_observation') for item in selected)
+    assert any(item.get('global_confidence') == .35 for item in selected)
+    # No global observation is invented when only native pixels reveal objects.
+    selected, _, count = _multiscale_budget(native, (180, 320), 8, 4, 'spatial', 2, [])
+    assert len(selected) == 8 and count == 0

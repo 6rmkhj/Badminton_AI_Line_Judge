@@ -1,0 +1,633 @@
+{
+  "scope": "Single released ordinary-1-a clip, now development. Read-only saved-output/source-context diagnosis; no code, thresholds, reference or source edits. No prospective6 pixels or other datasets opened.",
+  "conclusion": "The first-vicinity candidate already survives eligibility and the production top12. A separate later-event hypothesis wins the ranking even though an existing measured track exactly connects its approach to the earlier candidate rebound. Across-hypothesis episode ordering is the immediate final-selection failure; missing approach pixels also explain why the first candidate remains inferred.",
+  "core_commit": "7306efe267e40f4f8539c0439711ec54c2afcd41",
+  "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+  "source_sha256": "aa5e23a6400121849b7994664fd9dc942c9034b9e34180117a8973f10d83be76",
+  "inputs_sha256": {
+    "/workspace/remediation/final-fresh-0.5.4/ordinary-1-a/result.json": "f44db99faf05221c128c9c3192431dbde5e2e4b2acf29300e57651bc42de0f1c",
+    "/workspace/remediation/final-fresh-0.5.4/ordinary-1-a/detections.json": "094903b342360f781be9dd4eaf6b6ee1cb52d7e0000b34f14aaa8ae08508ab72",
+    "/workspace/remediation/sealed_references/ordinary-1-a.json": "07e8f40d61b802e535ee8737c8846d95dd7c2c60e8cdb4bcc6b0df1eff14a979",
+    "/workspace/remediation/sealed_visual/ordinary-1-a/metadata.json": "fd04c7317131d3fc281ab4e17527b2d3de9321af1a2a638a1efe6993b1f1a232"
+  },
+  "first_candidate": {
+    "rank": 3,
+    "track_id": 2134,
+    "frame_index": 158,
+    "time": 2.665111,
+    "point_px": [
+      209.95499951326042,
+      332.87061611294234
+    ],
+    "point_kind": "inferred_object_center",
+    "first_in_track": true,
+    "supported_for_review": true,
+    "confidence": 0.2202,
+    "fit_residual_px": 2.2563,
+    "approach_displacement_y_px": 82.802,
+    "raw_flight_rank": 25.4282467831588,
+    "inferred_point_rank_factor": 0.7,
+    "scene_rank_factor": 1.0,
+    "effective_flight_rank": 17.79977274821116,
+    "contact_observed": false
+  },
+  "selected_later_candidate": {
+    "rank": 1,
+    "track_id": 2254,
+    "frame_index": 187,
+    "time": 3.154278,
+    "point_px": [
+      182.0,
+      342.625
+    ],
+    "point_kind": "observed_object_center",
+    "first_in_track": true,
+    "supported_for_review": true,
+    "confidence": 0.3739,
+    "fit_residual_px": 0.9675,
+    "approach_displacement_y_px": 37.339,
+    "raw_flight_rank": 18.977890724269376,
+    "inferred_point_rank_factor": 1.0,
+    "scene_rank_factor": 1.0,
+    "effective_flight_rank": 18.977890724269376,
+    "contact_observed": false
+  },
+  "frozen_first_vicinity": {
+    "frame_interval": [
+      158,
+      160
+    ],
+    "point_px": [
+      207,
+      330
+    ],
+    "tolerance_px": 8,
+    "first_candidate_distance_px": 4.119764433951718,
+    "reference_is_independent_human_ground_truth": false
+  },
+  "exact_measured_episode_bridge": {
+    "track_id": 1472,
+    "method": "gated_kalman_hungarian_tracklets",
+    "actual_observation_frame_interval": [
+      159,
+      176
+    ],
+    "continuous_observation_count": 18,
+    "exact_signature_fields": [
+      "frame_index",
+      "x",
+      "y",
+      "method",
+      "bbox"
+    ],
+    "shared_first_rebound": [
+      {
+        "frame_index": 159,
+        "time": 2.681978,
+        "x": 207.25,
+        "y": 330.917,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          206,
+          329,
+          3,
+          5
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 160,
+        "time": 2.698844,
+        "x": 206.25,
+        "y": 327.417,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          205,
+          326,
+          4,
+          4
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 161,
+        "time": 2.715711,
+        "x": 205.125,
+        "y": 323.875,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          204,
+          323,
+          3,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 162,
+        "time": 2.732589,
+        "x": 204.2,
+        "y": 321.0,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          203,
+          320,
+          4,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 164,
+        "time": 2.766322,
+        "x": 202.111,
+        "y": 315.667,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          201,
+          314,
+          3,
+          4
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 165,
+        "time": 2.783189,
+        "x": 201.25,
+        "y": 313.375,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          200,
+          312,
+          4,
+          3
+        ],
+        "appearance_polarity": "dark"
+      }
+    ],
+    "shared_later_approach": [
+      {
+        "frame_index": 173,
+        "time": 2.918133,
+        "x": 193.143,
+        "y": 305.286,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          191,
+          305,
+          5,
+          2
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 174,
+        "time": 2.935,
+        "x": 192.0,
+        "y": 306.0,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          190,
+          305,
+          4,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 175,
+        "time": 2.951867,
+        "x": 190.833,
+        "y": 306.667,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          189,
+          306,
+          4,
+          2
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 176,
+        "time": 2.968733,
+        "x": 189.8,
+        "y": 307.8,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          188,
+          307,
+          4,
+          2
+        ],
+        "appearance_polarity": "dark"
+      }
+    ],
+    "observations": [
+      {
+        "frame_index": 159,
+        "time": 2.681978,
+        "x": 207.25,
+        "y": 330.917,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          206,
+          329,
+          3,
+          5
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 160,
+        "time": 2.698844,
+        "x": 206.25,
+        "y": 327.417,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          205,
+          326,
+          4,
+          4
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 161,
+        "time": 2.715711,
+        "x": 205.125,
+        "y": 323.875,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          204,
+          323,
+          3,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 162,
+        "time": 2.732589,
+        "x": 204.2,
+        "y": 321.0,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          203,
+          320,
+          4,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 163,
+        "time": 2.749456,
+        "x": 203.273,
+        "y": 318.273,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          202,
+          317,
+          4,
+          4
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 164,
+        "time": 2.766322,
+        "x": 202.111,
+        "y": 315.667,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          201,
+          314,
+          3,
+          4
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 165,
+        "time": 2.783189,
+        "x": 201.25,
+        "y": 313.375,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          200,
+          312,
+          4,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 166,
+        "time": 2.800056,
+        "x": 200.429,
+        "y": 311.286,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          199,
+          310,
+          4,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 167,
+        "time": 2.816922,
+        "x": 199.375,
+        "y": 309.875,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          198,
+          308,
+          4,
+          4
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 168,
+        "time": 2.833789,
+        "x": 198.625,
+        "y": 308.125,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          197,
+          307,
+          4,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 169,
+        "time": 2.850656,
+        "x": 197.25,
+        "y": 307.125,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          196,
+          306,
+          4,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 170,
+        "time": 2.867522,
+        "x": 196.286,
+        "y": 306.143,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          195,
+          305,
+          4,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 171,
+        "time": 2.884389,
+        "x": 195.429,
+        "y": 305.571,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          194,
+          305,
+          4,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 172,
+        "time": 2.901267,
+        "x": 194.375,
+        "y": 305.875,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          193,
+          305,
+          4,
+          4
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 173,
+        "time": 2.918133,
+        "x": 193.143,
+        "y": 305.286,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          191,
+          305,
+          5,
+          2
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 174,
+        "time": 2.935,
+        "x": 192.0,
+        "y": 306.0,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          190,
+          305,
+          4,
+          3
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 175,
+        "time": 2.951867,
+        "x": 190.833,
+        "y": 306.667,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          189,
+          306,
+          4,
+          2
+        ],
+        "appearance_polarity": "dark"
+      },
+      {
+        "frame_index": 176,
+        "time": 2.968733,
+        "x": 189.8,
+        "y": 307.8,
+        "method": "opencv_motion_dark_component",
+        "bbox": [
+          188,
+          307,
+          4,
+          2
+        ],
+        "appearance_polarity": "dark"
+      }
+    ],
+    "all_three_track_observations_match_actual_raw_pool": true,
+    "interpolated_or_fabricated_observations_used": false,
+    "note": "Track1472 has a trailing lost interval177–187, but the proof uses only its complete159–176 segment, overlapping the later approach173–176. The later hypothesis still has an unfilled frame186 gap."
+  },
+  "saved_track_limitations": {
+    "first_hypothesis_missing_frames": [
+      146,
+      158
+    ],
+    "first_hypothesis_additional_gap": [
+      163,
+      163
+    ],
+    "later_hypothesis_gap": [
+      186,
+      186
+    ],
+    "first_point_is_inferred": true,
+    "first_contact_verified": false
+  },
+  "raw_reference_checkpoint_distances": [
+    {
+      "frame_index": 154,
+      "reference_point": [
+        215,
+        283
+      ],
+      "closest_raw_point": [
+        194.639,
+        252.306
+      ],
+      "distance_px": 36.833299567103666,
+      "method": "opencv_source_roi_component",
+      "distance_is_not_identity_proof": true
+    },
+    {
+      "frame_index": 156,
+      "reference_point": [
+        211,
+        298
+      ],
+      "closest_raw_point": [
+        209.0,
+        294.0
+      ],
+      "distance_px": 4.47213595499958,
+      "method": "opencv_motion_dark_component",
+      "distance_is_not_identity_proof": true
+    },
+    {
+      "frame_index": 158,
+      "reference_point": [
+        209,
+        316
+      ],
+      "closest_raw_point": [
+        210.0,
+        319.5
+      ],
+      "distance_px": 3.640054944640259,
+      "method": "opencv_motion_bright_component",
+      "distance_is_not_identity_proof": true
+    },
+    {
+      "frame_index": 159,
+      "reference_point": [
+        207,
+        330
+      ],
+      "closest_raw_point": [
+        207.25,
+        330.917
+      ],
+      "distance_px": 0.9504677795695922,
+      "method": "opencv_motion_dark_component",
+      "distance_is_not_identity_proof": true
+    },
+    {
+      "frame_index": 162,
+      "reference_point": [
+        204,
+        321
+      ],
+      "closest_raw_point": [
+        204.2,
+        321.0
+      ],
+      "distance_px": 0.19999999999998863,
+      "method": "opencv_motion_dark_component",
+      "distance_is_not_identity_proof": true
+    },
+    {
+      "frame_index": 165,
+      "reference_point": [
+        201,
+        314
+      ],
+      "closest_raw_point": [
+        201.25,
+        313.375
+      ],
+      "distance_px": 0.673145600891813,
+      "method": "opencv_motion_dark_component",
+      "distance_is_not_identity_proof": true
+    },
+    {
+      "frame_index": 168,
+      "reference_point": [
+        196,
+        308
+      ],
+      "closest_raw_point": [
+        198.625,
+        308.125
+      ],
+      "distance_px": 2.62797450520358,
+      "method": "opencv_motion_dark_component",
+      "distance_is_not_identity_proof": true
+    }
+  ],
+  "source_visual_review": {
+    "evidence": [
+      {
+        "path": "/workspace/remediation/sealed_visual/ordinary-1-a/native-154-174-180-270-0.png",
+        "sha256": "573299830394de8c84656691bb645223bb5f46e90aa67a42194d73cd1ded0562"
+      },
+      {
+        "path": "/workspace/remediation/sealed_visual/ordinary-1-a/native-154-174-180-270-1.png",
+        "sha256": "6a6b40b025adcfbc657952659df94d2736fc5fd62bcd131c0c5599b59e6aeb03"
+      },
+      {
+        "path": "/workspace/remediation/final-fresh-0.5.4/ordinary-1-a/evidence/source-contact-000.jpg",
+        "sha256": "afa2e43727de4c29daa380da29fbb585940c2788d8bab58fb9658373356c89ad"
+      }
+    ],
+    "finding": "Native154–174 source sequence shows the descending white blur reverse near159, then the same dark cork/white feathers rise and rotate through174. Native185–189 source sequence shows the later bounce. The exact raw-observation bridge ties these measured portions to the same rebound episode; physical cork/floor contact remains uncertified.",
+    "cache_geometry_and_source_sha_match": true,
+    "scene_sample_and_selected_frame_hashes_match_saved_result": true
+  },
+  "ordering_cause": {
+    "later_is_first_only_within_short_track": true,
+    "cross_track_episode_bridge_considered_by_existing_ranker": false,
+    "existing_adjacent_fragment_resolver_scope": "Observed-center adjacent turns only, <=3 nominal frame steps and <=.08s; it cannot resolve these29-frame-separated events and the earlier point is inferred.",
+    "scene_factor_equal_for_both": true,
+    "global_time_sort_is_not_recommended": "Earlier unrelated-court events also exist; order should only use actual measured episode overlap."
+  },
+  "uncapped_replay": {
+    "performed": false,
+    "needed_for_existence_check": false,
+    "reason": "The matching first-vicinity candidate is already retained at rank3 in the production top12, so cap removal cannot explain its absence as primary."
+  },
+  "runtime_work": "Loaded saved JSON/cache for signatures and provenance; no detection, tracking, event or source-decode replay."
+}

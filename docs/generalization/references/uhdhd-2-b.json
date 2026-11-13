@@ -1,0 +1,57 @@
+{
+  "key": "uhdhd-2-b",
+  "file": "b시점(uhd30 hd30) 2.mp4",
+  "source_sha256": "972a0183da9fcdbb41e2ec94cc83201a84259238c34a54cfdf59b0cde4c56823",
+  "split": "development",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "human_verified": false,
+  "reference_frozen": true,
+  "contact_visibility": "occluded",
+  "landing_frame_interval": null,
+  "landing_point_px": null,
+  "tolerance_px": 8,
+  "trajectory_points": [
+    {
+      "frame_index": 34,
+      "x": 378,
+      "y": 219,
+      "time": 1.133333
+    },
+    {
+      "frame_index": 38,
+      "x": 434,
+      "y": 202,
+      "time": 1.266667
+    },
+    {
+      "frame_index": 42,
+      "x": 476,
+      "y": 199,
+      "time": 1.4
+    },
+    {
+      "frame_index": 46,
+      "x": 512,
+      "y": 205,
+      "time": 1.533333
+    },
+    {
+      "frame_index": 50,
+      "x": 536,
+      "y": 211,
+      "time": 1.666667
+    }
+  ],
+  "notes": [
+    "Main-court shuttle is a continuous white airborne streak across the green wall before overlapping the near tall black-shirt player. These are approximate visual flight positions, not contact positions.",
+    "Inspected consecutive source frames30–75. The sequence does not expose a defensible first floor-contact interval after the player overlap. Do not use the eventual player gathering or assumed floor projection as contact truth."
+  ],
+  "evidence_images": [
+    "visual/uhdhd-2-b/crop-30-49-330-150.jpg",
+    "visual/uhdhd-2-b/crop-48-75-480-170.jpg"
+  ]
+}

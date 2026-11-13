@@ -1,0 +1,58 @@
+{
+  "scope": "AI visual quality reviews kept separate from immutable strict vicinity references. No tolerance/coordinate changes and no independent-human ground-truth claim.",
+  "cases": {
+    "ordinary-12-a": {
+      "source_sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb",
+      "reference_sha256": "619a834d2eb3c5c2ddd442adcfa3fd0dcfce49bd8b110b46b52f90c98559f8ec",
+      "baseline_qualitative_status": "correct_object_first_vicinity_borderline",
+      "note": "The baseline selected the main shuttle first-bounce vicinity; its6.335px distance exceeded the frozen6px tolerance by0.335px. A later wrong object must not hide behind strict miss-to-miss counting.",
+      "reviewed_selections": [
+        {
+          "selection": {
+            "frame_index": 152,
+            "candidate_px": [
+              481.833,
+              208.667
+            ]
+          },
+          "qualitative_status": "correct_object_first_vicinity_borderline",
+          "evidence": "Baseline source-frame review before predictions, plus baseline overview/trajectory context."
+        },
+        {
+          "selection": {
+            "frame_index": 90,
+            "candidate_px": [
+              352.75,
+              218.5
+            ]
+          },
+          "qualitative_status": "wrong_object_racket_region",
+          "evidence": "Final920f744 overview atf90 circles the near gray player racket/hand, while main landing occursf150–153. Clear incoming bright path enters possibleoccluder then shrinks to tiny components and remains over player."
+        },
+        {
+          "selection": {
+            "frame_index": 150,
+            "candidate_px": [
+              481.316,
+              208.421
+            ]
+          },
+          "qualitative_status": "correct_object_first_vicinity_borderline",
+          "evidence": "Frozen d7f3d330 development detector-reuse output: full overview and native trajectory context visually restore the main shuttle descent and first floor-near rebound. Frame150 lies inside unchanged150–153 interval, but6.6145px distance still exceeds6px tolerance. This remains a strict failure; no criterion was changed. The prior racket-region selection at90 is absent.",
+          "source_revision": "d7f3d3303daa40c699d579c17e40269173220937",
+          "result_sha256": "a0f6ee12c582c44e2a677ff5186420ec71b94486172b13e3d95d88e93755cf98",
+          "reviewed_images": [
+            {
+              "path": "/workspace/generalization/release/ordinary-12-a/overview.jpg",
+              "sha256": "f04ffb523d8357007511f272bff63c1530d67840b3064f9f37011113cbf77b5e"
+            },
+            {
+              "path": "/workspace/generalization/release/ordinary-12-a/evidence/trajectory-context.jpg",
+              "sha256": "64a9f14a8779cb0140014f4fbc214ee32427e9e06b3b90e1e064cdfcc7a81404"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

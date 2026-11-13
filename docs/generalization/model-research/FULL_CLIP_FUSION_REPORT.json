@@ -1,0 +1,557 @@
+{
+  "decision": "Research only. Do not adopt as production default or ship model weights.",
+  "scope": "Three complete development clips; no holdout inputs, references, or results opened. Frozen same model, grid, threshold, observation extraction, and candidate budget; no learned training or threshold tuning.",
+  "model_sha256": "b0ed780c3cc2c4f8eab6efa08d1489667381ecdcced7fad52abccbd176204ed6",
+  "model_provenance": "PROVENANCE.json",
+  "license": "LICENSE-TrackNetV3.txt",
+  "fusion": "Preserve every original CV observation (at most80/frame); append at most8 image-conditioned model components after fixed2px overlap deduplication and measured local source-cache patch support. Model confidence is explicitly uncalibrated. Model-only denotes candidate observations; existing image occlusion metadata remains shared.",
+  "preprocessing": "OpenCV INTER_CUBIC with RGB, fixed unhinted2x2 grid (tile .6W×.6H, origins0/.4W and0/.4H), median background+8frames NCHW /255, sigmoid threshold.5. Existing source cache is960x540 BGR.",
+  "fixture_comparison": "fusion/8k-2-b/opencv-vs-pil-fixture.json: all22 prior accepted PIL components have an OpenCV counterpart within3px; one extra candidate appears. Mean heatmap absolute difference.000429, maximum.103501. Not bit-identical.",
+  "critical_limitations": [
+    "Primary-candidate agreement is not accurate full-trajectory tracking or verified first physical contact.",
+    "AI source-blinded visual development references are not independent human ground truth; pixel distances are measured against those estimates.",
+    "Independent source-review agent reported background contamination at B2 fusion frame46: selected CV observation[416.534,197.233] versus source-reference[419,207]. This is within the broad15px checkpoint tolerance, illustrating that point-recall can pass the wrong image object.",
+    "Some model observations have unknown occluder overlap; preserve the existing REVIEW output and unverified target identity/contact.",
+    "Inference is expensive onCPU and results do not establish generalization. Existing CV originalA1/B1 controls and held-out tests do not validate this model experiment.",
+    "No native source contact refinement was run for these cached-source replay comparisons; CV-only, model-only, and fusion share that limitation.",
+    "Full-clip model input batches are fixed0,8,16,...; the final partial batch repeats the last real input for context only and retains no synthetic output frames."
+  ],
+  "clips": [
+    {
+      "clip": "8k-2-b",
+      "metadata": {
+        "clip": "8k-2-b",
+        "split": "development",
+        "source_sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead",
+        "cache_sha256": "fde97fb9838d1377a42d7983021a254a9160d70e7523c60f0b99b70720299bb3",
+        "cache_path": "/workspace/generalization/detector-diagnosis/8k-2-b-frames960.npy",
+        "model_sha256": "b0ed780c3cc2c4f8eab6efa08d1489667381ecdcced7fad52abccbd176204ed6",
+        "adapter_sha256": "4c2e0a4529fd6e7e897427a92b1bb9bb987c7c91e1681717ffe2b110b7c4ba13",
+        "grid": [
+          [
+            0,
+            0,
+            576,
+            324
+          ],
+          [
+            384,
+            0,
+            576,
+            324
+          ],
+          [
+            0,
+            216,
+            576,
+            324
+          ],
+          [
+            384,
+            216,
+            576,
+            324
+          ]
+        ],
+        "threshold": 0.5,
+        "preprocessing": "cached_bgr960_fullclip_median_uint8_then_fixed_grid_rgb_opencv_inter_cubic_512x288_nchw_bg_plus_8_frames_div255",
+        "timestamp_basis": "normalized_source_pts",
+        "model_component_budget": 8,
+        "original_cv_candidates_preserved": true,
+        "original_candidate_count": 6400,
+        "added_candidate_count": 186,
+        "patch_unsupported_rejections": 0,
+        "overlap_duplicate_rejections": 46,
+        "inference_seconds": 78.30046731600487,
+        "preprocess_seconds": 1.6757510459901823,
+        "model_load_seconds": 0.18526803599888808,
+        "max_rss_mb": 1284.48828125,
+        "threads": 1,
+        "scope": "Full development clip; fixed8frame batches and four unhinted grid tiles. Last batch repeats last real input only for padding if needed; only real source frame outputs kept. No references/landing windows used. Model-only and fusion observations all tied to actual cached source pixels; model is uncalibrated."
+      },
+      "reference_sha256": "72e969f9957b4eb8bb196cb933e4ed19fd287f71709df42010e836084e5f00b9",
+      "reference_interval": [
+        45,
+        47
+      ],
+      "reference_point_px": [
+        419,
+        207
+      ],
+      "reference_tolerance_px": 15,
+      "frozen_cv_primary": {
+        "frame_index": 12,
+        "candidate_px": [
+          727.421,
+          179.355
+        ],
+        "reference_distance_px": 309.6574870175111,
+        "in_reference_interval": false,
+        "within_reference_tolerance": false,
+        "primary_matches_sparse_reference": false,
+        "target_identity_ambiguous": true,
+        "physical_contact_verified": false,
+        "flight_supported_for_review": true,
+        "model_observations_in_selected_track": 0,
+        "cv_observations_in_selected_track": 16,
+        "decision": "REVIEW",
+        "replay_seconds": 37.57073830399895
+      },
+      "methods": {
+        "cv_only": {
+          "frame_index": 12,
+          "candidate_px": [
+            727.421,
+            179.355
+          ],
+          "reference_distance_px": 309.6574870175111,
+          "in_reference_interval": false,
+          "within_reference_tolerance": false,
+          "primary_matches_sparse_reference": false,
+          "target_identity_ambiguous": true,
+          "physical_contact_verified": false,
+          "flight_supported_for_review": true,
+          "model_observations_in_selected_track": 0,
+          "cv_observations_in_selected_track": 16,
+          "decision": "REVIEW",
+          "replay_seconds": 7.284370659999695,
+          "artifact_path": "/workspace/generalization/next/model-research/fusion/8k-2-b/cv_only-result.json",
+          "artifact_sha256": "703646c2d7cd4eea77fdb9ed2ffc6440ba9749f8bee7dd9341d0745873ea2e0b",
+          "replay_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+          "replay_source_path": "/workspace/badminton-progress",
+          "replay_module_sha256": {
+            "tracking": "74e310e10f2d7674bfb069087bea903f247e9f06548c604777d35057a8af5cc4",
+            "events": "6fa68a1a6028bba6ce634b1a18c1de21a8786b85cd2ff9162465ee8f5f59a8e7",
+            "identity": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+            "identity_continuity": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+            "candidate_identity": "dec53a22d0932a78b71e503e38c176e4cb4001ea87712fb675d57c1831dc0c47",
+            "pipeline": "a81c5634c8bab9bb328a1091ea03d9383fa899b2ec303fe406e77ffe1f619a29",
+            "decision": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a"
+          }
+        },
+        "model_only": {
+          "frame_index": 45,
+          "candidate_px": [
+            419.625,
+            206.4375
+          ],
+          "reference_distance_px": 0.8408515029421069,
+          "in_reference_interval": true,
+          "within_reference_tolerance": true,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "physical_contact_verified": false,
+          "flight_supported_for_review": true,
+          "model_observations_in_selected_track": 24,
+          "cv_observations_in_selected_track": 0,
+          "decision": "REVIEW",
+          "replay_seconds": 0.3725668480001332,
+          "artifact_path": "/workspace/generalization/next/model-research/fusion/8k-2-b/model_only-result.json",
+          "artifact_sha256": "afbb090b2cd26b96a7b4fd88b786d976b2ad1d6c1437c083e6f08caf43d3563d",
+          "replay_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+          "replay_source_path": "/workspace/badminton-progress",
+          "replay_module_sha256": {
+            "tracking": "74e310e10f2d7674bfb069087bea903f247e9f06548c604777d35057a8af5cc4",
+            "events": "6fa68a1a6028bba6ce634b1a18c1de21a8786b85cd2ff9162465ee8f5f59a8e7",
+            "identity": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+            "identity_continuity": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+            "candidate_identity": "dec53a22d0932a78b71e503e38c176e4cb4001ea87712fb675d57c1831dc0c47",
+            "pipeline": "a81c5634c8bab9bb328a1091ea03d9383fa899b2ec303fe406e77ffe1f619a29",
+            "decision": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a"
+          }
+        },
+        "fusion": {
+          "frame_index": 45,
+          "candidate_px": [
+            419.625,
+            206.4375
+          ],
+          "reference_distance_px": 0.8408515029421069,
+          "in_reference_interval": true,
+          "within_reference_tolerance": true,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "physical_contact_verified": false,
+          "flight_supported_for_review": true,
+          "model_observations_in_selected_track": 11,
+          "cv_observations_in_selected_track": 13,
+          "decision": "REVIEW",
+          "replay_seconds": 6.7642985559996305,
+          "artifact_path": "/workspace/generalization/next/model-research/fusion/8k-2-b/fusion-result.json",
+          "artifact_sha256": "136e7deeb95553d04c1a501f9856167eaa0f3e65e9f6667170cc17b1d225f8cc",
+          "replay_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+          "replay_source_path": "/workspace/badminton-progress",
+          "replay_module_sha256": {
+            "tracking": "74e310e10f2d7674bfb069087bea903f247e9f06548c604777d35057a8af5cc4",
+            "events": "6fa68a1a6028bba6ce634b1a18c1de21a8786b85cd2ff9162465ee8f5f59a8e7",
+            "identity": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+            "identity_continuity": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+            "candidate_identity": "dec53a22d0932a78b71e503e38c176e4cb4001ea87712fb675d57c1831dc0c47",
+            "pipeline": "a81c5634c8bab9bb328a1091ea03d9383fa899b2ec303fe406e77ffe1f619a29",
+            "decision": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a"
+          }
+        }
+      }
+    },
+    {
+      "clip": "8k-5-b",
+      "metadata": {
+        "clip": "8k-5-b",
+        "split": "development",
+        "source_sha256": "7eccb2951dde57a8ab51b6cf1e42671348a7369d62e4ebf3800d536349a48667",
+        "cache_sha256": "f296ca8c6a50b71928513c98722111af921e2a153ea40dacfd03d400b6924656",
+        "cache_path": "/workspace/generalization/detector-diagnosis/8k-5-b-frames960.npy",
+        "model_sha256": "b0ed780c3cc2c4f8eab6efa08d1489667381ecdcced7fad52abccbd176204ed6",
+        "adapter_sha256": "4c2e0a4529fd6e7e897427a92b1bb9bb987c7c91e1681717ffe2b110b7c4ba13",
+        "grid": [
+          [
+            0,
+            0,
+            576,
+            324
+          ],
+          [
+            384,
+            0,
+            576,
+            324
+          ],
+          [
+            0,
+            216,
+            576,
+            324
+          ],
+          [
+            384,
+            216,
+            576,
+            324
+          ]
+        ],
+        "threshold": 0.5,
+        "preprocessing": "cached_bgr960_fullclip_median_uint8_then_fixed_grid_rgb_opencv_inter_cubic_512x288_nchw_bg_plus_8_frames_div255",
+        "timestamp_basis": "normalized_source_pts",
+        "model_component_budget": 8,
+        "original_cv_candidates_preserved": true,
+        "original_candidate_count": 7360,
+        "added_candidate_count": 154,
+        "patch_unsupported_rejections": 0,
+        "overlap_duplicate_rejections": 26,
+        "inference_seconds": 95.90203745600047,
+        "preprocess_seconds": 1.9058587419949617,
+        "model_load_seconds": 0.09303523000016867,
+        "max_rss_mb": 1307.2265625,
+        "threads": 1,
+        "scope": "Full development clip; fixed8frame batches and four unhinted grid tiles. Last batch repeats last real input only for padding if needed; only real source frame outputs kept. No references/landing windows used. Model-only and fusion observations all tied to actual cached source pixels; model is uncalibrated."
+      },
+      "reference_sha256": "4c2cbb5aa122e07b452fa2bfb74d1e3ec1f450068e5f2ab96cd50378d7b174ef",
+      "reference_interval": [
+        39,
+        41
+      ],
+      "reference_point_px": [
+        820,
+        291
+      ],
+      "reference_tolerance_px": 15,
+      "frozen_cv_primary": {
+        "frame_index": 39,
+        "candidate_px": [
+          818.667,
+          298.667
+        ],
+        "reference_distance_px": 7.782016319695012,
+        "in_reference_interval": true,
+        "within_reference_tolerance": true,
+        "primary_matches_sparse_reference": true,
+        "target_identity_ambiguous": true,
+        "physical_contact_verified": false,
+        "flight_supported_for_review": true,
+        "model_observations_in_selected_track": 0,
+        "cv_observations_in_selected_track": 22,
+        "decision": "REVIEW",
+        "replay_seconds": 49.392243306001546
+      },
+      "methods": {
+        "cv_only": {
+          "frame_index": 39,
+          "candidate_px": [
+            818.667,
+            298.667
+          ],
+          "reference_distance_px": 7.782016319695012,
+          "in_reference_interval": true,
+          "within_reference_tolerance": true,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "physical_contact_verified": false,
+          "flight_supported_for_review": true,
+          "model_observations_in_selected_track": 0,
+          "cv_observations_in_selected_track": 22,
+          "decision": "REVIEW",
+          "replay_seconds": 7.927340979998917,
+          "artifact_path": "/workspace/generalization/next/model-research/fusion/8k-5-b/cv_only-result.json",
+          "artifact_sha256": "df03f0591e490e7c99a837f2000b7d327cac01e92093658d0814505363e57815",
+          "replay_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+          "replay_source_path": "/workspace/badminton-progress",
+          "replay_module_sha256": {
+            "tracking": "74e310e10f2d7674bfb069087bea903f247e9f06548c604777d35057a8af5cc4",
+            "events": "6fa68a1a6028bba6ce634b1a18c1de21a8786b85cd2ff9162465ee8f5f59a8e7",
+            "identity": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+            "identity_continuity": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+            "candidate_identity": "dec53a22d0932a78b71e503e38c176e4cb4001ea87712fb675d57c1831dc0c47",
+            "pipeline": "a81c5634c8bab9bb328a1091ea03d9383fa899b2ec303fe406e77ffe1f619a29",
+            "decision": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a"
+          }
+        },
+        "model_only": {
+          "frame_index": 13,
+          "candidate_px": [
+            364.5,
+            166.5
+          ],
+          "reference_distance_px": 472.2081109002682,
+          "in_reference_interval": false,
+          "within_reference_tolerance": false,
+          "primary_matches_sparse_reference": false,
+          "target_identity_ambiguous": true,
+          "physical_contact_verified": false,
+          "flight_supported_for_review": false,
+          "model_observations_in_selected_track": 34,
+          "cv_observations_in_selected_track": 0,
+          "decision": "REVIEW",
+          "replay_seconds": 0.11080766600025527,
+          "artifact_path": "/workspace/generalization/next/model-research/fusion/8k-5-b/model_only-result.json",
+          "artifact_sha256": "14e7b2b3ecec80d2ab854fa9f58ec19f55113a9bace947afbbdc5f68fa905f35",
+          "replay_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+          "replay_source_path": "/workspace/badminton-progress",
+          "replay_module_sha256": {
+            "tracking": "74e310e10f2d7674bfb069087bea903f247e9f06548c604777d35057a8af5cc4",
+            "events": "6fa68a1a6028bba6ce634b1a18c1de21a8786b85cd2ff9162465ee8f5f59a8e7",
+            "identity": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+            "identity_continuity": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+            "candidate_identity": "dec53a22d0932a78b71e503e38c176e4cb4001ea87712fb675d57c1831dc0c47",
+            "pipeline": "a81c5634c8bab9bb328a1091ea03d9383fa899b2ec303fe406e77ffe1f619a29",
+            "decision": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a"
+          }
+        },
+        "fusion": {
+          "frame_index": 39,
+          "candidate_px": [
+            818.667,
+            298.667
+          ],
+          "reference_distance_px": 7.782016319695012,
+          "in_reference_interval": true,
+          "within_reference_tolerance": true,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "physical_contact_verified": false,
+          "flight_supported_for_review": true,
+          "model_observations_in_selected_track": 0,
+          "cv_observations_in_selected_track": 22,
+          "decision": "REVIEW",
+          "replay_seconds": 9.375033102000089,
+          "artifact_path": "/workspace/generalization/next/model-research/fusion/8k-5-b/fusion-result.json",
+          "artifact_sha256": "48b714c438cc770f59ae8f4eb13a17aa50523c856cd665568b705f9c5d0b58bc",
+          "replay_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+          "replay_source_path": "/workspace/badminton-progress",
+          "replay_module_sha256": {
+            "tracking": "74e310e10f2d7674bfb069087bea903f247e9f06548c604777d35057a8af5cc4",
+            "events": "6fa68a1a6028bba6ce634b1a18c1de21a8786b85cd2ff9162465ee8f5f59a8e7",
+            "identity": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+            "identity_continuity": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+            "candidate_identity": "dec53a22d0932a78b71e503e38c176e4cb4001ea87712fb675d57c1831dc0c47",
+            "pipeline": "a81c5634c8bab9bb328a1091ea03d9383fa899b2ec303fe406e77ffe1f619a29",
+            "decision": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a"
+          }
+        }
+      }
+    },
+    {
+      "clip": "8k-2-a",
+      "metadata": {
+        "clip": "8k-2-a",
+        "split": "development",
+        "source_sha256": "311b814ee7f7347dfa244e56d6c5f3b9d94be8fc4de29dada2adc89858167492",
+        "cache_sha256": "55c907a01cef172434a45609cc8af16593022a086aa85556ef08dc6dad5a7a44",
+        "cache_path": "/workspace/generalization/detector-diagnosis/8k-2-a-frames960.npy",
+        "model_sha256": "b0ed780c3cc2c4f8eab6efa08d1489667381ecdcced7fad52abccbd176204ed6",
+        "adapter_sha256": "a6c41261d986aea86a8b570be68238dff9752a3326ea0403f5fb48055d0c16e7",
+        "grid": [
+          [
+            0,
+            0,
+            576,
+            324
+          ],
+          [
+            384,
+            0,
+            576,
+            324
+          ],
+          [
+            0,
+            216,
+            576,
+            324
+          ],
+          [
+            384,
+            216,
+            576,
+            324
+          ]
+        ],
+        "threshold": 0.5,
+        "preprocessing": "cached_bgr960_fullclip_median_uint8_then_fixed_grid_rgb_opencv_inter_cubic_512x288_nchw_bg_plus_8_frames_div255",
+        "timestamp_basis": "normalized_source_pts",
+        "model_component_budget": 8,
+        "original_cv_candidates_preserved": true,
+        "original_candidate_count": 10320,
+        "added_candidate_count": 204,
+        "patch_unsupported_rejections": 8,
+        "overlap_duplicate_rejections": 33,
+        "inference_seconds": 140.82977042500897,
+        "preprocess_seconds": 3.063736711990714,
+        "model_load_seconds": 0.1606016030000319,
+        "max_rss_mb": 1376.93359375,
+        "threads": 1,
+        "scope": "Full development clip; fixed8frame batches and four unhinted grid tiles. Last batch repeats last real input only for padding if needed; only real source frame outputs kept. No references/landing windows used. Model-only and fusion observations all tied to actual cached source pixels; model is uncalibrated."
+      },
+      "reference_sha256": "c2e8627b03569427228052706497f8f992e5b1ec80190075a69a2e53c6e98d70",
+      "reference_interval": [
+        83,
+        85
+      ],
+      "reference_point_px": [
+        287,
+        362
+      ],
+      "reference_tolerance_px": 15,
+      "frozen_cv_primary": {
+        "frame_index": 84,
+        "candidate_px": [
+          284.833,
+          369.0
+        ],
+        "reference_distance_px": 7.327747880488239,
+        "in_reference_interval": true,
+        "within_reference_tolerance": true,
+        "primary_matches_sparse_reference": true,
+        "target_identity_ambiguous": true,
+        "physical_contact_verified": false,
+        "flight_supported_for_review": true,
+        "model_observations_in_selected_track": 0,
+        "cv_observations_in_selected_track": 24,
+        "decision": "REVIEW",
+        "replay_seconds": 190.88585203000002
+      },
+      "methods": {
+        "cv_only": {
+          "frame_index": 84,
+          "candidate_px": [
+            284.833,
+            369.0
+          ],
+          "reference_distance_px": 7.327747880488239,
+          "in_reference_interval": true,
+          "within_reference_tolerance": true,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "physical_contact_verified": false,
+          "flight_supported_for_review": true,
+          "model_observations_in_selected_track": 0,
+          "cv_observations_in_selected_track": 24,
+          "decision": "REVIEW",
+          "replay_seconds": 12.307645935999972,
+          "artifact_path": "/workspace/generalization/next/model-research/fusion/8k-2-a/cv_only-result.json",
+          "artifact_sha256": "52bf6a0a0fdcc1e6fad0b99de891c2c0d3dd8168959f176e2ce9ae2861061cbf",
+          "replay_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+          "replay_source_path": "/workspace/badminton-progress",
+          "replay_module_sha256": {
+            "tracking": "74e310e10f2d7674bfb069087bea903f247e9f06548c604777d35057a8af5cc4",
+            "events": "6fa68a1a6028bba6ce634b1a18c1de21a8786b85cd2ff9162465ee8f5f59a8e7",
+            "identity": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+            "identity_continuity": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+            "candidate_identity": "dec53a22d0932a78b71e503e38c176e4cb4001ea87712fb675d57c1831dc0c47",
+            "pipeline": "a81c5634c8bab9bb328a1091ea03d9383fa899b2ec303fe406e77ffe1f619a29",
+            "decision": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a"
+          }
+        },
+        "model_only": {
+          "frame_index": 97,
+          "candidate_px": [
+            789.0,
+            181.125
+          ],
+          "reference_distance_px": 533.5913845115942,
+          "in_reference_interval": false,
+          "within_reference_tolerance": false,
+          "primary_matches_sparse_reference": false,
+          "target_identity_ambiguous": false,
+          "physical_contact_verified": false,
+          "flight_supported_for_review": false,
+          "model_observations_in_selected_track": 50,
+          "cv_observations_in_selected_track": 0,
+          "decision": "REVIEW",
+          "replay_seconds": 0.3780722039991815,
+          "artifact_path": "/workspace/generalization/next/model-research/fusion/8k-2-a/model_only-result.json",
+          "artifact_sha256": "552db6e295e71cdaf7c37fb37f37db1a1f0bcdddcee7c1485d53347cd316f333",
+          "replay_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+          "replay_source_path": "/workspace/badminton-progress",
+          "replay_module_sha256": {
+            "tracking": "74e310e10f2d7674bfb069087bea903f247e9f06548c604777d35057a8af5cc4",
+            "events": "6fa68a1a6028bba6ce634b1a18c1de21a8786b85cd2ff9162465ee8f5f59a8e7",
+            "identity": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+            "identity_continuity": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+            "candidate_identity": "dec53a22d0932a78b71e503e38c176e4cb4001ea87712fb675d57c1831dc0c47",
+            "pipeline": "a81c5634c8bab9bb328a1091ea03d9383fa899b2ec303fe406e77ffe1f619a29",
+            "decision": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a"
+          }
+        },
+        "fusion": {
+          "frame_index": 84,
+          "candidate_px": [
+            284.833,
+            369.0
+          ],
+          "reference_distance_px": 7.327747880488239,
+          "in_reference_interval": true,
+          "within_reference_tolerance": true,
+          "primary_matches_sparse_reference": true,
+          "target_identity_ambiguous": true,
+          "physical_contact_verified": false,
+          "flight_supported_for_review": true,
+          "model_observations_in_selected_track": 0,
+          "cv_observations_in_selected_track": 24,
+          "decision": "REVIEW",
+          "replay_seconds": 11.979330566999124,
+          "artifact_path": "/workspace/generalization/next/model-research/fusion/8k-2-a/fusion-result.json",
+          "artifact_sha256": "d3b17efeec5bd6b8c3470a2b15dcfe3f463bf576ab9a89813519501331d82bfd",
+          "replay_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+          "replay_source_path": "/workspace/badminton-progress",
+          "replay_module_sha256": {
+            "tracking": "74e310e10f2d7674bfb069087bea903f247e9f06548c604777d35057a8af5cc4",
+            "events": "6fa68a1a6028bba6ce634b1a18c1de21a8786b85cd2ff9162465ee8f5f59a8e7",
+            "identity": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+            "identity_continuity": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+            "candidate_identity": "dec53a22d0932a78b71e503e38c176e4cb4001ea87712fb675d57c1831dc0c47",
+            "pipeline": "a81c5634c8bab9bb328a1091ea03d9383fa899b2ec303fe406e77ffe1f619a29",
+            "decision": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a"
+          }
+        }
+      }
+    }
+  ],
+  "replay_source_commit": "d7f3d3303daa40c699d579c17e40269173220937",
+  "replay_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "no_further_experiments": "Stopped after B2,5B,A2; ordinary12 full inference was explicitly cancelled before starting; no production/model package integration.",
+  "adapter_snapshots": {
+    "fusion_experiment_v1.py": "4c2e0a4529fd6e7e897427a92b1bb9bb987c7c91e1681717ffe2b110b7c4ba13",
+    "fusion_experiment_v2.py": "a6c41261d986aea86a8b570be68238dff9752a3326ea0403f5fb48055d0c16e7"
+  },
+  "pre_gap_artifact_index": "fusion/PRE_GAP_REPLAY_ARCHIVE.json"
+}

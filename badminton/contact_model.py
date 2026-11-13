@@ -371,8 +371,9 @@ def train_contact_model(manifest, annotations_dir, video_dir, output_path, epoch
 
 
 @lru_cache(maxsize=4)
-def _load_checkpoint_cached(path_string, mtime_ns, size, inode, ctime_ns):
+def _load_checkpoint_cached(path_string, mtime_ns, size, inode, ctime_ns, device="cpu"):
     import torch
+    from .inference import device_error
     path = Path(path_string)
     stored = torch.load(path, map_location="cpu", weights_only=True)
     metadata = stored.get("metadata", {})
@@ -383,14 +384,21 @@ def _load_checkpoint_cached(path_string, mtime_ns, size, inode, ctime_ns):
         raise ValueError("Invalid contact checkpoint patch size")
     model = _network()
     model.load_state_dict(stored["state_dict"], strict=True)
-    model.eval()
+    try:
+        model.eval().to(device)
+    except (RuntimeError, OSError, AssertionError) as error:
+        if device != "cpu":
+            raise device_error(device, error) from error
+        raise
     return model, metadata, hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _checkpoint(checkpoint):
+def _checkpoint(checkpoint, device="cpu"):
+    from .inference import resolve_device
+    device = resolve_device(device)
     path = Path(checkpoint).resolve()
     stat = path.stat()
-    return _load_checkpoint_cached(str(path), stat.st_mtime_ns, stat.st_size, stat.st_ino, stat.st_ctime_ns)
+    return _load_checkpoint_cached(str(path), stat.st_mtime_ns, stat.st_size, stat.st_ino, stat.st_ctime_ns, device)
 
 
 def contact_checkpoint_metadata(checkpoint):
@@ -398,21 +406,28 @@ def contact_checkpoint_metadata(checkpoint):
     return copy.deepcopy(_checkpoint(checkpoint)[1])
 
 
-def _prediction_result(metadata, digest, preprocessing):
+def clear_contact_model_cache():
+    """Release retained device models only when the analysis queues are idle."""
+    _load_checkpoint_cached.cache_clear()
+
+
+def _prediction_result(metadata, digest, preprocessing, device="cpu"):
     return {"contact_observed": False, "contact_px": None, "probabilities": None,
               "model_origin": "learned_temporal_contact", "reason_codes": [],
               "provenance": {"weights_sha256": digest,
                              "architecture": ARCHITECTURE, "dataset_kind": metadata.get("dataset_kind"),
                              "preprocessing": metadata.get("preprocessing"),
                              "runtime_preprocessing": preprocessing,
+                             "inference_device": device, "inference_executed": False,
                              "automatic_contact_qualified": _qualified(metadata),
                              "qualification_evidence": copy.deepcopy(metadata.get("qualification_evidence"))}}
 
 
-def _predict_patches(clips, times, candidate, image_size, model, metadata, digest, preprocessing):
+def _predict_patches(clips, times, candidate, image_size, model, metadata, digest, preprocessing, device="cpu"):
     """Shared training/inference contract: five RGB crops at a fixed native centre."""
     import torch
-    result = _prediction_result(metadata, digest, preprocessing)
+    from .inference import device_error
+    result = _prediction_result(metadata, digest, preprocessing, device)
     patch_size = metadata["patch_size"]
     point = candidate.get("candidate_px", candidate.get("contact_px"))
     index = candidate.get("frame_index")
@@ -436,11 +451,17 @@ def _predict_patches(clips, times, candidate, image_size, model, metadata, diges
     interval_range = metadata.get("frame_interval_range_seconds", [])
     compatible = ([width, height] in [list(size) for size in trained_sizes]
                   and len(interval_range) == 2 and interval_range[0] * 0.8 <= np.median(steps) <= interval_range[1] * 1.2)
-    tensor = torch.from_numpy(clips.transpose(3, 0, 1, 2).copy()[None]).float() / 255
-    with torch.no_grad():
-        logits, offset = model(tensor)
-        probabilities = torch.softmax(logits, 1)[0].numpy()
-        proposed = np.asarray(point) + offset[0].numpy() * patch_size / 2
+    try:
+        tensor = torch.from_numpy(clips.transpose(3, 0, 1, 2).copy()[None]).to(device, dtype=torch.float32) / 255
+        with torch.inference_mode():
+            logits, offset = model(tensor)
+            probabilities = torch.softmax(logits, 1)[0].detach().cpu().numpy()
+            proposed = np.asarray(point) + offset[0].detach().cpu().numpy() * patch_size / 2
+    except (RuntimeError, OSError, AssertionError) as error:
+        if device != "cpu":
+            raise device_error(device, error) from error
+        raise
+    result["provenance"]["inference_executed"] = True
     result.update(probabilities={name: float(probabilities[i]) for i, name in enumerate(CLASSES)},
                   proposed_contact_px=proposed.astype(float).tolist(), frame_index=index,
                   time=float(times[2]), confidence=float(probabilities[1]),
@@ -463,22 +484,26 @@ def _predict_patches(clips, times, candidate, image_size, model, metadata, diges
     return result
 
 
-def infer_contact_patches(clips, times, candidate, checkpoint, *, image_size, preprocessing):
+def infer_contact_patches(clips, times, candidate, checkpoint, *, image_size, preprocessing, device="cpu"):
     """Infer from native crops without retaining full-resolution temporal frames.
 
     ``candidate_px`` and ``image_size`` are in original source pixels. The
     patches must come from ``native_contact_patch`` with the checkpoint size;
     no resized/legacy checkpoint is silently treated as a native model.
     """
-    model, metadata, digest = _checkpoint(checkpoint)
-    return _predict_patches(clips, times, candidate, image_size, model, metadata, digest, preprocessing)
+    from .inference import resolve_device
+    device = resolve_device(device)
+    model, metadata, digest = _checkpoint(checkpoint, device)
+    return _predict_patches(clips, times, candidate, image_size, model, metadata, digest, preprocessing, device)
 
 
-def infer_contact(frames, timestamps, candidate, checkpoint, preprocessing=None):
+def infer_contact(frames, timestamps, candidate, checkpoint, preprocessing=None, device="cpu"):
     """Return a proposed cork point; certify it only with qualified heldout evidence."""
-    model, metadata, digest = _checkpoint(checkpoint)
+    from .inference import resolve_device
+    device = resolve_device(device)
+    model, metadata, digest = _checkpoint(checkpoint, device)
     patch_size = metadata["patch_size"]
-    result = _prediction_result(metadata, digest, preprocessing)
+    result = _prediction_result(metadata, digest, preprocessing, device)
     index, point = candidate.get("frame_index"), candidate.get("candidate_px")
     if point is None:
         point = candidate.get("contact_px")
@@ -497,4 +522,4 @@ def infer_contact(frames, timestamps, candidate, checkpoint, preprocessing=None)
     crop = native_contact_patch if preprocessing == SOURCE_PREPROCESSING else _patch
     clips = np.stack([crop(frame, point[0], point[1], patch_size) for frame in window])
     return _predict_patches(clips, timestamps[index - 2:index + 3], candidate, (width, height),
-                            model, metadata, digest, preprocessing)
+                            model, metadata, digest, preprocessing, device)

@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-11-12T09:11:11.980580+00:00",
+  "scope": "Prediction-aware qualitative source review of actual-pixel scene-context OFF/ON change on OLD24 ordinary-4-a. Frozen numeric reference is unchanged. No new8 reference or output was opened for this task.",
+  "review_method": "Compared exact OFF/ON result selections to verified 960x540 actual-source cached frames and existing native sequential source crops. Source cache digest verified. No detector run, full source decode, new ground-truth annotation, or physical-contact certification.",
+  "cases": [
+    {
+      "key": "ordinary-4-a",
+      "result_path": "/workspace/remediation/scene-context-on-b-v1/ordinary-4-a/result.json",
+      "result_sha256": "db7ae31cfd62556f48fe629d7bbb77ab4bded038b0d90a445eb6776f933b4ea2",
+      "baseline_result_path": "/workspace/remediation/scene-context-off-b-v1/ordinary-4-a/result.json",
+      "baseline_result_sha256": "ef7f151ac9c3000bd487f9bcdf555df17f656fd267beaf03c3005ed5a079ed9c",
+      "reference_path": "/workspace/remediation/regression_references/ordinary-4-a.json",
+      "reference_sha256": "b3861193dd347788cbf5de0efb46ab80c04bb28443e5c3b810a1c7ef86e9c29e",
+      "selection": {
+        "frame_index": 188,
+        "candidate_px": [
+          602.7496043657602,
+          240.64656956344658
+        ],
+        "time": 3.171144,
+        "method": "offline_occluded_image_trajectory_intersection",
+        "contact_observed": false,
+        "point_kind": "inferred_object_center",
+        "estimated_time": 3.1777128460825295,
+        "decision": "REVIEW"
+      },
+      "baseline_selection": {
+        "frame_index": 42,
+        "candidate_px": [
+          55.25,
+          109.25
+        ],
+        "time": 0.708444,
+        "method": "offline_motion_and_tracklet_candidate_search",
+        "contact_observed": false,
+        "point_kind": "observed_object_center",
+        "estimated_time": null,
+        "decision": "REVIEW"
+      },
+      "status": "confirmed_gain",
+      "change_assessment": "gain",
+      "gain_scope": "Main-rally approximate first-floor-vicinity candidate selection; not certified physical contact or end-to-end generalization.",
+      "before_judgment": {
+        "object": "adjacent_court_shuttle_racket_return",
+        "same_main_rally_shuttle": false,
+        "first_floor_near": false,
+        "observation": "OFF f42 [55.25,109.25] follows a real white shuttle in the neighboring court at image-left. Consecutive source crops show it approaching the adjacent player racket and then rising, high against the green wall. This is a racket-return image turn in another court, not the main-rally first floorward reversal."
+      },
+      "after_judgment": {
+        "object": "main_rally_shuttle",
+        "same_main_rally_shuttle": "visually_supported_not_formally_verified",
+        "first_floor_near": "visually_supported_approximate",
+        "observation": "The main shuttle travels from the far white-shirt player toward image-right of the near gray-shirt player. The approach crosses behind that player earlier, then the small moving shuttle is visible beside the hand/leg and separated from stationary spare shuttles. Source crops show its last descending segment followed by the compact same moving feather/cork object rising over the nearby floor lines. Native consecutive evidence f180–203 supports the first rebound vicinity represented by the frozen reference. ON selects that vicinity rather than the unrelated high racket return."
+      },
+      "observed_vs_inferred": {
+        "selected_point_observed": false,
+        "selected_frame_is_a_stored_trajectory_measurement": false,
+        "selected_point_kind": "inferred_object_center",
+        "method": "offline_occluded_image_trajectory_intersection",
+        "incoming_measured_frame_indices": [
+          179,
+          180,
+          181,
+          182,
+          183
+        ],
+        "outgoing_measured_frame_indices": [
+          189,
+          190,
+          191,
+          192
+        ],
+        "missing_measurement_frame_indices": [
+          184,
+          185,
+          186,
+          187,
+          188
+        ],
+        "gap_endpoint_frame_interval": [
+          183,
+          189
+        ],
+        "gap_endpoint_time_interval": [
+          3.086811,
+          3.188022
+        ],
+        "estimated_intersection_time_seconds": 3.1777128460825295,
+        "selected_frame_time_seconds": 3.171144,
+        "explanation": "The f188 [602.7496,240.6466] selection is a fitted intersection between measured incoming and outgoing trajectories across a ~0.1012-second endpoint gap. It is not a newly observed f188 center and not an observed cork-floor contact. Incoming samples f179–183 and outgoing samples f189–192 coincide with the moving source shuttle; visibility in native evidence supports the approximate first-rebound vicinity, while exact surface contact remains unresolved."
+      },
+      "frozen_reference_comparison": {
+        "reference_visibility": "visible",
+        "reference_frame_interval": [
+          188,
+          191
+        ],
+        "reference_point_px": [
+          603,
+          243
+        ],
+        "tolerance_px": 8,
+        "selected_frame_inside_frozen_interval": true,
+        "point_error_px": 2.3667135004774846,
+        "point_inside_frozen_tolerance": true,
+        "extra_frame_tolerance_used": 0,
+        "reference_changed": false,
+        "timestamp_note": "The frozen reference retains raw-source timestamp values that are 0.020 seconds above the result normalized timestamps. Result metadata time_origin_seconds=0.020. This review compares unchanged zero-based frame indices and image coordinates and does not reinterpret that clock-origin difference as a frame error."
+      },
+      "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+      "source_frame_cache": "/workspace/generalization/detector-diagnosis/ordinary-4-a-frames960.npy",
+      "source_frame_cache_sha256": "7f405af43fd22efeb4a51b6b044a794993e6d96b4065cfdf26af8936e5aeb35e",
+      "frame_provenance_path": "/workspace/remediation/frame_cache/ordinary-4-a/provenance.json",
+      "frame_provenance_sha256": "e53d6e6eb282618f91760a9a4a9ef1fa6f280c40c86627bec9a05827ee0fd962",
+      "evidence": [
+        {
+          "path": "/workspace/remediation/scene-context-review-visual/ordinary-4-a/frame-042.png",
+          "sha256": "b47c7df1cd863d22dfa9a0797f4a5b9c13797453359cd41879c89c3421276cb2",
+          "kind": "verified_source_frame_or_nearest_neighbor_crop"
+        },
+        {
+          "path": "/workspace/remediation/scene-context-review-visual/ordinary-4-a/frame-132.png",
+          "sha256": "166274423a272254c9fced4b85f343e89404400fa5af33e6ebc4a37e620f4d0b",
+          "kind": "verified_source_frame_or_nearest_neighbor_crop"
+        },
+        {
+          "path": "/workspace/remediation/scene-context-review-visual/ordinary-4-a/frame-188.png",
+          "sha256": "f930c04104f6243da385c85788294a91d3badfa63e4d7be2474cd0eb734255f0",
+          "kind": "verified_source_frame_or_nearest_neighbor_crop"
+        },
+        {
+          "path": "/workspace/remediation/scene-context-review-visual/ordinary-4-a/off-0.png",
+          "sha256": "75a4399c99e56d078629ee2fdee2247379e8df6a9736cc7e3b26ee75d34400ba",
+          "kind": "verified_source_frame_or_nearest_neighbor_crop"
+        },
+        {
+          "path": "/workspace/remediation/scene-context-review-visual/ordinary-4-a/on-0.png",
+          "sha256": "a3c94b7f3303db4bd681aa333e5bf4904ca88fbe3018dd4b7acbb6be59a57e19",
+          "kind": "verified_source_frame_or_nearest_neighbor_crop"
+        },
+        {
+          "path": "/workspace/remediation/scene-context-review-visual/ordinary-4-a/on-1.png",
+          "sha256": "286b176b1ffee16be3ca9fb5ce00a8aed4ae02d89257b0e5f72ec063116efe09",
+          "kind": "verified_source_frame_or_nearest_neighbor_crop"
+        },
+        {
+          "path": "/workspace/generalization/visual/ordinary-4-a/native-180-203-0.png",
+          "sha256": "51a0488d88608287c9f7b201dd3c720a468c2f8329dfb65536fe0e6b2022f2bb",
+          "kind": "existing_native_source_crop"
+        },
+        {
+          "path": "/workspace/generalization/visual/ordinary-4-a/native-180-203-1.png",
+          "sha256": "54f55be774a63bda66e9dfa0e64d509dff1c68c65a022d119e5790e2f2a16643",
+          "kind": "existing_native_source_crop"
+        }
+      ],
+      "conclusion": "Genuine improvement in selecting the main-rally approximate first-floor vicinity for this old development video. The selected point remains inferred across missing measurements and all output decisions remain REVIEW. This does not certify physical contact, IN/OUT, or performance on unseen videos.",
+      "physical_contact_certified": false
+    }
+  ],
+  "summary": {
+    "cases_reviewed": 1,
+    "confirmed_approximate_main_rally_gains": 1,
+    "regressions": 0,
+    "all_output_decisions": "REVIEW",
+    "frozen_references_changed": 0,
+    "physical_contact_certified": false
+  },
+  "new_round_holdout_read": false
+}

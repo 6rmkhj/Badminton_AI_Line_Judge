@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "key": "uhd4k-1-b",
+  "file": "b-1시점(uhd30 4k30).mp4",
+  "source_path": "/workspace/remediation/input/b-1시점(uhd30 4k30).mp4",
+  "source_sha256": "3f3f685323bc7c4a81c850e89624cc7b2fe635b99f037938b28e6fb5beb558f7",
+  "split": "holdout",
+  "round_holdout": true,
+  "round": "false_positive_remediation_after_0.5.3",
+  "scope": "Eight same-project/current-round holdout video files, four filename A/B pairs; not globally unseen data or independent human ground truth.",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    3840,
+    2160
+  ],
+  "contact_visibility": "visible",
+  "landing_point_px": [
+    462,
+    349
+  ],
+  "tolerance_px": 12,
+  "notes": "The main shuttle descends from image-left into the clear floor patch in front of the near black-shirt player. A blurred downward approach is followed by a compact tumbling/rebounding shuttle before the player lowers the racket to retrieve it. The first floorward turn is visible, but the exposure blur leaves a short interval instead of a single confirmed cork-contact frame. The image point is approximate object-center vicinity; tolerance reflects the blurred approach and feather extent.",
+  "landing_frame_interval": [
+    107,
+    109
+  ],
+  "landing_time_interval_seconds": [
+    3.568333,
+    3.635
+  ],
+  "additional_frame_tolerance": 0,
+  "trajectory_points": [
+    {
+      "frame_index": 104,
+      "time_seconds": 3.468333,
+      "x": 421,
+      "y": 277
+    },
+    {
+      "frame_index": 105,
+      "time_seconds": 3.501667,
+      "x": 432,
+      "y": 289
+    },
+    {
+      "frame_index": 106,
+      "time_seconds": 3.535,
+      "x": 442,
+      "y": 304
+    },
+    {
+      "frame_index": 107,
+      "time_seconds": 3.568333,
+      "x": 450,
+      "y": 325
+    },
+    {
+      "frame_index": 108,
+      "time_seconds": 3.601667,
+      "x": 461,
+      "y": 349
+    },
+    {
+      "frame_index": 109,
+      "time_seconds": 3.635,
+      "x": 471,
+      "y": 348
+    },
+    {
+      "frame_index": 110,
+      "time_seconds": 3.668333,
+      "x": 477,
+      "y": 348
+    },
+    {
+      "frame_index": 112,
+      "time_seconds": 3.735,
+      "x": 496,
+      "y": 348
+    }
+  ],
+  "later_bounce_observations": [],
+  "reference_source": "AI source-frame visual inspection blinded to current-round outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "ground_truth_eligible": false,
+  "predictions_or_model_outputs_inspected": false,
+  "companion_view_calibration_used": false,
+  "evidence": [
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/overview-1.jpg",
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/overview-2.jpg",
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/final-cached-0.png",
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/final-cached-1.png",
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/native-102-114-410-260-0.png",
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/native-102-114-410-260-1.png"
+  ],
+  "evidence_sha256": {
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/overview-1.jpg": "f8540f4927e458fe581e2a0be7e543140eae5b53f21838d033395ea1bfdea35a",
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/overview-2.jpg": "939e5cd644bd0c7cbbc05a1520510bcb1f5069eeb4f1799bc6bd595299d5a1ff",
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/final-cached-0.png": "92df70ad4bdaffbbc815c7a5d7d392e083c02338c060cd65955f1f95a644c8e4",
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/final-cached-1.png": "b7c7f7f57ca6498c0c97222fa40e70dc84f472907a99f44d9982821e50b01166",
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/native-102-114-410-260-0.png": "99637576bddc21a0e32c3ea32f672d4761d9845892dec6895653a12e774a7d50",
+    "/workspace/remediation/sealed_visual/uhd4k-1-b/native-102-114-410-260-1.png": "9aaac500b3d8c79957a7a4865be1b86cd746daf3ccba667db5ea1cbf419de9b1"
+  },
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; normalized source timestamps from ffprobe.",
+  "inspection_decode_threads": 1
+}

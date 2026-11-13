@@ -1,0 +1,97 @@
+{
+  "key": "ordinary-12-b",
+  "file": "b시점 12.mp4",
+  "source_path": "/workspace/generalization/input/b시점 12.mp4",
+  "source_sha256": "3aed5a60fbc157354e7fef85feb5bde191f9db0311b2fab4ee9811646fada62d",
+  "split": "development",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    3840,
+    2160
+  ],
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    182,
+    185
+  ],
+  "landing_time_interval_seconds": [
+    3.063444,
+    3.113456
+  ],
+  "landing_point_px": [
+    172,
+    253
+  ],
+  "tolerance_px": 8,
+  "trajectory_points": [
+    {
+      "frame_index": 156,
+      "time_seconds": 2.629978,
+      "x": 232,
+      "y": 106
+    },
+    {
+      "frame_index": 162,
+      "time_seconds": 2.730011,
+      "x": 216,
+      "y": 126
+    },
+    {
+      "frame_index": 168,
+      "time_seconds": 2.830033,
+      "x": 202,
+      "y": 151
+    },
+    {
+      "frame_index": 174,
+      "time_seconds": 2.930067,
+      "x": 190,
+      "y": 181
+    },
+    {
+      "frame_index": 177,
+      "time_seconds": 2.980089,
+      "x": 182,
+      "y": 204
+    },
+    {
+      "frame_index": 180,
+      "time_seconds": 3.0301,
+      "x": 176,
+      "y": 230
+    },
+    {
+      "frame_index": 183,
+      "time_seconds": 3.080111,
+      "x": 172,
+      "y": 252
+    },
+    {
+      "frame_index": 189,
+      "time_seconds": 3.180144,
+      "x": 169,
+      "y": 240
+    },
+    {
+      "frame_index": 195,
+      "time_seconds": 3.280178,
+      "x": 168,
+      "y": 234
+    }
+  ],
+  "later_bounce_observations": [],
+  "notes": "Main-court shuttle travels from the far gray-shirt player toward the near green-shirt player, who reaches too late. The descending feather blur approaches the floor just left of the diagonal blue court line, then the cork and feathers rebound upward. This first bounce is visible and distinct from later low bouncing/skidding. A source-native sequential crop was expanded below y=250 to inspect the actual first contact; the preceding smaller crop alone truncated the contact area. Coordinates and timing are approximate AI visual estimates.",
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "evidence": [
+    "/workspace/generalization/visual/ordinary-12-b/native-178-201-0.png",
+    "/workspace/generalization/visual/ordinary-12-b/native-178-201-1.png",
+    "/workspace/generalization/visual/ordinary-12-b/native-174-197-0.png",
+    "/workspace/generalization/visual/ordinary-12-b/crop-120-210-0.jpg",
+    "/workspace/generalization/visual/ordinary-12-b/crop-120-210-1.jpg"
+  ],
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; native crops use sequential decoding. Source timestamps from ffprobe. Contact-sheet time labels based on mean FPS are illustrative only."
+}

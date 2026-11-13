@@ -1,0 +1,22 @@
+{
+  "source_commit": "d7f3d3303daa40c699d579c17e40269173220937",
+  "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "scope": "Generator-compatible view of the canonical final software verification. Current-source completed-result browser replay is separate from the synthetic region UI test.",
+  "python_tests": {
+    "status": "passed",
+    "count": 556,
+    "reported_seconds": 49.4,
+    "launcher_elapsed_seconds": 51.398284912109375,
+    "process_exit_code": 0,
+    "log": "../software-verification/pytest-final.log",
+    "log_sha256": "78b837e60d12e51b3a7e03610a8051542040eba18d7eba68a6eff9b043df11e2"
+  },
+  "browser_report": "browser-validation.json",
+  "browser_report_sha256": "91debaaaf0f1415d95c17b96fe2b685c49e15da071705b9064da0b5eafad5680",
+  "canonical_verification": "../software-verification/verification.json",
+  "canonical_verification_sha256": "e5cc3a94baa583e3eafffd384b5db45e77015eba7dbb6f123decdbeb9a2117ea",
+  "source_tree_sha256": "5fde97506f80d7db95c9d8a5c503e9d22a68e4b9548b4598056b33346f7c90d9",
+  "windows_binaries_executed_in_this_environment": false,
+  "historical_records": "historical-920f7445/",
+  "browser_scope": "Replay fixture using freshly completed d7f3d330 original-control CLI results in current UI; no fresh browser upload or browser-run analysis tested."
+}

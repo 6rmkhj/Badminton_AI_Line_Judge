@@ -1,0 +1,75 @@
+{
+  "key": "uhdhd-4-b",
+  "file": "b시점(uhd30 hd30) 4.mp4",
+  "source_sha256": "10c84268a2aedd469fdbe91048bd3ee7bd3f6d1b9002a803552d1d37ea1c2c52",
+  "split": "development",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI source-frame visual inspection blinded to outputs",
+  "human_verified": false,
+  "reference_frozen": true,
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    75,
+    77
+  ],
+  "landing_point_px": [
+    544,
+    339
+  ],
+  "tolerance_px": 8,
+  "trajectory_points": [
+    {
+      "frame_index": 74,
+      "x": 534,
+      "y": 310,
+      "time": 2.468333
+    },
+    {
+      "frame_index": 75,
+      "x": 539,
+      "y": 321,
+      "time": 2.501667
+    },
+    {
+      "frame_index": 76,
+      "x": 544,
+      "y": 339,
+      "time": 2.535
+    },
+    {
+      "frame_index": 77,
+      "x": 546,
+      "y": 333,
+      "time": 2.568333
+    },
+    {
+      "frame_index": 78,
+      "x": 549,
+      "y": 330,
+      "time": 2.601667
+    },
+    {
+      "frame_index": 80,
+      "x": 551,
+      "y": 327,
+      "time": 2.668333
+    },
+    {
+      "frame_index": 83,
+      "x": 555,
+      "y": 330,
+      "time": 2.768333
+    }
+  ],
+  "notes": [
+    "Native source sequence shows a descending white blur, a low point around frame76 and an immediately rising short rebound in frames77–80. Approximate first-contact interval is75–77; this is not an exact millisecond or cork-contact measurement.",
+    "The near cap-wearing black-shirt player subsequently approaches the shuttle. This reference uses descent/rebound pixels rather than that later player reaction or eventual rest point."
+  ],
+  "evidence_images": [
+    "visual/uhdhd-4-b/native-68-83-505-260.jpg",
+    "visual/uhdhd-4-b/native-60-83-500-250.jpg"
+  ]
+}

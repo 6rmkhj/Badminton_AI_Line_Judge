@@ -1,0 +1,20 @@
+{
+  "architecture": "TrackNetV3 tracking module, no InpaintNet",
+  "upstream": "https://github.com/qaz812345/TrackNetV3",
+  "upstream_commit": "6eda442ada1740573f200f836d93edc9a541ee86",
+  "license": "MIT explicitly includes pretrained model checkpoints",
+  "license_url": "https://raw.githubusercontent.com/qaz812345/TrackNetV3/6eda442ada1740573f200f836d93edc9a541ee86/LICENSE",
+  "onnx_mirror_repository": "https://github.com/gob123th/Badminton-Generate-HUD",
+  "onnx_mirror_commit": "914605330c54f25b66af6f57e328e029811bc62c",
+  "download_url": "https://raw.githubusercontent.com/gob123th/Badminton-Generate-HUD/914605330c54f25b66af6f57e328e029811bc62c/models/tracknetv3.onnx",
+  "bytes": 45358143,
+  "git_blob_sha1": "9845f0a5d578b323d25aa1bbb440a37d806ada45",
+  "sha256": "b0ed780c3cc2c4f8eab6efa08d1489667381ecdcced7fad52abccbd176204ed6",
+  "mirror_attribution_url": "https://github.com/gob123th/Badminton-Generate-HUD/blob/914605330c54f25b66af6f57e328e029811bc62c/README.md",
+  "license_sha256": "1eeb31683deba741bce99f5f33bb813293a23b4e6c8302d6f056a587a30cd497",
+  "verified_against": "GitHub pinned tree byte size and Git blob SHA1; upstream-original checkpoint bit identity not independently verified",
+  "redistributed": false,
+  "inference_run": true,
+  "holdouts_accessed": false,
+  "inference_scope": "Bounded explicitly development cached source frames; raw TrackNet heatmaps only"
+}

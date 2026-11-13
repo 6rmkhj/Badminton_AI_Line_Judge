@@ -1,0 +1,97 @@
+{
+  "status": "passed",
+  "scope": "Replay fixture using freshly completed d7f3d330 original-control CLI results in current UI; no fresh browser upload or browser-run analysis tested.",
+  "code_commit": "d7f3d3303daa40c699d579c17e40269173220937",
+  "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "control_results": {
+    "A": {
+      "result_sha256": "e759546d58005b20ca38e167dfb59d4694f54dfb4d23ad3582d5afe3d2b8d010",
+      "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+      "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a"
+    },
+    "B": {
+      "result_sha256": "ae679d071ed94e273893ea898f5785bcf5678b352e1ec85259a08875fe0b8cfc",
+      "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+      "implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a"
+    }
+  },
+  "ui_sha256": {
+    "pair.html": "d69522e7814e00c64c37577bae75a2177c14ca0c5a8e46891efca2b567672d36",
+    "pair.js": "c969a8435838062b556b68c8cc52aaffe52a711b9cc41b51ff530b59c63462b0",
+    "pair.css": "745d72082195faac2494583b450bd15498a887bf9b662c79bbbe46a254e007ea"
+  },
+  "fixture_job": "release053control",
+  "media_checks": [
+    {
+      "camera": "A",
+      "candidate_frame": 49,
+      "source_seek_target": 1.599933,
+      "source_seek_actual": 1.599933,
+      "context_loaded": true,
+      "evidence_asset_count": 12,
+      "replay_present": true
+    },
+    {
+      "camera": "B",
+      "candidate_frame": 42,
+      "source_seek_target": 1.708833,
+      "source_seek_actual": 1.708833,
+      "context_loaded": true,
+      "evidence_asset_count": 12,
+      "replay_present": true
+    }
+  ],
+  "decoded_playback": [
+    {
+      "camera": "A",
+      "kind": ".view-video",
+      "current_time_seconds": 0.0657,
+      "width": 960,
+      "height": 540,
+      "decoded_frames": 63
+    },
+    {
+      "camera": "A",
+      "kind": ".trajectory-replay video",
+      "current_time_seconds": 0.0723,
+      "width": 960,
+      "height": 540,
+      "decoded_frames": 4
+    },
+    {
+      "camera": "B",
+      "kind": ".view-video",
+      "current_time_seconds": 0.066,
+      "width": 960,
+      "height": 540,
+      "decoded_frames": 54
+    },
+    {
+      "camera": "B",
+      "kind": ".trajectory-replay video",
+      "current_time_seconds": 0.0626,
+      "width": 960,
+      "height": 540,
+      "decoded_frames": 4
+    }
+  ],
+  "reload_restoration": true,
+  "mobile": [
+    {
+      "width": 375,
+      "horizontal_overflow": false
+    },
+    {
+      "width": 390,
+      "horizontal_overflow": false
+    }
+  ],
+  "javascript_errors": [],
+  "failed_requests": [],
+  "app_profile_flags": {
+    "temporal_candidate_memory": true,
+    "native_motion_recovery": true
+  },
+  "no_holdout_access": true,
+  "browser_mutation_requests": []
+}

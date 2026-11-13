@@ -1,0 +1,98 @@
+{
+  "scope": "Development-only compact research artifacts. No learned weights, source videos, full detector/track results, raw cached frames or heatmaps are bundled. Original source-review paths map through this inventory.",
+  "artifacts": [
+    {
+      "path": "B2-MLsource-review.json",
+      "original_path": "/workspace/generalization/next/model-research/fusion/8k-2-b/MLsource-review.json",
+      "bytes": 5391,
+      "sha256": "6fadbc6cc6f97490a624c8711bed98388e58994f77187ad8ffdbcd15f71d940d"
+    },
+    {
+      "path": "B2-native-source-provenance.json",
+      "original_path": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-provenance.json",
+      "bytes": 573,
+      "sha256": "7131724f3b8100d389679901199062677ae262effa2bba8939af2dcc4526793b"
+    },
+    {
+      "path": "B2-preprocessing-fixture.json",
+      "original_path": "/workspace/generalization/next/model-research/fusion/8k-2-b/opencv-vs-pil-fixture.json",
+      "bytes": 11383,
+      "sha256": "26e0b3729fae6b2c537dacd6e9d2621fe014b67a83e5599490942666d79cfcea"
+    },
+    {
+      "path": "B2-visual-native-36-44-marked.png",
+      "original_path": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-36-44-marked.png",
+      "bytes": 590891,
+      "sha256": "122b5b89caa55c4604febc75709adbc84dd296e554e823f87a2621a921e82f26"
+    },
+    {
+      "path": "B2-visual-native-36-44-raw.png",
+      "original_path": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-36-44-raw.png",
+      "bytes": 587958,
+      "sha256": "9cb38b30da8dc722b3b6ecbfa5044b2fffb16d94805f91544a0c923fb0574732"
+    },
+    {
+      "path": "B2-visual-native-45-53-marked.png",
+      "original_path": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-45-53-marked.png",
+      "bytes": 602740,
+      "sha256": "861d199d56ce81583d3ac7f4c377ff34c6d7fd97fa00dfdf72593d9228e4800c"
+    },
+    {
+      "path": "B2-visual-native-45-53-raw.png",
+      "original_path": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-45-53-raw.png",
+      "bytes": 599176,
+      "sha256": "9296c17437ae49c42f543090d54b17586f59c7554035b1f05b6e8991dd132a7d"
+    },
+    {
+      "path": "B2-visual-native-floor-detail-raw.png",
+      "original_path": "/workspace/generalization/next/model-research/fusion/8k-2-b/visual-native-floor-detail-raw.png",
+      "bytes": 207965,
+      "sha256": "7a2f7f11e70d840cf9f5679f9e52bdaf4707bbb4dd87ebbf6aa6071d9f472bd4"
+    },
+    {
+      "path": "FULL_CLIP_FUSION_REPORT.json",
+      "original_path": "/workspace/generalization/next/model-research/FULL_CLIP_FUSION_REPORT.json",
+      "bytes": 27634,
+      "sha256": "12de78a2dac80bb073509e780cd1e3913bd9f363ac84a24bc9a773f76f378fc1"
+    },
+    {
+      "path": "FULL_CLIP_FUSION_SUMMARY.json",
+      "original_path": "/workspace/generalization/next/model-research/FULL_CLIP_FUSION_SUMMARY.json",
+      "bytes": 5719,
+      "sha256": "ebb08658ceb666489abee55a408e68d68ce881b1209875f4ea3f3f793d75ad95"
+    },
+    {
+      "path": "LICENSE-TrackNetV3.txt",
+      "original_path": "/workspace/generalization/next/model-research/LICENSE-TrackNetV3.txt",
+      "bytes": 1097,
+      "sha256": "1eeb31683deba741bce99f5f33bb813293a23b4e6c8302d6f056a587a30cd497"
+    },
+    {
+      "path": "SOURCE_PATCH_INTEGRITY.json",
+      "original_path": "/workspace/generalization/next/model-research/SOURCE_PATCH_INTEGRITY.json",
+      "bytes": 1025,
+      "sha256": "2ec33f132ae0112bd1cee3cc9a5eedb6bea493c075e6ba49f05c558298a2258c"
+    },
+    {
+      "path": "adapter-v1.py",
+      "original_path": "/workspace/generalization/next/model-research/fusion_experiment_v1.py",
+      "bytes": 15410,
+      "sha256": "4c2e0a4529fd6e7e897427a92b1bb9bb987c7c91e1681717ffe2b110b7c4ba13"
+    },
+    {
+      "path": "adapter-v2.py",
+      "original_path": "/workspace/generalization/next/model-research/fusion_experiment_v2.py",
+      "bytes": 16700,
+      "sha256": "a6c41261d986aea86a8b570be68238dff9752a3326ea0403f5fb48055d0c16e7"
+    },
+    {
+      "path": "provenance.json",
+      "original_path": "/workspace/generalization/next/model-research/PROVENANCE.json",
+      "bytes": 1399,
+      "sha256": "669a1a2a7d83521a36cde022aecd110889df1fbcfc4afe7dfef5d87fca12bbcf"
+    }
+  ],
+  "full_replay_source_commit": "d7f3d3303daa40c699d579c17e40269173220937",
+  "full_replay_implementation_fingerprint": "42effbc814d2367a4e36d4ae843aa15fb09921d2dd8e4f8a14cb539e4dc9071a",
+  "total_bytes": 2675061
+}

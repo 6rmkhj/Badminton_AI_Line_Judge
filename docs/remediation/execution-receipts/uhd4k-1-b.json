@@ -1,0 +1,14 @@
+{
+  "status": "completed",
+  "worker": "1",
+  "evaluation_role": "new_round_holdout_full_fresh",
+  "source_sha256": "3f3f685323bc7c4a81c850e89624cc7b2fe635b99f037938b28e6fb5beb558f7",
+  "result_sha256": "5776cb9f58b06e8d58572346dd1bfac20ffaac343f46f4ee75ec5e7059154f4a",
+  "implementation_fingerprint": "ec9a727c87bdf7a264f492cbe2e286de14d8c8b5760c183075c320cf613bfe25",
+  "canonical_config_sha256": "e1f21c7835ac4d1f1be10305352b596f0c341af009f4dddb29a57eea816d56cf",
+  "mode": "full_fresh_pipeline",
+  "detector_stage_reused": false,
+  "elapsed_seconds": 97.32393179099745,
+  "completed_at": "2026-11-12T09:28:35.255111+00:00",
+  "freeze_sha256": "2c996ba611227a9fbedcc1afcf791e43e1dc9309d408d9b2ecf88d684a6c4284"
+}

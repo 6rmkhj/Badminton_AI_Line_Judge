@@ -7,7 +7,7 @@ const state = {
   sources: {A: {mode: 'library'}, B: {mode: 'library'}},
   jobId: null, currentJob: null, pollTimer: null, pollGeneration: 0,
   dashboardJob: null, receivedAt: 0, connected: true, frozenDelta: 0, announcement: '',
-  transfer: null, submissionError: '',
+  transfer: null, submissionError: '', restoredJobId: null,
 };
 const statusNames = {
   queued: '분석 대기', pending: '대기', running: '분석 중', analyzing: '영상 분석 중',
@@ -186,7 +186,7 @@ function updateClocks() {
   }
 }
 setInterval(updateClocks, 1000);
-const modeNames = {stored_ai_review: '기존 AI 검수', fresh_analysis: '새 분석', stored_automatic: '기존 자동 분석', review_guided_reanalysis: '원본 집중 재분석', failed: '처리 실패'};
+const modeNames = {stored_ai_review: '기존 AI 검수', fresh_analysis: '새 분석', stored_automatic: '기존 자동 분석', review_guided_reanalysis: '원본 집중 재분석', user_region_reanalysis: '사용자 영역 재분석', failed: '처리 실패'};
 const correspondenceNames = {
   ai_visual_review: '저장된 AI 검수의 동작 대응', reviewed_actions: '검수된 동작 대응',
   stored_ai_review: '저장된 AI 검수의 동작 대응', operator_selection: '사용자가 확인한 사건 대응',
@@ -258,6 +258,62 @@ function setBusy(busy) {
   document.querySelectorAll('#pair-form button, #pair-form input, #pair-form select').forEach(node => { node.disabled = busy; });
   $('submit-pair').querySelector('span').textContent = busy ? 'A/B 작업 진행 중' : 'A/B 연결 분석';
   $('refine-pair').disabled = busy;
+  $('edit-regions').disabled = busy;
+  cameras.forEach(renderRegion);
+}
+const regionKeys = ['x', 'y', 'width', 'height'];
+function validRegion(value) {
+  return value && regionKeys.every(key => typeof value[key] === 'number' && Number.isFinite(value[key]))
+    && value.x >= 0 && value.y >= 0 && value.width > 0 && value.height > 0
+    && value.x + value.width <= 1 && value.y + value.height <= 1;
+}
+function clearRegion(camera) {
+  const source = state.sources[camera];
+  source.reviewRegion = null; source.regionDraft = null; source.regionDrag = null; source.regionEditing = false;
+  renderRegion(camera);
+}
+function renderRegion(camera) {
+  const key = camera.toLowerCase(), source = state.sources[camera], player = $('preview-' + key);
+  const ready = !player.hidden && player.readyState >= 1 && player.videoWidth > 0;
+  const layer = $('region-layer-' + key), box = $('region-box-' + key);
+  const region = source.regionDraft || source.reviewRegion;
+  if (ready) {
+    // Align to the displayed video pixels, excluding object-fit letterboxing.
+    const scale = Math.min(player.clientWidth / player.videoWidth, player.clientHeight / player.videoHeight);
+    const width = player.videoWidth * scale, height = player.videoHeight * scale;
+    Object.assign(layer.style, {left: (player.clientWidth - width) / 2 + 'px', top: (player.clientHeight - height) / 2 + 'px', width: width + 'px', height: height + 'px'});
+  }
+  layer.hidden = !ready; layer.classList.toggle('editing', Boolean(source.regionEditing && !state.busy));
+  box.hidden = !region;
+  if (region) Object.assign(box.style, {left: region.x * 100 + '%', top: region.y * 100 + '%', width: region.width * 100 + '%', height: region.height * 100 + '%'});
+  const draw = $('region-draw-' + key);
+  draw.disabled = state.busy || !ready;
+  draw.setAttribute('aria-pressed', String(Boolean(source.regionEditing)));
+  draw.textContent = source.regionEditing ? '그리기 취소 · 재생으로 돌아가기' : '영상에서 영역 그리기';
+  $('region-clear-' + key).disabled = state.busy || !source.reviewRegion && !source.regionEditing;
+  $('region-fields-' + key).disabled = state.busy || !ready;
+  const fields = source.reviewRegion || {x: 0, y: 0, width: 1, height: 1};
+  regionKeys.forEach(name => { $('region-' + name + '-' + key).value = String(Math.round(fields[name] * 10000) / 100); });
+  $('region-status-' + key).textContent = source.regionEditing ? '영상 위를 드래그하세요. 그린 뒤에는 재생·탐색을 계속할 수 있습니다. Esc로 취소합니다.'
+    : source.reviewRegion ? '수동 검토 영역 적용 예정 · 접촉 미확정' : ready ? '자동 탐색 · 지정된 영역 없음' : '미리보기를 불러오면 영역을 지정할 수 있습니다.';
+  const manual = cameras.some(id => validRegion(state.sources[id].reviewRegion));
+  if (manual) $('reuse-review').checked = false;
+  $('reuse-review').disabled = state.busy || manual;
+  $('submit-pair').querySelector('span').textContent = state.busy ? 'A/B 작업 진행 중' : manual ? '지정 영역으로 A/B 분석' : 'A/B 연결 분석';
+}
+function setRegion(camera, region) {
+  const source = state.sources[camera];
+  if (!validRegion(region)) return;
+  source.reviewRegion = {...region}; source.regionEditing = false; source.regionDraft = null; source.regionDrag = null;
+  renderRegion(camera);
+}
+function regionPoint(camera, event) {
+  const rect = $('region-layer-' + camera.toLowerCase()).getBoundingClientRect();
+  return {x: Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)),
+    y: Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height))};
+}
+function withRegion(camera, value) {
+  return validRegion(state.sources[camera].reviewRegion) ? {...value, review_region: {...state.sources[camera].reviewRegion}} : value;
 }
 function setPreview(camera, url) {
   const key = camera.toLowerCase(), player = $('preview-' + key);
@@ -274,6 +330,50 @@ function setPreview(camera, url) {
     player.hidden = true;
     $('empty-' + key).hidden = false;
   }
+  renderRegion(camera);
+}
+function metadataFields(metadata, file = {}) {
+  const m = metadata || {}, known = value => typeof value === 'number' && Number.isFinite(value) && value > 0;
+  const width = m.width, height = m.height;
+  const size = m.size_bytes ?? file.size, duration = m.duration ?? m.duration_seconds;
+  const extension = m.extension || (file.name || '').match(/\.[^.]+$/)?.[0];
+  const fps = known(m.average_fps) ? m.average_fps : m.frame_count > 1 && known(m.fps) ? m.fps : null;
+  const shortSide = Math.min(width, height), longSide = Math.max(width, height);
+  const quality = longSide >= 3840 && shortSide >= 2160 ? '4K' : longSide >= 2560 && shortSide >= 1440 ? 'QHD' : longSide >= 1920 && shortSide >= 1080 ? 'FHD' : longSide >= 1280 && shortSide >= 720 ? 'HD' : '';
+  const bitrate = known(m.bitrate_bps) ? `${fmt(m.bitrate_bps / 1e6, 2)} Mbps` : known(m.container_bitrate_bps) ? `${fmt(m.container_bitrate_bps / 1e6, 2)} Mbps · 파일 전체` : '확인 불가';
+  return [
+    ['해상도', known(width) && known(height) ? `${width} × ${height}${quality ? ' · ' + quality : ''}` : '확인 불가'],
+    ['FPS', fps ? `${fmt(fps, 3)}${known(m.average_fps) ? ' · 평균' : ' · 대표 간격 기준'}` : '확인 불가'],
+    ['확장자', extension ? String(extension).toUpperCase() : '확인 불가'],
+    ['영상 코덱', m.codec ? String(m.codec).toUpperCase() : '확인 불가'],
+    ['재생 시간', known(duration) ? `${fmt(duration, 2)}초` : '확인 불가'],
+    ['파일 크기', known(size) ? `${fmt(size / (1024 ** 2), 2)} MiB` : '확인 불가'],
+    ['비트레이트', bitrate],
+    ['프레임 수', known(m.frame_count) ? `${m.frame_count.toLocaleString('ko-KR')}개` : '확인 불가'],
+  ];
+}
+function renderMetadata(camera) {
+  const source = state.sources[camera], key = camera.toLowerCase(), panel = $('video-info-' + key);
+  const row = source.mode === 'library' ? source.video : null;
+  const file = source.mode === 'upload' ? source.file || {name: source.savedFile} : {name: row?.file};
+  const metadata = row ? row.metadata || row : source.upload?.metadata || source.restoredMetadata || source.browserMetadata || {};
+  const present = row || source.mode === 'upload' && (source.file || source.uploadId);
+  panel.hidden = !present;
+  if (!present) return;
+  const list = $('video-info-' + key + '-fields'); list.replaceChildren();
+  for (const [label, value] of metadataFields(metadata, file)) {
+    const item = el('div'); item.append(el('dt', '', label), el('dd', '', value)); list.append(item);
+  }
+  const note = $('video-info-' + key + '-status');
+  const pending = source.mode === 'upload' && source.metadataStatus === 'checking';
+  const failed = source.mode === 'upload' && source.metadataStatus === 'failed';
+  note.textContent = pending ? '로컬 서버에 전송해 원본 정보를 확인하고 있습니다. 분석은 시작하지 않습니다.'
+    : failed ? source.metadataError || '원본 정보를 확인하지 못했습니다. 다시 시도해 주세요.'
+    : metadata.variable_frame_rate ? '프레임 간격에 변동이 있습니다. 분석에는 각 프레임의 실제 시각을 사용합니다.'
+    : '원본 영상 기준입니다. 해상도는 화질의 한 요소이며 선명도를 보장하지 않습니다.';
+  note.classList.toggle('video-info-error', failed);
+  $('video-info-' + key + '-retry').hidden = !failed;
+  if (source.mode === 'upload') $('source-' + key + '-state').textContent = pending ? '영상 정보 확인 중' : failed ? '영상 확인 실패' : source.uploadId ? '원본 확인 완료' : '파일 선택 완료';
 }
 function updateSource(camera) {
   const source = state.sources[camera], key = camera.toLowerCase();
@@ -286,16 +386,18 @@ function updateSource(camera) {
       ? [row.width && row.height ? `${row.width} × ${row.height}` : '', Number.isFinite(row.duration_seconds) ? `${fmt(row.duration_seconds)}초` : '', row.has_review ? 'AI 검수 기록 있음' : '자동 분석 기록'].filter(Boolean).join(' · ')
       : '기존 영상의 검수 근거도 함께 불러올 수 있습니다.';
   } else {
-    $('source-' + key + '-state').textContent = source.file ? '파일 선택 완료' : '입력 대기';
-    setPreview(camera, source.objectUrl || null);
+    $('source-' + key + '-state').textContent = source.file || source.uploadId ? '파일 선택 완료' : '입력 대기';
+    setPreview(camera, source.objectUrl || safeUrl(source.previewUrl) || null);
     $('source-' + key + '-meta').textContent = source.file
-      ? `${source.file.name} · ${fmt(source.file.size / (1024 ** 2), 1)} MB`
-      : `영상 파일을 선택하세요. 파일당 최대 ${fmt(state.limits.max_upload_bytes / (1024 ** 3), 1)} GB`;
+      ? `${source.file.name} · ${fmt(source.file.size / (1024 ** 2), 1)} MiB`
+      : source.uploadId ? `${source.savedFile || '저장된 원본'} · 다시 업로드하지 않고 분석합니다.`
+        : `영상 파일을 선택하세요. 파일당 최대 ${fmt(state.limits.max_upload_bytes / (1024 ** 3), 1)} GiB`;
   }
+  renderMetadata(camera);
 }
-function changeMode(camera, mode) {
-  if (state.busy) return;
-  if (state.sources[camera].mode !== mode) $('same-event').checked = false;
+function changeMode(camera, mode, restoring = false) {
+  if (state.busy && !restoring) return;
+  if (state.sources[camera].mode !== mode && !restoring) { $('same-event').checked = false; clearRegion(camera); }
   state.sources[camera].mode = mode;
   const key = camera.toLowerCase();
   $('library-' + key + '-panel').hidden = mode !== 'library';
@@ -312,41 +414,52 @@ function validateSources() {
   for (const camera of cameras) {
     const source = state.sources[camera];
     if (source.mode === 'library' && !source.video) throw new Error(`${camera} 시점 영상을 선택해 주세요.`);
-    if (source.mode === 'upload' && !source.file) throw new Error(`${camera} 시점 영상 파일을 선택해 주세요.`);
-    if (source.mode === 'upload' && source.file.size > state.limits.max_upload_bytes) {
+    if (source.mode === 'upload' && !source.file && !source.uploadId) throw new Error(`${camera} 시점 영상 파일을 선택해 주세요.`);
+    if (source.mode === 'upload' && source.file?.size > state.limits.max_upload_bytes) {
       throw new Error(`${camera} 시점 파일이 업로드 한도(${fmt(state.limits.max_upload_bytes / (1024 ** 3), 1)} GB)를 초과합니다.`);
     }
-    if (source.mode === 'upload' && source.file.size === 0) throw new Error(`${camera} 시점 파일이 비어 있습니다.`);
+    if (source.mode === 'upload' && source.file?.size === 0) throw new Error(`${camera} 시점 파일이 비어 있습니다.`);
   }
 }
 function upload(camera) {
   const source = state.sources[camera];
   if (source.mode === 'library') return Promise.resolve({video_id: source.video.id});
   if (source.uploadId) return Promise.resolve({upload_id: source.uploadId});
+  if (source.uploadPromise) return source.uploadPromise;
+  const file = source.file, generation = source.uploadGeneration;
+  const current = () => source.file === file && source.uploadGeneration === generation;
+  if (!file || !file.size || file.size > state.limits.max_upload_bytes) return Promise.reject(new Error(`${camera} 시점 영상은 1바이트 이상 ${fmt(state.limits.max_upload_bytes / (1024 ** 3), 1)} GiB 이하여야 합니다.`));
+  source.metadataStatus = 'checking'; source.metadataError = ''; renderMetadata(camera);
   const box = $('upload-' + camera.toLowerCase() + '-progress');
   box.hidden = false;
   box.querySelector('progress').value = 0;
   box.querySelector('span').textContent = '업로드 준비';
-  return new Promise((resolve, reject) => {
+  const promise = new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
+    source.uploadXhr = xhr;
     const updateTransfer = (status, loaded) => {
+      if (!current()) return;
       const transfer = state.transfer?.views[camera];
       if (transfer) { transfer.status = status; if (loaded !== undefined) transfer.loaded = loaded; renderTransfer(); }
     };
-    const fail = message => { updateTransfer('failed'); reject(new Error(message)); };
+    const fail = message => {
+      if (current()) { source.metadataStatus = 'failed'; source.metadataError = message; renderMetadata(camera); box.querySelector('span').textContent = '영상 확인 실패'; updateTransfer('failed'); }
+      reject(new Error(message));
+    };
     xhr.open('POST', '/api/pair-uploads');
     xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-    xhr.setRequestHeader('X-Filename', encodeURIComponent(source.file.name));
+    xhr.setRequestHeader('X-Filename', encodeURIComponent(file.name));
     xhr.timeout = 600000;
     xhr.upload.onprogress = event => {
-      if (!event.lengthComputable) return;
+      if (!current() || !event.lengthComputable) return;
       const percent = Math.min(100, Math.round(event.loaded / event.total * 100));
       box.querySelector('progress').value = percent;
       box.querySelector('span').textContent = percent === 100 ? '원본 확인 중' : `${percent}% 업로드`;
       updateTransfer(percent === 100 ? 'checking' : 'uploading', event.loaded);
     };
-    xhr.upload.onload = () => updateTransfer('checking', source.file.size);
+    xhr.upload.onload = () => updateTransfer('checking', file.size);
     xhr.onload = () => {
+      if (!current()) { reject(new Error('영상 선택이 변경되었습니다.')); return; }
       let data;
       try { data = JSON.parse(xhr.responseText); }
       catch { fail(`${camera} 시점 업로드 응답을 읽지 못했습니다.`); return; }
@@ -355,24 +468,74 @@ function upload(camera) {
       }
       source.uploadId = data.upload_id;
       source.upload = data;
+      source.metadataStatus = 'ready'; source.metadataError = ''; renderMetadata(camera);
       box.querySelector('progress').value = 100;
       box.querySelector('span').textContent = '업로드 완료';
-      updateTransfer('ready', source.file.size);
+      updateTransfer('ready', file.size);
       resolve({upload_id: data.upload_id});
     };
     xhr.onerror = () => fail(`${camera} 시점 업로드 연결이 끊겼습니다.`);
     xhr.ontimeout = () => fail(`${camera} 시점 업로드 시간이 초과됐습니다.`);
     xhr.onabort = () => fail(`${camera} 시점 업로드가 중단됐습니다.`);
-    xhr.send(source.file);
+    xhr.send(file);
+  });
+  source.uploadPromise = promise.finally(() => {
+    if (current()) { source.uploadPromise = null; source.uploadXhr = null; }
+  });
+  return source.uploadPromise;
+}
+function inspectSelectedVideo(camera) {
+  const source = state.sources[camera], file = source.file, generation = source.uploadGeneration;
+  upload(camera).catch(error => {
+    if (source.file !== file || source.uploadGeneration !== generation) return;
+    source.metadataStatus = 'failed'; source.metadataError = error.message; renderMetadata(camera);
   });
 }
 function jobUrl(id) { return '/api/pair-jobs/' + encodeURIComponent(id); }
+function restoreJobSources(job) {
+  if (!job.request?.views) return;
+  const first = state.restoredJobId !== job.job_id;
+  for (const camera of cameras) {
+    const selected = job.request.views[camera], source = state.sources[camera], key = camera.toLowerCase();
+    if (!selected) continue;
+    if (first) {
+      const sameUpload = selected.upload_id && selected.upload_id === source.uploadId;
+      if (!sameUpload && source.objectUrl) URL.revokeObjectURL(source.objectUrl);
+      if (!sameUpload) {
+        source.uploadGeneration = (source.uploadGeneration || 0) + 1; source.uploadXhr?.abort(); source.uploadPromise = null; source.uploadXhr = null;
+        source.file = null; source.objectUrl = null; source.uploadId = null; source.upload = null; source.browserMetadata = null; source.previewUrl = null; source.metadataStatus = null; $('file-' + key).value = '';
+      }
+      source.restoredMetadata = selected.metadata || job.result?.views?.[camera]?.metadata || null;
+      source.reviewRegion = validRegion(selected.review_region) ? {...selected.review_region} : null;
+      source.regionDraft = null; source.regionDrag = null; source.regionEditing = false;
+      if (selected.upload_id) {
+        source.uploadId = selected.upload_id;
+        source.savedFile = selected.file || job.views?.[camera]?.file;
+        $('file-' + key + '-name').textContent = source.savedFile || '저장된 업로드 원본';
+        source.previewUrl = safeUrl(job.result?.views?.[camera]?.preview_url);
+        changeMode(camera, 'upload', true);
+      } else if (selected.video_id) {
+        $('library-' + key).value = selected.video_id;
+        changeMode(camera, 'library', true);
+      }
+    } else if (source.mode === 'upload' && source.uploadId === selected.upload_id && !source.objectUrl && !source.previewUrl) {
+      const preview = safeUrl(job.result?.views?.[camera]?.preview_url);
+      if (preview) { source.previewUrl = preview; setPreview(camera, preview); }
+    }
+  }
+  if (first) {
+    $('same-event').checked = job.request.same_event_confirmed === true;
+    $('reuse-review').checked = job.request.reuse_review === true && !cameras.some(camera => state.sources[camera].reviewRegion);
+    state.restoredJobId = job.job_id;
+  }
+}
 function viewStatus(view) {
   if (!view) return '대기';
   const label = statusNames[view.status] || '처리 중';
   return view.file ? `${label} · ${view.file}` : label;
 }
 function renderJob(job) {
+  restoreJobSources(job);
   state.dashboardJob = job; state.receivedAt = performance.now(); state.transfer = null;
   state.connected = true; state.frozenDelta = 0; setConnection();
   $('job-progress').hidden = false;
@@ -456,6 +619,38 @@ function renderDiagnostics(result) {
     grid.append(card);
   });
 }
+function renderLandingCandidate(camera, view, player) {
+  const candidate = view.landing_candidate;
+  if (!candidate || candidate.status !== 'approximate' || candidate.inference_only !== true
+      || candidate.contact_observed !== false || !validSeconds(candidate.time_seconds)) return null;
+  const inferred = candidate.point_kind === 'inferred_object_center' || candidate.kind === 'occluded_descent_and_rebound';
+  const panel = el('section', 'landing-candidate'); panel.dataset.candidateCamera = camera;
+  const heading = el('div', 'candidate-heading');
+  heading.append(el('strong', '', inferred ? '가림 구간의 착지 추정' : '착지 추정 구간'), el('span', 'candidate-badge', '추정 · 접촉 미확인')); panel.append(heading);
+  const interval = candidate.time_interval;
+  const hasInterval = Array.isArray(interval) && interval.length === 2 && interval.every(validSeconds) && interval[0] <= interval[1];
+  const stamp = hasInterval ? `${fmt(interval[0], 2)}–${fmt(interval[1], 2)}초` : `${fmt(candidate.time_seconds, 2)}초 부근`;
+  const frames = candidate.frame_interval;
+  const hasFrames = Array.isArray(frames) && frames.length === 2 && frames.every(value => Number.isInteger(value) && value >= 0) && frames[0] <= frames[1];
+  panel.append(el('p', 'candidate-time', stamp));
+  if (hasFrames || Number.isInteger(candidate.frame_index)) panel.append(el('p', 'candidate-frames', hasFrames ? `프레임 ${frames[0]}–${frames[1]}` : `프레임 ${candidate.frame_index} 부근`));
+  const point = candidate.point_px, size = candidate.analysis_size;
+  if (Array.isArray(point) && point.length === 2 && point.every(value => typeof value === 'number' && Number.isFinite(value))
+      && size && validSeconds(size.width) && size.width > 0 && validSeconds(size.height) && size.height > 0) {
+    const x = Math.round(Math.max(0, Math.min(1, point[0] / size.width)) * 100), y = Math.round(Math.max(0, Math.min(1, point[1] / size.height)) * 100);
+    panel.append(el('p', 'candidate-position', `영상 속 추정 위치 · 왼쪽에서 ${x}% / 위에서 ${y}%`));
+  }
+  panel.append(el('p', 'candidate-note', inferred
+    ? '가림 전후의 이동 경로로 위치를 추정했습니다. 이 구간의 물체 위치와 실제 바닥 접촉은 직접 확인하지 못했습니다.'
+    : candidate.kind === 'descent_and_rebound'
+    ? '물체가 내려온 뒤 올라가는 움직임을 찾았습니다. 바닥 접촉이나 같은 랠리의 셔틀임을 확정한 것은 아닙니다.'
+    : '이동 경로에서 검토할 후보 위치를 찾았습니다. 실제 착지인지 영상에서 확인해 주세요.'));
+  if (player) {
+    const button = el('button', 'seek-button', '착지 추정 구간부터 보기'); button.type = 'button'; button.dataset.candidateSeekCamera = camera;
+    button.addEventListener('click', () => seek(player, hasInterval ? interval[0] : candidate.time_seconds)); panel.append(button);
+  }
+  return panel;
+}
 function renderView(camera, view, diagnostics) {
   const card = el('article', 'result-view');
   card.id = 'result-view-' + camera.toLowerCase();
@@ -465,8 +660,14 @@ function renderView(camera, view, diagnostics) {
   title.append(el('p', 'eyebrow', camera + ' VIEW'), el('h3', '', view.file || camera + ' 시점'));
   header.append(title, el('span', 'processing-label', modeNames[view.processing_mode] || '결과 확인'));
   card.append(header);
+  if (view.execution?.detector_device) {
+    const device = view.execution.detector_device;
+    const label = device === 'cpu' ? 'CPU' : device.startsWith('cuda:') ? 'GPU · ' + device : device === 'mps' ? 'Apple GPU · MPS' : device;
+    const stages = (view.execution.gpu_stages || []).map(stage => ({candidate_masks: '후보 마스크 연산', onnx_model: 'ONNX 모델 추론', candidate_scorer: '후보 모델 추론', contact_model: '접촉 모델 추론', source_contact_model: '원본 접촉 모델 추론'}[stage] || stage));
+    card.append(el('p', 'execution-device', `실행 장치: ${label}${stages.length ? ' · ' + stages.join(', ') : ''}`));
+  }
   const verdicts = el('div', 'view-verdicts');
-  const analysisLabel = view.processing_mode === 'review_guided_reanalysis' ? '후보 구간 재분석' : '자동 분석';
+  const analysisLabel = view.processing_mode === 'user_region_reanalysis' ? '수동 탐색 보조' : view.processing_mode === 'review_guided_reanalysis' ? '후보 구간 재분석' : '자동 분석';
   for (const [label, value] of [[analysisLabel, view.automatic_decision], ['직접 관측 근거', view.direct_decision], ['시점 보조 판정', view.assisted_decision]]) {
     const cell = el('div');
     cell.append(el('span', '', label), el('strong', '', value || 'REVIEW'));
@@ -484,6 +685,35 @@ function renderView(camera, view, diagnostics) {
   const body = el('div', 'view-body');
   if (view.error) body.append(el('p', 'message error', view.error));
   if (view.rationale) body.append(el('p', 'rationale', view.rationale));
+  const candidatePanel = renderLandingCandidate(camera, view, player);
+  if (candidatePanel) body.append(candidatePanel);
+  const trajectoryContext = safeUrl(view.trajectory_context_url);
+  if (trajectoryContext) {
+    const figure = el('figure', 'trajectory-context');
+    const link = el('a'); link.href = trajectoryContext; link.target = '_blank'; link.rel = 'noopener';
+    const image = el('img'); image.src = trajectoryContext; image.loading = 'lazy';
+    image.alt = camera + ' 시점의 이동 경로와 후보 구간 확대'; link.append(image);
+    const inferred = view.landing_candidate?.point_kind === 'inferred_object_center' || view.landing_candidate?.kind === 'occluded_descent_and_rebound';
+    figure.append(link, el('figcaption', '', candidatePanel ? inferred
+      ? '관측 경로와 가림 구간의 추정 위치 확대 ↗ · 관측과 추정을 구분해 표시했습니다. 추정 위치는 직접 확인한 바닥 접촉점이 아닙니다.'
+      : '이동 경로와 추정 위치 확대 ↗ · 표시점은 추적한 물체의 중심이며 실제 바닥 접촉점과 다를 수 있습니다.'
+      : '이동 경로와 검토 구간 확대 ↗'));
+    body.append(figure);
+  }
+  const replayUrl = safeUrl(view.trajectory_replay_url);
+  if (replayUrl) {
+    const section = el('section', 'trajectory-replay');
+    const heading = el('h4', '', '추적 경로 영상'); heading.id = 'trajectory-replay-heading-' + camera.toLowerCase();
+    section.setAttribute('aria-labelledby', heading.id); section.append(heading);
+    const replay = el('video'); replay.controls = true; replay.preload = 'metadata'; replay.playsInline = true;
+    replay.src = replayUrl; replay.setAttribute('aria-label', camera + ' 시점 추적 경로 구간 영상'); section.append(replay);
+    const origin = view.trajectory_replay_info?.source_time_origin;
+    section.append(el('p', 'replay-timeline-note', validSeconds(origin)
+      ? `원본 ${fmt(origin, 2)}초부터의 구간입니다. 영상 위 프레임·시각은 원본 기준이며, 재생 막대는 이 구간의 시작을 0초로 표시합니다.`
+      : '영상 위 프레임·시각은 원본 기준입니다. 이 영상은 원본에서 잘라낸 구간이므로 재생 막대 시간과 다릅니다.'));
+    section.append(el('p', 'replay-candidate-note', '경로는 관측한 지점만 연결하며, 누락된 프레임 사이에는 선을 잇지 않습니다. 착지 표시는 추정이며 바닥 접촉이나 IN/OUT 확정을 뜻하지 않습니다.'));
+    body.append(section);
+  }
   if (diagnostics && typeof diagnostics === 'object') {
     const observation = diagnostics.observation_status;
     const information = el('div', 'view-diagnosis');
@@ -493,12 +723,12 @@ function renderView(camera, view, diagnostics) {
     appendTextList(information, '이 시점의 후속 조치', diagnostics.follow_up_actions);
     if (information.childNodes.length) body.append(information);
   }
-  if (player && typeof diagnostics?.focus_time_seconds === 'number' && Number.isFinite(diagnostics.focus_time_seconds) && diagnostics.focus_time_seconds >= 0) {
+  if (!candidatePanel && player && typeof diagnostics?.focus_time_seconds === 'number' && Number.isFinite(diagnostics.focus_time_seconds) && diagnostics.focus_time_seconds >= 0) {
     const button = el('button', 'seek-button', `검토 구간 ${fmt(diagnostics.focus_time_seconds, 3)}초로 이동`);
     button.type = 'button'; button.dataset.reviewSeekCamera = camera;
     button.addEventListener('click', () => seek(player, diagnostics.focus_time_seconds)); body.append(button);
-  } else if (player && typeof view.contact_time_seconds === 'number' && Number.isFinite(view.contact_time_seconds) && view.contact_time_seconds >= 0) {
-    const button = el('button', 'seek-button', `이 시점의 접촉 ${fmt(view.contact_time_seconds, 3)}초로 이동`);
+  } else if (!candidatePanel && player && typeof view.contact_time_seconds === 'number' && Number.isFinite(view.contact_time_seconds) && view.contact_time_seconds >= 0) {
+    const button = el('button', 'seek-button', `${view.qualified === true ? '판정 근거' : '후보'} 구간 ${fmt(view.contact_time_seconds, 3)}초로 이동`);
     button.type = 'button'; button.dataset.seekCamera = camera;
     button.addEventListener('click', () => seek(player, view.contact_time_seconds)); body.append(button);
   }
@@ -513,7 +743,7 @@ function renderView(camera, view, diagnostics) {
   }
   const details = el('details', 'provenance-details');
   details.append(el('summary', '', '판정 출처와 원본 확인'));
-  const reviewSource = {ai_visual_review: 'AI 시각 검수', ai_review_guided_search: 'AI 검수의 후보 구간을 참고한 재분석', automatic: '자동 분석'}[view.review_source] || view.review_source || '자동 분석';
+  const reviewSource = {ai_visual_review: 'AI 시각 검수', ai_review_guided_search: 'AI 검수의 후보 구간을 참고한 재분석', operator_region_guided_search: '사용자 지정 영역의 수동 탐색 보조', automatic: '자동 분석'}[view.review_source] || view.review_source || '자동 분석';
   details.append(el('p', '', `검수 출처: ${reviewSource}`));
   if (view.source_sha256) details.append(el('p', '', '원본 SHA256: ' + view.source_sha256));
   if (Array.isArray(view.reason_codes) && view.reason_codes.length) details.append(el('p', '', view.reason_codes.join(' · ')));
@@ -531,7 +761,10 @@ function renderResult(job) {
   const refinedCameras = Array.isArray(result.refinement_applied_camera_ids)
     ? result.refinement_applied_camera_ids.filter(camera => cameras.includes(camera))
     : cameras.filter(camera => views[camera]?.processing_mode === 'review_guided_reanalysis');
-  $('result-provenance').textContent = refinedCameras.length
+  const manualCameras = cameras.filter(camera => validRegion(job.request?.views?.[camera]?.review_region));
+  $('result-provenance').textContent = manualCameras.length
+    ? `사용자 지정 영역으로 탐색한 보조 결과 · ${manualCameras.join('/')} 시점 · 접촉 미확정`
+    : refinedCameras.length
     ? `AI 검수의 후보 구간을 참고한 원본 집중 재분석 · ${refinedCameras.join('/')} 시점`
     : (result.refinement_requested === true || job.request?.refine_review_regions === true)
       ? '두 시점 새 분석 · 적용된 AI 후보 구간 없음'
@@ -578,7 +811,7 @@ async function pollJob(id, generation) {
 }
 function openJob(id, push = false) {
   if (!/^[a-zA-Z0-9_-]{1,128}$/.test(id)) { showError('잘못된 작업 ID입니다.'); return; }
-  clearTimeout(state.pollTimer); state.pollGeneration += 1; state.jobId = id; state.currentJob = null;
+  clearTimeout(state.pollTimer); state.pollGeneration += 1; state.jobId = id; state.currentJob = null; state.restoredJobId = null;
   state.dashboardJob = null; state.transfer = null; state.connected = true; state.frozenDelta = 0;
   $('pair-result').hidden = true; $('job-progress').hidden = false;
   $('progress-heading').textContent = '작업 상태를 불러오고 있습니다.';
@@ -621,20 +854,78 @@ async function loadHistory() {
 document.querySelectorAll('[data-mode][data-view]').forEach(button => button.addEventListener('click', () => { showError(''); changeMode(button.dataset.view, button.dataset.mode); }));
 for (const camera of cameras) {
   const key = camera.toLowerCase();
-  $('library-' + key).addEventListener('change', () => { showError(''); $('same-event').checked = false; updateSource(camera); });
+  $('library-' + key).addEventListener('change', () => { showError(''); $('same-event').checked = false; clearRegion(camera); updateSource(camera); });
   $('file-' + key).addEventListener('change', event => {
     showError('');
     const source = state.sources[camera];
+    source.uploadGeneration = (source.uploadGeneration || 0) + 1; source.uploadXhr?.abort(); source.uploadXhr = null; source.uploadPromise = null;
     if (source.objectUrl) URL.revokeObjectURL(source.objectUrl);
     source.file = event.target.files[0] || null;
-    source.uploadId = null; source.upload = null;
+    source.uploadId = null; source.upload = null; source.previewUrl = null; source.savedFile = null;
+    source.restoredMetadata = null; source.browserMetadata = null; source.metadataStatus = null; source.metadataError = ''; clearRegion(camera);
     $('same-event').checked = false;
     source.objectUrl = source.file ? URL.createObjectURL(source.file) : null;
     $('file-' + key + '-name').textContent = source.file?.name || 'MP4 · MOV · MKV · AVI · WEBM';
     $('upload-' + key + '-progress').hidden = true; updateSource(camera);
+    if (source.file) inspectSelectedVideo(camera);
   });
+  $('video-info-' + key + '-retry').addEventListener('click', () => inspectSelectedVideo(camera));
   $('preview-' + key).addEventListener('error', () => { if (!$('preview-' + key).hidden) $('preview-' + key + '-error').hidden = false; });
+  $('preview-' + key).addEventListener('loadedmetadata', () => {
+    renderRegion(camera);
+    const source = state.sources[camera], player = $('preview-' + key);
+    if (source.mode === 'upload' && source.file && source.objectUrl === player.currentSrc) {
+      source.browserMetadata = {width: player.videoWidth, height: player.videoHeight, duration: player.duration}; renderMetadata(camera);
+    }
+  });
+  new ResizeObserver(() => renderRegion(camera)).observe($('preview-box-' + key));
+  $('region-draw-' + key).addEventListener('click', () => {
+    const source = state.sources[camera];
+    source.regionEditing = !source.regionEditing; source.regionDraft = null; source.regionDrag = null;
+    $('preview-' + key).pause(); renderRegion(camera);
+    if (source.regionEditing) $('preview-' + key).scrollIntoView({block: 'center', behavior: 'auto'});
+  });
+  $('region-clear-' + key).addEventListener('click', () => clearRegion(camera));
+  regionKeys.forEach(name => $('region-' + name + '-' + key).addEventListener('change', event => {
+    const input = event.target, value = input.valueAsNumber;
+    if (!Number.isFinite(value) || value < (['width', 'height'].includes(name) ? 1 : 0) || value > 100) {
+      renderRegion(camera); $('region-status-' + key).textContent = '위치 0–99%, 크기 1–100%의 숫자를 입력하세요.'; return;
+    }
+    const region = {...(state.sources[camera].reviewRegion || {x: 0, y: 0, width: 1, height: 1})};
+    region[name] = value / 100;
+    region.x = Math.min(region.x, .99); region.y = Math.min(region.y, .99);
+    region.width = Math.min(region.width, 1 - region.x); region.height = Math.min(region.height, 1 - region.y);
+    setRegion(camera, region);
+  }));
+  const layer = $('region-layer-' + key);
+  layer.addEventListener('pointerdown', event => {
+    const source = state.sources[camera];
+    if (state.busy || !source.regionEditing || event.button !== 0) return;
+    event.preventDefault(); layer.setPointerCapture(event.pointerId);
+    source.regionDrag = {pointer: event.pointerId, start: regionPoint(camera, event)};
+  });
+  layer.addEventListener('pointermove', event => {
+    const source = state.sources[camera], drag = source.regionDrag;
+    if (!drag || event.pointerId !== drag.pointer) return;
+    const point = regionPoint(camera, event);
+    source.regionDraft = {x: Math.min(drag.start.x, point.x), y: Math.min(drag.start.y, point.y),
+      width: Math.abs(point.x - drag.start.x), height: Math.abs(point.y - drag.start.y)};
+    renderRegion(camera);
+  });
+  layer.addEventListener('pointerup', event => {
+    const source = state.sources[camera];
+    if (source.regionDrag?.pointer !== event.pointerId) return;
+    if (layer.hasPointerCapture(event.pointerId)) layer.releasePointerCapture(event.pointerId);
+    const region = source.regionDraft;
+    if (region && region.width >= .01 && region.height >= .01) setRegion(camera, region);
+    else { source.regionDrag = null; source.regionDraft = null; renderRegion(camera); $('region-status-' + key).textContent = '조금 더 넓은 영역을 드래그해 주세요. Esc로 취소할 수 있습니다.'; }
+  });
+  layer.addEventListener('pointercancel', () => { const source = state.sources[camera]; source.regionDrag = null; source.regionDraft = null; source.regionEditing = false; renderRegion(camera); });
 }
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  cameras.forEach(camera => { const source = state.sources[camera]; if (source.regionEditing) { source.regionEditing = false; source.regionDrag = null; source.regionDraft = null; renderRegion(camera); } });
+});
 $('pair-form').addEventListener('submit', async event => {
   event.preventDefault(); if (state.busy) return;
   showError('');
@@ -646,7 +937,7 @@ $('pair-form').addEventListener('submit', async event => {
     const uploads = await Promise.allSettled(cameras.map(upload));
     const failure = uploads.find(result => result.status === 'rejected');
     if (failure) throw failure.reason;
-    const views = {A: uploads[0].value, B: uploads[1].value};
+    const views = {A: withRegion('A', uploads[0].value), B: withRegion('B', uploads[1].value)};
     const job = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, same_event_confirmed: $('same-event').checked, reuse_review: $('reuse-review').checked})});
     if (!job.job_id) throw new Error('작업 ID가 응답에 없습니다. 최근 작업 목록을 확인해 주세요.');
     openJob(job.job_id, true);
@@ -671,6 +962,7 @@ $('refine-pair').addEventListener('click', async () => {
       $('refine-error').textContent = '저장된 작업의 입력 정보를 읽지 못했습니다. A/B 영상을 다시 선택해 주세요.';
       $('refine-error').hidden = false; return;
     }
+    if (validRegion(source.review_region)) views[camera].review_region = {...source.review_region};
   }
   setBusy(true); $('refine-error').hidden = true; beginSubmission(job);
   try {
@@ -686,6 +978,12 @@ $('refine-pair').addEventListener('click', async () => {
   }
 });
 $('refresh-history').addEventListener('click', loadHistory);
+$('edit-regions').addEventListener('click', () => {
+  if (state.busy) return;
+  cameras.forEach(camera => { $('region-tools-' + camera.toLowerCase()).open = true; });
+  $('pair-form').scrollIntoView({block: 'start', behavior: 'auto'});
+  $('region-tools-a').querySelector('summary').focus();
+});
 window.addEventListener('popstate', () => {
   const id = new URLSearchParams(location.search).get('job');
   if (id) openJob(id);

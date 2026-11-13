@@ -1,0 +1,70 @@
+{
+  "key": "8k-3-a",
+  "scope": "Post-release development source review, not independent human identity/contact proof. No additional inference or parameter changes.",
+  "frozen_cv_primary": "f99 [432.25,209.125] lies on near player clothing/shorts edge, not the main shuttle landing.",
+  "model_only_primary": "f70 [420.1875,129.9375] is a moving bright object against the upper green-wall region, an airborne/image reversal rather than floor vicinity. No claim it is a stationary wall feature.",
+  "fusion_primary": "f130 [724.571,236.714] belongs to the main shuttle approach, but its apparent reversal is not the first floor reversal. The selected track then attaches to a neighboring player shoe sole.",
+  "observed_association_switch": {
+    "track_id": 1098,
+    "last_approach_frame": 130,
+    "wrong_footwear_frames": [
+      132,
+      133,
+      134,
+      136,
+      137
+    ],
+    "wrong_footwear_points": [
+      [
+        731.5,
+        233.833
+      ],
+      [
+        734.645,
+        233.613
+      ],
+      [
+        734.645,
+        233.613
+      ],
+      [
+        734.6,
+        233.567
+      ],
+      [
+        733.115,
+        233.538
+      ]
+    ],
+    "source_observation_method": "opencv_motion_dark_component",
+    "true_reference_points_at132_133_137": [
+      [
+        734,
+        258
+      ],
+      [
+        740,
+        270
+      ],
+      [
+        747,
+        259
+      ]
+    ],
+    "interpretation": "The model improves selected approach association but fails to provide actual main-shuttle observations at contact/rebound, allowing existing CV shoe candidates to produce a false reversal."
+  },
+  "new_correct_primary": false,
+  "matching_exported_landing_event": false,
+  "strict_approximate_localization_improved": false,
+  "sparse_selected_approach_improved": true,
+  "frozen_point_tolerance_unchanged": 12,
+  "artifacts": {
+    "posthoc-comparison.json": "bcc39b4b5d265bf7698cf45541b1e0817685d18e64d6783569a6d5cb85df1287",
+    "selected-source-review.jpg": "bbdd56729a1378dee18435f859c08c6361c4ddcf40fddb9a09912e6d463ad933",
+    "selected-track-switch-review.jpg": "ae2da115bca3a7f1554955cb4fe9dc995844cc620ac246da9b68b5d84b06eb7f"
+  },
+  "limitations": [
+    "This is evidence of a remaining association failure, not a calibrated cause attribution inside the neural network.",
+    "Model candidate confidence is uncalibrated, and no output confirms target identity or physical cork contact."
+  ]
+}

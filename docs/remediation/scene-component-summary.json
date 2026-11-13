@@ -1,0 +1,166 @@
+{
+  "status": "completed_source_reviewed_development_component_gain",
+  "scope": "24 old development/regression clips, fixed old detector observations and verified actual pixels; current tracking/events with production top12 cap, wrapper OFF, native recovery not executed; scene OFF vs ON only. Not a full fresh detector/native-contact pipeline score.",
+  "current_off_strict": [
+    6,
+    13
+  ],
+  "scene_on_strict": [
+    7,
+    13
+  ],
+  "frozen_release_strict": [
+    5,
+    13
+  ],
+  "strict_gains": [
+    "ordinary-4-a"
+  ],
+  "strict_regressions": [],
+  "qualitative_regressions": [],
+  "source_reviews_pending": [],
+  "selected_frame_point_changes": [
+    "ordinary-4-a"
+  ],
+  "selected_trajectory_changes": [
+    "ordinary-4-a"
+  ],
+  "strict_match_candidate_kinds": {
+    "observed_object_center": 4,
+    "inferred_object_center": 3
+  },
+  "all_outputs_review": true,
+  "implementation_fingerprint": "eeafdbb6e1b3108cb94fd537da6f4aab145b15ad179bd0965c92ca6d9974b1bf",
+  "source_tree_sha256": "9aa26a3d437f0f45ab34d43a52a72486ee9aa6c1b829f31dd42dc521383449d4",
+  "audit_sha256": "9e4795efdf88f42152ec2c1b69e427ac351aae2663ddeb21065874cd685905ae",
+  "independent_review_sha256": "a4e6f1dc391395d91c45c2b99e3707d472ed034aeb6b2e570eb17010d044b4c9",
+  "timings": {
+    "off_total_instrumented_component_seconds": 400.5686898929853,
+    "on_total_instrumented_component_seconds": 419.3228803039892,
+    "note": "Concurrent CPU load and diagnostic validation overhead; not complete analysis latency or an isolated performance benchmark.",
+    "videos": [
+      {
+        "key": "8k-2-a",
+        "off_stage_seconds": 14.561609410000528,
+        "on_stage_seconds": 12.447881239000708
+      },
+      {
+        "key": "8k-2-b",
+        "off_stage_seconds": 7.0999657809989,
+        "on_stage_seconds": 7.553627141001925
+      },
+      {
+        "key": "8k-5-a",
+        "off_stage_seconds": 8.04517444099838,
+        "on_stage_seconds": 12.088501460999396
+      },
+      {
+        "key": "8k-5-b",
+        "off_stage_seconds": 9.527165290000994,
+        "on_stage_seconds": 12.117081615000643
+      },
+      {
+        "key": "8k-7-a",
+        "off_stage_seconds": 11.592407125001046,
+        "on_stage_seconds": 12.14002165400234
+      },
+      {
+        "key": "8k-7-b",
+        "off_stage_seconds": 9.960542353001074,
+        "on_stage_seconds": 9.587308022997604
+      },
+      {
+        "key": "ordinary-4-a",
+        "off_stage_seconds": 29.608790474998386,
+        "on_stage_seconds": 27.194433097996807
+      },
+      {
+        "key": "ordinary-4-b",
+        "off_stage_seconds": 27.261085621998063,
+        "on_stage_seconds": 28.79823601099997
+      },
+      {
+        "key": "ordinary-12-a",
+        "off_stage_seconds": 27.15096873099901,
+        "on_stage_seconds": 30.4050582939999
+      },
+      {
+        "key": "ordinary-12-b",
+        "off_stage_seconds": 35.172824751996814,
+        "on_stage_seconds": 35.83836215100018
+      },
+      {
+        "key": "ordinary-18-a",
+        "off_stage_seconds": 22.772084223001002,
+        "on_stage_seconds": 24.85565603899886
+      },
+      {
+        "key": "ordinary-18-b",
+        "off_stage_seconds": 27.361550596000598,
+        "on_stage_seconds": 28.307189192000806
+      },
+      {
+        "key": "uhd4k-2-a",
+        "off_stage_seconds": 13.879023978999612,
+        "on_stage_seconds": 14.741906618997746
+      },
+      {
+        "key": "uhd4k-2-b",
+        "off_stage_seconds": 15.603845844998432,
+        "on_stage_seconds": 15.651295247000235
+      },
+      {
+        "key": "uhd4k-4-a",
+        "off_stage_seconds": 9.200012261000666,
+        "on_stage_seconds": 11.497549326999433
+      },
+      {
+        "key": "uhd4k-4-b",
+        "off_stage_seconds": 15.878864202997647,
+        "on_stage_seconds": 16.036854349997157
+      },
+      {
+        "key": "uhd4k-3-a",
+        "off_stage_seconds": 12.99605728899769,
+        "on_stage_seconds": 13.249299726998288
+      },
+      {
+        "key": "uhd4k-3-b",
+        "off_stage_seconds": 12.051980821001052,
+        "on_stage_seconds": 12.335779397999431
+      },
+      {
+        "key": "uhdhd-2-a",
+        "off_stage_seconds": 21.88387209099892,
+        "on_stage_seconds": 20.022929724000278
+      },
+      {
+        "key": "uhdhd-2-b",
+        "off_stage_seconds": 7.979232376001164,
+        "on_stage_seconds": 11.859122047997516
+      },
+      {
+        "key": "uhdhd-4-a",
+        "off_stage_seconds": 18.525322368997877,
+        "on_stage_seconds": 18.9827358750008
+      },
+      {
+        "key": "uhdhd-4-b",
+        "off_stage_seconds": 9.614095288001408,
+        "on_stage_seconds": 10.395771365998371
+      },
+      {
+        "key": "uhdhd-5-a",
+        "off_stage_seconds": 22.878983360998973,
+        "on_stage_seconds": 23.54675461000079
+      },
+      {
+        "key": "uhdhd-5-b",
+        "off_stage_seconds": 9.963231210997037,
+        "on_stage_seconds": 9.669526095000037
+      }
+    ]
+  },
+  "new_holdout_files_opened": false,
+  "next_required": "Final accepted source/config freeze, validation of any newly enabled detector/tracker recovery, full fresh original controls and new8 heldouts; inspect heldouts only after explicit release."
+}

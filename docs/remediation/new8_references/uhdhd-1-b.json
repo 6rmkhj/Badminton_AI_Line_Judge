@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "key": "uhdhd-1-b",
+  "file": "b시점(uhd30 hd30) 1.mp4",
+  "source_path": "/workspace/remediation/input/b시점(uhd30 hd30) 1.mp4",
+  "source_sha256": "c1ab564e2a689f04df0001f4d60cf72164d2c8b6e4f4fdd796f9e2f22e03e044",
+  "split": "holdout",
+  "round_holdout": true,
+  "round": "false_positive_remediation_after_0.5.3",
+  "scope": "Eight same-project/current-round holdout video files, four filename A/B pairs; not globally unseen data or independent human ground truth.",
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "source_size": [
+    1920,
+    1080
+  ],
+  "contact_visibility": "occluded",
+  "landing_point_px": null,
+  "tolerance_px": null,
+  "notes": "The main shuttle descends in front of the far red-shirt player, briefly overlaps the body, and reappears beside the left leg. The critical lowest segment then overlaps the moving legs/shoes and lower net cord; a distinct first rebound is not reliably resolved in this HD view. Visible approach points are retained, but no landing frame/point is inferred from nearby shoes, later objects, or the companion camera.",
+  "landing_frame_interval": null,
+  "landing_time_interval_seconds": null,
+  "additional_frame_tolerance": 0,
+  "trajectory_points": [
+    {
+      "frame_index": 80,
+      "time_seconds": 2.668333,
+      "x": 352,
+      "y": 238
+    },
+    {
+      "frame_index": 81,
+      "time_seconds": 2.701667,
+      "x": 346,
+      "y": 241
+    },
+    {
+      "frame_index": 83,
+      "time_seconds": 2.768333,
+      "x": 337,
+      "y": 246
+    },
+    {
+      "frame_index": 90,
+      "time_seconds": 3.001667,
+      "x": 313,
+      "y": 266
+    },
+    {
+      "frame_index": 91,
+      "time_seconds": 3.035,
+      "x": 311,
+      "y": 270
+    },
+    {
+      "frame_index": 93,
+      "time_seconds": 3.101667,
+      "x": 307,
+      "y": 276
+    },
+    {
+      "frame_index": 94,
+      "time_seconds": 3.135,
+      "x": 306,
+      "y": 280
+    }
+  ],
+  "later_bounce_observations": [],
+  "reference_source": "AI source-frame visual inspection blinded to current-round outputs",
+  "reference_status": "AI estimate; not human ground truth",
+  "ground_truth_eligible": false,
+  "predictions_or_model_outputs_inspected": false,
+  "companion_view_calibration_used": false,
+  "evidence": [
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/overview-1.jpg",
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/overview-2.jpg",
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/left-cached-0.png",
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/left-cached-1.png",
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/native-79-100-290-235-0.png",
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/native-79-100-290-235-1.png"
+  ],
+  "evidence_sha256": {
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/overview-1.jpg": "03a5612118efb3c203de2bbd31f6313773d790a9defbf88aa4b859c72f64bf93",
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/overview-2.jpg": "189b19c861e2dfe15a6824bcaaea8f3445e9c4cd1d56eb4dfe9db40693cdb541",
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/left-cached-0.png": "ea334bbb3489948c7e64c586fa9e2f4085be779f73b11f9c174a9472f982bbd7",
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/left-cached-1.png": "c0de162776b6540c96146861517032c7b469110af532b2d64766168485d7feaa",
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/native-79-100-290-235-0.png": "c5aa5101134dd4861ff89efb4ebeb6f954b277dab8aec56d288a02e35d12eabe",
+    "/workspace/remediation/sealed_visual/uhdhd-1-b/native-79-100-290-235-1.png": "bc0e7bb30dee93d4583250d63dd253967df813c9942eb18e64ee46b0dac20941"
+  },
+  "indexing": "Zero-based source frames decoded sequentially from frame 0; normalized source timestamps from ffprobe.",
+  "inspection_decode_threads": 1
+}
