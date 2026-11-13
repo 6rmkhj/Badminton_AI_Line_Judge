@@ -16,8 +16,10 @@ const environment = {
   system:{os:'Windows', release:'11', machine:'AMD64'},
   cpu:{name:'Fixture CPU · 서버 장치', logical_cores:16, available_cores:8},
   memory:{total_mb:16384, available_mb:12288},
-  accelerators:[{id:'cuda:0', name:'Fixture GPU', memory_mb:8192, selectable:false,
-    reason:'현재 분석 파이프라인은 CPU에서 실행됩니다.'}],
+  accelerators:[{id:'display:nvidia:0', name:'Fixture GPU · 감지만 완료', memory_mb:8192, selectable:false,
+    reason:'실행 가능한 PyTorch 장치를 확인하지 못했습니다.'},
+    {id:'cuda:1', name:'Fixture CUDA GPU', memory_mb:16384, selectable:true,reason:'추론 실행 확인 완료'},
+    {id:'mps', name:'Fixture Apple GPU', memory_mb:null, selectable:true,reason:'추론 실행 확인 완료'}],
   defaults,
   limits:{cpu_threads:{min:1,max:8}, parallel_views:{min:1,max:2}, frame_memory_mb:{min:64,max:16384}},
   fingerprint:'fixture-server-environment',
@@ -84,7 +86,10 @@ const server = http.createServer(async (request, response) => {
     assert.match(await page.locator('#resource-hardware').innerText(), /CPU 8개 · 메모리 16 GiB/);
     assert.match(await page.locator('#resource-cpu').innerText(), /서버 장치/);
     assert.match(await page.locator('#resource-accelerators').innerText(), /Fixture GPU/);
-    assert.match(await page.locator('#resource-accelerators').innerText(), /CPU에서 실행/);
+    assert.match(await page.locator('#resource-accelerators').innerText(), /실행 가능한 PyTorch 장치를 확인하지 못했습니다/);
+    assert(await page.locator('[name="resource-device"][value="display:nvidia:0"]').isDisabled());
+    assert.equal(await page.locator('[name="resource-device"][value="cuda:1"]').isDisabled(), false);
+    assert.equal(await page.locator('#resource-gpu-memory-field').isVisible(), false);
     assert.equal(await page.locator('#resource-threads').getAttribute('max'),'8');
     assert.equal(await page.locator('#resource-memory').getAttribute('max'),'16384');
     assert(await page.evaluate(() => document.getElementById('resource-dialog').contains(document.activeElement)),
@@ -113,12 +118,44 @@ const server = http.createServer(async (request, response) => {
     assert.equal(await page.evaluate(() => document.activeElement.id),'resource-settings-button');
     assert.match(await page.locator('#resource-settings-button').innerText(), /CPU 3스레드/);
 
+    // Select the runtime's logical GPU identifier, including nonzero ordinals.
+    await openDialog();
+    await page.locator('[name="resource-device"][value="cuda:1"]').check();
+    assert(await page.locator('#resource-gpu-scope').isVisible());
+    assert.match(await page.locator('#resource-gpu-scope').innerText(), /CPU로 자동 전환하지 않습니다/);
+    assert(await page.locator('#resource-gpu-memory-field').isVisible());
+    await page.locator('#resource-gpu-memory').fill('35');
+    assert.match(await page.locator('#resource-summary').innerText(), /Fixture CUDA GPU.*GPU 할당 35%/);
+    await page.locator('#resource-save').click();
+    await page.waitForFunction(() => !document.getElementById('resource-dialog').open);
+    assert.deepEqual(saves.at(-1), {device:'cuda:1',cpu_threads:3,parallel_views:2,frame_memory_mb:2048,gpu_memory_percent:35});
+    assert.match(await page.locator('#resource-settings-button').innerText(), /GPU cuda:1/);
+    await openDialog();
+    assert(await page.locator('[name="resource-device"][value="cuda:1"]').isChecked());
+    assert.equal(await page.locator('#resource-gpu-memory').inputValue(), '35');
+    await page.locator('[name="resource-device"][value="mps"]').check();
+    assert.equal(await page.locator('#resource-gpu-memory-field').isVisible(), false);
+    assert(await page.locator('#resource-gpu-memory').isDisabled());
+    await page.locator('#resource-save').click();
+    await page.waitForFunction(() => !document.getElementById('resource-dialog').open);
+    assert.equal(saves.at(-1).device, 'mps');
+    assert.equal('gpu_memory_percent' in saves.at(-1), false);
+    await openDialog();
+    await page.locator('[name="resource-device"][value="cpu"]').check();
+    assert.equal(await page.locator('#resource-gpu-scope').isVisible(), false);
+    await page.locator('#resource-save').click();
+    await page.waitForFunction(() => !document.getElementById('resource-dialog').open);
+    assert.equal(saves.at(-1).device, 'cpu');
+    assert.equal('gpu_memory_percent' in saves.at(-1), false);
+    assert.equal(submissions.length, 0, 'Device changes must not start analysis');
+
     busy = true;
     await openDialog();
     for (const id of ['resource-threads','resource-parallel','resource-memory','resource-save','resource-defaults']) {
       assert(await page.locator('#' + id).isDisabled(),id + ' must be locked while analysis is pending/running');
     }
     assert(await page.locator('#resource-busy').isVisible());
+    assert(await page.locator('[name="resource-device"][value="cuda:1"]').isDisabled());
     await page.locator('#resource-close').click();
 
     busy = false; failSave = true;

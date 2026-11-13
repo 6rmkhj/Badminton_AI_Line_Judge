@@ -12,6 +12,16 @@ import venv
 import webbrowser
 
 
+def _project_python(project):
+    """Choose the prepared environment even if the system Python has CPU deps."""
+    environment = Path(project) / '.venv'
+    python = environment / ('Scripts/python.exe' if sys.platform == 'win32' else 'bin/python')
+    if (python.is_file() and (environment / 'pyvenv.cfg').is_file()
+            and Path(sys.prefix).resolve() != environment.resolve()):
+        return python
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run')
@@ -28,9 +38,15 @@ def main():
     project = Path(__file__).resolve().parent
     if sys.version_info < (3, 11):
         parser.error('Python 3.11 이상이 필요합니다.')
+    prepared_python = _project_python(project) if not args.review else None
+    if prepared_python is not None:
+        os.execv(str(prepared_python), [str(prepared_python), '-X', 'utf8',
+                                     str(Path(__file__).resolve()), *sys.argv[1:]])
     if not args.review and not all(importlib.util.find_spec(name) for name in ('numpy', 'cv2', 'scipy', 'filelock')):
         environment = project / '.venv'
         python = environment / ('Scripts/python.exe' if sys.platform == 'win32' else 'bin/python')
+        if python.is_file() and not (environment / 'pyvenv.cfg').is_file():
+            parser.error('기존 .venv가 올바른 가상환경이 아닙니다. 폴더를 확인한 뒤 다시 실행하세요.')
         if not python.is_file():
             print('로컬 Python 환경을 준비합니다.', flush=True)
             venv.EnvBuilder(with_pip=True).create(environment)

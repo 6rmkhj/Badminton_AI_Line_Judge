@@ -10,7 +10,7 @@
 
 0.5.5에서는 **분석 전 장치 설정 창**과 **입력 영상 정보**를 추가했습니다. `python start.py --pair` 또는 기존 A/B 실행기를 열면 서버 컴퓨터의 OS·CPU·메모리·GPU를 확인하고, 시점당 OpenCV/영상 처리 스레드, A/B 순차·동시 처리, 전체 프레임 버퍼 예산(MiB)을 정합니다. 설정을 확인하기 전에는 분석 API도 실행을 차단하며, 대기·진행 중에는 설정을 바꿀 수 없습니다. 같은 환경의 설정은 실행 폴더에 저장되지만 서버 재시작마다 다시 확인합니다.
 
-현재 분석기는 CPU를 사용하므로 감지한 GPU는 지원 상태와 함께 표시합니다. 스레드 수는 전체 CPU 사용률 상한이 아니며, 프레임 버퍼 예산은 프로그램 전체 RAM 상한이 아닙니다. 동시 처리 시 예산을 두 시점에 나누고, 초과 영상은 프레임을 생략하지 않고 사유와 함께 중단합니다. 순차 처리로 바꾸거나 예산을 늘려 다시 실행할 수 있습니다.
+0.5.5의 초기 장치 설정은 CPU 실행만 지원했으며, 0.5.6부터 아래 GPU 실행을 지원합니다. 스레드 수는 전체 CPU 사용률 상한이 아니며, 프레임 버퍼 예산은 프로그램 전체 RAM 상한이 아닙니다. 동시 처리 시 예산을 두 시점에 나누고, 초과 영상은 프레임을 생략하지 않고 사유와 함께 중단합니다. 순차 처리로 바꾸거나 예산을 늘려 다시 실행할 수 있습니다.
 
 새 파일을 선택하면 서버가 먼저 원본 정보를 확인해 **평균 FPS·해상도(HD/FHD/QHD/4K)·확장자·코덱·재생 시간·파일 크기·비트레이트·프레임 수**를 표시합니다. 분석은 버튼을 눌러 시작하며, 확인한 파일은 다시 업로드하지 않습니다. 가변 프레임 간격은 별도 안내하고, 읽을 수 없는 값은 확인 불가로 표시합니다. 해상도 등급은 선명도 측정 결과가 아닙니다. 아래 0.5.4 다운로드에는 이 변경이 포함되지 않으며, 이번 변경은 소스 실행 기준입니다.
 
@@ -27,6 +27,28 @@
 0.5.0에서는 [REVIEW 15쌍 재검수·개선](docs/REVIEW_REMEDIATION.md), 시점별 실패 사유, 검토 구간 이동과 원본 집중 재분석을 추가했습니다. 기존 검수에서 놓친 두 쌍의 첫 착지를 복구했으며, 검수 보조 결과와 새 자동 분석을 구분합니다.
 
 **새 검수 패키지 보기:** Python 3.11 이상 설치 후 `start-review-windows.bat` 또는 `python3 start.py --review`를 실행합니다. 포함된 영상·근거를 보는 데 추가 패키지 설치가 필요하지 않습니다. 미해결 영상은 사유와 함께 REVIEW로 남습니다.
+
+## GPU 실행 준비 (0.5.6 소스)
+
+장치 설정에서 GPU를 선택하면 기본 후보 생성의 대비·움직임 마스크 연산과 연결된 PyTorch 모델 추론이 선택한 장치에서 실행됩니다. NVIDIA CUDA와 Apple Silicon MPS를 지원하며, YOLO ONNX 모델은 CUDA에서 실행할 수 있습니다. 영상 읽기·연결 성분·코트 보정·추적·판정 등은 CPU에서 계속 실행합니다. 기본 후보 생성은 학습된 셔틀콕 모델이 아니며, GPU 설치가 새 모델 가중치나 판정 정확도를 제공하지는 않습니다.
+
+서버를 종료한 뒤 프로젝트 폴더에서 준비합니다. Python 3.11 이상과 GPU를 지원하는 OS 드라이버가 필요합니다. 설치기는 프로젝트의 독립 `.venv`만 사용하고, CUDA용 PyTorch 2.10.0은 공식 `cu128` 저장소에서 설치합니다. CUDA Toolkit 전체를 별도로 설치하는 대신 PyTorch 휠에 포함된 실행 라이브러리를 사용합니다.
+
+```bash
+# NVIDIA GPU · Windows/Linux
+python scripts/setup_gpu.py --backend cuda
+# ONNX 모델도 사용하는 경우
+python scripts/setup_gpu.py --backend cuda --onnx
+
+# Apple Silicon macOS (ONNX CUDA 모델 제외)
+python3 scripts/setup_gpu.py --backend mps
+```
+
+Windows에서는 `setup-gpu-windows.bat`를 실행해도 됩니다. ONNX용 설치는 `setup-gpu-windows.bat --onnx`입니다. `--dry-run`을 붙이면 실제 명령만 확인하고, `--check-only`를 붙이면 설치 없이 기존 환경의 GPU 연산을 확인합니다. 설치기는 모델 파일을 내려받지 않으며, `onnxruntime`과 `onnxruntime-gpu`의 충돌은 프로젝트 가상환경 안에서 정리합니다. 다른 프로그램의 Python 환경은 변경하지 않습니다.
+
+설치가 완료되면 기존 `start-pair-windows.bat` 또는 `python start.py --pair`를 실행합니다. 실행기는 준비된 `.venv`를 우선 사용합니다. 설정 창에는 실제 연산 확인을 통과한 GPU만 선택 가능하게 표시합니다. GPU 메모리 부족·드라이버 오류 시 CPU로 자동 대체하지 않고 실패 원인을 표시하므로, 문제를 해결하거나 장치 설정을 CPU로 바꿔 다시 실행하세요. AMD/Intel GPU용 설치기와 Windows 휴대용 ZIP 재패키징은 이번 소스 변경에 포함되지 않습니다.
+
+기존 모델을 사용하려면 `configs/poc.json`의 `detector.scorer_path`, `events.contact_model_path` 또는 `events.source_contact_model_path`에 호환되는 PyTorch 체크포인트를 지정합니다. ONNX는 `detector.backend: "onnx"`, `detector.model_path`와 해당 모델의 `onnx_format`, `shuttle_class_id`를 명시합니다. 모델의 학습 전처리·입력 크기·검증 기준은 그대로 적용되며, GPU 선택만으로 미검증 모델이 판정 근거로 승격되지 않습니다.
 
 ## 빠른 실행
 

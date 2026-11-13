@@ -728,6 +728,7 @@ class PairWorkspace:
         return original, digest, matches, entry
 
     def _view(self, identifier, camera, selected, reuse, catalog, refine=False):
+        from .inference import InferenceDeviceError
         started = time.perf_counter()
         self._progress(identifier, camera, "running")
         base = {"camera_id": camera, "file": selected["file"], "status": "completed", "rules": deepcopy(RULES),
@@ -838,11 +839,12 @@ class PairWorkspace:
                     trajectory_replay_url=replay_url, trajectory_replay_info=replay_info,
                     reason_codes=(result.get("decision") or {}).get("reason_codes", []),
                     rationale="새 원본 분석의 접촉·경계 검증 결과입니다.", analysis_timings=result.get("timings", {}),
+                    execution=deepcopy(result.get("execution")),
                     source_verification="current_original_sha256")
             return self._finish_view(identifier, camera, base)
         except Exception as error:
             base.update(status="failed", reason_codes=["VIEW_ANALYSIS_FAILED"], review_source="none",
-                        processing_mode="failed", error=str(error) if isinstance(error, (PairWorkspaceError, ValueError)) else f"영상 분석 실패: {type(error).__name__}",
+                        processing_mode="failed", error=str(error) if isinstance(error, (PairWorkspaceError, ValueError, InferenceDeviceError)) else f"영상 분석 실패: {type(error).__name__}",
                         elapsed_seconds=round(time.perf_counter() - started, 6))
             return self._finish_view(identifier, camera, base)
 

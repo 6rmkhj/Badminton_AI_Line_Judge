@@ -660,6 +660,12 @@ function renderView(camera, view, diagnostics) {
   title.append(el('p', 'eyebrow', camera + ' VIEW'), el('h3', '', view.file || camera + ' 시점'));
   header.append(title, el('span', 'processing-label', modeNames[view.processing_mode] || '결과 확인'));
   card.append(header);
+  if (view.execution?.detector_device) {
+    const device = view.execution.detector_device;
+    const label = device === 'cpu' ? 'CPU' : device.startsWith('cuda:') ? 'GPU · ' + device : device === 'mps' ? 'Apple GPU · MPS' : device;
+    const stages = (view.execution.gpu_stages || []).map(stage => ({candidate_masks: '후보 마스크 연산', onnx_model: 'ONNX 모델 추론', candidate_scorer: '후보 모델 추론', contact_model: '접촉 모델 추론', source_contact_model: '원본 접촉 모델 추론'}[stage] || stage));
+    card.append(el('p', 'execution-device', `실행 장치: ${label}${stages.length ? ' · ' + stages.join(', ') : ''}`));
+  }
   const verdicts = el('div', 'view-verdicts');
   const analysisLabel = view.processing_mode === 'user_region_reanalysis' ? '수동 탐색 보조' : view.processing_mode === 'review_guided_reanalysis' ? '후보 구간 재분석' : '자동 분석';
   for (const [label, value] of [[analysisLabel, view.automatic_decision], ['직접 관측 근거', view.direct_decision], ['시점 보조 판정', view.assisted_decision]]) {

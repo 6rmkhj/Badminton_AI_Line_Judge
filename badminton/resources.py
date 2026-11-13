@@ -116,13 +116,14 @@ def _memory_bytes(system):
     return total, available
 
 
-def _accelerators(system):
+def _hardware_accelerators(system):
+    """Inventory names are not CUDA runtime ordinals or proof of execution."""
     devices = []
     output = _command(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"])
     for line in output.splitlines():
         name, separator, memory = line.rpartition(",")
         if separator and name.strip():
-            devices.append({"id": f"cuda:{len(devices)}", "name": name.strip(),
+            devices.append({"id": f"display:nvidia:{len(devices)}", "name": name.strip(),
                             "memory_mb": _positive_integer(memory.strip())})
     if not devices and system == "Linux":
         # Display controllers are inventory only; their presence does not imply
@@ -149,7 +150,28 @@ def _accelerators(system):
         except (ValueError, TypeError, AttributeError):
             pass
     for device in devices:
-        device.update(selectable=False, reason="현재 분석 파이프라인은 CPU에서 실행됩니다.")
+        device.update(selectable=False, reason="GPU는 감지했지만 실행 가능한 PyTorch 장치를 확인하지 못했습니다. GPU 런타임·드라이버 설치 후 서버를 다시 시작하세요.")
+    return devices
+
+
+def _torch_accelerators():
+    from .inference import available_torch_devices
+    return available_torch_devices()
+
+
+def _accelerators(system):
+    # Runtime ordinals honor CUDA_VISIBLE_DEVICES; nvidia-smi's physical order
+    # must never be used to route inference to a potentially different GPU.
+    devices = [dict(device) for device in _torch_accelerators()]
+    remaining_names = [str(device.get("name", "")).strip().lower() for device in devices]
+    for device in _hardware_accelerators(system):
+        name = device["name"].strip().lower()
+        if system == "Darwin" and name.startswith("apple ") and any(item.get("id") == "mps" for item in devices):
+            continue
+        if name in remaining_names:
+            remaining_names.remove(name)
+        else:
+            devices.append(device)
     return devices
 
 
@@ -200,17 +222,29 @@ def recommend_settings(environment):
 
 
 def validate_settings(settings, environment):
-    if not isinstance(settings, dict) or set(settings) != _SETTING_FIELDS:
+    if (not isinstance(settings, dict) or not _SETTING_FIELDS.issubset(settings)
+            or set(settings) - _SETTING_FIELDS - {"gpu_memory_percent"}):
         raise ResourceSettingsError("장치, CPU 스레드, 동시 분석 수, 프레임 버퍼 예산을 모두 지정하세요.")
-    if settings["device"] != "cpu":
-        raise ResourceSettingsError("현재 분석 파이프라인은 CPU만 지원합니다.")
-    normalized = {"device": "cpu"}
+    device = settings["device"]
+    if not isinstance(device, str):
+        raise ResourceSettingsError("사용할 추론 장치를 선택하세요.")
+    if device != "cpu" and not any(item.get("id") == device and item.get("selectable") is True
+                                   for item in environment.get("accelerators", [])):
+        raise ResourceSettingsError("선택한 GPU에서 추론을 실행할 수 없습니다. GPU 런타임·드라이버를 확인하거나 CPU를 선택하세요.")
+    normalized = {"device": device}
     for field, label in (("cpu_threads", "CPU 스레드"), ("parallel_views", "동시 분석 수"),
                          ("frame_memory_mb", "프레임 버퍼 예산")):
         value, bounds = settings[field], environment["limits"][field]
         if isinstance(value, bool) or not isinstance(value, int) or not bounds["min"] <= value <= bounds["max"]:
             raise ResourceSettingsError(f"{label}: {bounds['min']}~{bounds['max']} 사이의 정수를 지정하세요.")
         normalized[field] = value
+    if device.startswith("cuda:"):
+        percent = settings.get("gpu_memory_percent", 50)
+        if isinstance(percent, bool) or not isinstance(percent, int) or not 10 <= percent <= 90:
+            raise ResourceSettingsError("GPU 메모리 예산은 10~90 사이의 정수(%)여야 합니다.")
+        normalized["gpu_memory_percent"] = percent
+    elif "gpu_memory_percent" in settings:
+        raise ResourceSettingsError("GPU 메모리 비율 설정은 CUDA 장치에서만 지원합니다.")
     return normalized
 
 
@@ -222,6 +256,14 @@ def apply_runtime(settings):
     if isinstance(threads, bool) or not isinstance(threads, int) or threads < 1:
         raise ResourceSettingsError("CPU 스레드는 1 이상의 정수여야 합니다.")
     with _runtime_lock:
+        from .inference import configure_device, InferenceDeviceError
+        try:
+            # This repeats the runtime check when saving; stale hardware
+            # discovery must not turn a missing GPU into silent CPU execution.
+            configure_device(settings.get("device", "cpu"),
+                             gpu_memory_percent=settings.get("gpu_memory_percent", 50))
+        except InferenceDeviceError as error:
+            raise ResourceSettingsError(str(error)) from error
         cv2.setNumThreads(threads)
         _decoder_threads = threads
         return {"opencv_threads": cv2.getNumThreads(), "decoder_threads": threads}

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+from copy import deepcopy
 from pathlib import Path
 
 import cv2
@@ -59,6 +60,18 @@ def _appearance_components(gray, hsv, bright, motion, foreground, local_base, co
     Joining both masks can connect a white shuttle to an adjacent dark player
     or court edge. The extra search must not erase the original light component.
     """
+    device = config.get("inference_device", "cpu")
+    if device != "cpu":
+        from .gpu_candidates import appearance_masks
+        for polarity, selected, contrast, cue in appearance_masks(
+                gray, hsv, bright, motion, foreground, local_base, config,
+                exclusion, roi, native=native, device=device):
+            count, labels, stats, centers = cv2.connectedComponentsWithStats(selected.astype(np.uint8) * 255, 8)
+            for label in range(1, count):
+                x, y, w, h, _ = map(int, stats[label])
+                yield (polarity, stats[label], centers[label], labels[y:y+h, x:x+w] == label,
+                       contrast[y:y+h, x:x+w], cue[y:y+h, x:x+w])
+        return
     positive = cv2.subtract(gray, local_base)
     channels = [("bright", bright > 0, positive, float(config.get("motion_threshold", 16)),
                  float(config.get("contrast_threshold", 8)))]
@@ -323,13 +336,24 @@ class _OnnxDetector:
         self.tile_overlap = float(config.get("tile_overlap", 0.2))
         if self.size < 32 or self.tile_size < 32 or not 0 <= self.tile_overlap < 0.75 or self.class_id < 0:
             raise ValueError("Invalid ONNX size, tiling, or class configuration")
-        self.net = cv2.dnn.readNetFromONNX(str(path))
-        self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
-        self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
+        self.device = config.get("inference_device", "cpu")
+        self.gpu_session = None
+        if self.device == "cpu":
+            self.net = cv2.dnn.readNetFromONNX(str(path))
+            self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
+            self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
+        else:
+            from .inference import resolve_device
+            from .gpu_candidates import CudaOnnxSession
+            self.device = resolve_device(self.device)
+            self.gpu_session = CudaOnnxSession(path, self.device, config.get("gpu_memory_percent", 50),
+                                               config.get("gpu_parallel_views", 1))
         self.provenance = {
             "backend": "onnx", "model_file": path.name,
             "model_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
             "format": self.format, "shuttle_class_id": self.class_id,
+            "inference_device": self.device,
+            "execution_provider": "CUDAExecutionProvider" if self.gpu_session else "OpenCV_CPU",
             "weights_validation": "user_supplied_not_independently_validated",
         }
 
@@ -341,8 +365,12 @@ class _OnnxDetector:
         pad_x, pad_y = (self.size - scaled_width) // 2, (self.size - scaled_height) // 2
         padded = np.full((self.size, self.size, 3), 114, np.uint8)
         padded[pad_y:pad_y + scaled_height, pad_x:pad_x + scaled_width] = resized
-        self.net.setInput(cv2.dnn.blobFromImage(padded, 1 / 255, swapRB=True, crop=False))
-        output = np.asarray(self.net.forward())
+        blob = cv2.dnn.blobFromImage(padded, 1 / 255, swapRB=True, crop=False)
+        if self.gpu_session is None:
+            self.net.setInput(blob)
+            output = np.asarray(self.net.forward())
+        else:
+            output = np.asarray(self.gpu_session.forward(blob))
         if output.ndim != 3 or output.shape[0] != 1:
             raise ValueError("Expected unpostprocessed YOLO ONNX output of shape [1,C,N] or [1,N,C]")
         predictions = output[0].T if self.format == "yolo_v8" else output[0]
@@ -723,6 +751,11 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
     _validate_inputs(frames, timestamps)
     if not frames:
         return []
+    device = config.get("inference_device", "cpu")
+    if device != "cpu":
+        from .inference import resolve_device
+        device = resolve_device(device)
+        config["inference_device"] = device
     backend = config.get("backend", "opencv_candidates")
     if backend not in ("opencv_candidates", "onnx"):
         raise ValueError("backend must be opencv_candidates or onnx")
@@ -756,7 +789,7 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
     scorer = None
     if config.get("scorer_path"):
         from .learning import load_candidate_scorer
-        scorer = load_candidate_scorer(config["scorer_path"])
+        scorer = load_candidate_scorer(config["scorer_path"], **({"device": device} if device != "cpu" else {}))
     provenance = onnx.provenance if onnx else {
         "backend": "opencv_candidates", "trained_model": False,
         "method": "bright_small_components_with_background_and_temporal_difference",
@@ -769,7 +802,12 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
     }
     provenance.update(candidate_selection=selection, refinement_region_count=len(regions),
                       refinement_region_source="operator_or_review_supplied" if regions else None,
-                      refinement_provides_contact_evidence=False)
+                      refinement_provides_contact_evidence=False,
+                      inference_device=device,
+                      gpu_stages=(["onnx_model"] if onnx else ["candidate_masks"]) if device != "cpu" else [],
+                      cpu_stages=["video_preprocessing", "candidate_geometry"]
+                                 + ([] if onnx else ["connected_components"])
+                                 + (["person_hog"] if config.get("person_backend", "hog") != "none" else []))
     min_area = float(config.get("min_area", max(1.0, 2 * scale * scale)))
     max_area = float(config.get("max_area", max(40.0, 180 * scale * scale)))
     if not math.isfinite(min_area) or not math.isfinite(max_area) or min_area <= 0 or max_area < min_area:
@@ -938,7 +976,7 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
             detections, preferred_count = _refined_budget(detections, frame.shape, max_candidates,
                                                           selection, max(1.0, 3 * scale), active_regions)
         record = {"frame_index": index, "time": float(timestamp), "detections": detections,
-                  "occlusion_regions": occlusion_regions, "detector": dict(provenance),
+                  "occlusion_regions": occlusion_regions, "detector": deepcopy(provenance),
                   "person_detector": person_diagnostics, "high_resolution": high_resolution,
                   "camera_motion": camera_motion, "proposal_count_before_limit": proposal_count,
                   "candidate_limit_reached": proposal_count > max_candidates,
@@ -947,7 +985,13 @@ def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
                                  "assistance_used": bool(active_regions), "coordinate_system": "analysis_pixels",
                                  "provides_contact_evidence": False, "provides_target_identity": False}}
         if scorer:
-            record["candidate_scorer"] = getattr(scorer, "provenance", {"path": str(config["scorer_path"])})
+            executed = getattr(scorer, "last_inference_executed", False) is True
+            record["candidate_scorer"] = {
+                **deepcopy(getattr(scorer, "provenance", {"path": str(config["scorer_path"])})),
+                "inference_executed": executed,
+            }
+            if executed and device != "cpu" and record["candidate_scorer"].get("inference_device") == device:
+                record["detector"]["gpu_stages"].append("candidate_scorer")
         records.append(record)
         previous_gray = gray
         progress.report(index + 1)

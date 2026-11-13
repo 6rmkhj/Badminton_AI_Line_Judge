@@ -602,8 +602,9 @@ class ReviewHandler(BaseHTTPRequestHandler):
                         self.server.jobs[job_id]["status"] = "completed"
                 except Exception as error:
                     from .resources import ResourceSettingsError
+                    from .inference import InferenceDeviceError
                     with self.server.job_lock:
-                        message = str(error) if isinstance(error, ResourceSettingsError) else f"분석 실패: {type(error).__name__}"
+                        message = str(error) if isinstance(error, (ResourceSettingsError, InferenceDeviceError)) else f"분석 실패: {type(error).__name__}"
                         self.server.jobs[job_id].update(status="failed", error=message)
             self.server.executor.submit(work)
             return self._json({"job_id": job_id, "status": "queued"}, 202)
