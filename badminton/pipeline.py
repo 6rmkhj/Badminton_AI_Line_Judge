@@ -133,6 +133,13 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
         return {'progress_callback': lambda fields: report(stage, **fields)} if progress_callback is not None else {}
 
     report('prepare', detail='원본 확인·미리보기 준비')
+    frame_options = {}
+    if config.get('resource_settings') is not None:
+        from .media import probe
+        from .resources import frame_budget_bytes, validate_frame_budget
+        budget = frame_budget_bytes(config['resource_settings'])
+        validate_frame_budget(probe(source), config.get('analysis_width', 1280), budget)
+        frame_options['max_memory_bytes'] = budget
     metadata, presentation, source_sha = prepare_preview(source, output / 'preview.mp4', config.get('analysis_width', 1280),
                                                        **observe('prepare'))
     detector_config = dict(config.get('detector') or {})
@@ -143,11 +150,11 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     if (learned_input or event_config.get('scene_context_ranking', False)
             or detector_config.get('refinement_regions') or detector_config.get('source_analysis_enabled', False)):
         frames = load_frames(source, presentation['frame_count'], config.get('max_frames', 3000),
-                             resize_to=(presentation['width'], presentation['height']), **observe('prepare'))
+                             resize_to=(presentation['width'], presentation['height']), **frame_options, **observe('prepare'))
         preprocessing = 'opencv_source_bgr_area_v1'
     else:
         frames = load_frames(output / 'preview.mp4', presentation['frame_count'], config.get('max_frames', 3000),
-                             **observe('prepare'))
+                             **frame_options, **observe('prepare'))
         preprocessing = 'h264_preview_crf21_bgr_v1'
     timestamps = presentation.pop('timestamps')
     metadata.pop('timestamps', None)

@@ -12,6 +12,7 @@ import re
 import threading
 from urllib.parse import unquote, urlsplit
 import uuid
+from copy import deepcopy
 
 
 class RequestError(Exception):
@@ -51,7 +52,69 @@ class ReviewServer(ThreadingHTTPServer):
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="review-analysis")
         self.pair_workspace = None
         self.pair_workspace_lock = threading.Lock()
+        self.resource_lock = threading.RLock()
+        self.resource_environment = None
+        self.resource_settings = None
+        self.resources_confirmed = False
         super().__init__(address, ReviewHandler)
+
+    def _load_resources(self):
+        if self.resource_environment is not None:
+            return
+        from .resources import detect_environment, validate_settings
+        self.resource_environment = detect_environment()
+        self.resource_settings = deepcopy(self.resource_environment["defaults"])
+        try:
+            saved = _read_json(self.root / "resource-settings.json", {})
+            if saved.get("fingerprint") == self.resource_environment["fingerprint"]:
+                self.resource_settings = validate_settings(saved["settings"], self.resource_environment)
+        except (ValueError, KeyError, TypeError, AttributeError, OSError):
+            pass
+
+    def resources_busy(self):
+        with self.job_lock:
+            if any(job["status"] in {"queued", "running"} for job in self.jobs.values()):
+                return True
+        workspace = self.pair_workspace
+        if workspace is not None and hasattr(workspace, "lock"):
+            with workspace.lock:
+                return any(job["status"] in {"queued", "running"} for job in workspace.jobs.values())
+        return False
+
+    def resources_status(self):
+        with self.resource_lock:
+            self._load_resources()
+            return {"environment": deepcopy(self.resource_environment),
+                    "settings": deepcopy(self.resource_settings),
+                    "confirmed": self.resources_confirmed, "busy": self.resources_busy()}
+
+    def configure_resources(self, body):
+        from .resources import validate_settings, apply_runtime, ResourceSettingsError
+        from .pair_workspace import _write
+        with self.resource_lock:
+            self._load_resources()
+            if self.resources_busy():
+                raise RequestError(409, "진행 중이거나 대기 중인 분석이 끝난 뒤 장치 설정을 변경하세요.")
+            try:
+                selected = validate_settings(body, self.resource_environment)
+                apply_runtime(selected)
+            except ResourceSettingsError as error:
+                raise RequestError(400, str(error)) from error
+            try:
+                _write(self.root / "resource-settings.json", {
+                    "fingerprint": self.resource_environment["fingerprint"], "settings": selected})
+            except OSError as error:
+                apply_runtime(self.resource_settings)
+                raise RequestError(500, "장치 설정을 저장하지 못했습니다. 저장 공간과 폴더 권한을 확인하세요.") from error
+            self.resource_settings = selected
+            self.resources_confirmed = True
+            return self.resources_status()
+
+    def require_resources(self):
+        with self.resource_lock:
+            if not self.resources_confirmed:
+                raise RequestError(409, "분석 전에 실행 환경과 장치 사용 설정을 확인해 주세요.")
+            return deepcopy(self.resource_settings)
 
     def server_close(self):
         self.executor.shutdown(wait=False, cancel_futures=True)
@@ -67,7 +130,8 @@ class ReviewServer(ThreadingHTTPServer):
                 project = Path(__file__).resolve().parents[1]
                 library = self.root if (self.root / "index.json").is_file() else project / "runs/integrated-poc"
                 self.pair_workspace = PairWorkspace(project_root=project,
-                    workspace_root=self.root / "paired", library_root=library)
+                    workspace_root=self.root / "paired", library_root=library,
+                    resource_settings_provider=self.require_resources)
             return self.pair_workspace
 
     def video(self, video_id):
@@ -372,6 +436,10 @@ class ReviewHandler(BaseHTTPRequestHandler):
 
     def _get(self):
         path = unquote(urlsplit(self.path).path)
+        if path == "/api/resources":
+            return self._json(self.server.resources_status())
+        if path in ("/resources.js", "/resources.css"):
+            return self._file(self.server.static / path[1:])
         if path in ("/pair", "/pair/", "/pair.html"):
             return self._file(self.server.static / "pair.html")
         if path in ("/pair.js", "/pair.css"):
@@ -449,8 +517,15 @@ class ReviewHandler(BaseHTTPRequestHandler):
             self.connection.settimeout(60)
             return self._json(self.server.get_pair_workspace().stage_upload(self.rfile, length, filename), 201)
         body = self._write_body()
+        if path == "/api/resources":
+            return self._json(self.server.configure_resources(body))
         if path == "/api/pair-jobs":
-            return self._json(self.server.get_pair_workspace().submit(body), 202)
+            with self.server.resource_lock:
+                self.server.require_resources()
+                with self.server.job_lock:
+                    if any(job["status"] in {"queued", "running"} for job in self.server.jobs.values()):
+                        raise RequestError(409, "개별 영상 분석이 끝난 뒤 A/B 분석을 시작하세요.")
+                return self._json(self.server.get_pair_workspace().submit(body), 202)
         if path.startswith("/api/annotations/"):
             return self._json(self.server.annotate(path.removeprefix("/api/annotations/"), body))
         match = re.fullmatch(r"/api/pairs/(\d+)/sync", path)
@@ -499,17 +574,21 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 temporary.replace(target)
             return self._json(record)
         if path.startswith("/api/analyze/"):
+            self.server.require_resources()
             video_id = path.removeprefix("/api/analyze/")
             row = self.server.video(video_id)
             existing = self.server.result(video_id)
             source, expected_source_hash = self.server.resolve_original(row, existing)
             configuration = dict(existing.get("config") or {})
             configuration["video_id"] = video_id
-            with self.server.job_lock:
-                if any(j["status"] in ("queued", "running") for j in self.server.jobs.values()):
+            with self.server.resource_lock:
+                if self.server.resources_busy():
                     raise RequestError(409, "분석이 이미 진행 중입니다.")
+                configuration["resource_settings"] = self.server.require_resources()
                 job_id = uuid.uuid4().hex
-                self.server.jobs[job_id] = {"id": job_id, "video_id": video_id, "status": "queued"}
+                with self.server.job_lock:
+                    self.server.jobs[job_id] = {"id": job_id, "video_id": video_id, "status": "queued",
+                                                "resource_settings": configuration["resource_settings"]}
             def work():
                 with self.server.job_lock:
                     self.server.jobs[job_id]["status"] = "running"
@@ -522,8 +601,10 @@ class ReviewHandler(BaseHTTPRequestHandler):
                     with self.server.job_lock:
                         self.server.jobs[job_id]["status"] = "completed"
                 except Exception as error:
+                    from .resources import ResourceSettingsError
                     with self.server.job_lock:
-                        self.server.jobs[job_id].update(status="failed", error=f"분석 실패: {type(error).__name__}")
+                        message = str(error) if isinstance(error, ResourceSettingsError) else f"분석 실패: {type(error).__name__}"
+                        self.server.jobs[job_id].update(status="failed", error=message)
             self.server.executor.submit(work)
             return self._json({"job_id": job_id, "status": "queued"}, 202)
         raise RequestError(404, "경로를 찾을 수 없습니다.")

@@ -265,7 +265,7 @@ def combine_views(views, *, same_event_confirmed=False, event_source=None, diffe
 
 
 class PairWorkspace:
-    def __init__(self, project_root, workspace_root, library_root=None):
+    def __init__(self, project_root, workspace_root, library_root=None, resource_settings_provider=None):
         self.project = Path(project_root).resolve()
         self.root = Path(workspace_root).resolve()
         self.library_root = Path(library_root).resolve() if library_root is not None else self.project / "runs/integrated-poc"
@@ -280,6 +280,7 @@ class PairWorkspace:
         self._stage_clocks = {}
         self._progress_writes = {}
         self._closed = False
+        self.resource_settings_provider = resource_settings_provider
         for path in sorted((self.root / "jobs").glob("*/job.json")):
             try:
                 job = _read(path)
@@ -417,6 +418,19 @@ class PairWorkspace:
                     "duration_seconds": None, "width": None, "height": None,
                     "direct_decision": row.get("decision", "REVIEW"), "assisted_decision": row.get("decision", "REVIEW"),
                     "source": "automatic", "has_review": False})
+        for video in videos:
+            # Use original-source metadata only; a preview may have been resized.
+            stored = _read(self.library_root / "videos" / video["id"] / "result.json", {})
+            metadata = deepcopy(stored.get("metadata") or {})
+            metadata.pop("timestamps", None)
+            metadata.setdefault("extension", Path(video["file"]).suffix.lower())
+            for dimension in ("width", "height"):
+                if video.get(dimension) is not None:
+                    metadata.setdefault(dimension, video[dimension])
+            video["metadata"] = metadata
+            video["duration_seconds"] = metadata.get("duration", metadata.get("duration_seconds"))
+            video["width"] = metadata.get("width", video["width"])
+            video["height"] = metadata.get("height", video["height"])
         videos.sort(key=lambda row: row["file"])
         return {"videos": videos, "limits": {"max_upload_bytes": MAX_UPLOAD_BYTES, "max_frames": MAX_FRAMES},
                 "rules": deepcopy(RULES)}
@@ -463,7 +477,7 @@ class PairWorkspace:
         except Exception as error:
             shutil.rmtree(folder, ignore_errors=True)
             raise PairWorkspaceError(400, "업로드한 파일에서 유효한 영상 프레임을 읽지 못했습니다.") from error
-        return {key: deepcopy(record[key]) for key in ("upload_id", "file", "sha256", "metadata")}
+        return {key: deepcopy(record[key]) for key in ("upload_id", "file", "sha256", "metadata", "bytes")}
 
     def _input(self, value, catalog):
         if (not isinstance(value, dict)
@@ -480,9 +494,12 @@ class PairWorkspace:
         upload = _read(_safe(self.root, f"uploads/{identifier}/upload.json"))
         if not upload or upload.get("upload_id") != identifier:
             raise PairWorkspaceError(404, "업로드한 영상을 찾을 수 없습니다.")
-        return {"upload_id": identifier, "file": upload["file"], **guidance}
+        metadata = deepcopy(upload.get("metadata") or {})
+        metadata.pop("timestamps", None)
+        return {"upload_id": identifier, "file": upload["file"], "metadata": metadata, **guidance}
 
     def submit(self, body):
+        resources = self.resource_settings_provider() if self.resource_settings_provider else None
         if not isinstance(body, dict) or not isinstance(body.get("views"), dict) or set(body["views"]) != {"A", "B"}:
             raise PairWorkspaceError(400, "A와 B 두 시점을 함께 입력하세요.")
         same_event, reuse = body.get("same_event_confirmed", False), body.get("reuse_review", False)
@@ -513,6 +530,8 @@ class PairWorkspace:
                    "result": None, "request": {"views": selected, "same_event_confirmed": same_event,
                                               "reuse_review": reuse, "refine_review_regions": refine, "rules": deepcopy(RULES)}}
             self.jobs[identifier] = job
+            if resources is not None:
+                job["request"]["resource_settings"] = deepcopy(resources)
             self._persist(job)
             self.executor.submit(self._run, identifier)
         return {"job_id": identifier, "status": "queued"}
@@ -748,10 +767,15 @@ class PairWorkspace:
                 from .media import probe
                 import cv2
                 metadata = probe(original)
+                base["metadata"] = {key: value for key, value in metadata.items() if key != "timestamps"}
                 if not 1 <= metadata["frame_count"] <= MAX_FRAMES:
                     raise PairWorkspaceError(413, f"영상 한 개는 {MAX_FRAMES}프레임 이하여야 합니다.")
                 config = _read(self.project / "configs/poc.json", {"analysis_width": 960, "max_frames": MAX_FRAMES})
                 config.update(video_id=f"pair_{identifier}_{camera.lower()}", rules=deepcopy(RULES), max_frames=MAX_FRAMES)
+                resources = self.jobs[identifier]["request"].get("resource_settings")
+                if resources is not None:
+                    config["resource_settings"] = deepcopy(resources)
+                    config["opencv_threads"] = resources["cpu_threads"]
                 manual_region = selected.get("review_region")
                 if manual_region is not None:
                     regions = _manual_review_regions(manual_region, metadata, config.get("analysis_width", 1280))
@@ -776,7 +800,8 @@ class PairWorkspace:
                             ai_visual_refinement_available=base["refinement_available"],
                             priority="operator_region_over_ai_visual_review")
                         config.setdefault("request_context", {})["review_region_guidance"] = deepcopy(base["refinement"])
-                cv2.setNumThreads(max(1, min(2, int(config.get("opencv_threads", 2)))))
+                if resources is None:
+                    cv2.setNumThreads(max(1, min(2, int(config.get("opencv_threads", 2)))))
                 output = self.root / "jobs" / identifier / "views" / camera
                 result = analyze_video(original, output, config=config,
                     progress_callback=lambda event: self._analysis_progress(identifier, camera, event))
@@ -817,7 +842,7 @@ class PairWorkspace:
             return self._finish_view(identifier, camera, base)
         except Exception as error:
             base.update(status="failed", reason_codes=["VIEW_ANALYSIS_FAILED"], review_source="none",
-                        processing_mode="failed", error=str(error) if isinstance(error, PairWorkspaceError) else f"영상 분석 실패: {type(error).__name__}",
+                        processing_mode="failed", error=str(error) if isinstance(error, (PairWorkspaceError, ValueError)) else f"영상 분석 실패: {type(error).__name__}",
                         elapsed_seconds=round(time.perf_counter() - started, 6))
             return self._finish_view(identifier, camera, base)
 
@@ -863,7 +888,8 @@ class PairWorkspace:
             request = deepcopy(job["request"])
         try:
             catalog = self._catalog()
-            with ThreadPoolExecutor(max_workers=2, thread_name_prefix="pair-view") as pool:
+            parallel_views = (request.get("resource_settings") or {}).get("parallel_views", 2)
+            with ThreadPoolExecutor(max_workers=parallel_views, thread_name_prefix="pair-view") as pool:
                 futures = {pool.submit(self._view, identifier, camera, selected, request["reuse_review"], catalog,
                                        request.get("refine_review_regions", False)): camera
                            for camera, selected in request["views"].items()}

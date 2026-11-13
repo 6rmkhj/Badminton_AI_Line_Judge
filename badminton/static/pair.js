@@ -332,6 +332,49 @@ function setPreview(camera, url) {
   }
   renderRegion(camera);
 }
+function metadataFields(metadata, file = {}) {
+  const m = metadata || {}, known = value => typeof value === 'number' && Number.isFinite(value) && value > 0;
+  const width = m.width, height = m.height;
+  const size = m.size_bytes ?? file.size, duration = m.duration ?? m.duration_seconds;
+  const extension = m.extension || (file.name || '').match(/\.[^.]+$/)?.[0];
+  const fps = known(m.average_fps) ? m.average_fps : m.frame_count > 1 && known(m.fps) ? m.fps : null;
+  const shortSide = Math.min(width, height), longSide = Math.max(width, height);
+  const quality = longSide >= 3840 && shortSide >= 2160 ? '4K' : longSide >= 2560 && shortSide >= 1440 ? 'QHD' : longSide >= 1920 && shortSide >= 1080 ? 'FHD' : longSide >= 1280 && shortSide >= 720 ? 'HD' : '';
+  const bitrate = known(m.bitrate_bps) ? `${fmt(m.bitrate_bps / 1e6, 2)} Mbps` : known(m.container_bitrate_bps) ? `${fmt(m.container_bitrate_bps / 1e6, 2)} Mbps · 파일 전체` : '확인 불가';
+  return [
+    ['해상도', known(width) && known(height) ? `${width} × ${height}${quality ? ' · ' + quality : ''}` : '확인 불가'],
+    ['FPS', fps ? `${fmt(fps, 3)}${known(m.average_fps) ? ' · 평균' : ' · 대표 간격 기준'}` : '확인 불가'],
+    ['확장자', extension ? String(extension).toUpperCase() : '확인 불가'],
+    ['영상 코덱', m.codec ? String(m.codec).toUpperCase() : '확인 불가'],
+    ['재생 시간', known(duration) ? `${fmt(duration, 2)}초` : '확인 불가'],
+    ['파일 크기', known(size) ? `${fmt(size / (1024 ** 2), 2)} MiB` : '확인 불가'],
+    ['비트레이트', bitrate],
+    ['프레임 수', known(m.frame_count) ? `${m.frame_count.toLocaleString('ko-KR')}개` : '확인 불가'],
+  ];
+}
+function renderMetadata(camera) {
+  const source = state.sources[camera], key = camera.toLowerCase(), panel = $('video-info-' + key);
+  const row = source.mode === 'library' ? source.video : null;
+  const file = source.mode === 'upload' ? source.file || {name: source.savedFile} : {name: row?.file};
+  const metadata = row ? row.metadata || row : source.upload?.metadata || source.restoredMetadata || source.browserMetadata || {};
+  const present = row || source.mode === 'upload' && (source.file || source.uploadId);
+  panel.hidden = !present;
+  if (!present) return;
+  const list = $('video-info-' + key + '-fields'); list.replaceChildren();
+  for (const [label, value] of metadataFields(metadata, file)) {
+    const item = el('div'); item.append(el('dt', '', label), el('dd', '', value)); list.append(item);
+  }
+  const note = $('video-info-' + key + '-status');
+  const pending = source.mode === 'upload' && source.metadataStatus === 'checking';
+  const failed = source.mode === 'upload' && source.metadataStatus === 'failed';
+  note.textContent = pending ? '로컬 서버에 전송해 원본 정보를 확인하고 있습니다. 분석은 시작하지 않습니다.'
+    : failed ? source.metadataError || '원본 정보를 확인하지 못했습니다. 다시 시도해 주세요.'
+    : metadata.variable_frame_rate ? '프레임 간격에 변동이 있습니다. 분석에는 각 프레임의 실제 시각을 사용합니다.'
+    : '원본 영상 기준입니다. 해상도는 화질의 한 요소이며 선명도를 보장하지 않습니다.';
+  note.classList.toggle('video-info-error', failed);
+  $('video-info-' + key + '-retry').hidden = !failed;
+  if (source.mode === 'upload') $('source-' + key + '-state').textContent = pending ? '영상 정보 확인 중' : failed ? '영상 확인 실패' : source.uploadId ? '원본 확인 완료' : '파일 선택 완료';
+}
 function updateSource(camera) {
   const source = state.sources[camera], key = camera.toLowerCase();
   if (source.mode === 'library') {
@@ -346,10 +389,11 @@ function updateSource(camera) {
     $('source-' + key + '-state').textContent = source.file || source.uploadId ? '파일 선택 완료' : '입력 대기';
     setPreview(camera, source.objectUrl || safeUrl(source.previewUrl) || null);
     $('source-' + key + '-meta').textContent = source.file
-      ? `${source.file.name} · ${fmt(source.file.size / (1024 ** 2), 1)} MB`
+      ? `${source.file.name} · ${fmt(source.file.size / (1024 ** 2), 1)} MiB`
       : source.uploadId ? `${source.savedFile || '저장된 원본'} · 다시 업로드하지 않고 분석합니다.`
-        : `영상 파일을 선택하세요. 파일당 최대 ${fmt(state.limits.max_upload_bytes / (1024 ** 3), 1)} GB`;
+        : `영상 파일을 선택하세요. 파일당 최대 ${fmt(state.limits.max_upload_bytes / (1024 ** 3), 1)} GiB`;
   }
+  renderMetadata(camera);
 }
 function changeMode(camera, mode, restoring = false) {
   if (state.busy && !restoring) return;
@@ -381,30 +425,41 @@ function upload(camera) {
   const source = state.sources[camera];
   if (source.mode === 'library') return Promise.resolve({video_id: source.video.id});
   if (source.uploadId) return Promise.resolve({upload_id: source.uploadId});
+  if (source.uploadPromise) return source.uploadPromise;
+  const file = source.file, generation = source.uploadGeneration;
+  const current = () => source.file === file && source.uploadGeneration === generation;
+  if (!file || !file.size || file.size > state.limits.max_upload_bytes) return Promise.reject(new Error(`${camera} 시점 영상은 1바이트 이상 ${fmt(state.limits.max_upload_bytes / (1024 ** 3), 1)} GiB 이하여야 합니다.`));
+  source.metadataStatus = 'checking'; source.metadataError = ''; renderMetadata(camera);
   const box = $('upload-' + camera.toLowerCase() + '-progress');
   box.hidden = false;
   box.querySelector('progress').value = 0;
   box.querySelector('span').textContent = '업로드 준비';
-  return new Promise((resolve, reject) => {
+  const promise = new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
+    source.uploadXhr = xhr;
     const updateTransfer = (status, loaded) => {
+      if (!current()) return;
       const transfer = state.transfer?.views[camera];
       if (transfer) { transfer.status = status; if (loaded !== undefined) transfer.loaded = loaded; renderTransfer(); }
     };
-    const fail = message => { updateTransfer('failed'); reject(new Error(message)); };
+    const fail = message => {
+      if (current()) { source.metadataStatus = 'failed'; source.metadataError = message; renderMetadata(camera); box.querySelector('span').textContent = '영상 확인 실패'; updateTransfer('failed'); }
+      reject(new Error(message));
+    };
     xhr.open('POST', '/api/pair-uploads');
     xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-    xhr.setRequestHeader('X-Filename', encodeURIComponent(source.file.name));
+    xhr.setRequestHeader('X-Filename', encodeURIComponent(file.name));
     xhr.timeout = 600000;
     xhr.upload.onprogress = event => {
-      if (!event.lengthComputable) return;
+      if (!current() || !event.lengthComputable) return;
       const percent = Math.min(100, Math.round(event.loaded / event.total * 100));
       box.querySelector('progress').value = percent;
       box.querySelector('span').textContent = percent === 100 ? '원본 확인 중' : `${percent}% 업로드`;
       updateTransfer(percent === 100 ? 'checking' : 'uploading', event.loaded);
     };
-    xhr.upload.onload = () => updateTransfer('checking', source.file.size);
+    xhr.upload.onload = () => updateTransfer('checking', file.size);
     xhr.onload = () => {
+      if (!current()) { reject(new Error('영상 선택이 변경되었습니다.')); return; }
       let data;
       try { data = JSON.parse(xhr.responseText); }
       catch { fail(`${camera} 시점 업로드 응답을 읽지 못했습니다.`); return; }
@@ -413,15 +468,27 @@ function upload(camera) {
       }
       source.uploadId = data.upload_id;
       source.upload = data;
+      source.metadataStatus = 'ready'; source.metadataError = ''; renderMetadata(camera);
       box.querySelector('progress').value = 100;
       box.querySelector('span').textContent = '업로드 완료';
-      updateTransfer('ready', source.file.size);
+      updateTransfer('ready', file.size);
       resolve({upload_id: data.upload_id});
     };
     xhr.onerror = () => fail(`${camera} 시점 업로드 연결이 끊겼습니다.`);
     xhr.ontimeout = () => fail(`${camera} 시점 업로드 시간이 초과됐습니다.`);
     xhr.onabort = () => fail(`${camera} 시점 업로드가 중단됐습니다.`);
-    xhr.send(source.file);
+    xhr.send(file);
+  });
+  source.uploadPromise = promise.finally(() => {
+    if (current()) { source.uploadPromise = null; source.uploadXhr = null; }
+  });
+  return source.uploadPromise;
+}
+function inspectSelectedVideo(camera) {
+  const source = state.sources[camera], file = source.file, generation = source.uploadGeneration;
+  upload(camera).catch(error => {
+    if (source.file !== file || source.uploadGeneration !== generation) return;
+    source.metadataStatus = 'failed'; source.metadataError = error.message; renderMetadata(camera);
   });
 }
 function jobUrl(id) { return '/api/pair-jobs/' + encodeURIComponent(id); }
@@ -434,7 +501,11 @@ function restoreJobSources(job) {
     if (first) {
       const sameUpload = selected.upload_id && selected.upload_id === source.uploadId;
       if (!sameUpload && source.objectUrl) URL.revokeObjectURL(source.objectUrl);
-      if (!sameUpload) { source.file = null; source.objectUrl = null; source.uploadId = null; source.previewUrl = null; $('file-' + key).value = ''; }
+      if (!sameUpload) {
+        source.uploadGeneration = (source.uploadGeneration || 0) + 1; source.uploadXhr?.abort(); source.uploadPromise = null; source.uploadXhr = null;
+        source.file = null; source.objectUrl = null; source.uploadId = null; source.upload = null; source.browserMetadata = null; source.previewUrl = null; source.metadataStatus = null; $('file-' + key).value = '';
+      }
+      source.restoredMetadata = selected.metadata || job.result?.views?.[camera]?.metadata || null;
       source.reviewRegion = validRegion(selected.review_region) ? {...selected.review_region} : null;
       source.regionDraft = null; source.regionDrag = null; source.regionEditing = false;
       if (selected.upload_id) {
@@ -781,16 +852,26 @@ for (const camera of cameras) {
   $('file-' + key).addEventListener('change', event => {
     showError('');
     const source = state.sources[camera];
+    source.uploadGeneration = (source.uploadGeneration || 0) + 1; source.uploadXhr?.abort(); source.uploadXhr = null; source.uploadPromise = null;
     if (source.objectUrl) URL.revokeObjectURL(source.objectUrl);
     source.file = event.target.files[0] || null;
-    source.uploadId = null; source.upload = null; source.previewUrl = null; source.savedFile = null; clearRegion(camera);
+    source.uploadId = null; source.upload = null; source.previewUrl = null; source.savedFile = null;
+    source.restoredMetadata = null; source.browserMetadata = null; source.metadataStatus = null; source.metadataError = ''; clearRegion(camera);
     $('same-event').checked = false;
     source.objectUrl = source.file ? URL.createObjectURL(source.file) : null;
     $('file-' + key + '-name').textContent = source.file?.name || 'MP4 · MOV · MKV · AVI · WEBM';
     $('upload-' + key + '-progress').hidden = true; updateSource(camera);
+    if (source.file) inspectSelectedVideo(camera);
   });
+  $('video-info-' + key + '-retry').addEventListener('click', () => inspectSelectedVideo(camera));
   $('preview-' + key).addEventListener('error', () => { if (!$('preview-' + key).hidden) $('preview-' + key + '-error').hidden = false; });
-  $('preview-' + key).addEventListener('loadedmetadata', () => renderRegion(camera));
+  $('preview-' + key).addEventListener('loadedmetadata', () => {
+    renderRegion(camera);
+    const source = state.sources[camera], player = $('preview-' + key);
+    if (source.mode === 'upload' && source.file && source.objectUrl === player.currentSrc) {
+      source.browserMetadata = {width: player.videoWidth, height: player.videoHeight, duration: player.duration}; renderMetadata(camera);
+    }
+  });
   new ResizeObserver(() => renderRegion(camera)).observe($('preview-box-' + key));
   $('region-draw-' + key).addEventListener('click', () => {
     const source = state.sources[camera];

@@ -26,6 +26,7 @@ def portable_review(tmp_path):
     (run / "index.json").write_text(json.dumps({"videos": [row]}), encoding="utf-8")
     (run / row["result_path"]).write_text(json.dumps(result), encoding="utf-8")
     server = create_server(run, port=0, video_dir=video_dir)
+    server.configure_resources(server.resources_status()["settings"])
     yield server, source, row, result
     server.server_close()
 
@@ -139,3 +140,29 @@ def test_serve_cli_passes_local_video_directory(monkeypatch):
     assert main() == 0
     assert calls[0][0][0] == Path("copied-run")
     assert calls[0][1]["video_dir"] == Path("local-originals")
+
+
+def test_reanalysis_retains_actionable_resource_budget_failure(portable_review, monkeypatch):
+    from badminton.resources import ResourceSettingsError
+    server, _, _, _ = portable_review
+    callbacks = []
+    monkeypatch.setattr(server.executor, "submit", lambda callback: callbacks.append(callback))
+    message = "영상 프레임 버퍼에 96 MiB가 필요하지만 시점당 예산은 64 MiB입니다."
+
+    def over_budget(*args, **kwargs):
+        raise ResourceSettingsError(message)
+
+    monkeypatch.setattr("badminton.pipeline.analyze_video", over_budget)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        status, payload = _post(server)
+        assert status == 202 and len(callbacks) == 1
+        callbacks.pop()()
+        job = server.jobs[payload["job_id"]]
+        assert job["status"] == "failed"
+        assert job["error"] == message
+        assert server.resources_status()["busy"] is False
+    finally:
+        server.shutdown()
+        thread.join(timeout=2)

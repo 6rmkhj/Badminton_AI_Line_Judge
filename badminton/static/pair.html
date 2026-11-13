@@ -6,7 +6,7 @@
   <title>Court Review · A/B 통합 판정</title>
   <link rel="stylesheet" href="/pair.css">
   <script src="/pair.js" defer></script>
-</head>
+<link rel="stylesheet" href="/resources.css"><script src="/resources.js" defer></script></head>
 <body>
   <header class="site-header">
     <a class="brand" href="/pair" aria-label="Court Review A/B 통합 판정"><svg viewBox="0 0 32 38" aria-hidden="true"><path d="M3 3h26v32H3zM3 19h26M9 3v32M23 3v32M3 10h26M3 28h26M16 3v7M16 28v7"/></svg><span>COURT <span>REVIEW</span></span></a>
@@ -40,6 +40,11 @@
             </fieldset>
           </details>
           <p id="source-a-meta" class="source-meta">기존 영상의 검수 근거도 함께 불러올 수 있습니다.</p>
+          <section id="video-info-a" class="video-info" aria-labelledby="video-info-a-heading" hidden>
+            <h3 id="video-info-a-heading">원본 영상 정보</h3><dl id="video-info-a-fields" class="video-info-fields"></dl>
+            <p id="video-info-a-status" class="video-info-note" role="status" aria-live="polite"></p>
+            <button id="video-info-a-retry" class="text-button" type="button" hidden>영상 정보 다시 확인</button>
+          </section>
           <p class="preview-error" id="preview-a-error" hidden>이 브라우저에서 원본 미리보기를 재생할 수 없습니다. 분석 후 변환된 미리보기를 제공합니다.</p>
           <div class="upload-progress" id="upload-a-progress" hidden><progress max="100" value="0" aria-label="A 시점 업로드 진행률"></progress><span></span></div>
         </section>
@@ -62,6 +67,11 @@
             </fieldset>
           </details>
           <p id="source-b-meta" class="source-meta">A 시점과 촬영 시작 시각이 달라도 입력할 수 있습니다.</p>
+          <section id="video-info-b" class="video-info" aria-labelledby="video-info-b-heading" hidden>
+            <h3 id="video-info-b-heading">원본 영상 정보</h3><dl id="video-info-b-fields" class="video-info-fields"></dl>
+            <p id="video-info-b-status" class="video-info-note" role="status" aria-live="polite"></p>
+            <button id="video-info-b-retry" class="text-button" type="button" hidden>영상 정보 다시 확인</button>
+          </section>
           <p class="preview-error" id="preview-b-error" hidden>이 브라우저에서 원본 미리보기를 재생할 수 없습니다. 분석 후 변환된 미리보기를 제공합니다.</p>
           <div class="upload-progress" id="upload-b-progress" hidden><progress max="100" value="0" aria-label="B 시점 업로드 진행률"></progress><span></span></div>
         </section>
