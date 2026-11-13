@@ -664,18 +664,22 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
     if cfg.get("contact_model_path"):
         for candidate in candidates:
             _apply_contact_model(candidate, frames, timestamps, cfg["contact_model_path"],
-                                 cfg.get("frame_preprocessing"))
+                                 cfg.get("frame_preprocessing"), device=cfg.get("inference_device", "cpu"))
     return candidates
 
 
-def _apply_contact_model(candidate, frames, timestamps, checkpoint, preprocessing=None):
+def _apply_contact_model(candidate, frames, timestamps, checkpoint, preprocessing=None, device="cpu"):
     """Keep learned contact proposals separate until the model qualifies them."""
+    from .inference import InferenceDeviceError
     try:
         from .contact_model import infer_contact
+        device_options = {"device": device} if device != "cpu" else {}
         prediction = infer_contact(frames, timestamps, candidate, checkpoint,
-                                   preprocessing=preprocessing)
+                                   preprocessing=preprocessing, **device_options)
         if not isinstance(prediction, dict):
             raise ValueError("contact model result must be an object")
+    except InferenceDeviceError:
+        raise
     except (ImportError, OSError, ValueError, RuntimeError, KeyError, TypeError) as error:
         candidate["contact_model"] = {"status": "failed", "error": str(error)[:1000]}
         candidate["reason_codes"].append("CONTACT_MODEL_ERROR")
@@ -747,6 +751,7 @@ def refine_source_contacts(landings, source_frames, timestamps, analysis_size, c
     """
     from .contact_model import (SOURCE_PREPROCESSING, contact_checkpoint_metadata,
                                 infer_contact_patches, native_contact_patch)
+    from .inference import InferenceDeviceError
     cfg = dict(config or {})
     validate_contact_modes(cfg)
     width, height = map(int, analysis_size)
@@ -880,8 +885,11 @@ def refine_source_contacts(landings, source_frames, timestamps, analysis_size, c
             continue
         try:
             native_candidate = {"frame_index": candidate["frame_index"], "candidate_px": evidence["candidate_source_px"]}
+            device = cfg.get("inference_device", "cpu")
+            device_options = {"device": device} if device != "cpu" else {}
             prediction = infer_contact_patches(model_patches[candidate_index], evidence["times"], native_candidate,
-                                                checkpoint, image_size=source_size, preprocessing=SOURCE_PREPROCESSING)
+                                                checkpoint, image_size=source_size, preprocessing=SOURCE_PREPROCESSING,
+                                                **device_options)
             candidate["source_contact_model"] = {**copy.deepcopy(prediction), "coordinate_system": "source_pixels"}
             scale = np.asarray(evidence["scale_xy"])
             mapped = copy.deepcopy(prediction)
@@ -894,6 +902,8 @@ def refine_source_contacts(landings, source_frames, timestamps, analysis_size, c
             mapped["coordinate_system"] = "analysis_pixels"
             mapped["source_to_analysis_scale_xy"] = (1 / scale).tolist()
             _apply_contact_prediction(candidate, mapped, (width, height), SOURCE_PREPROCESSING)
+        except InferenceDeviceError:
+            raise
         except (ImportError, OSError, ValueError, RuntimeError, KeyError, TypeError) as error:
             candidate["source_contact_model"] = {"status": "failed", "error": str(error)[:1000]}
             candidate["reason_codes"] = list(dict.fromkeys(candidate.get("reason_codes", []) + ["SOURCE_CONTACT_MODEL_ERROR"]))

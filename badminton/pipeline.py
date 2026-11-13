@@ -20,7 +20,7 @@ def implementation_fingerprint():
                  'events.py', 'identity.py', 'identity_continuity.py', 'candidate_identity.py',
                  'event_continuity.py', 'observation_support.py', 'scene_context.py',
                  'evidence.py', 'decision.py', 'learning.py',
-                 'contact_model.py', 'sync.py'):
+                 'contact_model.py', 'sync.py', 'inference.py', 'gpu_candidates.py'):
         digest.update(name.encode())
         digest.update((package / name).read_bytes())
     return digest.hexdigest()
@@ -114,6 +114,9 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     from .identity import apply_identity
     from .decision import decide
     config = dict(config or {})
+    from .inference import resolve_device
+    resource_settings = config.get('resource_settings') or {}
+    inference_device = resolve_device(resource_settings.get('device', config.get('inference_device', 'cpu')), verify=True)
     source, output = Path(video_path).resolve(), Path(output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
     video_id = config.get('video_id') or 'v_' + hashlib.sha256(source.name.encode()).hexdigest()[:12]
@@ -133,21 +136,33 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
         return {'progress_callback': lambda fields: report(stage, **fields)} if progress_callback is not None else {}
 
     report('prepare', detail='원본 확인·미리보기 준비')
+    frame_options = {}
+    if config.get('resource_settings') is not None:
+        from .media import probe
+        from .resources import frame_budget_bytes, validate_frame_budget
+        budget = frame_budget_bytes(config['resource_settings'])
+        validate_frame_budget(probe(source), config.get('analysis_width', 1280), budget)
+        frame_options['max_memory_bytes'] = budget
     metadata, presentation, source_sha = prepare_preview(source, output / 'preview.mp4', config.get('analysis_width', 1280),
                                                        **observe('prepare'))
     detector_config = dict(config.get('detector') or {})
     event_config = dict(config.get('events') or {})
+    # One explicit job choice controls all supported inference stages.
+    for settings in (detector_config, event_config):
+        settings['inference_device'] = inference_device
+        settings['gpu_memory_percent'] = resource_settings.get('gpu_memory_percent', 50)
+        settings['gpu_parallel_views'] = resource_settings.get('parallel_views', 1)
     validate_contact_modes(event_config)
     learned_input = bool(detector_config.get('model_path') or detector_config.get('scorer_path')
                          or event_config.get('contact_model_path'))
     if (learned_input or event_config.get('scene_context_ranking', False)
             or detector_config.get('refinement_regions') or detector_config.get('source_analysis_enabled', False)):
         frames = load_frames(source, presentation['frame_count'], config.get('max_frames', 3000),
-                             resize_to=(presentation['width'], presentation['height']), **observe('prepare'))
+                             resize_to=(presentation['width'], presentation['height']), **frame_options, **observe('prepare'))
         preprocessing = 'opencv_source_bgr_area_v1'
     else:
         frames = load_frames(output / 'preview.mp4', presentation['frame_count'], config.get('max_frames', 3000),
-                             **observe('prepare'))
+                             **frame_options, **observe('prepare'))
         preprocessing = 'h264_preview_crf21_bgr_v1'
     timestamps = presentation.pop('timestamps')
     metadata.pop('timestamps', None)
@@ -160,7 +175,7 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     calibration = guard_calibration_stability(calibration, stability)
     timings['calibration_seconds'] = time.perf_counter() - clock
     clock = time.perf_counter()
-    report('detection', detail='셔틀콕 후보 탐지 준비')
+    report('detection', detail=f'셔틀콕 후보 탐지 준비 · {inference_device}')
     detector_config['source_path'] = str(source)
     detector_config['frame_preprocessing'] = preprocessing
     source_frames = None
@@ -260,7 +275,21 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
             selected, decision, output, config.get('evidence'), **observe('evidence'))
     report('save', detail='분석 결과·탐지 근거 저장')
     timings['total_seconds'] = time.perf_counter() - start
+    gpu_stages = {stage for row in detections
+                  for stage in (row.get('detector') or {}).get('gpu_stages', [])}
+    if inference_device != 'cpu':
+        for landing in landings:
+            for stage in ('source_contact_model', 'contact_model'):
+                execution = (landing.get(stage) or {}).get('provenance') or {}
+                if execution.get('inference_executed') is True and execution.get('inference_device') == inference_device:
+                    gpu_stages.add(stage)
+                    break  # Native contact results may also be mapped into contact_model.
     result = {'schema_version': 1, 'pipeline_version': __version__, 'video_id': video_id,
+              'execution': {'requested_device': inference_device,
+                            'detector_device': (detections[0].get('detector') or {}).get('inference_device', 'cpu') if detections else None,
+                            'gpu_stages': sorted(gpu_stages),
+                            'cpu_stages': ['video_decode', 'calibration', 'connected_components', 'tracking', 'evidence'],
+                            'automatic_cpu_fallback': False},
               'implementation_fingerprint': implementation_fingerprint(),
               'file': source.name, 'source_path': str(source), 'source_sha256': source_sha,
               'metadata': metadata, 'analysis': {'width': frames[0].shape[1], 'height': frames[0].shape[0],

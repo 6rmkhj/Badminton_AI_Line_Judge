@@ -31,6 +31,7 @@ def review_server(tmp_path):
     (tmp_path / "index.json").write_text(json.dumps({"run_id": "test", "videos": rows,
                                                     "pairs": [{"a_id": "v_a", "b_id": "v_b", "sync": {"status": "review"}}]}))
     server = create_server(tmp_path, port=0)
+    server.configure_resources(server.resources_status()["settings"])
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     yield server, tmp_path
@@ -241,3 +242,5 @@ def test_reanalysis_preserves_trusted_configuration(review_server):
             time.sleep(.01)
     assert captured and captured[0]["rules"] == {"format": "singles"}
     assert captured[0]["video_id"] == "v_a"
+    assert captured[0]["resource_settings"] == server.resources_status()["settings"]
+    assert state["resource_settings"] == captured[0]["resource_settings"]

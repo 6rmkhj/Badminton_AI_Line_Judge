@@ -74,6 +74,7 @@ def pair_server(tmp_path):
     (root / 'index.json').write_text(json.dumps({'videos': [], 'pairs': []}))
     fake = FakePairWorkspace(root)
     server = create_server(root, port=0)
+    server.configure_resources(server.resources_status()['settings'])
     server.pair_workspace = fake
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()

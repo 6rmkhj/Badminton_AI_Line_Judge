@@ -110,7 +110,18 @@ const server = http.createServer(async (req, res) => {
       await page.setViewportSize({width, height: 1000});
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'horizontal overflow at ' + width);
       assert.equal(await page.locator('#region-width-b').inputValue(), '55');
-      const before = await page.locator('#region-layer-b').boundingBox(), selection = await page.locator('#region-box-b').boundingBox();
+      // ResizeObserver applies letterbox geometry asynchronously. Wait for that
+      // geometry, then sample both rectangles in one frame instead of comparing
+      // an old layer width with a newly resized selection from a second call.
+      await page.waitForFunction(() => {
+        const player = document.getElementById('preview-b'), layer = document.getElementById('region-layer-b');
+        const expected = player.videoWidth * Math.min(player.clientWidth / player.videoWidth, player.clientHeight / player.videoHeight);
+        return Math.abs(layer.getBoundingClientRect().width - expected) < 1;
+      });
+      const {before, selection} = await page.evaluate(() => ({
+        before: document.getElementById('region-layer-b').getBoundingClientRect().toJSON(),
+        selection: document.getElementById('region-box-b').getBoundingClientRect().toJSON(),
+      }));
       assert(Math.abs(selection.width / before.width - .55) < .02, 'normalized overlay resize');
       if (width === 375) await page.locator('.source-card').nth(1).screenshot({path: path.join(output, 'mobile-375.png')});
     }

@@ -4,13 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "badminton-line-judge"
-version = "0.5.4"
+version = "0.5.6"
 description = "Offline badminton candidate analysis, human review and honest evaluation"
 requires-python = ">=3.11"
 dependencies = ["numpy>=2.0", "opencv-python-headless>=4.10", "scipy>=1.12", "filelock>=3"]
 
 [project.optional-dependencies]
 learning = ["torch>=2.5"]
+gpu = ["torch>=2.5"]
+onnx-gpu = ["torch>=2.5", "onnxruntime-gpu>=1.21,<2"]
 test = ["pytest>=8"]
 
 [project.scripts]

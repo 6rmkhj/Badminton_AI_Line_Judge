@@ -9,6 +9,23 @@ import tempfile
 import time
 import uuid
 import cv2
+from .resources import decoder_threads, ResourceSettingsError
+
+
+def _positive_number(value):
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return number if math.isfinite(number) and number > 0 else None
+
+
+def _frame_rate(value):
+    try:
+        numerator, denominator = str(value).split('/')
+        return _positive_number(float(numerator) / float(denominator))
+    except (ValueError, ZeroDivisionError, OverflowError):
+        return _positive_number(value)
 
 
 class _FrameProgress:
@@ -84,7 +101,7 @@ def probe(path):
     raw = subprocess.check_output([
         'ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_streams',
         '-show_packets', '-show_entries',
-        'stream=index,codec_name,width,height,duration,avg_frame_rate,nb_frames:stream_side_data=rotation:stream_tags=rotate:packet=pts_time,flags',
+        'stream=index,codec_name,width,height,duration,avg_frame_rate,nb_frames,bit_rate,pix_fmt:format=format_name,bit_rate:stream_side_data=rotation:stream_tags=rotate:packet=pts_time,flags',
         '-of', 'json', str(path)], timeout=120)
     data = json.loads(raw)
     if not data.get('streams'):
@@ -110,10 +127,21 @@ def probe(path):
     coded_width, coded_height = int(stream['width']), int(stream['height'])
     width, height = (coded_height, coded_width) if round(abs(rotation)) % 180 == 90 else (coded_width, coded_height)
     stored = stream.get('nb_frames', '')
+    format_info = data.get('format') or {}
+    try:
+        size_bytes = Path(path).stat().st_size
+    except OSError:
+        size_bytes = None
     return {'width': width, 'height': height, 'coded_width': coded_width, 'coded_height': coded_height,
             'rotation_degrees': rotation,
             'codec': stream.get('codec_name'), 'duration': float(stream.get('duration') or timestamps[-1] + period),
             'fps': 1 / period, 'frame_count': len(timestamps),
+            'average_fps': _frame_rate(stream.get('avg_frame_rate')),
+            'variable_frame_rate': any(abs(p - period) > period * .02 for p in periods) if periods else None,
+            'extension': Path(path).suffix.lower() or None, 'size_bytes': size_bytes,
+            'container': format_info.get('format_name'), 'pixel_format': stream.get('pix_fmt'),
+            'bitrate_bps': _positive_number(stream.get('bit_rate')),
+            'container_bitrate_bps': _positive_number(format_info.get('bit_rate')),
             'stored_frame_count': int(stored) if str(stored).isdigit() else None,
             'timestamps': timestamps, 'time_origin_seconds': start, 'warnings': warnings}
 
@@ -132,11 +160,11 @@ def prepare_preview(source, destination, width=1280, *, progress_callback=None):
     if not destination.exists() or not sidecar.exists() or json.loads(sidecar.read_text()) != signature:
         temporary = destination.with_name(destination.stem + f'.partial-{uuid.uuid4().hex}.mp4')
         command = ['ffmpeg', '-hide_banner', '-nostdin', '-y', '-loglevel', 'error',
-                   '-xerror', '-err_detect', 'explode', '-threads', '2', '-filter_threads', '1',
+                   '-xerror', '-err_detect', 'explode', '-threads', str(decoder_threads()), '-filter_threads', '1',
                    '-i', str(source), '-map', '0:v:0', '-an', '-sn', '-dn',
                    '-vf', f'scale={width}:{height}:flags=area,setpts=PTS-STARTPTS',
                    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '21', '-pix_fmt', 'yuv420p',
-                   '-threads', '2', '-fps_mode', 'passthrough', '-enc_time_base', 'demux',
+                   '-threads', str(decoder_threads()), '-fps_mode', 'passthrough', '-enc_time_base', 'demux',
                    '-bsf:v', f'setts=pts=PTS:dts=DTS:duration=1/({metadata["fps"]:.9f}*TB)',
                    '-movflags', '+faststart', str(temporary)]
         if progress_callback is None:
@@ -196,11 +224,16 @@ def repair_preview_tail(path, fps=None):
     return True
 
 
-def load_frames(path, expected_count=None, max_frames=3000, resize_to=None, *, progress_callback=None):
-    capture = cv2.VideoCapture(str(path), cv2.CAP_FFMPEG, [cv2.CAP_PROP_N_THREADS, 2])
+def load_frames(path, expected_count=None, max_frames=3000, resize_to=None, *, progress_callback=None,
+                max_memory_bytes=None):
+    if max_memory_bytes is not None and (isinstance(max_memory_bytes, bool)
+            or not isinstance(max_memory_bytes, int) or max_memory_bytes < 1):
+        raise ValueError('프레임 메모리 한도는 1바이트 이상의 정수여야 합니다.')
+    capture = cv2.VideoCapture(str(path), cv2.CAP_FFMPEG, [cv2.CAP_PROP_N_THREADS, decoder_threads()])
     if not capture.isOpened():
         raise ValueError(f'Cannot open video: {path}')
     frames = []
+    memory_bytes = 0
     reporter = _FrameProgress(progress_callback, expected_count, '분석 프레임 읽기')
     reporter.report(0, force=True)
     try:
@@ -212,7 +245,10 @@ def load_frames(path, expected_count=None, max_frames=3000, resize_to=None, *, p
                 raise ValueError(f'Clip exceeds {max_frames} frames; split it before analysis')
             if resize_to is not None and (frame.shape[1], frame.shape[0]) != tuple(resize_to):
                 frame = cv2.resize(frame, tuple(resize_to), interpolation=cv2.INTER_AREA)
+            if max_memory_bytes is not None and memory_bytes + frame.nbytes > max_memory_bytes:
+                raise ResourceSettingsError('분석 프레임 메모리 한도를 초과했습니다. 장치 설정에서 프레임 버퍼 예산을 늘리거나 영상 구간을 줄여 주세요.')
             frames.append(frame)
+            memory_bytes += frame.nbytes
             reporter.report(len(frames))
     finally:
         capture.release()
@@ -246,7 +282,7 @@ class SourceFrameSequence:
     def _open(self):
         if self.capture is not None:
             self.capture.release()
-        self.capture = cv2.VideoCapture(self.path, cv2.CAP_FFMPEG, [cv2.CAP_PROP_N_THREADS, 2])
+        self.capture = cv2.VideoCapture(self.path, cv2.CAP_FFMPEG, [cv2.CAP_PROP_N_THREADS, decoder_threads()])
         self.index, self.frame, self._decoder_origin = -1, None, None
 
     def _grab(self, requested):
@@ -350,7 +386,7 @@ def source_crop(source, time_seconds, center_px, output_path, radius=192, frame_
     if x1 <= x0 or y1 <= y0:
         return {'status': 'outside_frame'}
     command = ['ffmpeg', '-hide_banner', '-nostdin', '-y', '-loglevel', 'error',
-               '-threads', '2', '-filter_threads', '1', '-i', str(source), '-map', '0:v:0',
+               '-threads', str(decoder_threads()), '-filter_threads', '1', '-i', str(source), '-map', '0:v:0',
                '-vf', f'select=eq(n\\,{frame_index}),crop={x1-x0}:{y1-y0}:{x0}:{y0}',
                '-frames:v', '1', '-fps_mode', 'passthrough', '-q:v', '2', '-threads', '1', str(output_path)]
     completed = subprocess.run(command, capture_output=True, text=True, timeout=180)
