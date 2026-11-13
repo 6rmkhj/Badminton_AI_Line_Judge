@@ -10,11 +10,11 @@ import tempfile
 import cv2
 import numpy as np
 
-from .media import probe, repair_preview_tail
+from .media import probe, repair_preview_tail, _FrameProgress, _run_ffmpeg_progress
 
 
 def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decision,
-                         output_dir, config=None):
+                         output_dir, config=None, *, progress_callback=None):
     cfg = dict(config or {})
     if not frames or len(frames) != len(timestamps):
         raise ValueError('Evidence requires one timestamp per frame')
@@ -40,6 +40,8 @@ def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decis
     period = float(np.median(np.diff(timestamps))) if len(timestamps) > 1 else 1 / 30
     origin = timestamps[indices[0]]
     timeline = []
+    progress = _FrameProgress(progress_callback, len(indices), '궤적·착지 근거 프레임 생성')
+    progress.report(0, force=True)
     with tempfile.TemporaryDirectory(prefix='badminton-evidence-') as temporary:
         temporary = Path(temporary)
         concat = ['ffconcat version 1.0']
@@ -78,6 +80,8 @@ def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decis
             concat.extend([f"file '{name}'", 'option framerate 1000000', f'duration {duration:.9f}'])
             timeline.append({'replay_frame_index': ordinal, 'source_frame_index': index,
                              'source_time': timestamps[index], 'replay_time': timestamps[index] - origin})
+            progress.report(ordinal + 1)
+        progress.report(len(indices), force=True)
         manifest = temporary / 'frames.ffconcat'
         manifest.write_text('\n'.join(concat) + '\n', encoding='utf-8')
         command = ['ffmpeg', '-hide_banner', '-nostdin', '-y', '-v', 'error', '-safe', '0',
@@ -86,7 +90,13 @@ def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decis
                    '-fps_mode', 'passthrough', '-enc_time_base', '1:1000000',
                    '-bsf:v', f'setts=pts=PTS:dts=DTS:duration=1/({1 / period:.9f}*TB)',
                    '-movflags', '+faststart', str(destination)]
-        subprocess.run(command, check=True, capture_output=True, timeout=180)
+        if progress_callback is None:
+            subprocess.run(command, check=True, capture_output=True, timeout=180)
+        else:
+            encoded = _run_ffmpeg_progress(command, progress_callback, len(indices), '근거 영상 인코딩', 180)
+            encoded.check_returncode()
+    if progress_callback is not None:
+        progress_callback({'detail': '근거 영상 프레임·시각 검증'})
     repair_preview_tail(destination, 1 / period)
     encoded = probe(destination)
     if encoded['frame_count'] != len(timeline) or any(

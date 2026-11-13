@@ -256,7 +256,7 @@ def test_new_sources_run_both_views_and_keep_automatic_review(pair_fixture,monke
     monkeypatch.setattr('badminton.media.probe',lambda path:{'frame_count':3,'width':960,'height':540,'timestamps':[0,.1,.2]})
     barrier = threading.Barrier(2,timeout=4)
     calls = []
-    def analyze(source,output,config):
+    def analyze(source,output,config,progress_callback=None):
         barrier.wait()
         output.mkdir(parents=True)
         (output/'preview.mp4').write_bytes(b'preview')
@@ -331,7 +331,7 @@ def test_refinement_passes_hints_not_labels_and_marks_assisted_view(pair_fixture
     workspace, _, _ = pair_fixture
     configs = []
     monkeypatch.setattr('badminton.media.probe', lambda _: {'frame_count':20,'width':3840,'height':2160})
-    def analyze(source, output, config):
+    def analyze(source, output, config, progress_callback=None):
         configs.append(config)
         return {'source_sha256':hashlib.sha256(Path(source).read_bytes()).hexdigest(),
                 'decision':{'decision':'REVIEW','reason_codes':['FIRST_CONTACT_NOT_OBSERVED']},
@@ -370,3 +370,208 @@ def test_analysis_original_fallback_cannot_follow_external_symlink(pair_fixture,
     entry={'kind':'analysis','row':{'id':'v_linked','file':'linked.mp4'}}
     with pytest.raises(PairWorkspaceError):
         workspace._original(entry)
+
+
+def test_live_progress_reports_both_views_and_freezes_completed_durations(pair_fixture, monkeypatch):
+    workspace, root, _ = pair_fixture
+    clock = [100.]
+    monkeypatch.setattr('badminton.pair_workspace.time.perf_counter', lambda: clock[0])
+    monkeypatch.setattr('badminton.media.probe', lambda _: {'frame_count':3,'width':960,'height':540})
+    reached = threading.Barrier(3, timeout=4)
+    release = threading.Event()
+
+    def analyze(source, output, config, progress_callback=None):
+        progress_callback({'stage':'detection','completed_units':1,'total_units':3,'unit':'frames'})
+        reached.wait()
+        assert release.wait(4)
+        progress_callback({'stage':'detection','completed_units':3,'total_units':3,'unit':'frames'})
+        progress_callback({'stage':'save'})
+        return {'source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),
+                'decision':{'decision':'REVIEW'},'artifacts':{},'timings':{}}
+
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    identifier = submit_fixture(workspace, reuse_review=False)
+    try:
+        reached.wait()
+        clock[0] = 107.
+        running = workspace.get_job(identifier)
+        assert running['phase'] == 'analyzing'
+        assert running['elapsed_seconds'] == 7.
+        assert running['server_time']
+        for view in running['views'].values():
+            assert view['status'] == 'running' and view['elapsed_seconds'] == 7.
+            progress = view['progress']
+            assert progress['stage'] == 'detection' and progress['stage_index'] == 3
+            assert progress['completed_units'] == 1 and progress['total_units'] == 3
+            assert progress['stage_elapsed_seconds'] == 7.
+        # Frame updates change memory for polling, but do not write per frame.
+        persisted = json.loads((workspace.root/f'jobs/{identifier}/job.json').read_text())
+        assert persisted['views']['A']['progress']['stage'] == 'detection'
+        clock[0] = 109.
+        assert workspace.get_job(identifier)['elapsed_seconds'] == 9.
+    finally:
+        release.set()
+    finished = wait_job(workspace, identifier)
+    assert finished['status'] == finished['phase'] == 'completed'
+    assert finished['finished_at'] and finished['elapsed_seconds'] == 9.
+    for camera, view in finished['views'].items():
+        assert view['progress']['stage'] == 'completed'
+        assert view['stage_history'][-1]['stage'] == 'save'
+        assert all(stage['status'] == 'completed' for stage in view['stage_history'])
+        assert finished['result']['views'][camera]['stage_history'] == view['stage_history']
+    clock[0] = 1000.
+    assert workspace.get_job(identifier)['elapsed_seconds'] == 9.
+    assert workspace.list_jobs()['jobs'][0]['elapsed_seconds'] == 9.
+
+
+def test_failure_preserves_the_actual_stage_and_partial_frame_count(pair_fixture, monkeypatch):
+    workspace, _, _ = pair_fixture
+    monkeypatch.setattr('badminton.media.probe', lambda _: {'frame_count':7,'width':960,'height':540})
+
+    def analyze(source, output, config, progress_callback=None):
+        progress_callback({'stage':'detection','completed_units':2,'total_units':7,'unit':'frames'})
+        if source.name == 'a.mp4':
+            raise RuntimeError('decoder stopped')
+        progress_callback({'stage':'save'})
+        return {'source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),
+                'decision':{'decision':'REVIEW'},'artifacts':{},'timings':{}}
+
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    job = wait_job(workspace, submit_fixture(workspace, reuse_review=False))
+    assert job['status'] == 'completed_with_errors' and job['phase'] == 'failed'
+    assert job['last_phase'] == 'analyzing'
+    failed = job['views']['A']
+    assert failed['status'] == 'failed'
+    assert failed['progress']['stage'] == 'detection'
+    assert failed['progress']['stage_status'] == 'failed'
+    assert failed['progress']['completed_units'] == 2
+    assert failed['stage_history'][-1]['status'] == 'failed'
+    assert job['result']['views']['A']['progress'] == failed['progress']
+    assert not any(stage['stage'] == 'save' for stage in failed['stage_history'])
+
+
+def test_queued_time_is_distinct_from_analysis_and_stored_review_has_own_stage(pair_fixture):
+    workspace, _, _ = pair_fixture
+    blocker = threading.Event()
+    workspace.executor.submit(blocker.wait)
+    identifier = submit_fixture(workspace)
+    try:
+        queued = workspace.get_job(identifier)
+        assert queued['status'] == queued['phase'] == 'queued'
+        assert queued['started_at'] is None and queued['elapsed_seconds'] == 0.
+        assert queued['queue_seconds'] >= 0.
+        assert all(v['progress']['stage'] == 'queued' for v in queued['views'].values())
+    finally:
+        blocker.set()
+    job = wait_job(workspace, identifier)
+    assert job['queue_seconds'] >= queued['queue_seconds']
+    for view in job['views'].values():
+        assert view['processing_mode'] == 'stored_ai_review'
+        assert [stage['stage'] for stage in view['stage_history']] == ['resolve', 'stored_review']
+        assert view['progress']['last_stage'] == 'stored_review'
+
+
+def test_restart_freezes_at_last_persisted_activity_and_keeps_legacy_jobs_compatible(pair_fixture):
+    workspace, root, _ = pair_fixture
+    workspace.close()
+    started = '2026-01-01T00:00:00+00:00'
+    stage_started = '2026-01-01T00:00:02+00:00'
+    stopped = '2026-01-01T00:00:07+00:00'
+    _write(workspace.root/'jobs/live/job.json', {
+        'job_id':'live','status':'running','phase':'analyzing','created_at':started,
+        'started_at':started,'updated_at':stopped,'result':None,
+        'views':{'A':{'status':'running','started_at':started,
+            'progress':{'stage':'detection','stage_started_at':stage_started,'completed_units':12,'total_units':30},
+            'stage_history':[{'stage':'detection','started_at':stage_started,'status':'running'}]},
+                 'B':{'status':'queued'}}})
+    _write(workspace.root/'jobs/legacy/job.json', {'job_id':'legacy','status':'completed','created_at':started,
+        'updated_at':stopped,'views':{'A':{'status':'completed'},'B':{'status':'completed'}},'result':{'decision':'IN'}})
+    _write(workspace.root/'jobs/linking/job.json', {'job_id':'linking','status':'running','phase':'linking',
+        'created_at':started,'started_at':started,'updated_at':stopped,'result':None,
+        'views':{'A':{'status':'completed'},'B':{'status':'completed'}}})
+    restored = PairWorkspace(root, workspace.root)
+    try:
+        job = restored.get_job('live')
+        assert job['status'] == job['phase'] == 'interrupted'
+        assert job['last_phase'] == 'analyzing'
+        assert job['finished_at'] == stopped and job['elapsed_seconds'] == 7.
+        view = job['views']['A']
+        assert view['status'] == 'interrupted'
+        assert view['elapsed_seconds'] == 7.
+        assert view['progress']['stage'] == 'detection'
+        assert view['progress']['stage_status'] == 'interrupted'
+        assert view['progress']['stage_elapsed_seconds'] == 5.
+        assert view['progress']['completed_units'] == 12
+        assert view['stage_history'][-1]['elapsed_seconds'] == 5.
+        assert restored.get_job('live')['elapsed_seconds'] == 7.
+        linking = restored.get_job('linking')
+        assert linking['status'] == 'interrupted' and linking['last_phase'] == 'linking'
+        assert linking['elapsed_seconds'] == 7.
+        assert all(view['status'] == 'completed' for view in linking['views'].values())
+        legacy = restored.get_job('legacy')
+        assert legacy['result']['decision'] == 'IN'
+        assert 'progress' not in legacy['views']['A']
+    finally:
+        restored.close()
+
+
+def test_progress_throttles_frame_writes_and_clears_previous_subtask_counters(pair_fixture, monkeypatch):
+    workspace, _, _ = pair_fixture
+    monkeypatch.setattr('badminton.pair_workspace.time.perf_counter', lambda: 100.)
+    workspace.jobs['manual'] = {'job_id':'manual','status':'running','views':{
+        'A':{'status':'running','stage_history':[]}}}
+    workspace._view_clocks[('manual','A')] = 100.
+    writes = []
+    persist = workspace._persist
+
+    def record(job):
+        writes.append(deepcopy(job))
+        persist(job)
+
+    monkeypatch.setattr(workspace, '_persist', record)
+    for count in range(1, 31):
+        workspace._analysis_progress('manual', 'A', {
+            'stage':'prepare','detail':'미리보기 생성','completed_units':count,'total_units':30,'unit':'frames'})
+    assert len(writes) == 2  # Stage start and actual final frame, not 30 disk writes.
+    workspace._analysis_progress('manual', 'A', {
+        'stage':'prepare','detail':'미리보기 생성','completed_units':30,'total_units':30,'unit':'frames'})
+    assert len(writes) == 2
+    workspace._analysis_progress('manual', 'A', {'stage':'prepare','detail':'미리보기 프레임·시각 검증'})
+    assert len(writes) == 3
+    progress = workspace.get_job('manual')['views']['A']['progress']
+    assert progress['detail'] == '미리보기 프레임·시각 검증'
+    assert not {'completed_units','total_units','unit'}.intersection(progress)
+    assert len(workspace.get_job('manual')['views']['A']['stage_history']) == 1
+    saved = json.loads((workspace.root/'jobs/manual/job.json').read_text())
+    assert 'completed_units' not in saved['views']['A']['progress']
+
+
+def test_linking_failure_preserves_stopped_phase_completed_views_and_frozen_timer(pair_fixture, monkeypatch):
+    workspace, root, _ = pair_fixture
+    clock = [100.]
+    monkeypatch.setattr('badminton.pair_workspace.time.perf_counter', lambda: clock[0])
+
+    def fail_correspondence(views, catalog):
+        assert all(view['status'] == 'completed' for view in views.values())
+        clock[0] = 123.
+        raise RuntimeError('correspondence unavailable')
+
+    monkeypatch.setattr(workspace, '_correspondence', fail_correspondence)
+    job = wait_job(workspace, submit_fixture(workspace))
+    assert job['status'] == job['phase'] == 'failed'
+    assert job['last_phase'] == 'linking'
+    assert job['result'] is None
+    assert job['finished_at'] and job['elapsed_seconds'] == 23.
+    assert all(view['status'] == 'completed' for view in job['views'].values())
+    assert all(view['progress']['stage'] == 'completed' for view in job['views'].values())
+    clock[0] = 1000.
+    assert workspace.get_job(job['job_id'])['elapsed_seconds'] == 23.
+    assert workspace.list_jobs()['jobs'][0]['last_phase'] == 'linking'
+    workspace.close()
+    restored = PairWorkspace(root, workspace.root)
+    try:
+        saved = restored.get_job(job['job_id'])
+        assert saved['last_phase'] == 'linking' and saved['elapsed_seconds'] == 23.
+        assert all(view['status'] == 'completed' for view in saved['views'].values())
+    finally:
+        restored.close()

@@ -52,10 +52,17 @@
       <div id="form-error" class="message error" role="alert" hidden></div>
     </form>
 
-    <section id="job-progress" class="job-progress" aria-labelledby="progress-heading" aria-live="polite" hidden>
-      <div class="section-title"><div><p class="eyebrow">ANALYSIS PROGRESS</p><h2 id="progress-heading">두 시점의 근거를 확인하고 있습니다.</h2></div><span id="job-status" class="status-pill"></span></div>
-      <div class="progress-views"><div><span class="mini-camera">A</span><span id="progress-a">대기</span></div><div><span class="mini-camera camera-b">B</span><span id="progress-b">대기</span></div></div>
-      <p id="progress-message" class="muted">새 영상은 프레임 분석과 근거 영상 생성에 시간이 필요합니다.</p>
+    <section id="job-progress" class="job-progress" aria-labelledby="progress-heading" hidden>
+      <div class="section-title"><div><p class="eyebrow">LIVE ANALYSIS</p><h2 id="progress-heading">두 시점의 근거를 확인하고 있습니다.</h2></div><span id="job-status" class="status-pill"></span></div>
+      <p id="progress-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+      <div class="progress-overview">
+        <div class="elapsed-metric"><span id="elapsed-label">분석 경과</span><strong id="job-elapsed">—</strong><small id="elapsed-caption">실제 처리 시간을 표시합니다.</small></div>
+        <div class="progress-summary"><span class="overview-label">지금 어디까지 왔나요?</span><strong id="overall-progress">작업 상태 확인 중</strong><p id="progress-message">새 영상은 프레임 분석과 근거 영상 생성에 시간이 필요합니다.</p><span id="queue-time" class="queue-time" hidden></span></div>
+      </div>
+      <ol id="workflow-steps" class="workflow-steps" aria-label="전체 처리 흐름"></ol>
+      <div id="connection-status" class="connection-status" hidden role="status"></div>
+      <div id="progress-views" class="analysis-view-grid"></div>
+      <p class="progress-footnote">진행 표시는 실제 처리 단계와 프레임 수를 기준으로 합니다. 단계마다 걸리는 시간은 다릅니다.</p>
       <div class="job-links"><a id="job-permalink" href="/pair">이 작업 다시 열기</a><a href="/pair">새 A/B 입력</a><button type="button" id="retry-poll" class="text-button" hidden>상태 다시 확인</button></div>
     </section>
 

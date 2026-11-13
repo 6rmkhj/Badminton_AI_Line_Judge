@@ -13,6 +13,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+from .media import _FrameProgress
 
 
 def _validate_inputs(frames, timestamps):
@@ -520,7 +521,7 @@ def _merge_native(global_candidates, native_candidates, distance):
     return pending + combined
 
 
-def detect_sequence(frames, timestamps, config=None):
+def detect_sequence(frames, timestamps, config=None, *, progress_callback=None):
     """Return frame-wise observations in the supplied frames' coordinate system.
 
     ``backend='opencv_candidates'`` is the default. ``backend='onnx'`` requires
@@ -583,6 +584,8 @@ def detect_sequence(frames, timestamps, config=None):
     global_motion_supported = bool(texture_points is not None and len(texture_points) >= 24
                                    and cv2.contourArea(cv2.convexHull(texture_points)) >= width * height * 0.2)
     records = []
+    progress = _FrameProgress(progress_callback, len(frames), '프레임별 셔틀콕 후보 탐지')
+    progress.report(0, force=True)
     for index, (raw_frame, timestamp) in enumerate(zip(frames, timestamps)):
         active_regions = [region for region in regions if region["frame_start"] <= index <= region["frame_end"]]
         frame = _bgr(raw_frame)
@@ -729,6 +732,8 @@ def detect_sequence(frames, timestamps, config=None):
             record["candidate_scorer"] = getattr(scorer, "provenance", {"path": str(config["scorer_path"])})
         records.append(record)
         previous_gray = gray
+        progress.report(index + 1)
+    progress.report(len(records), force=True)
     return records
 
 

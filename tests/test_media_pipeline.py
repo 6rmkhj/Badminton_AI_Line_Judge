@@ -46,7 +46,9 @@ def test_rotation_preserves_display_coordinate_mapping(tmp_path):
 
 def test_actual_pipeline_stays_review_without_ground_contact(tmp_path):
     source = clip(tmp_path)
-    result = analyze_video(source, tmp_path / 'run', {'analysis_width': 160, 'source_crop_count': 0})
+    progress = []
+    result = analyze_video(source, tmp_path / 'run', {'analysis_width': 160, 'source_crop_count': 0},
+                           progress_callback=progress.append)
     assert result['decision']['decision'] == 'REVIEW'
     assert result['validation_status'] == 'unvalidated_on_independent_human_ground_truth'
     assert result['analysis']['frame_count'] == 12
@@ -54,6 +56,33 @@ def test_actual_pipeline_stays_review_without_ground_contact(tmp_path):
     assert json.loads((tmp_path / 'run/result.json').read_text())['source_sha256'] == result['source_sha256']
     assert (tmp_path / 'run/preview.mp4').exists()
     assert all(event['contact_observed'] is False for event in result['landings'])
+    assert list(dict.fromkeys(event['stage'] for event in progress)) == [
+        'prepare', 'calibration', 'detection', 'tracking', 'contact', 'evidence', 'save']
+    assert [event['stage_index'] for event in progress] == sorted(event['stage_index'] for event in progress)
+    assert all(event['stage_count'] == 7 for event in progress)
+    counts = [event for event in progress if event.get('unit') == 'frames']
+    assert all(0 <= event['completed_units'] <= event['total_units'] for event in counts)
+    for detail in ('미리보기 변환', '분석 프레임 읽기', '프레임별 셔틀콕 후보 탐지', '근거 영상 인코딩'):
+        observed = [event for event in counts if event.get('detail') == detail]
+        assert observed[0]['completed_units'] == 0
+        assert observed[-1]['completed_units'] == observed[-1]['total_units'] == 12
+        assert [event['completed_units'] for event in observed] == sorted(event['completed_units'] for event in observed)
+    assert 'progress_callback' not in result['config']
+
+
+def test_frame_progress_throttles_intermediate_counts_and_retains_final(monkeypatch):
+    from badminton.media import _FrameProgress
+    clock = [0.]
+    monkeypatch.setattr('badminton.media.time.monotonic', lambda: clock[0])
+    events = []
+    progress = _FrameProgress(events.append, 12, '프레임 검사')
+    progress.report(0, force=True)
+    for count in range(1, 12):
+        clock[0] = count * .1
+        progress.report(count)
+    progress.report(12, force=True)
+    assert [event['completed_units'] for event in events] == [0, 5, 10, 12]
+    assert all(event['total_units'] == 12 for event in events)
 
 
 def test_multiple_unselected_landings_cannot_confirm_judgment():
