@@ -1,0 +1,2412 @@
+{
+  "schema_version": 1,
+  "case": "uhdhd-5-a",
+  "scope": "Five previously rejected hypotheses re-executed against accepted v5 settings, plus an unchanged native24 parity control. One previously exposed development source only; no generalization or physical-contact accuracy claim.",
+  "inference_source": {
+    "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+    "baseline_result_sha256": "1b10cf4b1bdcc992bcdfa2f46f02ef5976c6ccd7ce997ee9c7068df3d758ffd7",
+    "baseline_detections_sha256": "08ac868b37f8d46d7d0d8d04a029f4589e34da0d4bb52c2d2fdd0bb79283ab0e",
+    "accepted_run_sha256": "61ff1095f5f49472b93e61a302ae0adbc9ce1f337b4491ca2a8194e25340ec10"
+  },
+  "frozen_source_files": {
+    "badminton/__init__.py": "1c3bfb2fe0d91ba2529bed878251741d65926fa1f8d98af716f08520d4e2db58",
+    "badminton/__main__.py": "b62632d7bf9059d2e8584f2958991bff9ca3fd689313e2d19ad677a0378fd74f",
+    "badminton/assessment.py": "45d233d0051eb6c3ac2d738dbddc7f921735399703f75859196d4d2fd0ecd734",
+    "badminton/calibration.py": "068c65e343b3fbd27dcb7ccfb5dc6dce8bdc874731def0e1ec962fd2d1cc83fd",
+    "badminton/candidate_identity.py": "684739c98e06ec63a18b15edddfab8eb085cb50ea6e7f69d035d71ea8caf3943",
+    "badminton/contact_model.py": "6665b831343ec36e4510e0a5d1b085cac00d3adce2380ac239dc7fc998398ad6",
+    "badminton/dataset.py": "9bfaafd2a9de070f1324cea9b062932f0be442b19b7a2160ae1ad9813ff5ffc2",
+    "badminton/decision.py": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a",
+    "badminton/detection.py": "ad81c8b112ce8fc1476337a387005334c7ddd6cfd17d3a8f405ca403c8fb5c8c",
+    "badminton/evaluation.py": "21854945fd436b74906ab658032a082bf4007c0a77d2f5c5c0430dab0a214b24",
+    "badminton/event_continuity.py": "d659c2e84e573adf2bb69ef9537478d5ce4fa76aa4c3b1d9fac921052f87177f",
+    "badminton/event_sequence.py": "e1209e311ec9b839ce752e4ab2e391a1d793aa00f951016e68e24a6455204613",
+    "badminton/events.py": "f8e7636a0612ae567868e8fd5b5b2fa7d04ce3c93ec6e9edbdf52c3686925611",
+    "badminton/evidence.py": "1a265f10e7f219d9ea782fb47453b7adef284b227d054f39e8ee44ad87858332",
+    "badminton/gpu_candidates.py": "fbd22c30c6308eb1b904da564b1870a61891fef1062a529b9b61ff9fac26f27c",
+    "badminton/identity.py": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+    "badminton/identity_continuity.py": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+    "badminton/inference.py": "5491512b76cea3202d5ab04d0a7976a0099fab4e08ab572b78f0bc5b09ca957a",
+    "badminton/landing_recovery.py": "257a82f326c14ec5e2e3b2ab6a62faac4462b369d4543fc3c918cbc020d617b5",
+    "badminton/learning.py": "d8760c5b67730771c866c4481f3220496b8ad735f0dbea0c2c9e023b3f9dd2a4",
+    "badminton/media.py": "785235c30c848074a124f050dff278c9d4b6deb6ad995bf46efdbace685f2e23",
+    "badminton/observation_support.py": "6ff337da25abbf6781428031cf00a741cf8b1c41f6bffe616795d4983979c1c6",
+    "badminton/pair_workspace.py": "ad64ad7f00412db3940971f7998d1d832aa09f27430bc6c76d93c7334c00c794",
+    "badminton/pipeline.py": "5c9eba9bfe5ac23335eef994982f316dbdb3f157ad3a03d55e1ed1aaf5b6b97a",
+    "badminton/reporting.py": "c19ca54b23acb9d7f31a29654f6cef05ae6fcfb3dc602b74dd8064c4d832bccd",
+    "badminton/requests.py": "ae6b6f131ce628891745c97f6ea5c65ffca9fd02ed4247e763b60df547130a0b",
+    "badminton/resources.py": "3b142066ac2a10c48c499cd9b58045a4b72c40d240eb8878a684a96b2fdde4e4",
+    "badminton/review_diagnostics.py": "d3629272538c60715c78bad617a66fb5de8ffdbf5c9beaaf2ee11282cea457d1",
+    "badminton/review_refinement.py": "7227dcdca2c037578e5cd924c4e03c9c3ed5069da74f4fc99ac5d7d87c3b7aed",
+    "badminton/scene_context.py": "faa1bc862100a66b822a6a0dcd9a55f30dd741b770777217e1433fcf6348448e",
+    "badminton/static_review.py": "8b822cf73db45264635c81e8211d4748a26594f5a21be69721576bc41cfa6615",
+    "badminton/sync.py": "130024be1aed2a0fa11fed5135797affab06681801ab6de770ddbe432e437040",
+    "badminton/tracking.py": "77fb4da37f5bd713900e052a0da6c71bad1220cdcb0c1e249d1ca481d3bfa087",
+    "badminton/visual_review.py": "5a177fd96b9fb594e2e537bbb069a3c25fcf2c1ef1bff565e96951f751a7fbde",
+    "badminton/web.py": "c8d793ef553491b06bad8580188cd8a0b23db84657dab820feb01faca19f58b3"
+  },
+  "config": {
+    "analysis_width": 960,
+    "workers": 2,
+    "opencv_threads": 2,
+    "max_frames": 3000,
+    "source_crop_count": 0,
+    "rules": {
+      "game": "doubles",
+      "phase": "rally"
+    },
+    "detector": {
+      "backend": "opencv_candidates",
+      "source_analysis_enabled": true,
+      "candidate_selection": "spatial",
+      "max_candidates": 80,
+      "global_candidate_reserve": 64,
+      "temporal_candidate_memory": true,
+      "native_motion_recovery": true,
+      "include_dark_components": true,
+      "dark_contrast_threshold": 8,
+      "dark_motion_threshold": 8,
+      "dark_max_saturation": 190,
+      "max_component_aspect": 12,
+      "native_local_components": true,
+      "highres_enabled": true,
+      "highres_max_rois": 16,
+      "highres_roi_size": 192,
+      "highres_roi_analysis_size": 48,
+      "highres_exploration_rois": 4,
+      "person_backend": "hog",
+      "person_width": 960,
+      "person_interval": 16
+    },
+    "tracker": {
+      "flight_search_enabled": true
+    },
+    "events": {
+      "scene_context_ranking": true,
+      "source_contact_enabled": true,
+      "source_contact_max_candidates": 6,
+      "source_contact_patch_size": 96,
+      "causal_first_event_ranking": true,
+      "native_endpoint_recovery": true,
+      "native_rebound_guard": true,
+      "event_family_diversity": false
+    },
+    "evidence": {
+      "annotated_clip": true,
+      "seconds_before": 0.7,
+      "seconds_after": 0.7
+    }
+  },
+  "config_sha256": "64b17deb84f71abf35d2a9bc5dd9291661642528fc98a154b933c40de1d962df",
+  "evaluator_sha256": "f2135ad60d351933d3075eb19a5dbefbc4bf42f53807c09f44c139089536e9b1",
+  "current_evaluator_path": "scripts/evaluate_landing_engine.py",
+  "runner_revision_note": "The evaluator was moved to its canonical filename during the batch without a byte change. The first four execution runner bytes are preserved under pre_harness_move; the final runner changes only those three evaluator path literals. A failed import before the dark run produced no inference output and was retried with the same evaluator SHA.",
+  "source_decoding": "verified_seek=False; native pixels read again, exact read-only analysis frame cache and per-frame detector occluder records validated against baseline SHA contracts",
+  "terminal_evidence_scope": "Terminal proposals keep terminal_velocity_impulse kind. Existing descent/rebound-only native appearance and causal relation gates are called but intentionally do not certify this distinct mode; continuity, competing continuation, fragment, scene and ranking stages remain active.",
+  "candidate_trace_scope": "Counts and source-position traces are collected after existing evidence gates and before the global candidate cap; they do not claim the count before all event-generation/evidence filtering.",
+  "results": [
+    {
+      "variant": "control24",
+      "evaluation": {
+        "key": "uhdhd-5-a",
+        "cohort": "exposed_development_recheck",
+        "group_id": "uhdhd-5",
+        "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+        "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+        "reference_visibility": "visible",
+        "localization_scorable": true,
+        "selection_category": "wrong_target_or_spatial_localization",
+        "selected_comparison": {
+          "distance_px": 214.44113411377026,
+          "frame_error": 89,
+          "reference_coordinate_point": [
+            864.0,
+            141.0
+          ],
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "top1_match": false,
+        "recall_at_6": false,
+        "recall_at_12": false,
+        "matching_candidate_ranks": [],
+        "candidate_count": 12,
+        "candidate_kind": "observed_object_center",
+        "contact_observed": false,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 2272,
+          "frame_index": 55,
+          "time": 0.927733,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        "automatic_decision": "REVIEW",
+        "decision_reason_codes": [
+          "CALIBRATION_NOT_ACCEPTED",
+          "CALIBRATION_SUPPORT_INSUFFICIENT",
+          "CONTACT_EVIDENCE_UNCERTAIN",
+          "CONTACT_OCCLUDED_OR_MISSING",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "MULTIPLE_LANDING_CANDIDATES",
+          "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+        ],
+        "selected_reason_codes": [
+          "CALIBRATION_NOT_CONFIRMED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TRACK_IDENTITY_AMBIGUOUS"
+        ],
+        "timing_scope": "isolated_v5_hypothesis_replay",
+        "elapsed_seconds": 19.305625062000217,
+        "accepted_v5": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false
+        },
+        "fixed_metric_gain": false,
+        "result_sha256": "2bf66bec4fdb1798976568beb5cf94b9cdbfd83c1b426312f47c7d3ca7a62dd3",
+        "trace_sha256": "14e0480695ff87cde4f3181b9273571ee981e600f7b62e4bc08ab0f2cca2b8f0",
+        "receipt_sha256": "0715623cbb37d431991a0cb5144d186517a21740c421034e4d21d2435f6a8037",
+        "selected_coordinate_parity_with_accepted_v5": true
+      },
+      "recovery_summary": {
+        "method": "native_bidirectional_endpoint_recovery",
+        "approaches": 22,
+        "decoded_frames": 176,
+        "raw_components": 8434,
+        "additional_tracks": 26,
+        "crop_budget_bytes": 134217728,
+        "crop_bytes": 133319586,
+        "budget_skipped_windows": 2,
+        "identity_confirmed": false,
+        "physical_contact_confirmed": false,
+        "occlusion_context_frame_count": 216,
+        "status": "completed"
+      },
+      "generated_after_evidence_gates_before_cap": 1698,
+      "matching_before_cap_count": 0,
+      "terminal_proposal_count": 0,
+      "terminal_proposals": [],
+      "selected_prefix_endpoints": [],
+      "ranked_candidate_positions": [
+        {
+          "track_id": 2272,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2459,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2333,
+          "frame_index": 57,
+          "candidate_px": [
+            866.875,
+            152.875
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2453,
+          "frame_index": 62,
+          "candidate_px": [
+            872.3563006603688,
+            163.6877190577025
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2265,
+          "frame_index": 49,
+          "candidate_px": [
+            860.7,
+            130.25
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2464,
+          "frame_index": 58,
+          "candidate_px": [
+            869.9890006227561,
+            155.21850838186774
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2473,
+          "frame_index": 66,
+          "candidate_px": [
+            500.3770038709514,
+            155.85232461234799
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 328,
+          "frame_index": 34,
+          "candidate_px": [
+            830.491,
+            87.494
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1996,
+          "frame_index": 205,
+          "candidate_px": [
+            571.444,
+            135.833
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 787,
+          "frame_index": 85,
+          "candidate_px": [
+            553.75,
+            145.5
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1745,
+          "frame_index": 199,
+          "candidate_px": [
+            579.0,
+            132.5
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1774,
+          "frame_index": 188,
+          "candidate_px": [
+            106.058,
+            167.183
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        }
+      ],
+      "runner": "docs/landing-engine/reproduction/recheck_recovery_v5_pre_harness_move.py",
+      "runner_sha256": "bf7f7c799cac747c5360a9205441a49685c79ab601a4959338e15f4ef7021e57",
+      "input_source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "analysis_frames_sha256": "c460c4dd020947560d2f181cbb05c654ef9830e5593da6cf5473f3015621d64a",
+      "config_sha256": "64b17deb84f71abf35d2a9bc5dd9291661642528fc98a154b933c40de1d962df",
+      "prototype_function_sources": {},
+      "adaptations": [],
+      "artifacts": {
+        "run.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/control24/run.json",
+          "sha256": "0715623cbb37d431991a0cb5144d186517a21740c421034e4d21d2435f6a8037"
+        },
+        "result.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/control24/result.json",
+          "sha256": "2bf66bec4fdb1798976568beb5cf94b9cdbfd83c1b426312f47c7d3ca7a62dd3"
+        },
+        "candidate-trace.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/control24/candidate-trace.json",
+          "sha256": "14e0480695ff87cde4f3181b9273571ee981e600f7b62e4bc08ab0f2cca2b8f0"
+        },
+        "evaluation.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/control24/evaluation.json",
+          "sha256": "5bf286954be5bfa5a3d42e675dcb9b773e6b10bc6f9e0daad1f1d1755cf391e1"
+        }
+      }
+    },
+    {
+      "variant": "budget48",
+      "evaluation": {
+        "key": "uhdhd-5-a",
+        "cohort": "exposed_development_recheck",
+        "group_id": "uhdhd-5",
+        "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+        "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+        "reference_visibility": "visible",
+        "localization_scorable": true,
+        "selection_category": "wrong_target_or_spatial_localization",
+        "selected_comparison": {
+          "distance_px": 214.44113411377026,
+          "frame_error": 89,
+          "reference_coordinate_point": [
+            864.0,
+            141.0
+          ],
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "top1_match": false,
+        "recall_at_6": false,
+        "recall_at_12": false,
+        "matching_candidate_ranks": [],
+        "candidate_count": 12,
+        "candidate_kind": "observed_object_center",
+        "contact_observed": false,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 2272,
+          "frame_index": 55,
+          "time": 0.927733,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        "automatic_decision": "REVIEW",
+        "decision_reason_codes": [
+          "CALIBRATION_NOT_ACCEPTED",
+          "CALIBRATION_SUPPORT_INSUFFICIENT",
+          "CONTACT_EVIDENCE_UNCERTAIN",
+          "CONTACT_OCCLUDED_OR_MISSING",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "MULTIPLE_LANDING_CANDIDATES",
+          "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+        ],
+        "selected_reason_codes": [
+          "CALIBRATION_NOT_CONFIRMED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TRACK_IDENTITY_AMBIGUOUS"
+        ],
+        "timing_scope": "isolated_v5_hypothesis_replay",
+        "elapsed_seconds": 15.960802354999942,
+        "accepted_v5": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false
+        },
+        "fixed_metric_gain": false,
+        "result_sha256": "b4cd585347d3debe2ae6bf02d1b21b70f8315d3d779a644ba30776027df4e724",
+        "trace_sha256": "14e0480695ff87cde4f3181b9273571ee981e600f7b62e4bc08ab0f2cca2b8f0",
+        "receipt_sha256": "f1deaa8ac800963ff17829ea36c0908b98ed37423ab6d494f19aa9d6dc117ccd"
+      },
+      "recovery_summary": {
+        "method": "native_bidirectional_endpoint_recovery",
+        "approaches": 22,
+        "decoded_frames": 176,
+        "raw_components": 8434,
+        "additional_tracks": 26,
+        "crop_budget_bytes": 134217728,
+        "crop_bytes": 133319586,
+        "budget_skipped_windows": 8,
+        "identity_confirmed": false,
+        "physical_contact_confirmed": false,
+        "occlusion_context_frame_count": 216,
+        "status": "completed"
+      },
+      "generated_after_evidence_gates_before_cap": 1698,
+      "matching_before_cap_count": 0,
+      "terminal_proposal_count": 0,
+      "terminal_proposals": [],
+      "selected_prefix_endpoints": [],
+      "ranked_candidate_positions": [
+        {
+          "track_id": 2272,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2459,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2333,
+          "frame_index": 57,
+          "candidate_px": [
+            866.875,
+            152.875
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2453,
+          "frame_index": 62,
+          "candidate_px": [
+            872.3563006603688,
+            163.6877190577025
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2265,
+          "frame_index": 49,
+          "candidate_px": [
+            860.7,
+            130.25
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2464,
+          "frame_index": 58,
+          "candidate_px": [
+            869.9890006227561,
+            155.21850838186774
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2473,
+          "frame_index": 66,
+          "candidate_px": [
+            500.3770038709514,
+            155.85232461234799
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 328,
+          "frame_index": 34,
+          "candidate_px": [
+            830.491,
+            87.494
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1996,
+          "frame_index": 205,
+          "candidate_px": [
+            571.444,
+            135.833
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 787,
+          "frame_index": 85,
+          "candidate_px": [
+            553.75,
+            145.5
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1745,
+          "frame_index": 199,
+          "candidate_px": [
+            579.0,
+            132.5
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1774,
+          "frame_index": 188,
+          "candidate_px": [
+            106.058,
+            167.183
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        }
+      ],
+      "runner": "docs/landing-engine/reproduction/recheck_recovery_v5_pre_harness_move.py",
+      "runner_sha256": "bf7f7c799cac747c5360a9205441a49685c79ab601a4959338e15f4ef7021e57",
+      "input_source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "analysis_frames_sha256": "c460c4dd020947560d2f181cbb05c654ef9830e5593da6cf5473f3015621d64a",
+      "config_sha256": "64b17deb84f71abf35d2a9bc5dd9291661642528fc98a154b933c40de1d962df",
+      "prototype_function_sources": {},
+      "adaptations": [],
+      "artifacts": {
+        "run.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/budget48/run.json",
+          "sha256": "f1deaa8ac800963ff17829ea36c0908b98ed37423ab6d494f19aa9d6dc117ccd"
+        },
+        "result.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/budget48/result.json",
+          "sha256": "b4cd585347d3debe2ae6bf02d1b21b70f8315d3d779a644ba30776027df4e724"
+        },
+        "candidate-trace.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/budget48/candidate-trace.json",
+          "sha256": "14e0480695ff87cde4f3181b9273571ee981e600f7b62e4bc08ab0f2cca2b8f0"
+        },
+        "evaluation.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/budget48/evaluation.json",
+          "sha256": "7c2be469df693e0e21e54938fe0f7025271d2cdb94b7f862eb3ea19567055d15"
+        }
+      }
+    },
+    {
+      "variant": "prefix",
+      "evaluation": {
+        "key": "uhdhd-5-a",
+        "cohort": "exposed_development_recheck",
+        "group_id": "uhdhd-5",
+        "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+        "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+        "reference_visibility": "visible",
+        "localization_scorable": true,
+        "selection_category": "wrong_target_or_spatial_localization",
+        "selected_comparison": {
+          "distance_px": 214.44113411377026,
+          "frame_error": 89,
+          "reference_coordinate_point": [
+            864.0,
+            141.0
+          ],
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "top1_match": false,
+        "recall_at_6": false,
+        "recall_at_12": false,
+        "matching_candidate_ranks": [],
+        "candidate_count": 12,
+        "candidate_kind": "observed_object_center",
+        "contact_observed": false,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 2272,
+          "frame_index": 55,
+          "time": 0.927733,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        "automatic_decision": "REVIEW",
+        "decision_reason_codes": [
+          "CALIBRATION_NOT_ACCEPTED",
+          "CALIBRATION_SUPPORT_INSUFFICIENT",
+          "CONTACT_EVIDENCE_UNCERTAIN",
+          "CONTACT_OCCLUDED_OR_MISSING",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "MULTIPLE_LANDING_CANDIDATES",
+          "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+        ],
+        "selected_reason_codes": [
+          "CALIBRATION_NOT_CONFIRMED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TRACK_IDENTITY_AMBIGUOUS"
+        ],
+        "timing_scope": "isolated_v5_hypothesis_replay",
+        "elapsed_seconds": 15.932192530000066,
+        "accepted_v5": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false
+        },
+        "fixed_metric_gain": false,
+        "result_sha256": "bd9ce8caf8904a6da12ac265b5018035b8a7d37e95c61a2f332e5eead1f7db22",
+        "trace_sha256": "fe85491ac30cf4b31e36b10a035e7aa622fa26048fb0e1366471819d68aef9fa",
+        "receipt_sha256": "2a38e9eaf386535144a57f492f8ac28c651f3a35fdd82930eedc0ee7195ba6bd"
+      },
+      "recovery_summary": {
+        "method": "native_bidirectional_endpoint_recovery",
+        "approaches": 21,
+        "decoded_frames": 193,
+        "raw_components": 6732,
+        "additional_tracks": 27,
+        "crop_budget_bytes": 134217728,
+        "crop_bytes": 126904338,
+        "budget_skipped_windows": 3,
+        "identity_confirmed": false,
+        "physical_contact_confirmed": false,
+        "occlusion_context_frame_count": 216,
+        "status": "completed"
+      },
+      "generated_after_evidence_gates_before_cap": 1697,
+      "matching_before_cap_count": 0,
+      "terminal_proposal_count": 0,
+      "terminal_proposals": [],
+      "selected_prefix_endpoints": [
+        {
+          "track_id": 2452,
+          "frame_index": 73,
+          "point": [
+            20.846,
+            130.34
+          ]
+        },
+        {
+          "track_id": 2390,
+          "frame_index": 201,
+          "point": [
+            956.285,
+            47.942
+          ]
+        },
+        {
+          "track_id": 2274,
+          "frame_index": 51,
+          "point": [
+            862.5,
+            125.5
+          ]
+        },
+        {
+          "track_id": 2321,
+          "frame_index": 59,
+          "point": [
+            869.375,
+            149.5
+          ]
+        },
+        {
+          "track_id": 2440,
+          "frame_index": 24,
+          "point": [
+            527.125,
+            244.0
+          ]
+        },
+        {
+          "track_id": 2312,
+          "frame_index": 55,
+          "point": [
+            864.0,
+            141.0
+          ]
+        },
+        {
+          "track_id": 2366,
+          "frame_index": 128,
+          "point": [
+            617.534,
+            115.752
+          ]
+        },
+        {
+          "track_id": 2279,
+          "frame_index": 47,
+          "point": [
+            855.875,
+            115.75
+          ]
+        },
+        {
+          "track_id": 2236,
+          "frame_index": 146,
+          "point": [
+            732.0,
+            308.5
+          ]
+        },
+        {
+          "track_id": 2372,
+          "frame_index": 29,
+          "point": [
+            279.5,
+            96.5
+          ]
+        },
+        {
+          "track_id": 2419,
+          "frame_index": 80,
+          "point": [
+            381.0,
+            251.5
+          ]
+        },
+        {
+          "track_id": 2340,
+          "frame_index": 44,
+          "point": [
+            851.72,
+            106.652
+          ]
+        },
+        {
+          "track_id": 2357,
+          "frame_index": 61,
+          "point": [
+            874.78,
+            160.447
+          ]
+        },
+        {
+          "track_id": 2391,
+          "frame_index": 92,
+          "point": [
+            442.0,
+            244.5
+          ]
+        },
+        {
+          "track_id": 2449,
+          "frame_index": 120,
+          "point": [
+            626.667,
+            100.667
+          ]
+        },
+        {
+          "track_id": 2417,
+          "frame_index": 65,
+          "point": [
+            11.408,
+            95.853
+          ]
+        },
+        {
+          "track_id": 2334,
+          "frame_index": 51,
+          "point": [
+            856.0,
+            137.5
+          ]
+        },
+        {
+          "track_id": 2298,
+          "frame_index": 170,
+          "point": [
+            889.167,
+            126.976
+          ]
+        },
+        {
+          "track_id": 2448,
+          "frame_index": 79,
+          "point": [
+            823.743,
+            53.913
+          ]
+        },
+        {
+          "track_id": 2343,
+          "frame_index": 61,
+          "point": [
+            468.269,
+            132.917
+          ]
+        },
+        {
+          "track_id": 2364,
+          "frame_index": 116,
+          "point": [
+            632.621,
+            94.138
+          ]
+        },
+        {
+          "track_id": 2247,
+          "frame_index": 62,
+          "point": [
+            472.5,
+            141.5
+          ]
+        },
+        {
+          "track_id": 2220,
+          "frame_index": 64,
+          "point": [
+            488.6,
+            139.85
+          ]
+        },
+        {
+          "track_id": 2237,
+          "frame_index": 149,
+          "point": [
+            747.208,
+            313.792
+          ]
+        }
+      ],
+      "ranked_candidate_positions": [
+        {
+          "track_id": 2272,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2459,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2333,
+          "frame_index": 57,
+          "candidate_px": [
+            866.875,
+            152.875
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2453,
+          "frame_index": 62,
+          "candidate_px": [
+            872.3563006603688,
+            163.6877190577025
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2265,
+          "frame_index": 49,
+          "candidate_px": [
+            860.7,
+            130.25
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2464,
+          "frame_index": 58,
+          "candidate_px": [
+            869.9890006227561,
+            155.21850838186774
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2477,
+          "frame_index": 66,
+          "candidate_px": [
+            500.3770038709514,
+            155.85232461234799
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 328,
+          "frame_index": 34,
+          "candidate_px": [
+            830.491,
+            87.494
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1996,
+          "frame_index": 205,
+          "candidate_px": [
+            571.444,
+            135.833
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 787,
+          "frame_index": 85,
+          "candidate_px": [
+            553.75,
+            145.5
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1745,
+          "frame_index": 199,
+          "candidate_px": [
+            579.0,
+            132.5
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1774,
+          "frame_index": 188,
+          "candidate_px": [
+            106.058,
+            167.183
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        }
+      ],
+      "runner": "docs/landing-engine/reproduction/recheck_recovery_v5_pre_harness_move.py",
+      "runner_sha256": "bf7f7c799cac747c5360a9205441a49685c79ab601a4959338e15f4ef7021e57",
+      "input_source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "analysis_frames_sha256": "c460c4dd020947560d2f181cbb05c654ef9830e5593da6cf5473f3015621d64a",
+      "config_sha256": "64b17deb84f71abf35d2a9bc5dd9291661642528fc98a154b933c40de1d962df",
+      "prototype_function_sources": {
+        "docs/landing-engine/reproduction/prototypes/prefix_probe.py": "2baf850ff6f56e84a179f7bce50506c7711745e496259b61f2e4e3f2bb510828"
+      },
+      "adaptations": [],
+      "artifacts": {
+        "run.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/prefix/run.json",
+          "sha256": "2a38e9eaf386535144a57f492f8ac28c651f3a35fdd82930eedc0ee7195ba6bd"
+        },
+        "result.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/prefix/result.json",
+          "sha256": "bd9ce8caf8904a6da12ac265b5018035b8a7d37e95c61a2f332e5eead1f7db22"
+        },
+        "candidate-trace.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/prefix/candidate-trace.json",
+          "sha256": "fe85491ac30cf4b31e36b10a035e7aa622fa26048fb0e1366471819d68aef9fa"
+        },
+        "evaluation.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/prefix/evaluation.json",
+          "sha256": "cb5df825d533df8fe5fb0ebc7dfd6871cbe36d14938e7b500a3401ce463d1823"
+        }
+      }
+    },
+    {
+      "variant": "terminal",
+      "evaluation": {
+        "key": "uhdhd-5-a",
+        "cohort": "exposed_development_recheck",
+        "group_id": "uhdhd-5",
+        "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+        "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+        "reference_visibility": "visible",
+        "localization_scorable": true,
+        "selection_category": "wrong_target_or_spatial_localization",
+        "selected_comparison": {
+          "distance_px": 214.44113411377026,
+          "frame_error": 89,
+          "reference_coordinate_point": [
+            864.0,
+            141.0
+          ],
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "top1_match": false,
+        "recall_at_6": false,
+        "recall_at_12": false,
+        "matching_candidate_ranks": [],
+        "candidate_count": 12,
+        "candidate_kind": "observed_object_center",
+        "contact_observed": false,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 2272,
+          "frame_index": 55,
+          "time": 0.927733,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        "automatic_decision": "REVIEW",
+        "decision_reason_codes": [
+          "CALIBRATION_NOT_ACCEPTED",
+          "CALIBRATION_SUPPORT_INSUFFICIENT",
+          "CONTACT_EVIDENCE_UNCERTAIN",
+          "CONTACT_OCCLUDED_OR_MISSING",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "MULTIPLE_LANDING_CANDIDATES",
+          "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+        ],
+        "selected_reason_codes": [
+          "CALIBRATION_NOT_CONFIRMED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TRACK_IDENTITY_AMBIGUOUS"
+        ],
+        "timing_scope": "isolated_v5_hypothesis_replay",
+        "elapsed_seconds": 24.354336520999823,
+        "accepted_v5": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false
+        },
+        "fixed_metric_gain": false,
+        "result_sha256": "9d6631433ff704869afb95144271b4cb0c830bb74bafcf22c0c726b1a8c01a82",
+        "trace_sha256": "de2389c72e47a0ec25a4a23e3fbbcc5990166902ecb861ba19fbc1abb602978c",
+        "receipt_sha256": "dd3ad141314f8d549bde4041c27867a5fd7532dfcc3d1274674dda34625403ed"
+      },
+      "recovery_summary": {
+        "accepted_native24": {
+          "method": "native_bidirectional_endpoint_recovery",
+          "approaches": 22,
+          "decoded_frames": 176,
+          "raw_components": 8434,
+          "additional_tracks": 26,
+          "crop_budget_bytes": 134217728,
+          "crop_bytes": 133319586,
+          "budget_skipped_windows": 2,
+          "identity_confirmed": false,
+          "physical_contact_confirmed": false,
+          "occlusion_context_frame_count": 216
+        },
+        "experimental_terminal": {
+          "method": "native_bidirectional_endpoint_recovery",
+          "approaches": 21,
+          "decoded_frames": 193,
+          "raw_components": 6732,
+          "additional_tracks": 27,
+          "crop_budget_bytes": 134217728,
+          "crop_bytes": 126904338,
+          "budget_skipped_windows": 3,
+          "identity_confirmed": false,
+          "physical_contact_confirmed": false,
+          "occlusion_context_frame_count": 216
+        },
+        "additional_tracks": 53,
+        "independent_recovery_windows": true,
+        "status": "completed"
+      },
+      "generated_after_evidence_gates_before_cap": 1735,
+      "matching_before_cap_count": 0,
+      "terminal_proposal_count": 0,
+      "terminal_proposals": [],
+      "selected_prefix_endpoints": [
+        {
+          "track_id": 2452,
+          "frame_index": 73,
+          "point": [
+            20.846,
+            130.34
+          ]
+        },
+        {
+          "track_id": 2390,
+          "frame_index": 201,
+          "point": [
+            956.285,
+            47.942
+          ]
+        },
+        {
+          "track_id": 2274,
+          "frame_index": 51,
+          "point": [
+            862.5,
+            125.5
+          ]
+        },
+        {
+          "track_id": 2321,
+          "frame_index": 59,
+          "point": [
+            869.375,
+            149.5
+          ]
+        },
+        {
+          "track_id": 2440,
+          "frame_index": 24,
+          "point": [
+            527.125,
+            244.0
+          ]
+        },
+        {
+          "track_id": 2312,
+          "frame_index": 55,
+          "point": [
+            864.0,
+            141.0
+          ]
+        },
+        {
+          "track_id": 2366,
+          "frame_index": 128,
+          "point": [
+            617.534,
+            115.752
+          ]
+        },
+        {
+          "track_id": 2279,
+          "frame_index": 47,
+          "point": [
+            855.875,
+            115.75
+          ]
+        },
+        {
+          "track_id": 2236,
+          "frame_index": 146,
+          "point": [
+            732.0,
+            308.5
+          ]
+        },
+        {
+          "track_id": 2372,
+          "frame_index": 29,
+          "point": [
+            279.5,
+            96.5
+          ]
+        },
+        {
+          "track_id": 2419,
+          "frame_index": 80,
+          "point": [
+            381.0,
+            251.5
+          ]
+        },
+        {
+          "track_id": 2340,
+          "frame_index": 44,
+          "point": [
+            851.72,
+            106.652
+          ]
+        },
+        {
+          "track_id": 2357,
+          "frame_index": 61,
+          "point": [
+            874.78,
+            160.447
+          ]
+        },
+        {
+          "track_id": 2391,
+          "frame_index": 92,
+          "point": [
+            442.0,
+            244.5
+          ]
+        },
+        {
+          "track_id": 2449,
+          "frame_index": 120,
+          "point": [
+            626.667,
+            100.667
+          ]
+        },
+        {
+          "track_id": 2417,
+          "frame_index": 65,
+          "point": [
+            11.408,
+            95.853
+          ]
+        },
+        {
+          "track_id": 2334,
+          "frame_index": 51,
+          "point": [
+            856.0,
+            137.5
+          ]
+        },
+        {
+          "track_id": 2298,
+          "frame_index": 170,
+          "point": [
+            889.167,
+            126.976
+          ]
+        },
+        {
+          "track_id": 2448,
+          "frame_index": 79,
+          "point": [
+            823.743,
+            53.913
+          ]
+        },
+        {
+          "track_id": 2343,
+          "frame_index": 61,
+          "point": [
+            468.269,
+            132.917
+          ]
+        },
+        {
+          "track_id": 2364,
+          "frame_index": 116,
+          "point": [
+            632.621,
+            94.138
+          ]
+        },
+        {
+          "track_id": 2247,
+          "frame_index": 62,
+          "point": [
+            472.5,
+            141.5
+          ]
+        },
+        {
+          "track_id": 2220,
+          "frame_index": 64,
+          "point": [
+            488.6,
+            139.85
+          ]
+        },
+        {
+          "track_id": 2237,
+          "frame_index": 149,
+          "point": [
+            747.208,
+            313.792
+          ]
+        }
+      ],
+      "ranked_candidate_positions": [
+        {
+          "track_id": 2272,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2459,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2333,
+          "frame_index": 57,
+          "candidate_px": [
+            866.875,
+            152.875
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2453,
+          "frame_index": 62,
+          "candidate_px": [
+            872.3563006603688,
+            163.6877190577025
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2265,
+          "frame_index": 49,
+          "candidate_px": [
+            860.7,
+            130.25
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2464,
+          "frame_index": 58,
+          "candidate_px": [
+            869.9890006227561,
+            155.21850838186774
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2489,
+          "frame_index": 60,
+          "candidate_px": [
+            871.7871492161883,
+            160.10209590971016
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2473,
+          "frame_index": 66,
+          "candidate_px": [
+            500.3770038709514,
+            155.85232461234799
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 328,
+          "frame_index": 34,
+          "candidate_px": [
+            830.491,
+            87.494
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1996,
+          "frame_index": 205,
+          "candidate_px": [
+            571.444,
+            135.833
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 787,
+          "frame_index": 85,
+          "candidate_px": [
+            553.75,
+            145.5
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1745,
+          "frame_index": 199,
+          "candidate_px": [
+            579.0,
+            132.5
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        }
+      ],
+      "runner": "docs/landing-engine/reproduction/recheck_recovery_v5_pre_harness_move.py",
+      "runner_sha256": "bf7f7c799cac747c5360a9205441a49685c79ab601a4959338e15f4ef7021e57",
+      "input_source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "analysis_frames_sha256": "c460c4dd020947560d2f181cbb05c654ef9830e5593da6cf5473f3015621d64a",
+      "config_sha256": "64b17deb84f71abf35d2a9bc5dd9291661642528fc98a154b933c40de1d962df",
+      "prototype_function_sources": {
+        "docs/landing-engine/reproduction/prototypes/prefix_probe.py": "2baf850ff6f56e84a179f7bce50506c7711745e496259b61f2e4e3f2bb510828",
+        "docs/landing-engine/reproduction/prototypes/terminal_probe.py": "577307eda6a4724aaffe3c260f56fabec754611eb00fe795847753a7efd6d395"
+      },
+      "adaptations": [
+        "Retain accepted native24 tracks; add separate terminal-prefix tracks and proposals before existing global evidence gates; terminal kind stays distinct and is ineligible for rebound-only native guard/causal relation"
+      ],
+      "artifacts": {
+        "run.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/terminal/run.json",
+          "sha256": "dd3ad141314f8d549bde4041c27867a5fd7532dfcc3d1274674dda34625403ed"
+        },
+        "result.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/terminal/result.json",
+          "sha256": "9d6631433ff704869afb95144271b4cb0c830bb74bafcf22c0c726b1a8c01a82"
+        },
+        "candidate-trace.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/terminal/candidate-trace.json",
+          "sha256": "de2389c72e47a0ec25a4a23e3fbbcc5990166902ecb861ba19fbc1abb602978c"
+        },
+        "evaluation.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/terminal/evaluation.json",
+          "sha256": "d98b57e20556b302e53cc4a369a03d0d3caa4ca3edf028da10dc90dfa7f216a9"
+        }
+      }
+    },
+    {
+      "variant": "prefix-dark",
+      "evaluation": {
+        "key": "uhdhd-5-a",
+        "cohort": "exposed_development_recheck",
+        "group_id": "uhdhd-5",
+        "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+        "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+        "reference_visibility": "visible",
+        "localization_scorable": true,
+        "selection_category": "wrong_target_or_spatial_localization",
+        "selected_comparison": {
+          "distance_px": 214.44113411377026,
+          "frame_error": 89,
+          "reference_coordinate_point": [
+            864.0,
+            141.0
+          ],
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "top1_match": false,
+        "recall_at_6": false,
+        "recall_at_12": false,
+        "matching_candidate_ranks": [],
+        "candidate_count": 12,
+        "candidate_kind": "observed_object_center",
+        "contact_observed": false,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 2272,
+          "frame_index": 55,
+          "time": 0.927733,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        "automatic_decision": "REVIEW",
+        "decision_reason_codes": [
+          "CALIBRATION_NOT_ACCEPTED",
+          "CALIBRATION_SUPPORT_INSUFFICIENT",
+          "CONTACT_EVIDENCE_UNCERTAIN",
+          "CONTACT_OCCLUDED_OR_MISSING",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "MULTIPLE_LANDING_CANDIDATES",
+          "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+        ],
+        "selected_reason_codes": [
+          "CALIBRATION_NOT_CONFIRMED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TRACK_IDENTITY_AMBIGUOUS"
+        ],
+        "timing_scope": "isolated_v5_hypothesis_replay",
+        "elapsed_seconds": 17.956914495999627,
+        "accepted_v5": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false
+        },
+        "fixed_metric_gain": false,
+        "result_sha256": "52f119b6d1e770ad8a1e6ce80862b1a362745165dd4a54069071789c8a473009",
+        "trace_sha256": "23c50c1d2eb1774f858342f3f56bc2136b67ca352806963cc46cecbdd2eae9bd",
+        "receipt_sha256": "d9cb34e2c23b5a18415fd1921c4d9b59a05ec6a02f77bf2c0de36ba38dfdb259"
+      },
+      "recovery_summary": {
+        "method": "native_bidirectional_endpoint_recovery",
+        "approaches": 21,
+        "decoded_frames": 193,
+        "raw_components": 15487,
+        "additional_tracks": 28,
+        "crop_budget_bytes": 134217728,
+        "crop_bytes": 126904338,
+        "budget_skipped_windows": 3,
+        "identity_confirmed": false,
+        "physical_contact_confirmed": false,
+        "occlusion_context_frame_count": 216,
+        "status": "completed"
+      },
+      "generated_after_evidence_gates_before_cap": 1697,
+      "matching_before_cap_count": 0,
+      "terminal_proposal_count": 0,
+      "terminal_proposals": [],
+      "selected_prefix_endpoints": [
+        {
+          "track_id": 2452,
+          "frame_index": 73,
+          "point": [
+            20.846,
+            130.34
+          ]
+        },
+        {
+          "track_id": 2390,
+          "frame_index": 201,
+          "point": [
+            956.285,
+            47.942
+          ]
+        },
+        {
+          "track_id": 2274,
+          "frame_index": 51,
+          "point": [
+            862.5,
+            125.5
+          ]
+        },
+        {
+          "track_id": 2321,
+          "frame_index": 59,
+          "point": [
+            869.375,
+            149.5
+          ]
+        },
+        {
+          "track_id": 2440,
+          "frame_index": 24,
+          "point": [
+            527.125,
+            244.0
+          ]
+        },
+        {
+          "track_id": 2312,
+          "frame_index": 55,
+          "point": [
+            864.0,
+            141.0
+          ]
+        },
+        {
+          "track_id": 2366,
+          "frame_index": 128,
+          "point": [
+            617.534,
+            115.752
+          ]
+        },
+        {
+          "track_id": 2279,
+          "frame_index": 47,
+          "point": [
+            855.875,
+            115.75
+          ]
+        },
+        {
+          "track_id": 2236,
+          "frame_index": 146,
+          "point": [
+            732.0,
+            308.5
+          ]
+        },
+        {
+          "track_id": 2372,
+          "frame_index": 29,
+          "point": [
+            279.5,
+            96.5
+          ]
+        },
+        {
+          "track_id": 2419,
+          "frame_index": 80,
+          "point": [
+            381.0,
+            251.5
+          ]
+        },
+        {
+          "track_id": 2340,
+          "frame_index": 44,
+          "point": [
+            851.72,
+            106.652
+          ]
+        },
+        {
+          "track_id": 2357,
+          "frame_index": 61,
+          "point": [
+            874.78,
+            160.447
+          ]
+        },
+        {
+          "track_id": 2391,
+          "frame_index": 92,
+          "point": [
+            442.0,
+            244.5
+          ]
+        },
+        {
+          "track_id": 2449,
+          "frame_index": 120,
+          "point": [
+            626.667,
+            100.667
+          ]
+        },
+        {
+          "track_id": 2417,
+          "frame_index": 65,
+          "point": [
+            11.408,
+            95.853
+          ]
+        },
+        {
+          "track_id": 2334,
+          "frame_index": 51,
+          "point": [
+            856.0,
+            137.5
+          ]
+        },
+        {
+          "track_id": 2298,
+          "frame_index": 170,
+          "point": [
+            889.167,
+            126.976
+          ]
+        },
+        {
+          "track_id": 2448,
+          "frame_index": 79,
+          "point": [
+            823.743,
+            53.913
+          ]
+        },
+        {
+          "track_id": 2343,
+          "frame_index": 61,
+          "point": [
+            468.269,
+            132.917
+          ]
+        },
+        {
+          "track_id": 2364,
+          "frame_index": 116,
+          "point": [
+            632.621,
+            94.138
+          ]
+        },
+        {
+          "track_id": 2247,
+          "frame_index": 62,
+          "point": [
+            472.5,
+            141.5
+          ]
+        },
+        {
+          "track_id": 2220,
+          "frame_index": 64,
+          "point": [
+            488.6,
+            139.85
+          ]
+        },
+        {
+          "track_id": 2237,
+          "frame_index": 149,
+          "point": [
+            747.208,
+            313.792
+          ]
+        }
+      ],
+      "ranked_candidate_positions": [
+        {
+          "track_id": 2272,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2460,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2333,
+          "frame_index": 57,
+          "candidate_px": [
+            866.875,
+            152.875
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2454,
+          "frame_index": 62,
+          "candidate_px": [
+            872.3563006603688,
+            163.6877190577025
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2461,
+          "frame_index": 136,
+          "candidate_px": [
+            612.131979269205,
+            132.20049994377416
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2265,
+          "frame_index": 49,
+          "candidate_px": [
+            860.7,
+            130.25
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2478,
+          "frame_index": 68,
+          "candidate_px": [
+            513.8197865458441,
+            162.57769467749307
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 328,
+          "frame_index": 34,
+          "candidate_px": [
+            830.491,
+            87.494
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1996,
+          "frame_index": 205,
+          "candidate_px": [
+            571.444,
+            135.833
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 787,
+          "frame_index": 85,
+          "candidate_px": [
+            553.75,
+            145.5
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1745,
+          "frame_index": 199,
+          "candidate_px": [
+            579.0,
+            132.5
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1774,
+          "frame_index": 188,
+          "candidate_px": [
+            106.058,
+            167.183
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        }
+      ],
+      "runner": "docs/landing-engine/reproduction/recheck_recovery_v5.py",
+      "runner_sha256": "aa854fcade4f8f2ef8a4dbbcfc48aae23e2a6a94fcf52fcc5e65fe6762f373b5",
+      "input_source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "analysis_frames_sha256": "c460c4dd020947560d2f181cbb05c654ef9830e5593da6cf5473f3015621d64a",
+      "config_sha256": "64b17deb84f71abf35d2a9bc5dd9291661642528fc98a154b933c40de1d962df",
+      "prototype_function_sources": {
+        "docs/landing-engine/reproduction/prototypes/prefix_probe.py": "2baf850ff6f56e84a179f7bce50506c7711745e496259b61f2e4e3f2bb510828"
+      },
+      "adaptations": [
+        "Same pixels/thresholds; common native component method with explicit dark polarity for existing native guard eligibility"
+      ],
+      "artifacts": {
+        "run.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/prefix-dark/run.json",
+          "sha256": "d9cb34e2c23b5a18415fd1921c4d9b59a05ec6a02f77bf2c0de36ba38dfdb259"
+        },
+        "result.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/prefix-dark/result.json",
+          "sha256": "52f119b6d1e770ad8a1e6ce80862b1a362745165dd4a54069071789c8a473009"
+        },
+        "candidate-trace.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/prefix-dark/candidate-trace.json",
+          "sha256": "23c50c1d2eb1774f858342f3f56bc2136b67ca352806963cc46cecbdd2eae9bd"
+        },
+        "evaluation.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/prefix-dark/evaluation.json",
+          "sha256": "bfe59aa817967865585d5208e336f4f7ee26310374754e59a5696440ed45e31c"
+        }
+      }
+    },
+    {
+      "variant": "terminal-dark",
+      "evaluation": {
+        "key": "uhdhd-5-a",
+        "cohort": "exposed_development_recheck",
+        "group_id": "uhdhd-5",
+        "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+        "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+        "reference_visibility": "visible",
+        "localization_scorable": true,
+        "selection_category": "wrong_target_or_spatial_localization",
+        "selected_comparison": {
+          "distance_px": 214.44113411377026,
+          "frame_error": 89,
+          "reference_coordinate_point": [
+            864.0,
+            141.0
+          ],
+          "within_spatial_tolerance": false,
+          "within_frame_tolerance": false,
+          "matches_first_vicinity": false
+        },
+        "top1_match": false,
+        "recall_at_6": false,
+        "recall_at_12": false,
+        "matching_candidate_ranks": [],
+        "candidate_count": 12,
+        "candidate_kind": "observed_object_center",
+        "contact_observed": false,
+        "selected": {
+          "event_id": "event_000",
+          "track_id": 2272,
+          "frame_index": 55,
+          "time": 0.927733,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        "automatic_decision": "REVIEW",
+        "decision_reason_codes": [
+          "CALIBRATION_NOT_ACCEPTED",
+          "CALIBRATION_SUPPORT_INSUFFICIENT",
+          "CONTACT_EVIDENCE_UNCERTAIN",
+          "CONTACT_OCCLUDED_OR_MISSING",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "MULTIPLE_LANDING_CANDIDATES",
+          "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+        ],
+        "selected_reason_codes": [
+          "CALIBRATION_NOT_CONFIRMED",
+          "CORK_CONTACT_REGION_UNRESOLVED",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "IMAGE_SPACE_DESCENT_AND_REBOUND",
+          "TARGET_COURT_IMAGE_SUPPORT_MISSING",
+          "TARGET_IDENTITY_UNVERIFIED",
+          "TRACK_HAS_MISSING_OBSERVATIONS",
+          "TRACK_IDENTITY_AMBIGUOUS"
+        ],
+        "timing_scope": "isolated_v5_hypothesis_replay",
+        "elapsed_seconds": 24.23049133099994,
+        "accepted_v5": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false
+        },
+        "fixed_metric_gain": false,
+        "result_sha256": "9c8fa5b4020672ce52f1913c55b285c05ea5b4fbedafbc73cda9f79c42aae295",
+        "trace_sha256": "9ce1b225e4cbcf67b2638ad59048026c134b33d091348dcbf59c27d8119b4bc3",
+        "receipt_sha256": "950339cd80963b7ba3f820190729ebc89b44d0120ce89a726175c9168e750400"
+      },
+      "recovery_summary": {
+        "accepted_native24": {
+          "method": "native_bidirectional_endpoint_recovery",
+          "approaches": 22,
+          "decoded_frames": 176,
+          "raw_components": 8434,
+          "additional_tracks": 26,
+          "crop_budget_bytes": 134217728,
+          "crop_bytes": 133319586,
+          "budget_skipped_windows": 2,
+          "identity_confirmed": false,
+          "physical_contact_confirmed": false,
+          "occlusion_context_frame_count": 216
+        },
+        "experimental_terminal": {
+          "method": "native_bidirectional_endpoint_recovery",
+          "approaches": 21,
+          "decoded_frames": 193,
+          "raw_components": 15487,
+          "additional_tracks": 26,
+          "crop_budget_bytes": 134217728,
+          "crop_bytes": 126904338,
+          "budget_skipped_windows": 3,
+          "identity_confirmed": false,
+          "physical_contact_confirmed": false,
+          "occlusion_context_frame_count": 216
+        },
+        "additional_tracks": 52,
+        "independent_recovery_windows": true,
+        "status": "completed"
+      },
+      "generated_after_evidence_gates_before_cap": 1732,
+      "matching_before_cap_count": 0,
+      "terminal_proposal_count": 1,
+      "terminal_proposals": [
+        {
+          "track_id": 2479,
+          "frame_index": 52,
+          "time": 0.877133,
+          "candidate_px": [
+            863.9966198411178,
+            128.21781978283047
+          ],
+          "method": "experimental_terminal_velocity_impulse",
+          "image_motion_event": {
+            "kind": "terminal_velocity_impulse",
+            "inference_only": true,
+            "point_kind": "inferred_object_center",
+            "first_in_track": true,
+            "frame_interval": [
+              51,
+              53
+            ],
+            "time_interval": [
+              0.860267,
+              0.894
+            ],
+            "trajectory": [
+              {
+                "frame_index": 47,
+                "time": 0.792789,
+                "x": 855.875,
+                "y": 115.75
+              },
+              {
+                "frame_index": 48,
+                "time": 0.809656,
+                "x": 858.2,
+                "y": 117.4
+              },
+              {
+                "frame_index": 49,
+                "time": 0.826522,
+                "x": 860.148,
+                "y": 120.0
+              },
+              {
+                "frame_index": 50,
+                "time": 0.843389,
+                "x": 861.286,
+                "y": 122.429
+              },
+              {
+                "frame_index": 51,
+                "time": 0.860267,
+                "x": 862.5,
+                "y": 125.5
+              },
+              {
+                "frame_index": 53,
+                "time": 0.894,
+                "x": 862.954268292683,
+                "y": 129.3719512195122
+              },
+              {
+                "frame_index": 54,
+                "time": 0.910867,
+                "x": 863.8247663551402,
+                "y": 129.55607476635515
+              },
+              {
+                "frame_index": 55,
+                "time": 0.927733,
+                "x": 863.3932038834952,
+                "y": 129.92961165048544
+              },
+              {
+                "frame_index": 56,
+                "time": 0.9446,
+                "x": 863.5416666666666,
+                "y": 129.54166666666666
+              },
+              {
+                "frame_index": 57,
+                "time": 0.961467,
+                "x": 862.246062992126,
+                "y": 130.1948818897638
+              },
+              {
+                "frame_index": 58,
+                "time": 0.978333,
+                "x": 861.265625,
+                "y": 133.296875
+              }
+            ]
+          },
+          "flight_trajectory_support": {
+            "supported_for_review": true,
+            "method": "coherent_approach_and_terminal_velocity_impulse",
+            "approach_observation_count": 21,
+            "approach_displacement_y_px": 41.685,
+            "fit_residual_px": 0.3987433036862104,
+            "outgoing_fit_residual_px": 1.0729136695324513,
+            "speed_ratio": 0.21208734590085598,
+            "verified_identity": false,
+            "physical_contact_verified": false,
+            "reason_codes": []
+          },
+          "reason_codes": [
+            "TERMINAL_IMAGE_VELOCITY_IMPULSE",
+            "FIRST_CONTACT_NOT_OBSERVED",
+            "CORK_CONTACT_REGION_UNRESOLVED",
+            "TARGET_IDENTITY_UNVERIFIED"
+          ]
+        }
+      ],
+      "selected_prefix_endpoints": [
+        {
+          "track_id": 2452,
+          "frame_index": 73,
+          "point": [
+            20.846,
+            130.34
+          ]
+        },
+        {
+          "track_id": 2390,
+          "frame_index": 201,
+          "point": [
+            956.285,
+            47.942
+          ]
+        },
+        {
+          "track_id": 2274,
+          "frame_index": 51,
+          "point": [
+            862.5,
+            125.5
+          ]
+        },
+        {
+          "track_id": 2321,
+          "frame_index": 59,
+          "point": [
+            869.375,
+            149.5
+          ]
+        },
+        {
+          "track_id": 2440,
+          "frame_index": 24,
+          "point": [
+            527.125,
+            244.0
+          ]
+        },
+        {
+          "track_id": 2312,
+          "frame_index": 55,
+          "point": [
+            864.0,
+            141.0
+          ]
+        },
+        {
+          "track_id": 2366,
+          "frame_index": 128,
+          "point": [
+            617.534,
+            115.752
+          ]
+        },
+        {
+          "track_id": 2279,
+          "frame_index": 47,
+          "point": [
+            855.875,
+            115.75
+          ]
+        },
+        {
+          "track_id": 2236,
+          "frame_index": 146,
+          "point": [
+            732.0,
+            308.5
+          ]
+        },
+        {
+          "track_id": 2372,
+          "frame_index": 29,
+          "point": [
+            279.5,
+            96.5
+          ]
+        },
+        {
+          "track_id": 2419,
+          "frame_index": 80,
+          "point": [
+            381.0,
+            251.5
+          ]
+        },
+        {
+          "track_id": 2340,
+          "frame_index": 44,
+          "point": [
+            851.72,
+            106.652
+          ]
+        },
+        {
+          "track_id": 2357,
+          "frame_index": 61,
+          "point": [
+            874.78,
+            160.447
+          ]
+        },
+        {
+          "track_id": 2391,
+          "frame_index": 92,
+          "point": [
+            442.0,
+            244.5
+          ]
+        },
+        {
+          "track_id": 2449,
+          "frame_index": 120,
+          "point": [
+            626.667,
+            100.667
+          ]
+        },
+        {
+          "track_id": 2417,
+          "frame_index": 65,
+          "point": [
+            11.408,
+            95.853
+          ]
+        },
+        {
+          "track_id": 2334,
+          "frame_index": 51,
+          "point": [
+            856.0,
+            137.5
+          ]
+        },
+        {
+          "track_id": 2298,
+          "frame_index": 170,
+          "point": [
+            889.167,
+            126.976
+          ]
+        },
+        {
+          "track_id": 2448,
+          "frame_index": 79,
+          "point": [
+            823.743,
+            53.913
+          ]
+        },
+        {
+          "track_id": 2343,
+          "frame_index": 61,
+          "point": [
+            468.269,
+            132.917
+          ]
+        },
+        {
+          "track_id": 2364,
+          "frame_index": 116,
+          "point": [
+            632.621,
+            94.138
+          ]
+        },
+        {
+          "track_id": 2247,
+          "frame_index": 62,
+          "point": [
+            472.5,
+            141.5
+          ]
+        },
+        {
+          "track_id": 2220,
+          "frame_index": 64,
+          "point": [
+            488.6,
+            139.85
+          ]
+        },
+        {
+          "track_id": 2237,
+          "frame_index": 149,
+          "point": [
+            747.208,
+            313.792
+          ]
+        }
+      ],
+      "ranked_candidate_positions": [
+        {
+          "track_id": 2272,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2459,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2485,
+          "frame_index": 55,
+          "candidate_px": [
+            864.0,
+            141.0
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2333,
+          "frame_index": 57,
+          "candidate_px": [
+            866.875,
+            152.875
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2453,
+          "frame_index": 62,
+          "candidate_px": [
+            872.3563006603688,
+            163.6877190577025
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2479,
+          "frame_index": 52,
+          "candidate_px": [
+            863.9966198411178,
+            128.21781978283047
+          ],
+          "method": "experimental_terminal_velocity_impulse"
+        },
+        {
+          "track_id": 2265,
+          "frame_index": 49,
+          "candidate_px": [
+            860.7,
+            130.25
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 2464,
+          "frame_index": 58,
+          "candidate_px": [
+            869.9890006227561,
+            155.21850838186774
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 2473,
+          "frame_index": 66,
+          "candidate_px": [
+            500.3770038709514,
+            155.85232461234799
+          ],
+          "method": "offline_occluded_image_trajectory_intersection"
+        },
+        {
+          "track_id": 328,
+          "frame_index": 34,
+          "candidate_px": [
+            830.491,
+            87.494
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 1996,
+          "frame_index": 205,
+          "candidate_px": [
+            571.444,
+            135.833
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        },
+        {
+          "track_id": 787,
+          "frame_index": 85,
+          "candidate_px": [
+            553.75,
+            145.5
+          ],
+          "method": "offline_motion_and_tracklet_candidate_search"
+        }
+      ],
+      "runner": "docs/landing-engine/reproduction/recheck_recovery_v5.py",
+      "runner_sha256": "aa854fcade4f8f2ef8a4dbbcfc48aae23e2a6a94fcf52fcc5e65fe6762f373b5",
+      "input_source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "analysis_frames_sha256": "c460c4dd020947560d2f181cbb05c654ef9830e5593da6cf5473f3015621d64a",
+      "config_sha256": "64b17deb84f71abf35d2a9bc5dd9291661642528fc98a154b933c40de1d962df",
+      "prototype_function_sources": {
+        "docs/landing-engine/reproduction/prototypes/prefix_probe.py": "2baf850ff6f56e84a179f7bce50506c7711745e496259b61f2e4e3f2bb510828",
+        "docs/landing-engine/reproduction/prototypes/terminal_probe.py": "577307eda6a4724aaffe3c260f56fabec754611eb00fe795847753a7efd6d395"
+      },
+      "adaptations": [
+        "Same pixels/thresholds; common native component method with explicit dark polarity for existing native guard eligibility",
+        "Retain accepted native24 tracks; add separate terminal-prefix tracks and proposals before existing global evidence gates; terminal kind stays distinct and is ineligible for rebound-only native guard/causal relation"
+      ],
+      "artifacts": {
+        "run.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/terminal-dark/run.json",
+          "sha256": "950339cd80963b7ba3f820190729ebc89b44d0120ce89a726175c9168e750400"
+        },
+        "result.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/terminal-dark/result.json",
+          "sha256": "9c8fa5b4020672ce52f1913c55b285c05ea5b4fbedafbc73cda9f79c42aae295"
+        },
+        "candidate-trace.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/terminal-dark/candidate-trace.json",
+          "sha256": "9ce1b225e4cbcf67b2638ad59048026c134b33d091348dcbf59c27d8119b4bc3"
+        },
+        "evaluation.json": {
+          "path": "runs/landing-engine/observation-audit/v5-rechecks/terminal-dark/evaluation.json",
+          "sha256": "1fea4dbabd24fd1b35cfe245a42c528375f9bac50272fd7fdc2910d3bddb3c8c"
+        }
+      }
+    }
+  ],
+  "fixed_metric_gains": [],
+  "decision": "All five additional hypotheses remain rejected: no fixed top1, recall@6 or recall@12 gain on the exposed failure case under accepted v5 settings. No production engine/configuration change follows.",
+  "stopping_scope": "These declared applicable alternatives did not improve this current engine; this is not proof that every future landing model is exhausted.",
+  "reserved_references_read_by_runner": false,
+  "curator": "docs/landing-engine/reproduction/summarize_recovery_v5_rechecks.py",
+  "curator_sha256": "ee49a45926efbc9550fe04fcf846f12ad82e8477b19a87b3ce4ee5124d3b8b5a"
+}

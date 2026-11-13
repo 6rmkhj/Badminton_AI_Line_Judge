@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "key": "ordinary-2-b",
+  "file": "b시점 2.mp4",
+  "source_path": "video/b시점 2.mp4",
+  "source_sha256": "8be748ba5ae3d29b5a62185de97716a8b7c7ca42c9aa3851dcab18e7a95cbb48",
+  "source_bytes": 31232237,
+  "source_size": [
+    3840,
+    2160
+  ],
+  "decoded_frame_count": 289,
+  "container_reported_frame_count": 289,
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "contact_visibility": "ambiguous",
+  "landing_frame_interval": null,
+  "landing_time_interval": null,
+  "landing_point_px": null,
+  "tolerance_px": null,
+  "frame_tolerance": 0,
+  "point_kind": null,
+  "human_verified": false,
+  "physical_contact_verified": false,
+  "reference_kind": "AI_source_only_first_vicinity",
+  "prediction_blind_current_round": true,
+  "prior_repository_ai_labels_exist": true,
+  "frozen_at_utc": "2026-11-13T06:40:40.776783+00:00",
+  "note": "The full clip and detailed source sequences were reviewed. The conspicuous floor shuttle near analysis (349,211) is stationary from frame 0 and is not the rally landing. A unique moving target first-contact vicinity was not established; no point is assigned.",
+  "source_evidence": [
+    "ordinary-2-b-crop-0-140-0.jpg",
+    "ordinary-2-b-crop-0-140-1.jpg",
+    "ordinary-2-b-crop-140-200-0.jpg",
+    "ordinary-2-b-crop-140-200-1.jpg",
+    "ordinary-2-b-crop-40-136-0.jpg",
+    "ordinary-2-b-crop-40-136-1.jpg",
+    "ordinary-2-b-overview-0.jpg",
+    "ordinary-2-b-overview-1.jpg"
+  ]
+}

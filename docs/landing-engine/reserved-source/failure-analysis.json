@@ -1,0 +1,1344 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-11-13T07:46:55.646048+00:00",
+  "key": "uhdhd-3-a",
+  "scope": "Read-only post-release failure-stage diagnosis after frozen baseline and accepted full-pipeline runs; no new inference experiment, code/configuration/reference change or tuning. The additional context points are approximate visual diagnostic readings, not independently frozen accuracy labels.",
+  "reference_path": "docs/landing-engine/reserved-source/references/uhdhd-3-a.json",
+  "reference_sha256": "f1755ef2cbf26bba4d45d3b708a9fbbbfc9958f5450033a12132061835b2eefc",
+  "original_sealed_manifest_sha256": "c3daf37b7e33bd41631f0aaf77707fdcd20f76d10fdccb45f2cafd897aa40281",
+  "accepted_freeze_sha256": "30eb23649da6da42b9b43a251282b1abc3652cfc1aaa01a6c17f63f7e0f71ee1",
+  "source_visual_evidence": [
+    {
+      "path": "docs/landing-engine/reserved-source/uhdhd-3-a-crop-130-153-0.jpg",
+      "sha256": "374029db73be3086e76edbb97b7c61b4239a4f3a621d28154da5eafbda201bb5"
+    },
+    {
+      "path": "docs/landing-engine/reserved-source/uhdhd-3-a-reference-grid.jpg",
+      "sha256": "9aee23c51e6bc4a61c628b49b03cc435c1913b8f15600824197210246bf09a08"
+    },
+    {
+      "path": "docs/landing-engine/reserved-source/uhdhd-3-a-reference-full.jpg",
+      "sha256": "ea1740a92bf5a91867c1bc67a94f520548df2a36512daab06415dcd9217f5b91"
+    }
+  ],
+  "frozen_reference_unchanged": true,
+  "comparison": {
+    "raw_detections_byte_identical": true,
+    "track_arrays_identical": true,
+    "both_top1_and_recall12_failed": true,
+    "uncapped_event_hypotheses_recomputed": false
+  },
+  "finding": {
+    "primary_failure_stage": "missing_actual_shuttle_observations_near_first_vicinity",
+    "frozen_interval_frames_with_nearby_raw_proposal": 0,
+    "frozen_interval_frame_count": 3,
+    "frozen_interval_frames_with_nearby_actual_track_observation": 0,
+    "explanation": "Neither run retains a raw proposal within 6 analysis pixels of the frozen first-vicinity point at frames 137–139. No actual track observation supports that region in the interval. The correct vicinity is absent from all 12 returned candidates, so reordering those candidates cannot repair this case. This audit does not claim every uncapped hypothesis was inspected.",
+    "recovery_limit": "The accepted native endpoint recovery is skipped because whole-clip camera stability is unconfirmed (CAMERA_STABILITY_UNOBSERVABLE), not because measured displacement exceeded its threshold. The 71 unobservable background-motion samples include frames 130–133; local measurements improve near the landing. No stability threshold was relaxed after seeing this failure.",
+    "source_description": "The original native-resolution sequence shows a blurred shuttle descending against a pale floor, reaching its first low vicinity around frame 138 and then rebounding; a foreground passerby later obscures the area. These qualitative source observations do not independently identify which internal detector threshold or candidate-budget operation dropped it.",
+    "limitation": "This reserved failure remains unresolved. Improved candidate ordering/recovery on the exposed regression clips did not establish generalization to this clip. It suggests future source-proposal/robust background-registration work, which has not been implemented or validated here; no claim that all possible future improvements are exhausted."
+  },
+  "variants": [
+    {
+      "variant": "reserved-baseline",
+      "result_path": "runs/landing-engine/reserved-baseline/uhdhd-3-a/result.json",
+      "result_sha256": "11593f41ec1ea3151fa547c3d8883c24145899d981c54d04c50e8f3df64341da",
+      "detections_path": "runs/landing-engine/reserved-baseline/uhdhd-3-a/detections.json",
+      "detections_sha256": "aaf9c519e6c6ffcf8d9fd9eb386d0be70f20aca079b0bf04dce9c077e5b80aba",
+      "source_sha256": "c061c86a87286a0882f8a3f976d779c58c0d2755bc11432c69171ca08ef90d73",
+      "implementation_fingerprint": "c1694510a69c6ef535a10c374497c4f895828dfefdc73bb39787dd5fff9bbf81",
+      "benchmark_execution_mode": "full",
+      "analysis_size": [
+        960,
+        540
+      ],
+      "track_count": 2389,
+      "returned_candidate_count": 12,
+      "frozen_reference_proposal_audit": [
+        {
+          "frame_index": 137,
+          "raw_proposal_count": 80,
+          "raw_proposals_within_frozen_spatial_tolerance": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              255.0,
+              260.5
+            ],
+            "distance_px": 48.5412,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_frozen_spatial_tolerance": 0,
+          "nearest_actual_track_observation": {
+            "point_px": [
+              255.0,
+              260.5
+            ],
+            "distance_px": 48.5412,
+            "method": "opencv_motion_bright_component",
+            "track_id": 2134
+          }
+        },
+        {
+          "frame_index": 138,
+          "raw_proposal_count": 80,
+          "raw_proposals_within_frozen_spatial_tolerance": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              143.0,
+              292.5
+            ],
+            "distance_px": 92.2835,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_frozen_spatial_tolerance": 0,
+          "nearest_actual_track_observation": {
+            "point_px": [
+              143.0,
+              292.5
+            ],
+            "distance_px": 92.2835,
+            "method": "opencv_motion_bright_component",
+            "track_id": 1919
+          }
+        },
+        {
+          "frame_index": 139,
+          "raw_proposal_count": 80,
+          "raw_proposals_within_frozen_spatial_tolerance": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              204.0,
+              336.5
+            ],
+            "distance_px": 44.2069,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_frozen_spatial_tolerance": 0,
+          "nearest_actual_track_observation": {
+            "point_px": [
+              210.0,
+              261.5
+            ],
+            "distance_px": 49.4899,
+            "method": "opencv_motion_bright_component",
+            "track_id": 2234
+          }
+        }
+      ],
+      "source_context_diagnostic": [
+        {
+          "frame_index": 130,
+          "approximate_source_object_center_px": [
+            242,
+            227
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              321.833,
+              254.417
+            ],
+            "distance_px": 84.4097,
+            "method": "opencv_source_roi_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 131,
+          "approximate_source_object_center_px": [
+            241,
+            239
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              322.0,
+              254.0
+            ],
+            "distance_px": 82.3772,
+            "method": "opencv_source_roi_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 132,
+          "approximate_source_object_center_px": [
+            240,
+            249
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              229.5,
+              250.0
+            ],
+            "distance_px": 10.5475,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 133,
+          "approximate_source_object_center_px": [
+            239,
+            263
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              230.0,
+              250.0
+            ],
+            "distance_px": 15.8114,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 134,
+          "approximate_source_object_center_px": [
+            238,
+            269
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              255.0,
+              260.5
+            ],
+            "distance_px": 19.0066,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 135,
+          "approximate_source_object_center_px": [
+            237,
+            279
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              255.0,
+              261.0
+            ],
+            "distance_px": 25.4558,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 136,
+          "approximate_source_object_center_px": [
+            236,
+            289
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              255.0,
+              261.0
+            ],
+            "distance_px": 33.8378,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 137,
+          "approximate_source_object_center_px": [
+            236,
+            299
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              255.0,
+              260.5
+            ],
+            "distance_px": 42.9331,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 138,
+          "approximate_source_object_center_px": [
+            234.5,
+            304.5
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              143.0,
+              292.5
+            ],
+            "distance_px": 92.2835,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 139,
+          "approximate_source_object_center_px": [
+            232,
+            304
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              204.0,
+              336.5
+            ],
+            "distance_px": 42.8981,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 140,
+          "approximate_source_object_center_px": [
+            230,
+            304
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              204.0,
+              335.0
+            ],
+            "distance_px": 40.4599,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 141,
+          "approximate_source_object_center_px": [
+            228,
+            303.5
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              210.0,
+              261.5
+            ],
+            "distance_px": 45.6946,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 142,
+          "approximate_source_object_center_px": [
+            225.5,
+            303.5
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              207.0,
+              299.5
+            ],
+            "distance_px": 18.9275,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 143,
+          "approximate_source_object_center_px": [
+            223,
+            304
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              207.0,
+              299.5
+            ],
+            "distance_px": 16.6208,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        }
+      ],
+      "returned_candidates": [
+        {
+          "rank": 1,
+          "track_id": 3968,
+          "frame_index": 26,
+          "candidate_px": [
+            542.058,
+            85.668
+          ],
+          "distance_to_frozen_point_px": 377.4644,
+          "interval_frame_error": 111,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 2,
+          "track_id": 4003,
+          "frame_index": 72,
+          "candidate_px": [
+            280.0944892137867,
+            198.36827802079756
+          ],
+          "distance_to_frozen_point_px": 115.511,
+          "interval_frame_error": 65,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 3,
+          "track_id": 3742,
+          "frame_index": 231,
+          "candidate_px": [
+            814.5,
+            223.0
+          ],
+          "distance_to_frozen_point_px": 585.6981,
+          "interval_frame_error": 92,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 4,
+          "track_id": 3680,
+          "frame_index": 230,
+          "candidate_px": [
+            204.0,
+            62.5
+          ],
+          "distance_to_frozen_point_px": 243.9144,
+          "interval_frame_error": 91,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 5,
+          "track_id": 2459,
+          "frame_index": 163,
+          "candidate_px": [
+            136.5,
+            52.0
+          ],
+          "distance_to_frozen_point_px": 270.851,
+          "interval_frame_error": 24,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 6,
+          "track_id": 3760,
+          "frame_index": 232,
+          "candidate_px": [
+            626.5,
+            74.0
+          ],
+          "distance_to_frozen_point_px": 454.7464,
+          "interval_frame_error": 93,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 7,
+          "track_id": 2199,
+          "frame_index": 139,
+          "candidate_px": [
+            62.864,
+            56.307
+          ],
+          "distance_to_frozen_point_px": 301.7593,
+          "interval_frame_error": 0,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 8,
+          "track_id": 3656,
+          "frame_index": 227,
+          "candidate_px": [
+            941.5,
+            400.0
+          ],
+          "distance_to_frozen_point_px": 713.4208,
+          "interval_frame_error": 88,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 9,
+          "track_id": 3963,
+          "frame_index": 118,
+          "candidate_px": [
+            567.25,
+            27.75
+          ],
+          "distance_to_frozen_point_px": 432.7969,
+          "interval_frame_error": 19,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 10,
+          "track_id": 5,
+          "frame_index": 26,
+          "candidate_px": [
+            542.058,
+            85.668
+          ],
+          "distance_to_frozen_point_px": 377.4644,
+          "interval_frame_error": 111,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 11,
+          "track_id": 1566,
+          "frame_index": 105,
+          "candidate_px": [
+            593.5,
+            142.0
+          ],
+          "distance_to_frozen_point_px": 394.065,
+          "interval_frame_error": 32,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 12,
+          "track_id": 838,
+          "frame_index": 56,
+          "candidate_px": [
+            296.0,
+            162.25
+          ],
+          "distance_to_frozen_point_px": 154.9752,
+          "interval_frame_error": 81,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        }
+      ],
+      "strict_top1_match": false,
+      "strict_recall_at_12": false,
+      "native_endpoint_recovery": {
+        "status": "not_present_in_baseline"
+      },
+      "camera_stability": {
+        "status": "review",
+        "reason_codes": [
+          "CAMERA_STABILITY_UNOBSERVABLE"
+        ],
+        "max_displacement_px": 1.0463,
+        "threshold_px": 3.0,
+        "all_frames_sampled": true,
+        "method": "reference_optical_flow_ransac_background_motion",
+        "observation_status_counts": {
+          "measured": 164,
+          "unobservable": 71
+        },
+        "context_observations": [
+          {
+            "frame_index": 130,
+            "status": "unobservable",
+            "inlier_count": 150,
+            "inlier_fraction": 0.4644,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1907
+          },
+          {
+            "frame_index": 131,
+            "status": "unobservable",
+            "inlier_count": 148,
+            "inlier_fraction": 0.454,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.2174
+          },
+          {
+            "frame_index": 132,
+            "status": "unobservable",
+            "inlier_count": 154,
+            "inlier_fraction": 0.4724,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1973
+          },
+          {
+            "frame_index": 133,
+            "status": "unobservable",
+            "inlier_count": 157,
+            "inlier_fraction": 0.4876,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.2116
+          },
+          {
+            "frame_index": 134,
+            "status": "measured",
+            "inlier_count": 160,
+            "inlier_fraction": 0.5,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1962
+          },
+          {
+            "frame_index": 135,
+            "status": "measured",
+            "inlier_count": 160,
+            "inlier_fraction": 0.5,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.2075
+          },
+          {
+            "frame_index": 136,
+            "status": "measured",
+            "inlier_count": 164,
+            "inlier_fraction": 0.5141,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1934
+          },
+          {
+            "frame_index": 137,
+            "status": "measured",
+            "inlier_count": 167,
+            "inlier_fraction": 0.5235,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1816
+          },
+          {
+            "frame_index": 138,
+            "status": "measured",
+            "inlier_count": 176,
+            "inlier_fraction": 0.5552,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1368
+          },
+          {
+            "frame_index": 139,
+            "status": "measured",
+            "inlier_count": 177,
+            "inlier_fraction": 0.5566,
+            "spatial_grid_cells": 8,
+            "displacement_px": 0.1871
+          },
+          {
+            "frame_index": 140,
+            "status": "measured",
+            "inlier_count": 180,
+            "inlier_fraction": 0.559,
+            "spatial_grid_cells": 8,
+            "displacement_px": 0.1802
+          },
+          {
+            "frame_index": 141,
+            "status": "measured",
+            "inlier_count": 182,
+            "inlier_fraction": 0.567,
+            "spatial_grid_cells": 8,
+            "displacement_px": 0.1975
+          },
+          {
+            "frame_index": 142,
+            "status": "measured",
+            "inlier_count": 181,
+            "inlier_fraction": 0.5674,
+            "spatial_grid_cells": 8,
+            "displacement_px": 0.171
+          },
+          {
+            "frame_index": 143,
+            "status": "measured",
+            "inlier_count": 186,
+            "inlier_fraction": 0.5813,
+            "spatial_grid_cells": 8,
+            "displacement_px": 0.1888
+          }
+        ]
+      },
+      "final_decision": {
+        "decision": "REVIEW",
+        "reason_codes": [
+          "CALIBRATION_NOT_ACCEPTED",
+          "CALIBRATION_SUPPORT_INSUFFICIENT",
+          "CONTACT_EVIDENCE_UNCERTAIN",
+          "CONTACT_OCCLUDED_OR_MISSING",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "MULTIPLE_LANDING_CANDIDATES",
+          "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+        ],
+        "confidence": null,
+        "note": "A unique, observed target landing is required for automatic IN/OUT."
+      }
+    },
+    {
+      "variant": "reserved-accepted-v5",
+      "result_path": "runs/landing-engine/reserved-accepted-v5/uhdhd-3-a/result.json",
+      "result_sha256": "67f71dcbfdcf6b1df6ea22d0dc6469b08adb7a2052ebc976b5dee9b8686585f4",
+      "detections_path": "runs/landing-engine/reserved-accepted-v5/uhdhd-3-a/detections.json",
+      "detections_sha256": "aaf9c519e6c6ffcf8d9fd9eb386d0be70f20aca079b0bf04dce9c077e5b80aba",
+      "source_sha256": "c061c86a87286a0882f8a3f976d779c58c0d2755bc11432c69171ca08ef90d73",
+      "implementation_fingerprint": "e9c9fe063b65e376f073090a54a3d3848d1ac148a4c9e116b9b0d2dabfb5c8fc",
+      "benchmark_execution_mode": "full",
+      "analysis_size": [
+        960,
+        540
+      ],
+      "track_count": 2389,
+      "returned_candidate_count": 12,
+      "frozen_reference_proposal_audit": [
+        {
+          "frame_index": 137,
+          "raw_proposal_count": 80,
+          "raw_proposals_within_frozen_spatial_tolerance": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              255.0,
+              260.5
+            ],
+            "distance_px": 48.5412,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_frozen_spatial_tolerance": 0,
+          "nearest_actual_track_observation": {
+            "point_px": [
+              255.0,
+              260.5
+            ],
+            "distance_px": 48.5412,
+            "method": "opencv_motion_bright_component",
+            "track_id": 2134
+          }
+        },
+        {
+          "frame_index": 138,
+          "raw_proposal_count": 80,
+          "raw_proposals_within_frozen_spatial_tolerance": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              143.0,
+              292.5
+            ],
+            "distance_px": 92.2835,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_frozen_spatial_tolerance": 0,
+          "nearest_actual_track_observation": {
+            "point_px": [
+              143.0,
+              292.5
+            ],
+            "distance_px": 92.2835,
+            "method": "opencv_motion_bright_component",
+            "track_id": 1919
+          }
+        },
+        {
+          "frame_index": 139,
+          "raw_proposal_count": 80,
+          "raw_proposals_within_frozen_spatial_tolerance": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              204.0,
+              336.5
+            ],
+            "distance_px": 44.2069,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_frozen_spatial_tolerance": 0,
+          "nearest_actual_track_observation": {
+            "point_px": [
+              210.0,
+              261.5
+            ],
+            "distance_px": 49.4899,
+            "method": "opencv_motion_bright_component",
+            "track_id": 2234
+          }
+        }
+      ],
+      "source_context_diagnostic": [
+        {
+          "frame_index": 130,
+          "approximate_source_object_center_px": [
+            242,
+            227
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              321.833,
+              254.417
+            ],
+            "distance_px": 84.4097,
+            "method": "opencv_source_roi_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 131,
+          "approximate_source_object_center_px": [
+            241,
+            239
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              322.0,
+              254.0
+            ],
+            "distance_px": 82.3772,
+            "method": "opencv_source_roi_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 132,
+          "approximate_source_object_center_px": [
+            240,
+            249
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              229.5,
+              250.0
+            ],
+            "distance_px": 10.5475,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 133,
+          "approximate_source_object_center_px": [
+            239,
+            263
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              230.0,
+              250.0
+            ],
+            "distance_px": 15.8114,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 134,
+          "approximate_source_object_center_px": [
+            238,
+            269
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              255.0,
+              260.5
+            ],
+            "distance_px": 19.0066,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 135,
+          "approximate_source_object_center_px": [
+            237,
+            279
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              255.0,
+              261.0
+            ],
+            "distance_px": 25.4558,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 136,
+          "approximate_source_object_center_px": [
+            236,
+            289
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              255.0,
+              261.0
+            ],
+            "distance_px": 33.8378,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 137,
+          "approximate_source_object_center_px": [
+            236,
+            299
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              255.0,
+              260.5
+            ],
+            "distance_px": 42.9331,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 138,
+          "approximate_source_object_center_px": [
+            234.5,
+            304.5
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              143.0,
+              292.5
+            ],
+            "distance_px": 92.2835,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 139,
+          "approximate_source_object_center_px": [
+            232,
+            304
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              204.0,
+              336.5
+            ],
+            "distance_px": 42.8981,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 140,
+          "approximate_source_object_center_px": [
+            230,
+            304
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              204.0,
+              335.0
+            ],
+            "distance_px": 40.4599,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 141,
+          "approximate_source_object_center_px": [
+            228,
+            303.5
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              210.0,
+              261.5
+            ],
+            "distance_px": 45.6946,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 142,
+          "approximate_source_object_center_px": [
+            225.5,
+            303.5
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              207.0,
+              299.5
+            ],
+            "distance_px": 18.9275,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        },
+        {
+          "frame_index": 143,
+          "approximate_source_object_center_px": [
+            223,
+            304
+          ],
+          "raw_proposals_within_6px_of_diagnostic_center": 0,
+          "nearest_raw_proposal": {
+            "point_px": [
+              207.0,
+              299.5
+            ],
+            "distance_px": 16.6208,
+            "method": "opencv_motion_bright_component",
+            "track_id": null
+          },
+          "actual_track_observations_within_6px_of_diagnostic_center": 0
+        }
+      ],
+      "returned_candidates": [
+        {
+          "rank": 1,
+          "track_id": 3968,
+          "frame_index": 26,
+          "candidate_px": [
+            542.058,
+            85.668
+          ],
+          "distance_to_frozen_point_px": 377.4644,
+          "interval_frame_error": 111,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 2,
+          "track_id": 4003,
+          "frame_index": 72,
+          "candidate_px": [
+            280.0944892137867,
+            198.36827802079756
+          ],
+          "distance_to_frozen_point_px": 115.511,
+          "interval_frame_error": 65,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 3,
+          "track_id": 3742,
+          "frame_index": 231,
+          "candidate_px": [
+            814.5,
+            223.0
+          ],
+          "distance_to_frozen_point_px": 585.6981,
+          "interval_frame_error": 92,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 4,
+          "track_id": 3680,
+          "frame_index": 230,
+          "candidate_px": [
+            204.0,
+            62.5
+          ],
+          "distance_to_frozen_point_px": 243.9144,
+          "interval_frame_error": 91,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 5,
+          "track_id": 2459,
+          "frame_index": 163,
+          "candidate_px": [
+            136.5,
+            52.0
+          ],
+          "distance_to_frozen_point_px": 270.851,
+          "interval_frame_error": 24,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 6,
+          "track_id": 3760,
+          "frame_index": 232,
+          "candidate_px": [
+            626.5,
+            74.0
+          ],
+          "distance_to_frozen_point_px": 454.7464,
+          "interval_frame_error": 93,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 7,
+          "track_id": 2199,
+          "frame_index": 139,
+          "candidate_px": [
+            62.864,
+            56.307
+          ],
+          "distance_to_frozen_point_px": 301.7593,
+          "interval_frame_error": 0,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 8,
+          "track_id": 3656,
+          "frame_index": 227,
+          "candidate_px": [
+            941.5,
+            400.0
+          ],
+          "distance_to_frozen_point_px": 713.4208,
+          "interval_frame_error": 88,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 9,
+          "track_id": 3963,
+          "frame_index": 118,
+          "candidate_px": [
+            567.25,
+            27.75
+          ],
+          "distance_to_frozen_point_px": 432.7969,
+          "interval_frame_error": 19,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 10,
+          "track_id": 5,
+          "frame_index": 26,
+          "candidate_px": [
+            542.058,
+            85.668
+          ],
+          "distance_to_frozen_point_px": 377.4644,
+          "interval_frame_error": 111,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 11,
+          "track_id": 1566,
+          "frame_index": 105,
+          "candidate_px": [
+            593.5,
+            142.0
+          ],
+          "distance_to_frozen_point_px": 394.065,
+          "interval_frame_error": 32,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        },
+        {
+          "rank": 12,
+          "track_id": 838,
+          "frame_index": 56,
+          "candidate_px": [
+            296.0,
+            162.25
+          ],
+          "distance_to_frozen_point_px": 154.9752,
+          "interval_frame_error": 81,
+          "strict_vicinity_match": false,
+          "contact_observed": false
+        }
+      ],
+      "strict_top1_match": false,
+      "strict_recall_at_12": false,
+      "native_endpoint_recovery": {
+        "status": "skipped",
+        "reason_codes": [
+          "SOURCE_CAMERA_NOT_CONFIRMED_STABLE"
+        ]
+      },
+      "camera_stability": {
+        "status": "review",
+        "reason_codes": [
+          "CAMERA_STABILITY_UNOBSERVABLE"
+        ],
+        "max_displacement_px": 1.0463,
+        "threshold_px": 3.0,
+        "all_frames_sampled": true,
+        "method": "reference_optical_flow_ransac_background_motion",
+        "observation_status_counts": {
+          "measured": 164,
+          "unobservable": 71
+        },
+        "context_observations": [
+          {
+            "frame_index": 130,
+            "status": "unobservable",
+            "inlier_count": 150,
+            "inlier_fraction": 0.4644,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1907
+          },
+          {
+            "frame_index": 131,
+            "status": "unobservable",
+            "inlier_count": 148,
+            "inlier_fraction": 0.454,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.2174
+          },
+          {
+            "frame_index": 132,
+            "status": "unobservable",
+            "inlier_count": 154,
+            "inlier_fraction": 0.4724,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1973
+          },
+          {
+            "frame_index": 133,
+            "status": "unobservable",
+            "inlier_count": 157,
+            "inlier_fraction": 0.4876,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.2116
+          },
+          {
+            "frame_index": 134,
+            "status": "measured",
+            "inlier_count": 160,
+            "inlier_fraction": 0.5,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1962
+          },
+          {
+            "frame_index": 135,
+            "status": "measured",
+            "inlier_count": 160,
+            "inlier_fraction": 0.5,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.2075
+          },
+          {
+            "frame_index": 136,
+            "status": "measured",
+            "inlier_count": 164,
+            "inlier_fraction": 0.5141,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1934
+          },
+          {
+            "frame_index": 137,
+            "status": "measured",
+            "inlier_count": 167,
+            "inlier_fraction": 0.5235,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1816
+          },
+          {
+            "frame_index": 138,
+            "status": "measured",
+            "inlier_count": 176,
+            "inlier_fraction": 0.5552,
+            "spatial_grid_cells": 7,
+            "displacement_px": 0.1368
+          },
+          {
+            "frame_index": 139,
+            "status": "measured",
+            "inlier_count": 177,
+            "inlier_fraction": 0.5566,
+            "spatial_grid_cells": 8,
+            "displacement_px": 0.1871
+          },
+          {
+            "frame_index": 140,
+            "status": "measured",
+            "inlier_count": 180,
+            "inlier_fraction": 0.559,
+            "spatial_grid_cells": 8,
+            "displacement_px": 0.1802
+          },
+          {
+            "frame_index": 141,
+            "status": "measured",
+            "inlier_count": 182,
+            "inlier_fraction": 0.567,
+            "spatial_grid_cells": 8,
+            "displacement_px": 0.1975
+          },
+          {
+            "frame_index": 142,
+            "status": "measured",
+            "inlier_count": 181,
+            "inlier_fraction": 0.5674,
+            "spatial_grid_cells": 8,
+            "displacement_px": 0.171
+          },
+          {
+            "frame_index": 143,
+            "status": "measured",
+            "inlier_count": 186,
+            "inlier_fraction": 0.5813,
+            "spatial_grid_cells": 8,
+            "displacement_px": 0.1888
+          }
+        ]
+      },
+      "final_decision": {
+        "decision": "REVIEW",
+        "reason_codes": [
+          "CALIBRATION_NOT_ACCEPTED",
+          "CALIBRATION_SUPPORT_INSUFFICIENT",
+          "CONTACT_EVIDENCE_UNCERTAIN",
+          "CONTACT_OCCLUDED_OR_MISSING",
+          "FIRST_CONTACT_NOT_OBSERVED",
+          "MULTIPLE_LANDING_CANDIDATES",
+          "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+        ],
+        "confidence": null,
+        "note": "A unique, observed target landing is required for automatic IN/OUT."
+      }
+    }
+  ]
+}

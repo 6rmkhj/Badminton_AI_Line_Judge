@@ -143,3 +143,51 @@ def test_pipeline_prioritizes_preview_and_evidence_but_aggregates_every_landing(
     assert result['review_refinement']['selected_in_requested_region'] is has_match
     assert result['review_refinement']['status'] == ('matched_candidates' if has_match else 'no_matching_candidate')
     assert result['review_refinement']['matching_event_ids'] == (['event_007'] if has_match else [])
+
+
+@pytest.mark.parametrize('anchored', [True, False])
+def test_identity_anchor_protects_event_candidates_before_assistance_is_applied(tmp_path, monkeypatch, anchored):
+    from badminton import calibration, detection, events, evidence, pipeline, tracking
+    from badminton.event_sequence import diversify_event_families
+    frames = [np.zeros((30, 40, 3), np.uint8)] * 20
+    times = [i / 30 for i in range(20)]
+    shared = [{'frame_index': i, 'time': times[i], 'x': float(i),
+               'y': float(20 - abs(i - 8)), 'radius': 2., 'observed': True} for i in range(3, 14)]
+    paths = [{'track_id': identifier, 'identity_ambiguous': False,
+              'observations': [{'frame_index': 0, 'time': 0., 'x': x, 'y': x,
+                                'radius': 2., 'observed': True}, *deepcopy(shared)]}
+             for identifier, x in [(1, 0.), (2, 10.)]]
+    candidates = [landing(8, (8, 20), .5, identifier) for identifier in (1, 2)]
+    for candidate in candidates:
+        candidate['image_motion_event'] = {'kind': 'descent_and_rebound', 'point_kind': 'observed_object_center'}
+    monkeypatch.setattr(pipeline, 'prepare_preview', lambda *args: (
+        {'width': 40, 'height': 30, 'warnings': []},
+        {'width': 40, 'height': 30, 'frame_count': 20, 'timestamps': times, 'warnings': []}, '0' * 64))
+    monkeypatch.setattr(pipeline, 'load_frames', lambda *args, **kwargs: frames)
+    monkeypatch.setattr(calibration, 'calibrate', lambda *args: {'status': 'unconfirmed'})
+    monkeypatch.setattr(calibration, 'assess_camera_stability', lambda *args: {})
+    monkeypatch.setattr(calibration, 'guard_calibration_stability', lambda result, *args: result)
+    monkeypatch.setattr(detection, 'detect_sequence', lambda *args: [])
+    monkeypatch.setattr(detection, 'summarize_detection_quality', lambda *args: {})
+    monkeypatch.setattr(tracking, 'track_detections', lambda *args: deepcopy(paths))
+    monkeypatch.setattr(evidence, 'write_trajectory_context', lambda *args: None)
+    seen = []
+    def estimated(*args):
+        seen.append(dict(args[-1]))
+        return (diversify_event_families(candidates, args[0], 1 / 30)
+                if args[-1]['event_family_diversity'] else deepcopy(candidates))
+    monkeypatch.setattr(events, 'estimate_landings', estimated)
+    config = {'events': {'event_family_diversity': True, 'causal_first_event_ranking': True,
+                         'source_contact_enabled': False},
+              'evidence': {'annotated_clip': False}, 'source_crop_count': 0,
+              'identity': {'hit_anchors': [{'time': 0., 'point_px': [10., 10.], 'radius_px': 1.,
+                                            'time_tolerance_seconds': .001}] if anchored else []}}
+    original = deepcopy(config)
+    result = pipeline.analyze_video(tmp_path / 'input.mp4', tmp_path / 'run', config)
+    assert seen[0]['event_family_diversity'] is not anchored
+    assert seen[0]['causal_first_event_ranking'] is not anchored
+    assert config == original
+    assert result['assistance_used'] is anchored
+    assert result['selected_landing']['track_id'] == (2 if anchored else 1)
+    if anchored:
+        assert result['selected_landing']['request_match'] == 'selected'

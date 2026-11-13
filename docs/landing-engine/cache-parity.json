@@ -1,0 +1,91 @@
+{
+  "status": "passed",
+  "key": "8k-2-b",
+  "source_sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead",
+  "baseline_result_sha256": "b0681a8c59fca3c52a4812284c4e0e26f85924de132b105dcbf50bd1de96e706",
+  "source_tree_sha256": "1b7da100546768fb7ca584039833c46224018187b6583e0c4b46909bf28c586f",
+  "source_files": {
+    "badminton/__init__.py": "ad6fdd668a27a1705af9d171c5663207ddeffc8edcce3a5d508003dd4617c419",
+    "badminton/__main__.py": "b62632d7bf9059d2e8584f2958991bff9ca3fd689313e2d19ad677a0378fd74f",
+    "badminton/assessment.py": "45d233d0051eb6c3ac2d738dbddc7f921735399703f75859196d4d2fd0ecd734",
+    "badminton/calibration.py": "068c65e343b3fbd27dcb7ccfb5dc6dce8bdc874731def0e1ec962fd2d1cc83fd",
+    "badminton/candidate_identity.py": "684739c98e06ec63a18b15edddfab8eb085cb50ea6e7f69d035d71ea8caf3943",
+    "badminton/contact_model.py": "6665b831343ec36e4510e0a5d1b085cac00d3adce2380ac239dc7fc998398ad6",
+    "badminton/dataset.py": "9bfaafd2a9de070f1324cea9b062932f0be442b19b7a2160ae1ad9813ff5ffc2",
+    "badminton/decision.py": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a",
+    "badminton/detection.py": "ad81c8b112ce8fc1476337a387005334c7ddd6cfd17d3a8f405ca403c8fb5c8c",
+    "badminton/evaluation.py": "21854945fd436b74906ab658032a082bf4007c0a77d2f5c5c0430dab0a214b24",
+    "badminton/event_continuity.py": "d659c2e84e573adf2bb69ef9537478d5ce4fa76aa4c3b1d9fac921052f87177f",
+    "badminton/event_sequence.py": "337a03d018ab69d5053b838e947e764a140baaeaedaad2aa40e388de1bedfcc7",
+    "badminton/events.py": "a066f28b3c70e64d3c02ec8fdacb6e99564e0220b8d8926b7044e16c1e29c27f",
+    "badminton/evidence.py": "1a265f10e7f219d9ea782fb47453b7adef284b227d054f39e8ee44ad87858332",
+    "badminton/gpu_candidates.py": "fbd22c30c6308eb1b904da564b1870a61891fef1062a529b9b61ff9fac26f27c",
+    "badminton/identity.py": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+    "badminton/identity_continuity.py": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+    "badminton/inference.py": "5491512b76cea3202d5ab04d0a7976a0099fab4e08ab572b78f0bc5b09ca957a",
+    "badminton/landing_recovery.py": "bc6e27d9cf3e9bbefe14b2c60a4519cf991222be069937f6e7a0d020779c0b68",
+    "badminton/learning.py": "d8760c5b67730771c866c4481f3220496b8ad735f0dbea0c2c9e023b3f9dd2a4",
+    "badminton/media.py": "785235c30c848074a124f050dff278c9d4b6deb6ad995bf46efdbace685f2e23",
+    "badminton/observation_support.py": "6ff337da25abbf6781428031cf00a741cf8b1c41f6bffe616795d4983979c1c6",
+    "badminton/pair_workspace.py": "ad64ad7f00412db3940971f7998d1d832aa09f27430bc6c76d93c7334c00c794",
+    "badminton/pipeline.py": "ba33bcfecfe9df3c63ac664afc2f17a505bc0e8e5d71ffeca64b55e949f10127",
+    "badminton/reporting.py": "c19ca54b23acb9d7f31a29654f6cef05ae6fcfb3dc602b74dd8064c4d832bccd",
+    "badminton/requests.py": "ae6b6f131ce628891745c97f6ea5c65ffca9fd02ed4247e763b60df547130a0b",
+    "badminton/resources.py": "3b142066ac2a10c48c499cd9b58045a4b72c40d240eb8878a684a96b2fdde4e4",
+    "badminton/review_diagnostics.py": "d3629272538c60715c78bad617a66fb5de8ffdbf5c9beaaf2ee11282cea457d1",
+    "badminton/review_refinement.py": "7227dcdca2c037578e5cd924c4e03c9c3ed5069da74f4fc99ac5d7d87c3b7aed",
+    "badminton/scene_context.py": "faa1bc862100a66b822a6a0dcd9a55f30dd741b770777217e1433fcf6348448e",
+    "badminton/static_review.py": "8b822cf73db45264635c81e8211d4748a26594f5a21be69721576bc41cfa6615",
+    "badminton/sync.py": "130024be1aed2a0fa11fed5135797affab06681801ab6de770ddbe432e437040",
+    "badminton/tracking.py": "77fb4da37f5bd713900e052a0da6c71bad1220cdcb0c1e249d1ca481d3bfa087",
+    "badminton/visual_review.py": "5a177fd96b9fb594e2e537bbb069a3c25fcf2c1ef1bff565e96951f751a7fbde",
+    "badminton/web.py": "c8d793ef553491b06bad8580188cd8a0b23db84657dab820feb01faca19f58b3"
+  },
+  "config_sha256": "8fa5a8935c9c12f9e316c0a52bd76465a8a8cfe3dbc9c51e39098f00f435d712",
+  "evaluator_sha256": "f1e99a730365f392d54231c3097582ab334c1bd6bef1c33040f3a98fc06e6eed",
+  "comparisons": {
+    "fresh": {
+      "semantic_sha256": "5fa907e95f660320cdd4c2d8b6c0e4d03d224b243344ed603e0d76d77222dec8",
+      "analysis_frames_sha256": "8479a4f8538e8c5ca4743e48e9303f726a59cf327b8377b238f733ab22ddba15",
+      "cache": {
+        "enabled": false,
+        "reused": false
+      },
+      "total_seconds": 13.124586762000035,
+      "result_sha256": "3887d7b2f4554629053cb9096c6b7c4a65f67169aeb73419a76e7898d487430b"
+    },
+    "cache-created": {
+      "semantic_sha256": "5fa907e95f660320cdd4c2d8b6c0e4d03d224b243344ed603e0d76d77222dec8",
+      "analysis_frames_sha256": "8479a4f8538e8c5ca4743e48e9303f726a59cf327b8377b238f733ab22ddba15",
+      "cache": {
+        "enabled": true,
+        "reused": false,
+        "path": "/workspace/Badminton_AI_Line_Judge/runs/landing-engine/frame-cache/4bf18576b5f3b13a5c72156f480f291b91a3282b00c97aa968fe9404e5ffa6de.npy",
+        "contract_sha256": "4bf18576b5f3b13a5c72156f480f291b91a3282b00c97aa968fe9404e5ffa6de",
+        "analysis_frames_sha256": "8479a4f8538e8c5ca4743e48e9303f726a59cf327b8377b238f733ab22ddba15",
+        "read_only": true,
+        "stored_bytes": 124416128,
+        "scope": "Original analysis pixels only; native recovery/contact still reads original source frames."
+      },
+      "total_seconds": 11.960038603000157,
+      "result_sha256": "6e57f1b82637f44513a5574ee289106ef1ebb95716c42fbcb7dbe3ece06ddf59"
+    },
+    "cache-reused": {
+      "semantic_sha256": "5fa907e95f660320cdd4c2d8b6c0e4d03d224b243344ed603e0d76d77222dec8",
+      "analysis_frames_sha256": "8479a4f8538e8c5ca4743e48e9303f726a59cf327b8377b238f733ab22ddba15",
+      "cache": {
+        "enabled": true,
+        "reused": true,
+        "path": "/workspace/Badminton_AI_Line_Judge/runs/landing-engine/frame-cache/4bf18576b5f3b13a5c72156f480f291b91a3282b00c97aa968fe9404e5ffa6de.npy",
+        "contract_sha256": "4bf18576b5f3b13a5c72156f480f291b91a3282b00c97aa968fe9404e5ffa6de",
+        "analysis_frames_sha256": "8479a4f8538e8c5ca4743e48e9303f726a59cf327b8377b238f733ab22ddba15",
+        "read_only": true,
+        "stored_bytes": 124416128,
+        "scope": "Original analysis pixels only; native recovery/contact still reads original source frames."
+      },
+      "total_seconds": 5.364988841000013,
+      "result_sha256": "a4545932d5a4928144e86b35e746abd9a2de341121b526ee46cf1eac283fd3e9"
+    }
+  },
+  "claim": "Fresh analysis decode, first cache publication, and read-only cache reuse produce identical ranked candidate geometry, confidence, reasons, selected event, recovered measured tracks, decision and assessment. Native source recovery/contact remains a fresh source read."
+}

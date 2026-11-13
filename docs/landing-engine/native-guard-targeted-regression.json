@@ -1,0 +1,74 @@
+{
+  "mode": "targeted_event_replay_with_v4_recovered_tracks_and_same_frame_detector_occlusion_binding",
+  "scope": "Six previously exposed regression cases. This is not the full fresh-v5 pipeline validation; separate v5 harness recomputes native recovery from source.",
+  "checks": [
+    {
+      "key": "control-1-b",
+      "frame": 42,
+      "point": [
+        397.1439393939394,
+        200.82575757575756
+      ],
+      "distance_px": 1.1830316225775155,
+      "matches": true,
+      "result_sha256": "92cdfbf5e313d29822875bebd5ffcc325422687d6f14b6f81c3eba4fe055d9eb"
+    },
+    {
+      "key": "8k-5-b",
+      "frame": 39,
+      "point": [
+        818.667,
+        298.667
+      ],
+      "distance_px": 7.782016319695012,
+      "matches": true,
+      "result_sha256": "7ce765bb4561d62f7477360e2e4def6da501daf1639f14de47f8c0ae9e0f2679"
+    },
+    {
+      "key": "8k-2-b",
+      "frame": 45,
+      "point": [
+        419.3070175438597,
+        204.9561403508772
+      ],
+      "distance_px": 2.0667902742053865,
+      "matches": true,
+      "result_sha256": "a49a4a9f2123f76efa29bf6e3225639011811498e76abdda15184938fa529989"
+    },
+    {
+      "key": "ordinary-12-a",
+      "frame": 151,
+      "point": [
+        481.9140625,
+        215.296875
+      ],
+      "distance_px": 0.30906313195082,
+      "matches": true,
+      "result_sha256": "40cdc41d77c379300d1b0dcfccb0cc599b6468441b3fa0dc33554cd644077c1a"
+    },
+    {
+      "key": "ordinary-12-b",
+      "frame": 183,
+      "point": [
+        170.24043916295832,
+        253.2796158820173
+      ],
+      "distance_px": 1.7816395204213227,
+      "matches": true,
+      "result_sha256": "f761a186ad85e7c9b6de9ea1ffedd089df0bc7accaf88d8dc15596dfe2cfa658"
+    },
+    {
+      "key": "ordinary-1-a",
+      "frame": 158,
+      "point": [
+        209.95499951326042,
+        332.87061611294234
+      ],
+      "distance_px": 4.119764433951718,
+      "matches": true,
+      "result_sha256": "164a73c704a30c016d91dfbc3a3a578c01f50c518451cd66a9e68424a5c55f8c"
+    }
+  ],
+  "production_guard": "events.native_rebound_guard=true",
+  "fixed_source_receipts_retained": true
+}

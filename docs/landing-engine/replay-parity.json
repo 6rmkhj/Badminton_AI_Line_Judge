@@ -1,0 +1,23 @@
+{
+  "scope": "Full baseline vs event-only replay on identical engine and configuration",
+  "cases": [
+    {
+      "key": "8k-2-b",
+      "ranked_candidates_equal": true,
+      "decision_equal": true,
+      "candidate_count": 12,
+      "source_sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead",
+      "baseline_result_sha256": "b0681a8c59fca3c52a4812284c4e0e26f85924de132b105dcbf50bd1de96e706",
+      "replay_result_sha256": "0b9119f2baeff9a41599385d27839596681622e49f030065c252fb2d79b6c934"
+    },
+    {
+      "key": "ordinary-1-a",
+      "ranked_candidates_equal": true,
+      "decision_equal": true,
+      "candidate_count": 12,
+      "source_sha256": "aa5e23a6400121849b7994664fd9dc942c9034b9e34180117a8973f10d83be76",
+      "baseline_result_sha256": "012c006bf92c83792a5eff6f1e56c4dd8222c0ee2e9c7ef5cc742d79c846a4c4",
+      "replay_result_sha256": "6f9b12e0cea5b73054fa92de3a7e289b94f3a6fa2f240c72fddcf70b0c1075a4"
+    }
+  ]
+}

@@ -1,0 +1,3100 @@
+{
+  "schema_version": 1,
+  "scope": "Frozen full-34 development ablations of causal event ordering and duplicate-family budgeting; not independent contact or line-judgment accuracy.",
+  "reference_policy": {
+    "primary": "32 previously exposed videos: old24 contains 13 scorable references; exposed8 contains 4. Primary denominator is 17, with 15 excluded for visibility/ambiguity.",
+    "controls": "Two original control videos are reported separately (2/2 scorable), not added to the primary score.",
+    "pooled": "34/19 is an explicitly pooled regression summary, not the primary result.",
+    "labels": "Frozen AI visual approximate first-landing-vicinity object centers, not independently human-verified cork contact points or IN/OUT labels.",
+    "match": "Both the frozen frame interval (plus its predeclared frame tolerance) and scaled pixel-distance tolerance must pass; no post-prediction tolerance changes.",
+    "inference_received_references": false,
+    "independent_contact_accuracy": null,
+    "independent_line_judgment_accuracy": null
+  },
+  "protocol": {
+    "path": "docs/landing-engine/protocol.json",
+    "sha256": "81d71cf20408c4cf6a020e4fad73cfc80cf4feaddb60964cd394301145ae6e2e"
+  },
+  "reproducer": {
+    "path": "docs/landing-engine/reproduction/summarize_sequence_experiments.py",
+    "sha256": "0e6396b630a2eb9b2b0ec9e76353fc66a7b53361e35af0f4c0a7f03ffc41e655"
+  },
+  "baseline_config": {
+    "analysis_width": 960,
+    "workers": 2,
+    "opencv_threads": 2,
+    "max_frames": 3000,
+    "source_crop_count": 0,
+    "rules": {
+      "game": "doubles",
+      "phase": "rally"
+    },
+    "detector": {
+      "backend": "opencv_candidates",
+      "source_analysis_enabled": true,
+      "candidate_selection": "spatial",
+      "max_candidates": 80,
+      "global_candidate_reserve": 64,
+      "temporal_candidate_memory": true,
+      "native_motion_recovery": true,
+      "include_dark_components": true,
+      "dark_contrast_threshold": 8,
+      "dark_motion_threshold": 8,
+      "dark_max_saturation": 190,
+      "max_component_aspect": 12,
+      "native_local_components": true,
+      "highres_enabled": true,
+      "highres_max_rois": 16,
+      "highres_roi_size": 192,
+      "highres_roi_analysis_size": 48,
+      "highres_exploration_rois": 4,
+      "person_backend": "hog",
+      "person_width": 960,
+      "person_interval": 16
+    },
+    "tracker": {
+      "flight_search_enabled": true
+    },
+    "events": {
+      "scene_context_ranking": true,
+      "source_contact_enabled": true,
+      "source_contact_max_candidates": 6,
+      "source_contact_patch_size": 96
+    },
+    "evidence": {
+      "annotated_clip": true,
+      "seconds_before": 0.7,
+      "seconds_after": 0.7
+    }
+  },
+  "source_snapshots": {
+    "ecb4b75d5e1c1233c6a515ca77df6da96c6e1d07521693df6135b96f8e7677d7": {
+      "execution_path": "/tmp/landing-baseline",
+      "files": {
+        "badminton/__init__.py": "ad6fdd668a27a1705af9d171c5663207ddeffc8edcce3a5d508003dd4617c419",
+        "badminton/__main__.py": "b62632d7bf9059d2e8584f2958991bff9ca3fd689313e2d19ad677a0378fd74f",
+        "badminton/calibration.py": "068c65e343b3fbd27dcb7ccfb5dc6dce8bdc874731def0e1ec962fd2d1cc83fd",
+        "badminton/candidate_identity.py": "684739c98e06ec63a18b15edddfab8eb085cb50ea6e7f69d035d71ea8caf3943",
+        "badminton/contact_model.py": "6665b831343ec36e4510e0a5d1b085cac00d3adce2380ac239dc7fc998398ad6",
+        "badminton/dataset.py": "9bfaafd2a9de070f1324cea9b062932f0be442b19b7a2160ae1ad9813ff5ffc2",
+        "badminton/decision.py": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a",
+        "badminton/detection.py": "ad81c8b112ce8fc1476337a387005334c7ddd6cfd17d3a8f405ca403c8fb5c8c",
+        "badminton/evaluation.py": "21854945fd436b74906ab658032a082bf4007c0a77d2f5c5c0430dab0a214b24",
+        "badminton/event_continuity.py": "d659c2e84e573adf2bb69ef9537478d5ce4fa76aa4c3b1d9fac921052f87177f",
+        "badminton/events.py": "f4fe4482ac4669e03c85ff6c80c209099e4c40eb94c89633c7045a911e2c230e",
+        "badminton/evidence.py": "1a265f10e7f219d9ea782fb47453b7adef284b227d054f39e8ee44ad87858332",
+        "badminton/gpu_candidates.py": "fbd22c30c6308eb1b904da564b1870a61891fef1062a529b9b61ff9fac26f27c",
+        "badminton/identity.py": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+        "badminton/identity_continuity.py": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+        "badminton/inference.py": "5491512b76cea3202d5ab04d0a7976a0099fab4e08ab572b78f0bc5b09ca957a",
+        "badminton/learning.py": "d8760c5b67730771c866c4481f3220496b8ad735f0dbea0c2c9e023b3f9dd2a4",
+        "badminton/media.py": "785235c30c848074a124f050dff278c9d4b6deb6ad995bf46efdbace685f2e23",
+        "badminton/observation_support.py": "6ff337da25abbf6781428031cf00a741cf8b1c41f6bffe616795d4983979c1c6",
+        "badminton/pair_workspace.py": "e7080ea755662986347419984de3d393578677ffbffc2df5cb8fda0bd761094c",
+        "badminton/pipeline.py": "5b69d1ad0c66c8893ffcda50f72d25d647f0691e4ba9aa8976dbda7bc0e6f77d",
+        "badminton/reporting.py": "c19ca54b23acb9d7f31a29654f6cef05ae6fcfb3dc602b74dd8064c4d832bccd",
+        "badminton/requests.py": "ae6b6f131ce628891745c97f6ea5c65ffca9fd02ed4247e763b60df547130a0b",
+        "badminton/resources.py": "3b142066ac2a10c48c499cd9b58045a4b72c40d240eb8878a684a96b2fdde4e4",
+        "badminton/review_diagnostics.py": "d3629272538c60715c78bad617a66fb5de8ffdbf5c9beaaf2ee11282cea457d1",
+        "badminton/review_refinement.py": "7227dcdca2c037578e5cd924c4e03c9c3ed5069da74f4fc99ac5d7d87c3b7aed",
+        "badminton/scene_context.py": "faa1bc862100a66b822a6a0dcd9a55f30dd741b770777217e1433fcf6348448e",
+        "badminton/static_review.py": "8b822cf73db45264635c81e8211d4748a26594f5a21be69721576bc41cfa6615",
+        "badminton/sync.py": "130024be1aed2a0fa11fed5135797affab06681801ab6de770ddbe432e437040",
+        "badminton/tracking.py": "77fb4da37f5bd713900e052a0da6c71bad1220cdcb0c1e249d1ca481d3bfa087",
+        "badminton/visual_review.py": "5a177fd96b9fb594e2e537bbb069a3c25fcf2c1ef1bff565e96951f751a7fbde",
+        "badminton/web.py": "c8d793ef553491b06bad8580188cd8a0b23db84657dab820feb01faca19f58b3"
+      }
+    },
+    "1b7da100546768fb7ca584039833c46224018187b6583e0c4b46909bf28c586f": {
+      "execution_path": "/tmp/landing-engine-v4",
+      "files": {
+        "badminton/__init__.py": "ad6fdd668a27a1705af9d171c5663207ddeffc8edcce3a5d508003dd4617c419",
+        "badminton/__main__.py": "b62632d7bf9059d2e8584f2958991bff9ca3fd689313e2d19ad677a0378fd74f",
+        "badminton/assessment.py": "45d233d0051eb6c3ac2d738dbddc7f921735399703f75859196d4d2fd0ecd734",
+        "badminton/calibration.py": "068c65e343b3fbd27dcb7ccfb5dc6dce8bdc874731def0e1ec962fd2d1cc83fd",
+        "badminton/candidate_identity.py": "684739c98e06ec63a18b15edddfab8eb085cb50ea6e7f69d035d71ea8caf3943",
+        "badminton/contact_model.py": "6665b831343ec36e4510e0a5d1b085cac00d3adce2380ac239dc7fc998398ad6",
+        "badminton/dataset.py": "9bfaafd2a9de070f1324cea9b062932f0be442b19b7a2160ae1ad9813ff5ffc2",
+        "badminton/decision.py": "97b5b5c72d96412ea34ba5d61d66c51c54794f835018ad85a10759967556628a",
+        "badminton/detection.py": "ad81c8b112ce8fc1476337a387005334c7ddd6cfd17d3a8f405ca403c8fb5c8c",
+        "badminton/evaluation.py": "21854945fd436b74906ab658032a082bf4007c0a77d2f5c5c0430dab0a214b24",
+        "badminton/event_continuity.py": "d659c2e84e573adf2bb69ef9537478d5ce4fa76aa4c3b1d9fac921052f87177f",
+        "badminton/event_sequence.py": "337a03d018ab69d5053b838e947e764a140baaeaedaad2aa40e388de1bedfcc7",
+        "badminton/events.py": "a066f28b3c70e64d3c02ec8fdacb6e99564e0220b8d8926b7044e16c1e29c27f",
+        "badminton/evidence.py": "1a265f10e7f219d9ea782fb47453b7adef284b227d054f39e8ee44ad87858332",
+        "badminton/gpu_candidates.py": "fbd22c30c6308eb1b904da564b1870a61891fef1062a529b9b61ff9fac26f27c",
+        "badminton/identity.py": "aa29b577cb33870cefca27b4e98b1e7fa3449a7a486b8c41e6467d0e1a8d279f",
+        "badminton/identity_continuity.py": "52f3b0d2d66c8d2a183e181108d55bfc4778cc0c15e4c2fee71c083bb8c2adcd",
+        "badminton/inference.py": "5491512b76cea3202d5ab04d0a7976a0099fab4e08ab572b78f0bc5b09ca957a",
+        "badminton/landing_recovery.py": "bc6e27d9cf3e9bbefe14b2c60a4519cf991222be069937f6e7a0d020779c0b68",
+        "badminton/learning.py": "d8760c5b67730771c866c4481f3220496b8ad735f0dbea0c2c9e023b3f9dd2a4",
+        "badminton/media.py": "785235c30c848074a124f050dff278c9d4b6deb6ad995bf46efdbace685f2e23",
+        "badminton/observation_support.py": "6ff337da25abbf6781428031cf00a741cf8b1c41f6bffe616795d4983979c1c6",
+        "badminton/pair_workspace.py": "ad64ad7f00412db3940971f7998d1d832aa09f27430bc6c76d93c7334c00c794",
+        "badminton/pipeline.py": "ba33bcfecfe9df3c63ac664afc2f17a505bc0e8e5d71ffeca64b55e949f10127",
+        "badminton/reporting.py": "c19ca54b23acb9d7f31a29654f6cef05ae6fcfb3dc602b74dd8064c4d832bccd",
+        "badminton/requests.py": "ae6b6f131ce628891745c97f6ea5c65ffca9fd02ed4247e763b60df547130a0b",
+        "badminton/resources.py": "3b142066ac2a10c48c499cd9b58045a4b72c40d240eb8878a684a96b2fdde4e4",
+        "badminton/review_diagnostics.py": "d3629272538c60715c78bad617a66fb5de8ffdbf5c9beaaf2ee11282cea457d1",
+        "badminton/review_refinement.py": "7227dcdca2c037578e5cd924c4e03c9c3ed5069da74f4fc99ac5d7d87c3b7aed",
+        "badminton/scene_context.py": "faa1bc862100a66b822a6a0dcd9a55f30dd741b770777217e1433fcf6348448e",
+        "badminton/static_review.py": "8b822cf73db45264635c81e8211d4748a26594f5a21be69721576bc41cfa6615",
+        "badminton/sync.py": "130024be1aed2a0fa11fed5135797affab06681801ab6de770ddbe432e437040",
+        "badminton/tracking.py": "77fb4da37f5bd713900e052a0da6c71bad1220cdcb0c1e249d1ca481d3bfa087",
+        "badminton/visual_review.py": "5a177fd96b9fb594e2e537bbb069a3c25fcf2c1ef1bff565e96951f751a7fbde",
+        "badminton/web.py": "c8d793ef553491b06bad8580188cd8a0b23db84657dab820feb01faca19f58b3"
+      }
+    }
+  },
+  "runs": {
+    "baseline": {
+      "execution_mode": "full",
+      "run_receipt": {
+        "path": "runs/landing-engine/baseline/run.json",
+        "sha256": "3490318115a8a1fe611d730a56126a0cdaec085ba378427259d73dea4d962923"
+      },
+      "evaluation_report": {
+        "path": "runs/landing-engine/baseline/evaluation.json",
+        "sha256": "de19582ec0050a3661cbcd2f7c6bda586e06f615ccd9b4c74eef696ab7a87cdd"
+      },
+      "evaluator": {
+        "execution_path": "scripts/evaluate_landing_engine.py",
+        "sha256": "f6499a171047016e8065524537d45150e0aeb2728414afad527ef9497e228408",
+        "archived_source_path": "docs/landing-engine/reproduction/evaluate_baseline.py"
+      },
+      "source_snapshot_sha256": "ecb4b75d5e1c1233c6a515ca77df6da96c6e1d07521693df6135b96f8e7677d7",
+      "implementation_fingerprint": "c1694510a69c6ef535a10c374497c4f895828dfefdc73bb39787dd5fff9bbf81",
+      "config_sha256": "e1f21c7835ac4d1f1be10305352b596f0c341af009f4dddb29a57eea816d56cf",
+      "event_config_delta_from_baseline": {},
+      "baseline_run_receipt_sha256": null
+    },
+    "causal-v4": {
+      "execution_mode": "replay",
+      "run_receipt": {
+        "path": "runs/landing-engine/causal-v4/run.json",
+        "sha256": "a98116694e0e39a5f408acf5c06095004ba953c5af40c3f09f582af1519470b6"
+      },
+      "evaluation_report": {
+        "path": "runs/landing-engine/causal-v4/evaluation.json",
+        "sha256": "3801918107ee9bc5990e12ca369ea9e34fc484afc90e3e3855ea302724264933"
+      },
+      "evaluator": {
+        "execution_path": "scripts/evaluate_landing_engine_next.py",
+        "sha256": "f1e99a730365f392d54231c3097582ab334c1bd6bef1c33040f3a98fc06e6eed",
+        "archived_source_path": "docs/landing-engine/reproduction/evaluate_v4.py"
+      },
+      "source_snapshot_sha256": "1b7da100546768fb7ca584039833c46224018187b6583e0c4b46909bf28c586f",
+      "implementation_fingerprint": "eb3980b0a9586eef0f53939b2dd270ffb4c56a200ca9e0869efff015fcccddfb",
+      "config_sha256": "42ba963d9ca7c8491cda5499c0d4e78db90a058d4de50dcabff13cb8c731d8e5",
+      "event_config_delta_from_baseline": {
+        "causal_first_event_ranking": true
+      },
+      "baseline_run_receipt_sha256": "3490318115a8a1fe611d730a56126a0cdaec085ba378427259d73dea4d962923"
+    },
+    "family-v4": {
+      "execution_mode": "replay",
+      "run_receipt": {
+        "path": "runs/landing-engine/family-v4/run.json",
+        "sha256": "24b81b213a32471c17136476ee080ea83ec4b3f66ecb60c8ff6ec20df2746141"
+      },
+      "evaluation_report": {
+        "path": "runs/landing-engine/family-v4/evaluation.json",
+        "sha256": "dc7e9faecfb315ec027983be1752ebe7467826aed2f7d64b0573526c5db3c8d3"
+      },
+      "evaluator": {
+        "execution_path": "scripts/evaluate_landing_engine_next.py",
+        "sha256": "f1e99a730365f392d54231c3097582ab334c1bd6bef1c33040f3a98fc06e6eed",
+        "archived_source_path": "docs/landing-engine/reproduction/evaluate_v4.py"
+      },
+      "source_snapshot_sha256": "1b7da100546768fb7ca584039833c46224018187b6583e0c4b46909bf28c586f",
+      "implementation_fingerprint": "eb3980b0a9586eef0f53939b2dd270ffb4c56a200ca9e0869efff015fcccddfb",
+      "config_sha256": "9fae957807b515d67715e68df562195b5a08c297cacf19f5f75f38ae76e45472",
+      "event_config_delta_from_baseline": {
+        "event_family_diversity": true
+      },
+      "baseline_run_receipt_sha256": "3490318115a8a1fe611d730a56126a0cdaec085ba378427259d73dea4d962923"
+    }
+  },
+  "execution_notes": [
+    "Baseline executes the full source-video pipeline. v4 variants replay events/identity/native-contact/decision using baseline tracks and calibration plus hash-verified actual source analysis pixels.",
+    "The optional read-only frame cache is bound to original source, timestamps, preprocessing, dimensions and the baseline decoded-frame SHA. Replay timing is not full-pipeline timing.",
+    "Frozen v4 receipts do not describe later family-member ordering fixes, native-recovery experiments or the final release source."
+  ],
+  "summaries": {
+    "primary32": {
+      "baseline": {
+        "video_count": 32,
+        "scorable_count": 17,
+        "excluded_count": 15,
+        "top1_match_count": 7,
+        "recall_at_6_count": 8,
+        "recall_at_12_count": 8,
+        "matched_candidate_kind_counts": {
+          "inferred_object_center": 3,
+          "observed_object_center": 4
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 32
+        }
+      },
+      "causal-v4": {
+        "video_count": 32,
+        "scorable_count": 17,
+        "excluded_count": 15,
+        "top1_match_count": 8,
+        "recall_at_6_count": 8,
+        "recall_at_12_count": 8,
+        "matched_candidate_kind_counts": {
+          "inferred_object_center": 4,
+          "observed_object_center": 4
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 32
+        }
+      },
+      "family-v4": {
+        "video_count": 32,
+        "scorable_count": 17,
+        "excluded_count": 15,
+        "top1_match_count": 7,
+        "recall_at_6_count": 8,
+        "recall_at_12_count": 8,
+        "matched_candidate_kind_counts": {
+          "inferred_object_center": 3,
+          "observed_object_center": 4
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 32
+        }
+      }
+    },
+    "old24": {
+      "baseline": {
+        "video_count": 24,
+        "scorable_count": 13,
+        "excluded_count": 11,
+        "top1_match_count": 7,
+        "recall_at_6_count": 7,
+        "recall_at_12_count": 7,
+        "matched_candidate_kind_counts": {
+          "inferred_object_center": 3,
+          "observed_object_center": 4
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 24
+        }
+      },
+      "causal-v4": {
+        "video_count": 24,
+        "scorable_count": 13,
+        "excluded_count": 11,
+        "top1_match_count": 7,
+        "recall_at_6_count": 7,
+        "recall_at_12_count": 7,
+        "matched_candidate_kind_counts": {
+          "inferred_object_center": 3,
+          "observed_object_center": 4
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 24
+        }
+      },
+      "family-v4": {
+        "video_count": 24,
+        "scorable_count": 13,
+        "excluded_count": 11,
+        "top1_match_count": 7,
+        "recall_at_6_count": 7,
+        "recall_at_12_count": 7,
+        "matched_candidate_kind_counts": {
+          "inferred_object_center": 3,
+          "observed_object_center": 4
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 24
+        }
+      }
+    },
+    "previously_exposed_new8": {
+      "baseline": {
+        "video_count": 8,
+        "scorable_count": 4,
+        "excluded_count": 4,
+        "top1_match_count": 0,
+        "recall_at_6_count": 1,
+        "recall_at_12_count": 1,
+        "matched_candidate_kind_counts": {},
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 8
+        }
+      },
+      "causal-v4": {
+        "video_count": 8,
+        "scorable_count": 4,
+        "excluded_count": 4,
+        "top1_match_count": 1,
+        "recall_at_6_count": 1,
+        "recall_at_12_count": 1,
+        "matched_candidate_kind_counts": {
+          "inferred_object_center": 1
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 8
+        }
+      },
+      "family-v4": {
+        "video_count": 8,
+        "scorable_count": 4,
+        "excluded_count": 4,
+        "top1_match_count": 0,
+        "recall_at_6_count": 1,
+        "recall_at_12_count": 1,
+        "matched_candidate_kind_counts": {},
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 8
+        }
+      }
+    },
+    "controls2": {
+      "baseline": {
+        "video_count": 2,
+        "scorable_count": 2,
+        "excluded_count": 0,
+        "top1_match_count": 2,
+        "recall_at_6_count": 2,
+        "recall_at_12_count": 2,
+        "matched_candidate_kind_counts": {
+          "observed_object_center": 2
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 2
+        }
+      },
+      "causal-v4": {
+        "video_count": 2,
+        "scorable_count": 2,
+        "excluded_count": 0,
+        "top1_match_count": 2,
+        "recall_at_6_count": 2,
+        "recall_at_12_count": 2,
+        "matched_candidate_kind_counts": {
+          "observed_object_center": 2
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 2
+        }
+      },
+      "family-v4": {
+        "video_count": 2,
+        "scorable_count": 2,
+        "excluded_count": 0,
+        "top1_match_count": 2,
+        "recall_at_6_count": 2,
+        "recall_at_12_count": 2,
+        "matched_candidate_kind_counts": {
+          "observed_object_center": 2
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 2
+        }
+      }
+    },
+    "pooled34": {
+      "baseline": {
+        "video_count": 34,
+        "scorable_count": 19,
+        "excluded_count": 15,
+        "top1_match_count": 9,
+        "recall_at_6_count": 10,
+        "recall_at_12_count": 10,
+        "matched_candidate_kind_counts": {
+          "inferred_object_center": 3,
+          "observed_object_center": 6
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 34
+        }
+      },
+      "causal-v4": {
+        "video_count": 34,
+        "scorable_count": 19,
+        "excluded_count": 15,
+        "top1_match_count": 10,
+        "recall_at_6_count": 10,
+        "recall_at_12_count": 10,
+        "matched_candidate_kind_counts": {
+          "inferred_object_center": 4,
+          "observed_object_center": 6
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 34
+        }
+      },
+      "family-v4": {
+        "video_count": 34,
+        "scorable_count": 19,
+        "excluded_count": 15,
+        "top1_match_count": 9,
+        "recall_at_6_count": 10,
+        "recall_at_12_count": 10,
+        "matched_candidate_kind_counts": {
+          "inferred_object_center": 3,
+          "observed_object_center": 6
+        },
+        "physical_contact_observed_count": 0,
+        "automatic_decision_counts": {
+          "REVIEW": 34
+        }
+      }
+    }
+  },
+  "changes_from_baseline": {
+    "causal-v4": {
+      "top1_gains": [
+        "ordinary-1-a"
+      ],
+      "top1_regressions": [],
+      "recall_at_6_gains": [],
+      "recall_at_6_regressions": [],
+      "recall_at_12_gains": [],
+      "recall_at_12_regressions": [],
+      "changed_selections": [
+        {
+          "key": "ordinary-1-a",
+          "changed_fields": [
+            "track_id",
+            "frame_index",
+            "time",
+            "candidate_px",
+            "method"
+          ]
+        }
+      ]
+    },
+    "family-v4": {
+      "top1_gains": [],
+      "top1_regressions": [],
+      "recall_at_6_gains": [],
+      "recall_at_6_regressions": [],
+      "recall_at_12_gains": [],
+      "recall_at_12_regressions": [],
+      "changed_selections": []
+    }
+  },
+  "conclusion": {
+    "causal_ordering": "Primary first-vicinity matches increase 7/17 to 8/17; controls remain 2/2. Only ordinary-1-a changes, from a later observed rebound to the earlier inferred first-vicinity candidate. Existing successes and recall@6/@12 are preserved.",
+    "family_diversity_default": false,
+    "family_diversity_reason": "No top-1 or recall@6/@12 gain in the complete 34-video ablation; keep this optional mechanism disabled by default.",
+    "physical_contact_observed_per_variant": 0,
+    "formal_decisions_per_variant": {
+      "REVIEW": 34
+    },
+    "accuracy_claim": "Improved approximate candidate localization/order only; no measured physical-contact or legal line-call accuracy."
+  },
+  "case_encoding": "Every variant has exact report scores and result SHA. Missing selected/selected_comparison fields inherit baseline_selection/baseline_comparison in that case; selection_changed compares track, frame, time, point and method, excluding display event_id.",
+  "cases": [
+    {
+      "key": "8k-2-a",
+      "cohort": "regression24",
+      "group_id": "8k 30 4k 24 {view}시점 2",
+      "source_sha256": "311b814ee7f7347dfa244e56d6c5f3b9d94be8fc4de29dada2adc89858167492",
+      "reference_sha256": "c2e8627b03569427228052706497f8f992e5b1ec80190075a69a2e53c6e98d70",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1089,
+        "frame_index": 84,
+        "time": 2.799889,
+        "candidate_px": [
+          284.833,
+          369.0
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 7.327747880488239,
+        "frame_error": 0,
+        "reference_coordinate_point": [
+          284.833,
+          369.0
+        ],
+        "within_spatial_tolerance": true,
+        "within_frame_tolerance": true,
+        "matches_first_vicinity": true
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "f4c26f86d9ae92138f5427bf8bfe6dfc1b5683ae053a9073d4c9179e35c2f2a4",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "4257ebe8b37f59c44e0dd084d838e721592225d929220182e85ca37cf82e7637",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "014a854aeffbca9216fb5e2e7c0a717f7ed066987e7480f0b809e167d78ebf4a",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "8k-2-b",
+      "cohort": "regression24",
+      "group_id": "8k 30 4k 24 {view}시점 2",
+      "source_sha256": "06f3a5110fecbd32f0edf191ee9c4cfe201a8a5d33bb4d46e61b5b6f70f2bead",
+      "reference_sha256": "72e969f9957b4eb8bb196cb933e4ed19fd287f71709df42010e836084e5f00b9",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 888,
+        "frame_index": 12,
+        "time": 0.500111,
+        "candidate_px": [
+          727.421,
+          179.355
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 309.6574870175111,
+        "frame_error": 33,
+        "reference_coordinate_point": [
+          727.421,
+          179.355
+        ],
+        "within_spatial_tolerance": false,
+        "within_frame_tolerance": false,
+        "matches_first_vicinity": false
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "b0681a8c59fca3c52a4812284c4e0e26f85924de132b105dcbf50bd1de96e706",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "89687f640c9e8b08be653eaa80922b424f43ce0b977efcf382aa44d59c01de06",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "81f3d17b6460d1e8a2e0d7919821fbcb40c5b3a6323e2850cd95144cabc3867c",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "8k-5-a",
+      "cohort": "regression24",
+      "group_id": "8k 30 4k 24 {view}시점 5",
+      "source_sha256": "2030ff7b0e2e51039bbb48db6c40a7be2ca44e06cbba77c6b31b8f7aee08e0b9",
+      "reference_sha256": "6956e412cc958cf5cafaf360f5ca27e7b0b0de8784caa0f716a2686114263dc8",
+      "reference_visibility": "occluded",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 325,
+        "frame_index": 45,
+        "time": 1.499933,
+        "candidate_px": [
+          646.236,
+          177.686
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "11983b57187dff2ae8565a9e3db5cb642b42e6b071759cff667ee49e66a3cbc8",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "cffee038c9642cf77404e38a41f4f4209cb2d93a3e96d276b1be6be9e71e52c6",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "81a8da5da5a339a1b4fa9747f4cbe36f8cef9322f63d6a6d3d75ce6bcc50de31",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "8k-5-b",
+      "cohort": "regression24",
+      "group_id": "8k 30 4k 24 {view}시점 5",
+      "source_sha256": "7eccb2951dde57a8ab51b6cf1e42671348a7369d62e4ebf3800d536349a48667",
+      "reference_sha256": "4c2cbb5aa122e07b452fa2bfb74d1e3ec1f450068e5f2ab96cd50378d7b174ef",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 885,
+        "frame_index": 39,
+        "time": 1.625489,
+        "candidate_px": [
+          818.667,
+          298.667
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 7.782016319695012,
+        "frame_error": 0,
+        "reference_coordinate_point": [
+          818.667,
+          298.667
+        ],
+        "within_spatial_tolerance": true,
+        "within_frame_tolerance": true,
+        "matches_first_vicinity": true
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "8d1489ca8f03de967d6ebfd8fb96ad8fac1d6e0dff9219002e415a6933081b8a",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "6f307b1ce79537a386b48012422e72acbb0b55125507bbba0933e33450ddab55",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "53a8e14b381e48d77544521ce3dbcc9f981e53a98e4aea43bf6905a1e8f33fcb",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "8k-7-a",
+      "cohort": "regression24",
+      "group_id": "8k 30 4k 24 {view}시점 7",
+      "source_sha256": "cf9ad62b3e429094f325404e1347adf646eaa3a2439bf37d258463b154a9f02f",
+      "reference_sha256": "7ae7499e9c1a184dae7ea91c84efa0d2b24442f3679bdf9ee52d3ba4bd514db3",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 943,
+        "frame_index": 77,
+        "time": 2.566567,
+        "candidate_px": [
+          290.5334454255675,
+          289.70965462808795
+        ],
+        "method": "offline_occluded_image_trajectory_intersection"
+      },
+      "baseline_comparison": {
+        "distance_px": 1.9534004962126348,
+        "frame_error": 0,
+        "reference_coordinate_point": [
+          290.5334454255675,
+          289.70965462808795
+        ],
+        "within_spatial_tolerance": true,
+        "within_frame_tolerance": true,
+        "matches_first_vicinity": true
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12
+          ],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "6aab2b290f29e4191318d049f759e20e6fedd3224a977e2c9eb96fc529384813",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12
+          ],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "d79f0d569f7b19b3eb69a941d475d5bede7ce91e16a12f6e8b6ddd67cf685ef7",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            3,
+            5,
+            6,
+            8
+          ],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "88be950919265f4e9133b4d2afec0b7a1990bc2f938aad33d7c7e7f19e096da0",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "8k-7-b",
+      "cohort": "regression24",
+      "group_id": "8k 30 4k 24 {view}시점 7",
+      "source_sha256": "c8c2fa52ef709de4c8084c8fdc456d2cf6cdb4b44924f32ec08b406d2acfe4d7",
+      "reference_sha256": "ad4632b1bdab32441b6c62b4a2489c12cd3bbb0be86faa193572ce5a4a83a070",
+      "reference_visibility": "ambiguous",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 879,
+        "frame_index": 73,
+        "time": 3.042556,
+        "candidate_px": [
+          937.375,
+          197.75
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "e5873d9e5e049061c82c6ddf45bd99d0e9593ae7fe62f7d91e215cc47fb9789c",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "35175476ea6a4cb94597c7b835ee0b5f90b85f442f06c9e8bc1f85797226b850",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "a21c3b2c1db15bb59e9a8c0a6ccbadfb87e80e52127ff14396fbc415683643da",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "ordinary-4-a",
+      "cohort": "regression24",
+      "group_id": "{view}시점 4",
+      "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+      "reference_sha256": "b3861193dd347788cbf5de0efb46ab80c04bb28443e5c3b810a1c7ef86e9c29e",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 3551,
+        "frame_index": 188,
+        "time": 3.171144,
+        "candidate_px": [
+          602.7496043657602,
+          240.64656956344658
+        ],
+        "method": "offline_occluded_image_trajectory_intersection"
+      },
+      "baseline_comparison": {
+        "distance_px": 2.3667135004774726,
+        "frame_error": 0,
+        "reference_coordinate_point": [
+          602.7496043657603,
+          240.64656956344658
+        ],
+        "within_spatial_tolerance": true,
+        "within_frame_tolerance": true,
+        "matches_first_vicinity": true
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1
+          ],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "9c2a41f7a46bb8cbfa760d705fa414b3cea069892c9da57ee467a1793d1a57a6",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1
+          ],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "4ecab15295309e53dd88ba3d8aa21a58f66f7b9d1e95a5c8d4ea038a30c5ee86",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1
+          ],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "28d16af24ce61f3af764c82613ddcfef4293797866d32df91e9d748975de9d26",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "ordinary-4-b",
+      "cohort": "regression24",
+      "group_id": "{view}시점 4",
+      "source_sha256": "5564dda029e222e8dc4b0fc529ed0d6affe4407f80ecbd66d582b7044ceb497a",
+      "reference_sha256": "c54f295bd34661ec70286b6db17e112fb059cb2d54b3c201ec631583bc4375a8",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 4957,
+        "frame_index": 142,
+        "time": 2.367356,
+        "candidate_px": [
+          295.333,
+          106.0
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 150.70069969645132,
+        "frame_error": 86,
+        "reference_coordinate_point": [
+          295.333,
+          106.0
+        ],
+        "within_spatial_tolerance": false,
+        "within_frame_tolerance": false,
+        "matches_first_vicinity": false
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "065c05be564403523277515113f711648e03f204c949a8d0779049f5baa476e4",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "a74f417047f8451bd1788df218d8361f8931ef540b8531e2af46a901c2be2ad6",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "a86a0b6ae48d77f54871fa94b7fc10ca8b41c1f59791cc7db4a50032eba74a65",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "ordinary-12-a",
+      "cohort": "regression24",
+      "group_id": "{view}시점 12",
+      "source_sha256": "37562e63c2b5ad99a439ece37e9d7f9011e6fa0a0e5ce012a3718478841b04eb",
+      "reference_sha256": "619a834d2eb3c5c2ddd442adcfa3fd0dcfce49bd8b110b46b52f90c98559f8ec",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 2359,
+        "frame_index": 151,
+        "time": 2.547044,
+        "candidate_px": [
+          481.934,
+          210.755
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 4.2455130432022035,
+        "frame_error": 0,
+        "reference_coordinate_point": [
+          481.934,
+          210.755
+        ],
+        "within_spatial_tolerance": true,
+        "within_frame_tolerance": true,
+        "matches_first_vicinity": true
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "4d0ffeb925431c749a32f401b287ec9efeacb720e3b0b8e41ba5f0b8377a72dd",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "cefec496a12f8a2c72354fae47145eb12639d3e7b17cdaafe15d9ca676e0362d",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "7a5dc98344804d410903c2d9a965a5f23e576190710f71ff5e7367989c48f9d5",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "ordinary-12-b",
+      "cohort": "regression24",
+      "group_id": "{view}시점 12",
+      "source_sha256": "3aed5a60fbc157354e7fef85feb5bde191f9db0311b2fab4ee9811646fada62d",
+      "reference_sha256": "baa9eacc30a1b2b8dbc0bf182a5bd4bceeefeae3065d71eeb20ebb5e5a53283a",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 4679,
+        "frame_index": 183,
+        "time": 3.050911,
+        "candidate_px": [
+          170.24043916295832,
+          253.2796158820173
+        ],
+        "method": "offline_occluded_image_trajectory_intersection"
+      },
+      "baseline_comparison": {
+        "distance_px": 1.7816395204213182,
+        "frame_error": 0,
+        "reference_coordinate_point": [
+          170.24043916295832,
+          253.27961588201728
+        ],
+        "within_spatial_tolerance": true,
+        "within_frame_tolerance": true,
+        "matches_first_vicinity": true
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            4
+          ],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "7d35cc4a5ae39b127f24b9e77e944daee2d5424ed59c3afcafd6d58b96458748",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            4
+          ],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "f1ca8617d35f8688343f8195d816f4c404f83f39bac414b06cb0051f263d4d04",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            3
+          ],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "c82ebdfbd0ac0c403f78561a911634a4dacac9f0dabdf01d5fb7ef46e980e44a",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "ordinary-18-a",
+      "cohort": "regression24",
+      "group_id": "{view}시점 18",
+      "source_sha256": "dd04f1a5a96ce2ba9ad1c14eb750396fbd4537b23cc09749fc065f0b2a260c9d",
+      "reference_sha256": "521f231a6233578231c3f978c11afd3f09cea48d708c488613784654a54ba07b",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1717,
+        "frame_index": 67,
+        "time": 1.130144,
+        "candidate_px": [
+          521.25,
+          188.875
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 116.88061483838969,
+        "frame_error": 64,
+        "reference_coordinate_point": [
+          521.25,
+          188.875
+        ],
+        "within_spatial_tolerance": false,
+        "within_frame_tolerance": false,
+        "matches_first_vicinity": false
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "0493ac0b9fe51e5c1a05f32175494c2962c49066ee7e0dc8dcb5856ca10dad04",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "f6e0fcbb95b387270e0312be1dc5d694b247ee24b33608488a2e95b56bde4fba",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "9564f0ef39df1c92dcfe1fce7f6eb86fa6815953caae439a42a1c9ad0fee125a",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "ordinary-18-b",
+      "cohort": "regression24",
+      "group_id": "{view}시점 18",
+      "source_sha256": "c2b3e5cd92940e93598163c454c831c0a25df07dd347c1f9b67f5e27acd0d831",
+      "reference_sha256": "a36596b9d3ca8018037b081269e43650c3c2fdeee960cd6183ea0d9f64a79d44",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 3443,
+        "frame_index": 186,
+        "time": 3.100922,
+        "candidate_px": [
+          348.0,
+          313.333
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 3.479782895526699,
+        "frame_error": 0,
+        "reference_coordinate_point": [
+          348.0,
+          313.333
+        ],
+        "within_spatial_tolerance": true,
+        "within_frame_tolerance": true,
+        "matches_first_vicinity": true
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "1b5ac8026bcb83582ddd1fc70bce5adcbe49168d7318de11b17a3c3a3ccf7af0",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "cb53298285d4288cb030a27f6c98ad548e3afb97136331e14c00a35bf96e4cbb",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            9,
+            10
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "3ef120075c669638417ea5b9ec5c9fa5c45184b00b03e882600415f8314ad83d",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhd4k-2-a",
+      "cohort": "regression24",
+      "group_id": "{view}-2시점(uhd30 4k30)",
+      "source_sha256": "4e42f1c0996825312f6782fa94168c21789fe2d22cac9b7e43e05c5a7461c4ee",
+      "reference_sha256": "ee35aa582770d4144206acded52acade76468f4bef610264cc5093f8daca8dbf",
+      "reference_visibility": "ambiguous",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1210,
+        "frame_index": 59,
+        "time": 1.966833,
+        "candidate_px": [
+          684.875,
+          176.875
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "418ebc111381a7a2cda5295eb7a490ef31358cd54ab214a1ba3341502d733597",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "13d6b0c019751f3baa71db341ae75e384d47475cb2dac64dbad11556d66b01d7",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "67c771835929a5b2cced3e97b1969a9cabcbbe484ca12ee6a8ab1b85c7d602ae",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhd4k-2-b",
+      "cohort": "regression24",
+      "group_id": "{view}-2시점(uhd30 4k30)",
+      "source_sha256": "26c434519a4fdcb2e43e38bf067b8683f67c9346b003e5f7e330f2debe846000",
+      "reference_sha256": "0050e4c223a5e44dbc5272c4dbe88e2fe525fe71dfc1e26cb41b312550a2ded9",
+      "reference_visibility": "ambiguous",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1890,
+        "frame_index": 57,
+        "time": 1.901667,
+        "candidate_px": [
+          260.8699081913292,
+          201.2445655857205
+        ],
+        "method": "offline_occluded_image_trajectory_intersection"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "705a05a39de60a3488dc0c374aa6e8997fb54529f32992b613f411e1189b6828",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "4aec16e8d267180579e9d0549d10057e096ef275306c450c904fa9e2632f4443",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "062c194c9bf9d10c66334bb2f8ec5e6b1e1fdbe337c7ad749d7cf7159f97b656",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhd4k-4-a",
+      "cohort": "regression24",
+      "group_id": "{view}-4시점(uhd30 4k30)",
+      "source_sha256": "973355dc2d10ab4eebe1564e4c223b02f1ba225d600a9889405eae646b8213b3",
+      "reference_sha256": "1584fe4d02cdeedcdb7e73c4f3a6541b7b863879678a2dd8912343d8e51fc0db",
+      "reference_visibility": "ambiguous",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 862,
+        "frame_index": 45,
+        "time": 1.500133,
+        "candidate_px": [
+          513.5,
+          109.125
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "dfb3ce978a34803a236423bb588ab4fe9185c6c11b07f5ddd037ddb69582d573",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "4e1502d470b39322ffbe3f6ad35ab31ab31965f7fc29b9949094799ca6d96697",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "a1025ea0a223937053c80f5172aa7f4e906f837239b9af043feaa5a022514f9d",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhd4k-4-b",
+      "cohort": "regression24",
+      "group_id": "{view}-4시점(uhd30 4k30)",
+      "source_sha256": "018caa9ed0179b56a2e672ee32d84c5d08db3f51b51b3b1b83dea19b561ab729",
+      "reference_sha256": "917027c3be06aff4048e4aa94a99e911cab35ea72a36b2c26d68a17225848116",
+      "reference_visibility": "ambiguous",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1336,
+        "frame_index": 44,
+        "time": 1.466667,
+        "candidate_px": [
+          267.25,
+          201.0
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "d98715614baa1841aa8e64ea00e193e1f5cfbe6c8c108cecd94bef0e24050bed",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "f49f0a871e97ad7db2a8fcd71df62efa445d744b9049898fbc44ee0d3c275ce3",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "0f248fa5f134dad06013288d9131b309dd9cc84fcf0f18a862028e9d081be5f1",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhd4k-3-a",
+      "cohort": "regression24",
+      "group_id": "{view}-3시점(uhd30 4k30)",
+      "source_sha256": "4780ea68e9689f3602bfdc3955cb3bc47c41d2bcbfd78dfa78378dbe47242729",
+      "reference_sha256": "5fd5f3582540a6b872adc6d083c39dd4445cc0201d41be1ab08fd40bef794f17",
+      "reference_visibility": "ambiguous",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1396,
+        "frame_index": 76,
+        "time": 2.533544,
+        "candidate_px": [
+          385.0,
+          250.0
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "f197312229c283a3f324e7ece14bca0c975061671dd0b8c6ac2338bc89edc46f",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "ccfce3a503f9a5af54662751395fb63ea54a8e2d513699f54940a47bf9950044",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "d585f778da32823ec7bf9bb62ac83742f3de77a20b08b3868ddaca94e3257263",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhd4k-3-b",
+      "cohort": "regression24",
+      "group_id": "{view}-3시점(uhd30 4k30)",
+      "source_sha256": "1469100923fd649976a9ebb3ffff518018c7a6ad660f036fd35d007443ae54c5",
+      "reference_sha256": "2bf524009ad75ad2e67c5e512c7d19859cea55a51f8a8f46e44e073f88c3dcd8",
+      "reference_visibility": "ambiguous",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 731,
+        "frame_index": 62,
+        "time": 2.068333,
+        "candidate_px": [
+          332.4138025007407,
+          202.3771905104236
+        ],
+        "method": "offline_occluded_image_trajectory_intersection"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "78e081910f57a2284454259cd54e3f9c5c356d131ffc00f3e74730617cb5837f",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "59f00c60edf10be2162a0600eccf6288826e74cc353095ef6748fa869b3d1ae1",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "074dd754a44e386bd7db0b95fc1afe2c93f561450602bc7dd59801878d8c89cb",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhdhd-2-a",
+      "cohort": "regression24",
+      "group_id": "{view}시점(uhd30 hd30) 2",
+      "source_sha256": "c6bc1029c316cb96713d1076ba0f098f4124914802648aade538c5a7f1e28ec7",
+      "reference_sha256": "549477069b501f31be7d9ec76b8e8b9adcdbf672cb37654219ba6b8d5649cddd",
+      "reference_visibility": "ambiguous",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1933,
+        "frame_index": 88,
+        "time": 1.484367,
+        "candidate_px": [
+          750.211,
+          122.998
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "56051abff61bef3be22a815bb4ea94d5fdeb9b3a7ee4f53428237a7f783d6923",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "93c357dea4dd536beace1b07bafc035b5e951f6a24bec8be79b82b7012a30c08",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "8f1be411e026555f6bedea447c7e82041dbfdca30e23f30ef47b239c85b10688",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhdhd-2-b",
+      "cohort": "regression24",
+      "group_id": "{view}시점(uhd30 hd30) 2",
+      "source_sha256": "972a0183da9fcdbb41e2ec94cc83201a84259238c34a54cfdf59b0cde4c56823",
+      "reference_sha256": "378855f6a61233342ad7e8c3179ba536e2a51693a2a1063820a86d5bb5deba6a",
+      "reference_visibility": "occluded",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 857,
+        "frame_index": 60,
+        "time": 2.0,
+        "candidate_px": [
+          601.021,
+          264.167
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "a8849ac20de079947b1890c40c4e8dee440d5a4b0eb861e61eabb4db86b75337",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "fe382727f3f52afea81510d1b028aa421b7c48be68a54e7cc9424e00cb0cbc36",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "0661808cda7fca2a2d58797458f23b68fbe597681ae0d98a24fbec25cb5437e0",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhdhd-4-a",
+      "cohort": "regression24",
+      "group_id": "{view}시점(uhd30 hd30) 4",
+      "source_sha256": "c143093bc59937dcd50343a6c09628a031d71c726e313a6f1330c6a6c04c06d6",
+      "reference_sha256": "85858b1ad548290eaccf4fc790d499ff65db05944d197ea44b728fadd4d5eb67",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1089,
+        "frame_index": 93,
+        "time": 1.5687,
+        "candidate_px": [
+          478.375,
+          246.875
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 160.10748342910148,
+        "frame_error": 49,
+        "reference_coordinate_point": [
+          478.375,
+          246.875
+        ],
+        "within_spatial_tolerance": false,
+        "within_frame_tolerance": false,
+        "matches_first_vicinity": false
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "dad2dc27ae3148ba709136a5f55b0d25a20d3ef85f1c7b3b84a387775006be6c",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "7a38a4f6084e6a92879ca260f45aba39840ba898fb8d467c1e2b1ad6eee309cd",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "1a949a81f627a9c6c46ed1a8262a52ced91253b408c48b9af1efb1136cf8a6aa",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhdhd-4-b",
+      "cohort": "regression24",
+      "group_id": "{view}시점(uhd30 hd30) 4",
+      "source_sha256": "10c84268a2aedd469fdbe91048bd3ee7bd3f6d1b9002a803552d1d37ea1c2c52",
+      "reference_sha256": "6832cae824764bd855682bf4b17144890aa2304e0b308d9ee0d6fde52311f442",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 933,
+        "frame_index": 71,
+        "time": 2.368333,
+        "candidate_px": [
+          147.385,
+          283.154
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 400.5274446788884,
+        "frame_error": 4,
+        "reference_coordinate_point": [
+          147.38499999999996,
+          283.154
+        ],
+        "within_spatial_tolerance": false,
+        "within_frame_tolerance": false,
+        "matches_first_vicinity": false
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "b2ffea631d549f64f1500f75ebf036c478ccea8600ebe1f2b3eabf565c1a1642",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "2ef96f0f5956a5c8ce6ff1e77a01a2e6e6febe35977c8c60f02f8c65068c893a",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "54e97101e9f6eff017ce126fd2e1204901ad3b9ab46c31460f77dd8d6898c934",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhdhd-5-a",
+      "cohort": "regression24",
+      "group_id": "{view}시점(uhd30 hd30) 5",
+      "source_sha256": "88b978e4611becabf52952d9a5575cb46ee1a099cd839db39f8c8e4e0ed54952",
+      "reference_sha256": "11b93e0e8394c1f7f308fa5d7c31ceeb81b8bea182a2c3a9aafce792e34c8199",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 2272,
+        "frame_index": 55,
+        "time": 0.927733,
+        "candidate_px": [
+          864.0,
+          141.0
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 214.44113411377026,
+        "frame_error": 89,
+        "reference_coordinate_point": [
+          864.0,
+          141.0
+        ],
+        "within_spatial_tolerance": false,
+        "within_frame_tolerance": false,
+        "matches_first_vicinity": false
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "1b10cf4b1bdcc992bcdfa2f46f02ef5976c6ccd7ce997ee9c7068df3d758ffd7",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "e9ff50402b945b245e8681f258e24466dfede59253cebd1a2b583fb980a7b3f5",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "5abe2785cf7c6dcaedc4b75595595340aaca17853303246f1a5eaa09f8e14753",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhdhd-5-b",
+      "cohort": "regression24",
+      "group_id": "{view}시점(uhd30 hd30) 5",
+      "source_sha256": "e09374a98ab6839216c2ec4baab9a90fd18b3c76bdbbd3df90005248de8b8476",
+      "reference_sha256": "135375b793fd7a4b6eb4e89b7468d387d87e370508ed818df976a8cd08182bb4",
+      "reference_visibility": "occluded",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 977,
+        "frame_index": 79,
+        "time": 2.635,
+        "candidate_px": [
+          104.5,
+          296.0
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "359e8db8bde48f493b46ddab11016e2c9db77d6d41efd135037ab01c5a8483f2",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "1fedc762244362135e7b160d933b686882d76566ba115c20684840d3715de3c4",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "5a5f2fb4872e644fa5ce71dba883418938f8953820659d8289145f4ce48ddf54",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "8k-3-a",
+      "cohort": "exposed8",
+      "group_id": "8k 30 4k 24 {view}시점 3",
+      "source_sha256": "9d29a7841610b8adf20acc41d63432027dcf6d157c4108b390af3982672e07c8",
+      "reference_sha256": "4ea2a4fcb2e97523456db69088ed3ca114d03ba7d3d13891692b9c52c0f9ed21",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1232,
+        "frame_index": 99,
+        "time": 3.299856,
+        "candidate_px": [
+          432.25,
+          209.125
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 313.712970922466,
+        "frame_error": 34,
+        "reference_coordinate_point": [
+          432.25,
+          209.125
+        ],
+        "within_spatial_tolerance": false,
+        "within_frame_tolerance": false,
+        "matches_first_vicinity": false
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "d84c0bf6a26b92497362ea3873f19c7893fbf9f6d0fe1012126b18269aee63df",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "df3d88dc4ffa78db5ffaf024277e73b59feec86b37e93d49258b47864fb27907",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "84f5a16feeeec3e98934798e2996bb106b8998a8dd4b5b994b4a1b92165fa69f",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "8k-3-b",
+      "cohort": "exposed8",
+      "group_id": "8k 30 4k 24 {view}시점 3",
+      "source_sha256": "ad2a4c498cd7ddf1e746a139e262578523d3ed7c5dd320a0245eca1a73e2fb52",
+      "reference_sha256": "f5e40fee5c61c708946464156ea1da91b31cd32a0eb93cb9a4e0b1661414d0e1",
+      "reference_visibility": "occluded",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1329,
+        "frame_index": 29,
+        "time": 1.208711,
+        "candidate_px": [
+          315.41816838015154,
+          178.40484604124933
+        ],
+        "method": "offline_occluded_image_trajectory_intersection"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "10174070dedeaacd0c62a7ad30d2b3f1abe737a570a0050774742b146cad1482",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "4d33942b6e34c3a84ffb1dd3fc513a5c01623019387e9ea57d69a30f17564f78",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "681d2d806d9c57869bb73f78c094c8f970f2889c866209a2b199eae1b29094bf",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "ordinary-1-a",
+      "cohort": "exposed8",
+      "group_id": "{view}시점 1",
+      "source_sha256": "aa5e23a6400121849b7994664fd9dc942c9034b9e34180117a8973f10d83be76",
+      "reference_sha256": "07e8f40d61b802e535ee8737c8846d95dd7c2c60e8cdb4bcc6b0df1eff14a979",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 2254,
+        "frame_index": 187,
+        "time": 3.154278,
+        "candidate_px": [
+          182.0,
+          342.625
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 28.00697457777259,
+        "frame_error": 27,
+        "reference_coordinate_point": [
+          182.0,
+          342.625
+        ],
+        "within_spatial_tolerance": false,
+        "within_frame_tolerance": false,
+        "matches_first_vicinity": false
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": false,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            3
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "012c006bf92c83792a5eff6f1e56c4dd8222c0ee2e9c7ef5cc742d79c846a4c4",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1
+          ],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "56994864b35782303292a3fa5f27394355700912c7a9e0946f7edaee3acb2989",
+          "selection_changed": true,
+          "selected": {
+            "event_id": "event_000",
+            "track_id": 2134,
+            "frame_index": 158,
+            "time": 2.665111,
+            "candidate_px": [
+              209.95499951326042,
+              332.87061611294234
+            ],
+            "method": "offline_occluded_image_trajectory_intersection"
+          },
+          "selected_comparison": {
+            "distance_px": 4.1197644339517385,
+            "frame_error": 0,
+            "reference_coordinate_point": [
+              209.95499951326045,
+              332.87061611294234
+            ],
+            "within_spatial_tolerance": true,
+            "within_frame_tolerance": true,
+            "matches_first_vicinity": true
+          }
+        },
+        "family-v4": {
+          "top1_match": false,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            3
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "163f0cb93f7734fa6b4101ddf802749637d5de932665b1429cdde043369eabc6",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "ordinary-1-b",
+      "cohort": "exposed8",
+      "group_id": "{view}시점 1",
+      "source_sha256": "cc576acd32f449a02d2b3c5de6a85ed25b2f380a008d83a98a243f782156c330",
+      "reference_sha256": "3b3eddef60f421ccdffdbc5859ab0c5bc2c974cbd4e787da2dff503cb4a1202c",
+      "reference_visibility": "occluded",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 2697,
+        "frame_index": 95,
+        "time": 1.583811,
+        "candidate_px": [
+          86.35432937814323,
+          139.77460218987008
+        ],
+        "method": "offline_occluded_image_trajectory_intersection"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "d7d48679a18a757ae8ca008fba4fae037b912add600ba251378cafcf23f58412",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "1d8ba14aff65353aebb43400c809d8d66d22139caa66f09dd52462a6ea7c688e",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "inferred_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "ca5f270ab135074be21b840b922520260f228e3a50552bac4ee5041010fbaa1d",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhd4k-1-a",
+      "cohort": "exposed8",
+      "group_id": "{view}-1시점(uhd30 4k30)",
+      "source_sha256": "5d96da4c41da8ea61969423563930cf2a593026b2d687b0a460a3148e048f597",
+      "reference_sha256": "6a303d76d4623387e5927ee61312daa1cf157b60bb65b492c9b203edf1d26c61",
+      "reference_visibility": "occluded",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1200,
+        "frame_index": 29,
+        "time": 0.966744,
+        "candidate_px": [
+          393.0,
+          222.5
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "7398203b06ba3e961054a60c5ead96842edcc2250949df092bf4ba4fb0af5fd7",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "fbd80ab4a607904e6460c3318133b200a9610007190c783049937c7b76413671",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "d4c5ab670d2285765ad3235eae0525510ad0ba3df5447a75be04734c1914b8b0",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhd4k-1-b",
+      "cohort": "exposed8",
+      "group_id": "{view}-1시점(uhd30 4k30)",
+      "source_sha256": "3f3f685323bc7c4a81c850e89624cc7b2fe635b99f037938b28e6fb5beb558f7",
+      "reference_sha256": "3224f9895b39ebf83041d7c05c1ba17ed03349cb5a5b69d0a6ccf9e153618358",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1822,
+        "frame_index": 38,
+        "time": 1.266667,
+        "candidate_px": [
+          475.5,
+          109.625
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 239.7553766341852,
+        "frame_error": 69,
+        "reference_coordinate_point": [
+          475.5,
+          109.625
+        ],
+        "within_spatial_tolerance": false,
+        "within_frame_tolerance": false,
+        "matches_first_vicinity": false
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "3eae6869682c810c8cf4476dc6c47819865d1e186569ca00b8838871acc8fb77",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "3d6871aced8582199db2edb180dd83bbcaed2a353241d23767f30222575cf30d",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "1ec029207e1a67c1a8714795c4c9eae35da40bc1832cb77e65aa42c679ce3dec",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhdhd-1-a",
+      "cohort": "exposed8",
+      "group_id": "{view}시점(uhd30 hd30) 1",
+      "source_sha256": "8c41d422456f4d9103667fc61b91b208327a03639f9281b1c654c4cb05127771",
+      "reference_sha256": "85109a5a2cab12ff3d11d8f3590af41107aa7183a704403d9757a15bf35d604d",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 3254,
+        "frame_index": 107,
+        "time": 1.804856,
+        "candidate_px": [
+          334.733,
+          176.161
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 390.58967115119674,
+        "frame_error": 88,
+        "reference_coordinate_point": [
+          334.733,
+          176.161
+        ],
+        "within_spatial_tolerance": false,
+        "within_frame_tolerance": false,
+        "matches_first_vicinity": false
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "8f0b421875f21787d9fb98c3a447eeb3eb1398d77ec6364b8ca6b7252a33cd23",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "7e7fd58edd7db7bf259cc7acc4268dff7028dd0affb93a6d68c83d91d502ef2d",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": false,
+          "recall_at_6": false,
+          "recall_at_12": false,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "be19298ca3dbc10cb49b6de73caba164ff46eef01693f5df82c51e02e726b98e",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "uhdhd-1-b",
+      "cohort": "exposed8",
+      "group_id": "{view}시점(uhd30 hd30) 1",
+      "source_sha256": "c1ab564e2a689f04df0001f4d60cf72164d2c8b6e4f4fdd796f9e2f22e03e044",
+      "reference_sha256": "ecbd5ec407c2da39bf77e302d44d5f77feb14047c60f45f0c7eb9699befdee74",
+      "reference_visibility": "occluded",
+      "localization_scorable": false,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 937,
+        "frame_index": 63,
+        "time": 2.101667,
+        "candidate_px": [
+          476.0,
+          281.846
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": null,
+      "variants": {
+        "baseline": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "23461f02773a8e69026c771c94d0c5a001d5e28993de99115b7ff326ad4fddd8",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "bbbabad2f0056192401caa34aac0412b68a58d6d64360e2a822674a17c66b8b4",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": null,
+          "recall_at_6": null,
+          "recall_at_12": null,
+          "matching_candidate_ranks": [],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "e369bd3af37d4069324138ba42bc234cf60f92656dd4c780c863a0dbe9be27a3",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "control-1-a",
+      "cohort": "controls2",
+      "group_id": "8k 30 4k 24 {view}시점 1",
+      "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+      "reference_sha256": "9f378d467227e36c18cfe7c746f3b912580480caff7cf76afa0284ee2d45c207",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 1074,
+        "frame_index": 49,
+        "time": 1.633267,
+        "candidate_px": [
+          360.869,
+          447.182
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 5.183655563403124,
+        "frame_error": 0,
+        "reference_coordinate_point": [
+          360.869,
+          447.182
+        ],
+        "within_spatial_tolerance": true,
+        "within_frame_tolerance": true,
+        "matches_first_vicinity": true
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            3,
+            6,
+            8,
+            9
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "8cbfe4851846a8f5193aac43083c24c1defad3b0b208e1cc44cc85e49eae124c",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            3,
+            6,
+            8,
+            9
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "106c9f61e6e03500ec74d4e1d9188db0da4ecf9ff136286511a4829b10b46dd3",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            3,
+            5
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "4baa68059af023e3bae9277a48d218495b511f0d7edc9fc6f8ec18c43165869e",
+          "selection_changed": false
+        }
+      }
+    },
+    {
+      "key": "control-1-b",
+      "cohort": "controls2",
+      "group_id": "8k 30 4k 24 {view}시점 1",
+      "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+      "reference_sha256": "9f378d467227e36c18cfe7c746f3b912580480caff7cf76afa0284ee2d45c207",
+      "reference_visibility": "visible",
+      "localization_scorable": true,
+      "baseline_selection": {
+        "event_id": "event_000",
+        "track_id": 730,
+        "frame_index": 42,
+        "time": 1.7922,
+        "candidate_px": [
+          396.667,
+          200.333
+        ],
+        "method": "offline_motion_and_tracklet_candidate_search"
+      },
+      "baseline_comparison": {
+        "distance_px": 1.6999347046283935,
+        "frame_error": 0,
+        "reference_coordinate_point": [
+          396.667,
+          200.333
+        ],
+        "within_spatial_tolerance": true,
+        "within_frame_tolerance": true,
+        "matches_first_vicinity": true
+      },
+      "variants": {
+        "baseline": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            3,
+            5,
+            6,
+            7
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "03f180bc1b15b3925df12e79e444582167448a99f57f6cb63e1ef9f1606751e9",
+          "selection_changed": false
+        },
+        "causal-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            2,
+            3,
+            5,
+            6,
+            7
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "701de655174cb4dc79e695e151088bbdb57855c4216651ce930812b6a3585d4c",
+          "selection_changed": false
+        },
+        "family-v4": {
+          "top1_match": true,
+          "recall_at_6": true,
+          "recall_at_12": true,
+          "matching_candidate_ranks": [
+            1,
+            3
+          ],
+          "candidate_kind": "observed_object_center",
+          "contact_observed": false,
+          "automatic_decision": "REVIEW",
+          "result_sha256": "38dceccf2b8508e23420961d1e63802db2c6784c987f05a225e8e8fc30309427",
+          "selection_changed": false
+        }
+      }
+    }
+  ],
+  "source_evidence_figure": {
+    "path": "docs/landing-engine/examples/ordinary-1-a-sequence.jpg",
+    "sha256": "0b5991fe27efd059bb0f8905c5072bf259e0639eccd344e51335414f6576817e",
+    "renderer": "docs/landing-engine/reproduction/render_sequence_evidence.py",
+    "renderer_sha256": "803f6c6d70e97bd0071c4b34384dc9f1a5dc6dd47fd4e13a51227111b44afdee",
+    "source_path": "video/a시점 1.mp4",
+    "source_sha256": "aa5e23a6400121849b7994664fd9dc942c9034b9e34180117a8973f10d83be76",
+    "source_size": [
+      3840,
+      2160
+    ],
+    "analysis_size": [
+      960,
+      540
+    ],
+    "figure_size": [
+      1600,
+      1580
+    ],
+    "timestamp_origin_seconds": 0.0309,
+    "timestamp_semantics": "Saved normalized source timestamps; original PTS origin is recorded separately.",
+    "decoded_bgr_frame_sha256": {
+      "156": "27f9feb2588d3015ae795e4808d3ccf05456fa7413b2901784ab270b7b5b4305",
+      "158": "ee431d3d8ee1d51f14d5eef9d62953359ff1233bbd130e973e35cf2b8d6dd8e9",
+      "159": "dc67211146fcbac61eefe30d241619a932e87358a2b4bcc1503b6ce54f3708a0",
+      "162": "6cccc4ff1d235f3ab6d0c7298afe7a3d27e794f1af2811143ba6b4560922733c",
+      "185": "7ef3692613472a850d41c6c3548065b15f2a1ae7c314911f6bc0a1b76da98710",
+      "187": "8bb48e41f149fd92de525654d58825a777cb1ea113182c505c490a9526ec1a91",
+      "189": "d858b9d2e60deef6ec8b2a794c82cdc800285aa42da14aa25d795389e438d196",
+      "192": "88eadabad5bef0809814db07d4d8c221e081c34980d5a67d473e1ca749204fcb"
+    },
+    "decoder": {
+      "library": "opencv",
+      "version": "4.12.0",
+      "frame_selection": "sequential decode from frame zero, no seeking or frame interpolation",
+      "threads": 1
+    },
+    "renderer_environment": {
+      "pillow_version": "13.0.0",
+      "fonts": [
+        {
+          "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+          "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a"
+        },
+        {
+          "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+          "sha256": "faa5f3656a78b2e2d450d27fe8382c778bc2b6bb5ea29c986664a6a435056ceb"
+        }
+      ]
+    },
+    "reference_path": "docs/remediation/new8_references/ordinary-1-a.json",
+    "reference_sha256": "07e8f40d61b802e535ee8737c8846d95dd7c2c60e8cdb4bcc6b0df1eff14a979",
+    "reference_coordinate_size": [
+      960,
+      540
+    ],
+    "reference_point_px": [
+      207,
+      330
+    ],
+    "reference_frame_interval": [
+      158,
+      160
+    ],
+    "reference_tolerance_px": 8,
+    "reference_distance_before_px": 28.00697457777259,
+    "reference_distance_after_px": 4.1197644339517385,
+    "baseline_result_path": "runs/landing-engine/baseline/ordinary-1-a/result.json",
+    "baseline_result_sha256": "012c006bf92c83792a5eff6f1e56c4dd8222c0ee2e9c7ef5cc742d79c846a4c4",
+    "improved_result_path": "runs/landing-engine/causal-v4/ordinary-1-a/result.json",
+    "improved_result_sha256": "56994864b35782303292a3fa5f27394355700912c7a9e0946f7edaee3acb2989",
+    "baseline_implementation_fingerprint": "c1694510a69c6ef535a10c374497c4f895828dfefdc73bb39787dd5fff9bbf81",
+    "improved_implementation_fingerprint": "eb3980b0a9586eef0f53939b2dd270ffb4c56a200ca9e0869efff015fcccddfb",
+    "improved_execution_mode": "replay",
+    "estimated_event_time_seconds": 2.673377999568735,
+    "missing_track_observation_interval": [
+      146,
+      158
+    ],
+    "overview_panels": [
+      {
+        "source_frame_index": 187,
+        "timestamp_seconds": 3.154278,
+        "candidate_analysis_px": [
+          182.0,
+          342.625
+        ],
+        "candidate_source_px": [
+          728.0,
+          1370.5
+        ],
+        "point_kind": "observed_object_center",
+        "display_rect_px": [
+          32,
+          185,
+          752,
+          423
+        ],
+        "marker_display_px": [
+          174.56666666666666,
+          453.38958333333335
+        ],
+        "marker_radius_display_px": 15,
+        "marker_style": "solid_outline",
+        "marker_semantics": "saved candidate location, not an uncertainty radius or fabricated observation",
+        "contact_observed": false
+      },
+      {
+        "source_frame_index": 158,
+        "timestamp_seconds": 2.665111,
+        "candidate_analysis_px": [
+          209.95499951326042,
+          332.87061611294234
+        ],
+        "candidate_source_px": [
+          839.8199980530418,
+          1331.4824644517694
+        ],
+        "point_kind": "inferred_object_center",
+        "display_rect_px": [
+          816,
+          185,
+          752,
+          423
+        ],
+        "marker_display_px": [
+          980.4647496187207,
+          445.7486492884715
+        ],
+        "marker_radius_display_px": 15,
+        "marker_style": "dashed_outline",
+        "marker_semantics": "saved candidate location, not an uncertainty radius or fabricated observation",
+        "contact_observed": false
+      }
+    ],
+    "adjacent_context_panels": [
+      {
+        "source_frame_index": 156,
+        "timestamp_seconds": 2.631378,
+        "analysis_crop_xyxy": [
+          171,
+          292,
+          249,
+          350
+        ],
+        "source_crop_xyxy": [
+          684,
+          1168,
+          996,
+          1400
+        ],
+        "display_rect_px": [
+          32,
+          788,
+          372,
+          277
+        ],
+        "prediction_overlay": false
+      },
+      {
+        "source_frame_index": 158,
+        "timestamp_seconds": 2.665111,
+        "analysis_crop_xyxy": [
+          171,
+          292,
+          249,
+          350
+        ],
+        "source_crop_xyxy": [
+          684,
+          1168,
+          996,
+          1400
+        ],
+        "display_rect_px": [
+          420,
+          788,
+          372,
+          277
+        ],
+        "prediction_overlay": false
+      },
+      {
+        "source_frame_index": 159,
+        "timestamp_seconds": 2.681978,
+        "analysis_crop_xyxy": [
+          171,
+          292,
+          249,
+          350
+        ],
+        "source_crop_xyxy": [
+          684,
+          1168,
+          996,
+          1400
+        ],
+        "display_rect_px": [
+          808,
+          788,
+          372,
+          277
+        ],
+        "prediction_overlay": false
+      },
+      {
+        "source_frame_index": 162,
+        "timestamp_seconds": 2.732589,
+        "analysis_crop_xyxy": [
+          171,
+          292,
+          249,
+          350
+        ],
+        "source_crop_xyxy": [
+          684,
+          1168,
+          996,
+          1400
+        ],
+        "display_rect_px": [
+          1196,
+          788,
+          372,
+          277
+        ],
+        "prediction_overlay": false
+      },
+      {
+        "source_frame_index": 185,
+        "timestamp_seconds": 3.120544,
+        "analysis_crop_xyxy": [
+          143,
+          308,
+          221,
+          366
+        ],
+        "source_crop_xyxy": [
+          572,
+          1232,
+          884,
+          1464
+        ],
+        "display_rect_px": [
+          32,
+          1180,
+          372,
+          277
+        ],
+        "prediction_overlay": false
+      },
+      {
+        "source_frame_index": 187,
+        "timestamp_seconds": 3.154278,
+        "analysis_crop_xyxy": [
+          143,
+          308,
+          221,
+          366
+        ],
+        "source_crop_xyxy": [
+          572,
+          1232,
+          884,
+          1464
+        ],
+        "display_rect_px": [
+          420,
+          1180,
+          372,
+          277
+        ],
+        "prediction_overlay": false
+      },
+      {
+        "source_frame_index": 189,
+        "timestamp_seconds": 3.188011,
+        "analysis_crop_xyxy": [
+          143,
+          308,
+          221,
+          366
+        ],
+        "source_crop_xyxy": [
+          572,
+          1232,
+          884,
+          1464
+        ],
+        "display_rect_px": [
+          808,
+          1180,
+          372,
+          277
+        ],
+        "prediction_overlay": false
+      },
+      {
+        "source_frame_index": 192,
+        "timestamp_seconds": 3.238622,
+        "analysis_crop_xyxy": [
+          143,
+          308,
+          221,
+          366
+        ],
+        "source_crop_xyxy": [
+          572,
+          1232,
+          884,
+          1464
+        ],
+        "display_rect_px": [
+          1196,
+          1180,
+          372,
+          277
+        ],
+        "prediction_overlay": false
+      }
+    ],
+    "crop_selection_policy": "Display-only neighborhoods chosen after frozen experiments; these rectangles are never inference inputs.",
+    "resampling": "Pillow LANCZOS for display-only resizing; all crops are actual source pixels without prediction overlays",
+    "scope": "Actual source frames and unchanged saved candidate markers. The f158 coordinate is inferred, not a measured source observation. No physical contact or target identity is certified."
+  }
+}

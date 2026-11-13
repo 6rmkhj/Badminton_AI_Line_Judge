@@ -50,6 +50,9 @@ def test_actual_pipeline_stays_review_without_ground_contact(tmp_path):
     result = analyze_video(source, tmp_path / 'run', {'analysis_width': 160, 'source_crop_count': 0},
                            progress_callback=progress.append)
     assert result['decision']['decision'] == 'REVIEW'
+    assert result['assessment']['line_verdict'] == result['decision']['decision']
+    assert result['assessment']['changes_decision'] is False
+    assert json.loads((tmp_path / 'run/result.json').read_text())['assessment'] == result['assessment']
     assert result['validation_status'] == 'unvalidated_on_independent_human_ground_truth'
     assert result['analysis']['frame_count'] == 12
     assert len(result['timestamps']) == 12

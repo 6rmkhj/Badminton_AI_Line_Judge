@@ -32,8 +32,14 @@ def _value(observation, name, default=0.0):
 def validate_contact_modes(config=None):
     """Prevent one observation's geometry from inheriting another model's proof."""
     config = config or {}
+    if not isinstance(config.get('native_rebound_guard', False), bool):
+        raise ValueError('native_rebound_guard must be a boolean')
     if not isinstance(config.get('scene_context_ranking', False), bool):
         raise ValueError('scene_context_ranking must be a boolean')
+    if not isinstance(config.get('event_family_diversity', False), bool):
+        raise ValueError('event_family_diversity must be a boolean')
+    if not isinstance(config.get('causal_first_event_ranking', False), bool):
+        raise ValueError('causal_first_event_ranking must be a boolean')
     if config.get("contact_model_path") and config.get("source_contact_model_path"):
         raise ValueError("Choose either contact_model_path or source_contact_model_path, not both preprocessing modes")
 
@@ -96,7 +102,11 @@ def prioritize_review_candidates(candidates, regions, *, identity_first=False):
         scores = (-_value(candidate, 'identity_confidence'), -score) if identity_first else (-score,)
         return (not bool(review_region_indices(candidate, regions)), not requested, not observed, not flight,
                 -flight_rank if flight else 0., *scores)
-    return sorted(candidates, key=key)
+    ranked = sorted(candidates, key=key)
+    if not regions and any(candidate.get('causal_event_sequence') for candidate in ranked):
+        from .event_sequence import order_causal_rebounds
+        ranked = order_causal_rebounds(ranked)
+    return ranked
 
 
 def _measured_rebound_support(observations, index, nominal_step, *, minimum_after=3):
@@ -649,14 +659,31 @@ def estimate_landings(tracks, frames, timestamps, calibration, config=None):
                     _apply_flight_continuity(candidate, track, nominal_step)
                     candidates.append(candidate)
     candidates = apply_competing_continuation_evidence(candidates, tracks or [], nominal_step)
+    if cfg.get('native_rebound_guard', False):
+        from .landing_recovery import guard_native_rebound_branches
+        candidates = guard_native_rebound_branches(candidates, tracks or [], nominal_step)
     candidates = resolve_fragment_turns(candidates, tracks or [], nominal_step)
     if cfg.get('scene_context_ranking', False):
         from .scene_context import annotate_scene_context
         candidates = annotate_scene_context(candidates, frames)
+    if cfg.get('causal_first_event_ranking', False):
+        from .event_sequence import annotate_causal_rebounds
+        candidates = annotate_causal_rebounds(candidates, tracks or [], nominal_step)
     candidates.sort(key=lambda item: (-item["confidence"], -item["identity_confidence"], item["time"]))
     # The global cap must not discard a reviewed region before the later native
     # evidence budget can see it. The cap and physical qualification stay intact.
     candidates = prioritize_review_candidates(candidates, regions)
+    # Learned contact qualification happens after this budget stage. Preserve
+    # every model proposal until its own frame/patch has been evaluated.
+    if (cfg.get('event_family_diversity', False)
+            and not cfg.get('contact_model_path') and not cfg.get('source_contact_model_path')):
+        from .event_sequence import diversify_event_families, order_causal_rebounds
+        candidates = diversify_event_families(candidates, tracks or [], nominal_step)
+        # A relation may live on a merged alternative. Resolve it before the
+        # budget cap can discard its earlier event; explicit guidance keeps its
+        # existing ordering, just as in prioritize_review_candidates.
+        if not regions:
+            candidates = order_causal_rebounds(candidates)
     if regions:
         for candidate in candidates:
             _mark_review_guidance(candidate, regions)

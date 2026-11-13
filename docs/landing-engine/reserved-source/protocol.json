@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "scope": "Current-round reserved source-only AI first-landing-vicinity check, released only after accepted engine/configuration freeze. Four videos, one scorable approximate object-centre reference and three ambiguous exclusions. All repository clips have previous AI annotations; this is not independent human ground truth or globally unseen data, and it does not measure physical cork contact or IN/OUT accuracy.",
+  "reference_policy": {
+    "immutable_intervals_points_tolerances": true,
+    "scorable": "contact_visibility=visible with valid frame interval and point",
+    "denominators": {
+      "reserved4": 1
+    },
+    "additional_frame_tolerance": 0,
+    "no_reference_assistance_for_inference": true,
+    "no_reference_retuning_after_release": true,
+    "original_sealed_manifest_sha256": "c3daf37b7e33bd41631f0aaf77707fdcd20f76d10fdccb45f2cafd897aa40281",
+    "frozen_at_utc": "2026-11-13T06:40:40.776783+00:00"
+  },
+  "accepted_freeze_path": "docs/landing-engine/accepted-freeze.json",
+  "accepted_freeze_sha256": "30eb23649da6da42b9b43a251282b1abc3652cfc1aaa01a6c17f63f7e0f71ee1",
+  "accepted_config_sha256": "64b17deb84f71abf35d2a9bc5dd9291661642528fc98a154b933c40de1d962df",
+  "grouping": "Keep A/B filename pairs together; do not transfer contact time, identity, or coordinates between views solely by filename.",
+  "videos": [
+    {
+      "key": "ordinary-2-a",
+      "cohort": "reserved4",
+      "group_id": "ordinary-2",
+      "file": "a시점 2.mp4",
+      "source_sha256": "f064fde8fa78f53ad667a5f1977bcb6daaddb8e5912150593b384fb17dcd69cd",
+      "reference_path": "docs/landing-engine/reserved-source/references/ordinary-2-a.json",
+      "reference_sha256": "560e1fe9841d072c8e2a4a04216cf7012afb004548be187b63a074fc39325b08"
+    },
+    {
+      "key": "ordinary-2-b",
+      "cohort": "reserved4",
+      "group_id": "ordinary-2",
+      "file": "b시점 2.mp4",
+      "source_sha256": "8be748ba5ae3d29b5a62185de97716a8b7c7ca42c9aa3851dcab18e7a95cbb48",
+      "reference_path": "docs/landing-engine/reserved-source/references/ordinary-2-b.json",
+      "reference_sha256": "276b24a92246e4416cfbb08f51235b0b074b651114f2737bc52d63ad3ebe8b37"
+    },
+    {
+      "key": "uhdhd-3-a",
+      "cohort": "reserved4",
+      "group_id": "uhdhd-3",
+      "file": "a시점(uhd30 hd30) 3.mp4",
+      "source_sha256": "c061c86a87286a0882f8a3f976d779c58c0d2755bc11432c69171ca08ef90d73",
+      "reference_path": "docs/landing-engine/reserved-source/references/uhdhd-3-a.json",
+      "reference_sha256": "f1755ef2cbf26bba4d45d3b708a9fbbbfc9958f5450033a12132061835b2eefc"
+    },
+    {
+      "key": "uhdhd-3-b",
+      "cohort": "reserved4",
+      "group_id": "uhdhd-3",
+      "file": "b시점(uhd30 hd30) 3.mp4",
+      "source_sha256": "22f90d5ebb1e66a3750b659fda24b0df90d27e7bf3fb1ff2472467c2f497ee5f",
+      "reference_path": "docs/landing-engine/reserved-source/references/uhdhd-3-b.json",
+      "reference_sha256": "71bdfba74930cce8f82d381e193f3c6c6023ce12d795024dd1171890b59c298a"
+    }
+  ]
+}

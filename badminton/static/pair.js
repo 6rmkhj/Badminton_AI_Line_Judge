@@ -651,6 +651,25 @@ function renderLandingCandidate(camera, view, player) {
   }
   return panel;
 }
+function renderEvidenceAssessment(camera, assessment) {
+  if (!assessment || assessment.schema_version !== 1 || !Array.isArray(assessment.stages)) return null;
+  const panel = el('section', 'evidence-assessment');
+  const heading = el('h4', '', '착지 탐색과 라인 판정'); heading.id = 'assessment-heading-' + camera.toLowerCase();
+  panel.setAttribute('aria-labelledby', heading.id); panel.append(heading);
+  if (typeof assessment.summary === 'string') panel.append(el('p', 'assessment-summary', assessment.summary));
+  panel.append(el('p', 'assessment-scope', '접촉·식별·보정·위치 오차는 화면의 대표 후보 기준이며, 사건 선택과 최종 판정은 전체 판정 대상 후보를 기준으로 표시합니다.'));
+  const list = el('ul', 'assessment-stages');
+  for (const stage of assessment.stages) {
+    if (!stage || typeof stage.label !== 'string' || typeof stage.detail !== 'string') continue;
+    const row = el('li');
+    const allowed = ['found', 'absent', 'passed', 'blocked', 'not_evaluated', 'unknown'];
+    row.dataset.status = allowed.includes(stage.status) ? stage.status : 'unknown';
+    const title = el('div', 'assessment-stage-title');
+    title.append(el('strong', '', stage.label), el('span', '', typeof stage.status_label === 'string' ? stage.status_label : '근거 확인 필요'));
+    row.append(title, el('p', '', stage.detail)); list.append(row);
+  }
+  panel.append(list); return panel;
+}
 function renderView(camera, view, diagnostics) {
   const card = el('article', 'result-view');
   card.id = 'result-view-' + camera.toLowerCase();
@@ -687,6 +706,8 @@ function renderView(camera, view, diagnostics) {
   if (view.rationale) body.append(el('p', 'rationale', view.rationale));
   const candidatePanel = renderLandingCandidate(camera, view, player);
   if (candidatePanel) body.append(candidatePanel);
+  const assessmentPanel = renderEvidenceAssessment(camera, view.assessment);
+  if (assessmentPanel) body.append(assessmentPanel);
   const trajectoryContext = safeUrl(view.trajectory_context_url);
   if (trajectoryContext) {
     const figure = el('figure', 'trajectory-context');

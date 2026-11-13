@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "key": "uhdhd-3-a",
+  "file": "a시점(uhd30 hd30) 3.mp4",
+  "source_path": "video/a시점(uhd30 hd30) 3.mp4",
+  "source_sha256": "c061c86a87286a0882f8a3f976d779c58c0d2755bc11432c69171ca08ef90d73",
+  "source_bytes": 30682251,
+  "source_size": [
+    3840,
+    2160
+  ],
+  "decoded_frame_count": 236,
+  "container_reported_frame_count": 236,
+  "coordinate_size": [
+    960,
+    540
+  ],
+  "contact_visibility": "visible",
+  "landing_frame_interval": [
+    137,
+    139
+  ],
+  "landing_time_interval": [
+    2.310888888888889,
+    2.344622222222222
+  ],
+  "landing_point_px": [
+    234.5,
+    304.5
+  ],
+  "tolerance_px": 6.0,
+  "frame_tolerance": 0,
+  "point_kind": "observed_object_center",
+  "human_verified": false,
+  "physical_contact_verified": false,
+  "reference_kind": "AI_source_only_first_vicinity",
+  "prediction_blind_current_round": true,
+  "prior_repository_ai_labels_exist": true,
+  "frozen_at_utc": "2026-11-13T06:40:40.776783+00:00",
+  "note": "A moving shuttle descends through source frames 130–137, reaches the first low vicinity at 138, and is seen moving away/up over 139–143 before later travel and foreground occlusion. Approximate object-centre reference, not a measured cork-contact polygon or independently verified first physical contact.",
+  "source_evidence": [
+    "uhdhd-3-a-crop-116-192-0.jpg",
+    "uhdhd-3-a-crop-130-153-0.jpg",
+    "uhdhd-3-a-crop-130-153-1.jpg",
+    "uhdhd-3-a-overview-0.jpg",
+    "uhdhd-3-a-overview-1.jpg",
+    "uhdhd-3-a-reference-full.jpg",
+    "uhdhd-3-a-reference-grid.jpg"
+  ]
+}

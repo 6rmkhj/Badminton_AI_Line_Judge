@@ -31,6 +31,10 @@
   "tracker": {"flight_search_enabled": true},
   "events": {
     "scene_context_ranking": true,
+    "causal_first_event_ranking": true,
+    "native_endpoint_recovery": true,
+    "native_rebound_guard": true,
+    "event_family_diversity": false,
     "source_contact_enabled": true,
     "source_contact_max_candidates": 6,
     "source_contact_patch_size": 96
