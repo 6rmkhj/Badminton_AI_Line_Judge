@@ -24,7 +24,7 @@ APPLICATION = '08-application.zip'
 SOURCE_FOLDERS = {'badminton', 'configs', 'docs', 'examples', 'scripts', 'tests', 'annotations'}
 SOURCE_ROOTS = {'README.md', 'pyproject.toml', 'start.py'}
 DOWNLOAD_URL = ('https://github.com/6rmkhj/Badminton_AI_Line_Judge/'
-                'archive/refs/heads/downloads/windows-portable-{version}.zip')
+                'releases/download/v{version}/badminton-windows-{version}.zip')
 
 
 def json_bytes(value):
@@ -181,7 +181,10 @@ def start_batch(version):
     prepare = (
         "$ErrorActionPreference='Stop'; "
         "$manifest='PAYLOAD_CHECKSUMS.json'; "
-        "$items=@(Get-Content -LiteralPath $manifest -Raw -Encoding UTF8 | ConvertFrom-Json); "
+        # Windows PowerShell 5.1 emits a JSON array as one pipeline object.
+        # Assign it first so @() cannot wrap that output in a second array.
+        "$items=Get-Content -LiteralPath $manifest -Raw -Encoding UTF8 | ConvertFrom-Json; "
+        "$items=@($items); "
         "if($items.Count -ne 9){throw 'Expected nine payload archives'}; "
         "$seen=@{}; foreach($item in $items){ "
         "if($item.file -notmatch '^(0[1-9])-[a-z_-]+[.]zip$' -or $seen.ContainsKey($item.file)){throw 'Invalid payload name'}; "
