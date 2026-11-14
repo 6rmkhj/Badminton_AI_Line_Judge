@@ -1,0 +1,263 @@
+{
+  "scope": "Read-only audit of current source-only AI visual review examples. Original source SHA checked; current image-space geometry recomputed and native contact/action frames visually inspected. No automatic IN/OUT result or independent human truth is claimed. Historical evidence_paths assets are not all present, so this audit does not claim a complete original review-report schema validation.",
+  "source_or_annotation_files_changed": false,
+  "records": [
+    {
+      "video_id": "v_6fcc4642a13f",
+      "file": "8k 30 4k 24 a시점 4.mp4",
+      "source_path": "video/8k 30 4k 24 a시점 4.mp4",
+      "source_sha256": "7e730a4a1bf262e2d1a43a09e7524be5d867040691a584976582a98a1255d28e",
+      "bytes": 75343727,
+      "annotation_path": "annotations/ai-visual/v_6fcc4642a13f.json",
+      "annotation_sha256": "f0dc5aea5f20e92598e286258b8a96f99f8dcfd8523ad922997f2f186533d5d5",
+      "original_label": "UNKNOWN",
+      "human_verified": false,
+      "contact_observed": false,
+      "contact_interval_observed": null,
+      "contact_interval_frames": null,
+      "contact_time": null,
+      "cross_view_match": {
+        "other_video_id": "v_248b1672f38d",
+        "same_event_confirmed_by_ai": true,
+        "matched_actions": [
+          {
+            "frame_index": 14,
+            "other_frame_index": 4,
+            "description": "검은색 선수가 네트 쪽으로 크게 런지하며 라켓을 옆으로 뻗고 남색 선수가 뒤를 커버"
+          },
+          {
+            "frame_index": 52,
+            "other_frame_index": 32,
+            "description": "검은색 선수의 다음 포핸드 블록 때 발을 벌리고 가슴 앞에서 셔틀을 맞히는 동작"
+          }
+        ],
+        "rationale": "각 영상의 중앙 목표 코트에서 같은 검은색/남색 두 선수 및 흰색/연청색 상대의 서로 다른 두 동작이 같은 순서로 이어지는 것을 양쪽 시점의 확대 시퀀스로 직접 대조했다. 두 번째 동작 후 이어지는 동일 랠리의 최초 접촉을 근거 시점에서 판독한다. 파일명만으로 연결한 것이 아니며 두 영상의 시각이 동기화되었다고 주장하지 않는다.",
+        "evidence_paths": [
+          "runs/visual-review/v_6fcc4642a13f/cross-view-actions.jpg",
+          "runs/visual-review/v_248b1672f38d/far_native_seq_0_81_0.jpg",
+          "runs/visual-review/v_248b1672f38d/overview.jpg"
+        ],
+        "clock_synchronization_claimed": false
+      }
+    },
+    {
+      "video_id": "v_248b1672f38d",
+      "file": "8k 30 4k 24 b시점 4.mp4",
+      "source_path": "video/8k 30 4k 24 b시점 4.mp4",
+      "source_sha256": "ae1db2f945a14c7e0c2b11d00be7085ed8c7f69b431ee621cc1d0b9efc1411c6",
+      "bytes": 12834379,
+      "annotation_path": "annotations/ai-visual/v_248b1672f38d.json",
+      "annotation_sha256": "bdbf85c2b9dca4c5c1bec1851dd25de23fed110acf1fd18bac7915094bfa2f48",
+      "original_label": "IN",
+      "human_verified": false,
+      "contact_observed": true,
+      "contact_interval_observed": true,
+      "contact_interval_frames": [
+        58,
+        60
+      ],
+      "contact_time": 2.459056,
+      "cross_view_match": null,
+      "visual_geometry_recheck": {
+        "decision": "IN",
+        "coordinate_system": "analysis_pixels",
+        "reason_codes": [
+          "CONTACT_SUPPORT_ROBUSTLY_INSIDE_VALID_COURT"
+        ],
+        "boundaries": [
+          {
+            "role": "net",
+            "min_inside_margin_px": 114.60893615867255,
+            "max_inside_margin_px": 130.13835619285084,
+            "boundary_uncertainty_px": 4.0,
+            "uncertainty_px": 7.0,
+            "robust_inside": true,
+            "robust_outside": false,
+            "is_outer_boundary": false
+          },
+          {
+            "role": "right",
+            "min_inside_margin_px": 129.06906346956666,
+            "max_inside_margin_px": 146.54249427371187,
+            "boundary_uncertainty_px": 4.0,
+            "uncertainty_px": 7.0,
+            "robust_inside": true,
+            "robust_outside": false,
+            "is_outer_boundary": true
+          },
+          {
+            "role": "near",
+            "min_inside_margin_px": 89.72713238744696,
+            "max_inside_margin_px": 107.83352850870318,
+            "boundary_uncertainty_px": 4.0,
+            "uncertainty_px": 7.0,
+            "robust_inside": true,
+            "robust_outside": false,
+            "is_outer_boundary": true
+          },
+          {
+            "role": "left",
+            "min_inside_margin_px": 163.2285549161882,
+            "max_inside_margin_px": 181.15701488717258,
+            "boundary_uncertainty_px": 4.0,
+            "uncertainty_px": 7.0,
+            "robust_inside": true,
+            "robust_outside": false,
+            "is_outer_boundary": true
+          }
+        ],
+        "uncertainty_px": 7.0,
+        "contact_uncertainty_px": 3.0,
+        "default_boundary_uncertainty_px": 4.0,
+        "contact_support_px": [
+          [
+            465,
+            350
+          ],
+          [
+            477,
+            350
+          ],
+          [
+            477,
+            365
+          ],
+          [
+            465,
+            365
+          ]
+        ],
+        "polygon_region": "near_half"
+      }
+    },
+    {
+      "video_id": "v_45241dd65a35",
+      "file": "a시점 7.mp4",
+      "source_path": "video/a시점 7.mp4",
+      "source_sha256": "4547686c4665cb787757ed015253367b6202b9a3c8503ddd08f4de15d2e3c3ef",
+      "bytes": 31616163,
+      "annotation_path": "annotations/ai-visual/v_45241dd65a35.json",
+      "annotation_sha256": "a5e22b6cae54a989c791ea481e66563bf09b6f5be4f5558ed90b92535068b74d",
+      "original_label": "UNKNOWN",
+      "human_verified": false,
+      "contact_observed": false,
+      "contact_interval_observed": false,
+      "contact_interval_frames": null,
+      "contact_time": null,
+      "cross_view_match": {
+        "other_video_id": "v_63d6bb9ca96b",
+        "same_event_confirmed_by_ai": true,
+        "matched_actions": [
+          {
+            "frame_index": 5,
+            "other_frame_index": 7,
+            "description": "회색 상의 남자가 녹색 상의 전위 파트너 뒤에서 같은 오버헤드 타구를 한다."
+          },
+          {
+            "frame_index": 75,
+            "other_frame_index": 77,
+            "description": "다음 교환에서 회색 남자가 라켓을 들어 올린 뒤 타구하지 않고 뒤로 가는 셔틀을 보내며 녹색 파트너가 앞에서 지켜본다."
+          }
+        ],
+        "rationale": "두 카메라의 원본 확대에서 같은 선수 조합의 오버헤드 타구와 다음 공을 보내는 두 동작을 순서대로 대조했다. 파일명만으로 연결하지 않았고, 프레임 차이는 대략적인 동작 대응이며 정확한 시계 동기화를 주장하지 않는다. A시점에 없는 접촉 픽셀을 만들어 넣지 않는다.",
+        "evidence_paths": [
+          "runs/visual-review/v_45241dd65a35/detail_0_26_5_native.jpg",
+          "runs/visual-review/v_45241dd65a35/detail_25_106_5_native.jpg",
+          "runs/visual-review/v_63d6bb9ca96b/overview-24.jpg"
+        ]
+      }
+    },
+    {
+      "video_id": "v_63d6bb9ca96b",
+      "file": "b시점 7.mp4",
+      "source_path": "video/b시점 7.mp4",
+      "source_sha256": "27050156feb5987b60dbe4e0d42eb0f59e61b5679c95f6efd2d39901a9208d1c",
+      "bytes": 19439968,
+      "annotation_path": "annotations/ai-visual/v_63d6bb9ca96b.json",
+      "annotation_sha256": "27f21fcea26cf1844c8769dc75c397c829f2e53497b6afad011053b98617abbd",
+      "original_label": "OUT",
+      "human_verified": false,
+      "contact_observed": false,
+      "contact_interval_observed": true,
+      "contact_interval_frames": [
+        113,
+        115
+      ],
+      "contact_time": 1.900567,
+      "cross_view_match": null,
+      "visual_geometry_recheck": {
+        "decision": "OUT",
+        "coordinate_system": "analysis_pixels",
+        "reason_codes": [
+          "CONTACT_SUPPORT_ROBUSTLY_OUTSIDE_OUTER_BOUNDARY"
+        ],
+        "boundaries": [
+          {
+            "role": "left",
+            "min_inside_margin_px": -24.301523239438925,
+            "max_inside_margin_px": -21.55180960072565,
+            "boundary_uncertainty_px": 4.0,
+            "uncertainty_px": 8.0,
+            "robust_inside": false,
+            "robust_outside": true,
+            "is_outer_boundary": true
+          }
+        ],
+        "uncertainty_px": 8.0,
+        "contact_uncertainty_px": 4.0,
+        "default_boundary_uncertainty_px": 4.0,
+        "contact_support_px": [
+          [
+            270,
+            435
+          ],
+          [
+            278,
+            444
+          ]
+        ]
+      }
+    }
+  ],
+  "native_contact_sequences": {
+    "IN_B4": [
+      54,
+      66
+    ],
+    "OUT_B7": [
+      108,
+      118
+    ]
+  },
+  "pair_action_frames": {
+    "IN_A4_B4": [
+      [
+        14,
+        4
+      ],
+      [
+        52,
+        32
+      ]
+    ],
+    "OUT_A7_B7": [
+      [
+        5,
+        7
+      ],
+      [
+        75,
+        77
+      ]
+    ]
+  },
+  "pair_clock_synchronization_claimed": false,
+  "generated_inspection_images": [
+    "in-overview.jpg",
+    "in-pair-actions.jpg",
+    "in-source-sequence.jpg",
+    "out-overview.jpg",
+    "out-pair-actions.jpg",
+    "out-source-sequence.jpg"
+  ]
+}

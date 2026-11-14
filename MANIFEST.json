@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "scope": "Original videos with AI visual review reference labels. These are not examples producing automatic IN/OUT in the default 0.5.7 pipeline.",
+  "human_verified": false,
+  "original_video_bytes_unchanged": true,
+  "files": [
+    {
+      "path": "IN/8k 30 4k 24 a시점 4.mp4",
+      "camera": "A",
+      "pair_ai_assisted_label": "IN",
+      "direct_view_ai_label": "UNKNOWN",
+      "sha256": "7e730a4a1bf262e2d1a43a09e7524be5d867040691a584976582a98a1255d28e",
+      "bytes": 75343727,
+      "annotation": "IN/v_6fcc4642a13f.json",
+      "annotation_sha256": "f0dc5aea5f20e92598e286258b8a96f99f8dcfd8523ad922997f2f186533d5d5",
+      "direct_contact_interval_frames": null,
+      "direct_contact_time_seconds": null
+    },
+    {
+      "path": "IN/8k 30 4k 24 b시점 4.mp4",
+      "camera": "B",
+      "pair_ai_assisted_label": "IN",
+      "direct_view_ai_label": "IN",
+      "sha256": "ae1db2f945a14c7e0c2b11d00be7085ed8c7f69b431ee621cc1d0b9efc1411c6",
+      "bytes": 12834379,
+      "annotation": "IN/v_248b1672f38d.json",
+      "annotation_sha256": "bdbf85c2b9dca4c5c1bec1851dd25de23fed110acf1fd18bac7915094bfa2f48",
+      "direct_contact_interval_frames": [
+        58,
+        60
+      ],
+      "direct_contact_time_seconds": 2.459056
+    },
+    {
+      "path": "OUT/a시점 7.mp4",
+      "camera": "A",
+      "pair_ai_assisted_label": "OUT",
+      "direct_view_ai_label": "UNKNOWN",
+      "sha256": "4547686c4665cb787757ed015253367b6202b9a3c8503ddd08f4de15d2e3c3ef",
+      "bytes": 31616163,
+      "annotation": "OUT/v_45241dd65a35.json",
+      "annotation_sha256": "a5e22b6cae54a989c791ea481e66563bf09b6f5be4f5558ed90b92535068b74d",
+      "direct_contact_interval_frames": null,
+      "direct_contact_time_seconds": null
+    },
+    {
+      "path": "OUT/b시점 7.mp4",
+      "camera": "B",
+      "pair_ai_assisted_label": "OUT",
+      "direct_view_ai_label": "OUT",
+      "sha256": "27050156feb5987b60dbe4e0d42eb0f59e61b5679c95f6efd2d39901a9208d1c",
+      "bytes": 19439968,
+      "annotation": "OUT/v_63d6bb9ca96b.json",
+      "annotation_sha256": "27f21fcea26cf1844c8769dc75c397c829f2e53497b6afad011053b98617abbd",
+      "direct_contact_interval_frames": [
+        113,
+        115
+      ],
+      "direct_contact_time_seconds": 1.900567
+    }
+  ]
+}
