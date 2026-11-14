@@ -1,0 +1,51 @@
+name: Publish verified Windows 0.5.10 package
+
+on:
+  push:
+    branches: [downloads/windows-portable-0.5.10]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-windows-v0.5.10
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Reassemble and verify the existing package
+        run: python3 release/assemble.py
+      - name: Verify source tag and publish package
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_commit=$(python3 -c "import json; print(json.load(open('release/receipt.json'))['source_commit'])")
+          tag_commit=$(git ls-remote origin 'refs/tags/v0.5.10^{}' | cut -f1)
+          test "$tag_commit" = "$source_commit"
+          gh release create v0.5.10 \
+            --verify-tag --target "$source_commit" --draft \
+            --title '0.5.10 · 단일 시점 판정 및 단식·복식 선택' \
+            --notes-file release/notes.md \
+            dist/badminton-windows-0.5.10.zip \
+            dist/badminton-windows-0.5.10.zip.sha256
+          gh api "repos/$GH_REPO/releases/tags/v0.5.10" > /tmp/release-assets.json
+          python3 - <<'PY'
+          import json
+          expected = json.load(open('release/receipt.json'))
+          assets = json.load(open('/tmp/release-assets.json'))['assets']
+          archive = next(item for item in assets if item['name'] == 'badminton-windows-0.5.10.zip')
+          assert archive['size'] == expected['bytes'], 'Uploaded package size mismatch'
+          assert archive['state'] == 'uploaded', 'Package upload incomplete'
+          assert archive['digest'] == 'sha256:' + expected['sha256'], 'Uploaded package SHA256 mismatch'
+          assert any(item['name'] == 'badminton-windows-0.5.10.zip.sha256' and item['state'] == 'uploaded' for item in assets)
+          PY
+          gh release edit v0.5.10 --draft=false --latest

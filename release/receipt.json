@@ -1,0 +1,13 @@
+{
+  "archive": "/workspace/court-package/badminton-windows-0.5.10.zip",
+  "bytes": 285878163,
+  "sha256": "9044da2d402ed2e799432df23f76900110a032d0004b469d159e6d6b89053177",
+  "output_dir": "/workspace/court-package/windows-0.5.10",
+  "source_commit": "ef51298b44ebf0d957093b3fecc7ccf6573d23df",
+  "source_worktree_dirty": false,
+  "source_snapshot_sha256": "efbe05005bdc0a9aceb3d59537e2d66dbfe309334b8dece675b7db56f6833cf2",
+  "app_version": "0.5.10",
+  "runtime_payloads_reused": 8,
+  "application_source_files": 754,
+  "windows_runtime_executed": false
+}

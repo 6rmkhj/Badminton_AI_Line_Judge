@@ -1,0 +1,2 @@
+# Preserve the byte-verified package payloads, including Windows CRLF scripts.
+* -text
