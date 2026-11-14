@@ -9,7 +9,8 @@ import time
 import pytest
 
 from badminton.pair_workspace import (PairWorkspace, PairWorkspaceError, combine_views, MAX_UPLOAD_BYTES,
-                                      MAX_FRAMES, RULES, _write, _landing_candidate, _trajectory_replay)
+                                      MAX_FRAMES, RULES, _write, _landing_candidate, _trajectory_replay,
+                                      _video_estimate_summary)
 
 
 def wait_job(workspace, job_id):
@@ -898,3 +899,192 @@ def test_uploaded_region_rerun_uses_fresh_output_and_updated_config(pair_fixture
     assert calls[0][1]['request_context']!=calls[1][1]['request_context']
     assert all(job['request']['views']['A']['upload_id']==uploaded['upload_id'] for job in jobs)
     assert [job['request']['views']['A']['review_region'] for job in jobs]==regions
+
+
+def native_estimate(label='IN', digest='a', **overrides):
+    return {
+        'schema_version': 1, 'decision': label, 'eligible': True, 'decision_kind': 'video_estimate',
+        'source': 'native_temporal_landing_envelope', 'source_sha256': digest * 64,
+        'rules': deepcopy(RULES), 'contact_observed': False, 'target_identity_verified': False,
+        'selected_family_id': 'family_000', 'member_event_ids': ['event_000', 'event_001'],
+        'native_evidence': {'status': 'supported'}, 'family_resolution': {'status': 'selected'},
+        'geometry': {'status': 'resolved'}, 'frame_interval': [0, 2], 'time_interval': [0, .2],
+        'frame_time_interval': [0, .2], 'time_bounds': [0, .2],
+        'analysis_size': {'width': 960, 'height': 540, 'frame_count': 3},
+        'possible_contact_polygon_px': [[100, 100], [115, 100], [115, 120], [100, 120]],
+        'uncertainty_px': 4, 'reason_codes': ['VIDEO_POSSIBLE_REGION_INSIDE'], **overrides,
+    }
+
+
+@pytest.mark.parametrize('camera,label,confirmed', [('A', 'IN', False), ('B', 'OUT', False),
+                                                  ('A', 'IN', True), ('B', 'OUT', True)])
+def test_native_estimate_can_decide_without_promoting_direct_contact(camera, label, confirmed):
+    views = {'A': source_view('REVIEW'), 'B': source_view('REVIEW', 'b')}
+    views[camera]['video_estimate'] = native_estimate(label, camera.lower())
+    original = deepcopy(views)
+    result = combine_views(views, same_event_confirmed=confirmed)
+    assert result['decision'] == label and result['decision_kind'] == 'video_estimate'
+    assert result['source_camera_ids'] == [camera]
+    assert result['video_estimate_used'] is True
+    assert result['evaluation_eligible'] is False and result['automatic_benchmark_eligible'] is False
+    assert result['ground_truth_created'] is False and result['human_verified'] is False
+    assert result['court_position_m'] is None
+    assert result['views'][camera]['estimated_decision'] == label
+    for row in result['views'].values():
+        assert row['qualified'] is False
+        assert row['automatic_decision'] == row['direct_decision'] == row['assisted_decision'] == 'REVIEW'
+        assert row['verdict_source_camera_ids'] == []
+    assert '직접 관측한 최초 접촉은 아직 확정되지 않았습니다' in result['review_diagnostics']['summary']
+    assert views == original
+
+
+@pytest.mark.parametrize('confirmed,source_ids', [(False, ['A']), (True, ['A', 'B'])])
+def test_native_estimate_donors_only_link_when_the_same_event_is_confirmed(confirmed, source_ids):
+    views = {'A': source_view('REVIEW', video_estimate=native_estimate()),
+             'B': source_view('REVIEW', 'b', video_estimate=native_estimate(digest='b'))}
+    result = combine_views(views, same_event_confirmed=confirmed)
+    assert result['decision'] == 'IN' and result['source_camera_ids'] == source_ids
+    assert result['decision_scope'] == ('linked_views' if confirmed else 'single_view')
+    assert all(row['assisted_decision'] == 'REVIEW' for row in result['views'].values())
+
+
+def test_conflicting_native_estimates_and_known_different_rallies_remain_review():
+    views = {'A': source_view('REVIEW', video_estimate=native_estimate()),
+             'B': source_view('REVIEW', 'b', video_estimate=native_estimate('OUT', 'b'))}
+    conflict = combine_views(views)
+    assert conflict['decision'] == 'REVIEW' and conflict['decision_kind'] == 'unresolved'
+    assert 'CONFLICTING_VIDEO_ESTIMATES' in conflict['reason_codes']
+    assert conflict['source_camera_ids'] == []
+    views['B']['video_estimate'] = native_estimate('IN', 'b')
+    different = combine_views(views, same_event_confirmed=True, different_event=True)
+    assert different['decision'] == 'REVIEW' and 'KNOWN_DIFFERENT_RALLY' in different['reason_codes']
+
+
+@pytest.mark.parametrize('confirmed,expected', [(False, 'IN'), (True, 'REVIEW')])
+def test_verified_verdict_and_opposite_estimate_preserve_correspondence_semantics(confirmed, expected):
+    views = {'A': source_view('IN'),
+             'B': source_view('REVIEW', 'b', video_estimate=native_estimate('OUT', 'b'))}
+    result = combine_views(views, same_event_confirmed=confirmed)
+    assert result['decision'] == expected
+    if confirmed:
+        assert 'VERIFIED_ESTIMATE_CONFLICT' in result['reason_codes']
+        assert result['source_camera_ids'] == []
+    else:
+        assert result['decision_kind'] == 'verified' and result['source_camera_ids'] == ['A']
+        assert 'UNLINKED_ESTIMATE_CONFLICT' in result['warning_codes']
+
+
+def test_verified_evidence_has_priority_over_agreeing_video_estimate():
+    result = combine_views({'A': source_view('IN'),
+                            'B': source_view('REVIEW', 'b', video_estimate=native_estimate('IN', 'b'))},
+                           same_event_confirmed=True)
+    assert result['decision'] == 'IN' and result['decision_kind'] == 'verified'
+    assert result['source_camera_ids'] == ['A'] and not result['video_estimate_used']
+    assert result['views']['B']['direct_decision'] == 'REVIEW'
+    assert result['views']['B']['assistance_mode'] == 'other_view_verdict'
+    result = combine_views({'A': source_view('IN', video_estimate=native_estimate('OUT')),
+                            'B': source_view('REVIEW', 'b')})
+    assert result['decision'] == 'REVIEW' and 'VERIFIED_ESTIMATE_CONFLICT' in result['reason_codes']
+
+
+@pytest.mark.parametrize('invalid', [
+    {'decision': []}, {'decision': {}},
+    {'eligible': False}, {'source': 'unqualified_motion'}, {'schema_version': True},
+    {'contact_observed': True}, {'target_identity_verified': True}, {'source_sha256': 'b' * 64},
+    {'rules': {'game': 'singles', 'phase': 'rally'}}, {'frame_interval': [0, 3]},
+    {'time_interval': [0, .3]}, {'time_interval': [float('nan'), .2]},
+    {'frame_time_interval': None}, {'time_bounds': [-1, .2]}, {'uncertainty_px': -1},
+    {'possible_contact_polygon_px': [[100, 100], [115, 100], [960, 120]]},
+    {'possible_contact_polygon_px': [[100, 100], [100, 100], [100, 100]]},
+    {'possible_contact_polygon_px': [[100, 100], [115, 120], [115, 100], [100, 120]]},
+    {'native_evidence': {'status': 'review'}}, {'geometry': {'status': 'review'}},
+    {'family_resolution': {'status': 'ambiguous'}}, {'member_event_ids': []},
+    {'member_event_ids': ['event_000', 'event_000']}, {'selected_family_id': ''},
+])
+def test_incomplete_or_wrong_source_native_estimates_never_become_pair_verdicts(invalid):
+    result = combine_views({'A': source_view('REVIEW', video_estimate=native_estimate(**invalid)),
+                            'B': source_view('REVIEW', 'b')})
+    assert result['decision'] == 'REVIEW' and result['source_camera_ids'] == []
+    assert result['views']['A']['estimated_decision'] == 'REVIEW'
+
+
+def test_estimate_rules_and_peer_failure_use_the_available_matching_source():
+    singles = {'game': 'singles', 'phase': 'rally'}
+    result = combine_views({'A': source_view('REVIEW', status='failed'),
+                            'B': source_view('REVIEW', 'b', rules=singles,
+                                             video_estimate=native_estimate('OUT', 'b', rules=singles))}, rules=singles)
+    assert result['decision'] == 'OUT' and result['decision_kind'] == 'video_estimate'
+    assert result['source_camera_ids'] == ['B'] and 'VIEW_ANALYSIS_FAILED' in result['warning_codes']
+
+
+def test_video_estimate_summary_uses_trusted_bounds_and_only_safe_images(tmp_path):
+    output = tmp_path / 'result'
+    (output / 'evidence').mkdir(parents=True)
+    (output / 'evidence/native landing.jpg').write_bytes(b'actual-native-evidence')
+    raw = native_estimate(artifact_path='evidence/native landing.jpg',
+                          analysis_size={'width': 10000, 'height': 10000, 'frame_count': 999})
+    analysis = {'width': 960, 'height': 540, 'frame_count': 3}
+    result = {'source_sha256': 'a' * 64, 'video_estimate': raw, 'analysis': analysis,
+              'timestamps': [0, .1, .2], 'config': {'rules': deepcopy(RULES)}}
+    summary = _video_estimate_summary(result, output, '/pair-media/jobs/test/views/A/')
+    assert summary['eligible'] is True and summary['decision'] == 'IN'
+    assert summary['analysis_size'] == analysis
+    assert summary['artifact_url'].endswith('/evidence/native%20landing.jpg')
+    assert 'artifact_path' not in summary
+    for relative in ('../outside.jpg', 'evidence/missing.jpg', 'https://example.org/image.jpg'):
+        result['video_estimate']['artifact_path'] = relative
+        assert _video_estimate_summary(result, output, '/pair-media/')['artifact_url'] is None
+    result['video_estimate']['source_sha256'] = 'b' * 64
+    invalid = _video_estimate_summary(result, output, '/pair-media/')
+    assert invalid['decision'] == 'REVIEW' and not invalid['eligible']
+    assert 'INVALID_VIDEO_ESTIMATE' in invalid['reason_codes']
+
+
+def test_native_estimate_flows_through_fresh_pair_jobs_and_history_without_contact_promotion(pair_fixture, monkeypatch):
+    workspace, _, _ = pair_fixture
+    monkeypatch.setattr('badminton.media.probe', lambda _: {
+        'frame_count': 3, 'width': 960, 'height': 540, 'timestamps': [0, .1, .2]})
+    def analyze(source, output, config, **kwargs):
+        digest = hashlib.sha256(Path(source).read_bytes()).hexdigest()
+        native = native_estimate(artifact_path='evidence/native.jpg', source_sha256=digest)
+        if Path(source).name == 'b.mp4':
+            native.update(decision='REVIEW', eligible=False, reason_codes=['OUTSIDE_SUPPORTED_COURT'])
+        (output / 'evidence').mkdir(parents=True, exist_ok=True)
+        (output / 'evidence/native.jpg').write_bytes(b'original-temporal-evidence')
+        return {'source_sha256': digest, 'decision': {'decision': 'REVIEW'}, 'video_estimate': native,
+                'analysis': {'width': 960, 'height': 540, 'frame_count': 3}, 'timestamps': [0, .1, .2],
+                'artifacts': {}, 'config': deepcopy(config)}
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    job = wait_job(workspace, submit_fixture(workspace, reuse_review=False))
+    result = job['result']
+    assert result['decision'] == 'IN' and result['decision_kind'] == 'video_estimate'
+    assert result['source_camera_ids'] == ['A']
+    for view in result['views'].values():
+        assert view['automatic_decision'] == view['direct_decision'] == view['assisted_decision'] == 'REVIEW'
+        assert view['contact_time_seconds'] is None and view['qualified'] is False
+    assert result['views']['A']['video_estimate']['artifact_url'].endswith('/evidence/native.jpg')
+    assert result['views']['B']['video_estimate']['decision'] == 'REVIEW'
+    assert workspace.list_jobs()['jobs'][0]['decision_kind'] == 'video_estimate'
+    stored = json.loads((workspace.root / 'jobs' / job['job_id'] / 'job.json').read_text())
+    assert stored['result']['decision_kind'] == 'video_estimate'
+
+
+@pytest.mark.parametrize('malformed_label', [[], {}])
+def test_malformed_optional_estimate_does_not_discard_valid_strict_camera(pair_fixture, monkeypatch, malformed_label):
+    workspace, _, _ = pair_fixture
+    monkeypatch.setattr('badminton.media.probe', lambda _: {
+        'frame_count': 3, 'width': 960, 'height': 540, 'timestamps': [0, .1, .2]})
+    def analyze(source, output, config, **kwargs):
+        digest = hashlib.sha256(Path(source).read_bytes()).hexdigest()
+        return {'source_sha256': digest,
+                'decision': {'decision': 'IN' if Path(source).name == 'a.mp4' else 'REVIEW'},
+                'video_estimate': native_estimate(source_sha256=digest, decision=malformed_label),
+                'analysis': {'width': 960, 'height': 540, 'frame_count': 3}, 'timestamps': [0, .1, .2],
+                'artifacts': {}, 'config': deepcopy(config)}
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    job = wait_job(workspace, submit_fixture(workspace, reuse_review=False))
+    assert job['status'] == 'completed'
+    assert job['result']['decision'] == 'IN' and job['result']['decision_kind'] == 'verified'
+    assert job['result']['source_camera_ids'] == ['A']
+    assert job['result']['views']['A']['direct_decision'] == 'IN'
+    assert job['result']['views']['A']['video_estimate']['decision'] == 'REVIEW'

@@ -1,0 +1,899 @@
+{
+  "app_version": "0.5.12",
+  "tested_implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+  "inference_inputs": "fresh original video analysis; no reviewed contact points, labels, temporal windows, manual regions, or stored review reuse",
+  "independent_ground_truth_accuracy": null,
+  "physical_contact_verification_claimed": false,
+  "estimate_is_conditional_on": "foreground target identity, image reversal representing ground rebound, and local motion model",
+  "A_source_note": "Repository source with the same filename; byte identity with the uploaded A attachment was not verified (attachment exceeds transfer limit). B is the actual uploaded source.",
+  "source_manifest_sha256": "60e9c95f5a3eb82ef9730487bfee5fa6eab7b84c0524cdb5efe17ee4d0cd3374",
+  "negative_control_manifest_sha256": "30abaa77523b3b034d563de782083496a6f1248fb5cfd1020329886075a2aaa2",
+  "baseline_source_commit": "39b2b9e97c7e22100f3124a397d3d1d3dda5ec15",
+  "pair_runs": {
+    "doubles": {
+      "job_id": "c5e26cfa44154da88327c475fffa99e5",
+      "final_decision": "IN",
+      "decision_kind": "video_estimate",
+      "source_camera_ids": [
+        "A"
+      ],
+      "same_event_confirmed": false,
+      "reuse_review": false,
+      "views": {
+        "A": {
+          "strict_decision": "REVIEW",
+          "estimate": "IN",
+          "eligible": true,
+          "reason_codes": [
+            "VIDEO_ESTIMATE_ALL_POSITIONS_INSIDE"
+          ],
+          "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+          "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+          "analysis": {
+            "width": 960,
+            "height": 540,
+            "frame_count": 108,
+            "preprocessing": "opencv_source_bgr_area_v1",
+            "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+          },
+          "family_status": "selected",
+          "member_event_ids": [
+            "event_000",
+            "event_001",
+            "event_002",
+            "event_006",
+            "event_008",
+            "event_009"
+          ],
+          "native_status": "supported",
+          "native_reason_codes": [
+            "NATIVE_FOREGROUND_AND_LOCAL_REBOUND_SUPPORTED"
+          ],
+          "native_observed_frame_count": 10,
+          "native_decoded_frame_count": 19,
+          "frame_interval": [
+            48,
+            51
+          ],
+          "time_interval": [
+            1.599933,
+            1.699933
+          ],
+          "possible_contact_polygon_px": [
+            [
+              345.0,
+              431.625
+            ],
+            [
+              376.5,
+              431.625
+            ],
+            [
+              376.5,
+              455.375
+            ],
+            [
+              345.0,
+              455.375
+            ]
+          ],
+          "uncertainty_px": 3.7160444430539226,
+          "minimum_clearance_px": 10.3852,
+          "temporal_model": {
+            "residual_px": 2.6551444430539224,
+            "between_frame_overshoot_px": 0.0,
+            "crossing_time": 1.6158569838687378,
+            "crossing_interval": [
+              1.612433,
+              1.61946425
+            ],
+            "bracketing_frame_interval": [
+              48,
+              51
+            ],
+            "bracketing_time_interval": [
+              1.599933,
+              1.699933
+            ],
+            "incoming_residual_px": 1.4053343158605862,
+            "outgoing_residual_px": 2.6551444430539224,
+            "nominal_frame_period_seconds": 0.03333300000000006,
+            "model": "local quadratic bottom-of-foreground intersection with observed residual band"
+          },
+          "contact_observed": false,
+          "target_identity_verified": false,
+          "evaluation_eligible": false,
+          "timings": {
+            "decode_and_preview_seconds": 68.0382625179991,
+            "calibration_seconds": 4.1412399359996925,
+            "detection_seconds": 46.99719229600123,
+            "tracking_seconds": 27.610101606998796,
+            "events_and_decision_seconds": 23.828513144999306,
+            "total_seconds": 182.77542545199867
+          }
+        },
+        "B": {
+          "strict_decision": "REVIEW",
+          "estimate": "REVIEW",
+          "eligible": false,
+          "reason_codes": [
+            "VIDEO_ESTIMATE_NO_UNIQUE_EVENT"
+          ],
+          "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+          "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+          "analysis": {
+            "width": 960,
+            "height": 540,
+            "frame_count": 82,
+            "preprocessing": "opencv_source_bgr_area_v1",
+            "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+          },
+          "family_status": "review",
+          "member_event_ids": null,
+          "native_status": null,
+          "native_reason_codes": null,
+          "native_observed_frame_count": null,
+          "native_decoded_frame_count": null,
+          "frame_interval": null,
+          "time_interval": null,
+          "possible_contact_polygon_px": null,
+          "uncertainty_px": null,
+          "minimum_clearance_px": null,
+          "temporal_model": null,
+          "contact_observed": false,
+          "target_identity_verified": false,
+          "evaluation_eligible": false,
+          "timings": {
+            "decode_and_preview_seconds": 9.86190939900007,
+            "calibration_seconds": 3.588724466999338,
+            "detection_seconds": 25.533610966998822,
+            "tracking_seconds": 17.054864554000233,
+            "events_and_decision_seconds": 4.306819744999302,
+            "total_seconds": 63.13471676900008
+          }
+        }
+      }
+    },
+    "singles": {
+      "job_id": "588ee8d3a10644be87626d83cf9d50d2",
+      "final_decision": "OUT",
+      "decision_kind": "video_estimate",
+      "source_camera_ids": [
+        "A"
+      ],
+      "same_event_confirmed": false,
+      "reuse_review": false,
+      "views": {
+        "A": {
+          "strict_decision": "REVIEW",
+          "estimate": "OUT",
+          "eligible": true,
+          "reason_codes": [
+            "VIDEO_ESTIMATE_ALL_POSITIONS_OUTSIDE"
+          ],
+          "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+          "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+          "analysis": {
+            "width": 960,
+            "height": 540,
+            "frame_count": 108,
+            "preprocessing": "opencv_source_bgr_area_v1",
+            "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+          },
+          "family_status": "selected",
+          "member_event_ids": [
+            "event_000",
+            "event_001",
+            "event_002",
+            "event_006",
+            "event_008",
+            "event_009"
+          ],
+          "native_status": "supported",
+          "native_reason_codes": [
+            "NATIVE_FOREGROUND_AND_LOCAL_REBOUND_SUPPORTED"
+          ],
+          "native_observed_frame_count": 10,
+          "native_decoded_frame_count": 19,
+          "frame_interval": [
+            48,
+            51
+          ],
+          "time_interval": [
+            1.599933,
+            1.699933
+          ],
+          "possible_contact_polygon_px": [
+            [
+              345.0,
+              431.625
+            ],
+            [
+              376.5,
+              431.625
+            ],
+            [
+              376.5,
+              455.375
+            ],
+            [
+              345.0,
+              455.375
+            ]
+          ],
+          "uncertainty_px": 3.7160444430539226,
+          "minimum_clearance_px": 17.4752,
+          "temporal_model": {
+            "residual_px": 2.6551444430539224,
+            "between_frame_overshoot_px": 0.0,
+            "crossing_time": 1.6158569838687378,
+            "crossing_interval": [
+              1.612433,
+              1.61946425
+            ],
+            "bracketing_frame_interval": [
+              48,
+              51
+            ],
+            "bracketing_time_interval": [
+              1.599933,
+              1.699933
+            ],
+            "incoming_residual_px": 1.4053343158605862,
+            "outgoing_residual_px": 2.6551444430539224,
+            "nominal_frame_period_seconds": 0.03333300000000006,
+            "model": "local quadratic bottom-of-foreground intersection with observed residual band"
+          },
+          "contact_observed": false,
+          "target_identity_verified": false,
+          "evaluation_eligible": false,
+          "timings": {
+            "decode_and_preview_seconds": 54.53847154000141,
+            "calibration_seconds": 4.579070665000472,
+            "detection_seconds": 61.18104853499972,
+            "tracking_seconds": 26.970390905000386,
+            "events_and_decision_seconds": 28.53301051299968,
+            "total_seconds": 190.96753308400002
+          }
+        },
+        "B": {
+          "strict_decision": "REVIEW",
+          "estimate": "REVIEW",
+          "eligible": false,
+          "reason_codes": [
+            "VIDEO_ESTIMATE_NO_UNIQUE_EVENT"
+          ],
+          "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+          "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+          "analysis": {
+            "width": 960,
+            "height": 540,
+            "frame_count": 82,
+            "preprocessing": "opencv_source_bgr_area_v1",
+            "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+          },
+          "family_status": "review",
+          "member_event_ids": null,
+          "native_status": null,
+          "native_reason_codes": null,
+          "native_observed_frame_count": null,
+          "native_decoded_frame_count": null,
+          "frame_interval": null,
+          "time_interval": null,
+          "possible_contact_polygon_px": null,
+          "uncertainty_px": null,
+          "minimum_clearance_px": null,
+          "temporal_model": null,
+          "contact_observed": false,
+          "target_identity_verified": false,
+          "evaluation_eligible": false,
+          "timings": {
+            "decode_and_preview_seconds": 6.885234567000225,
+            "calibration_seconds": 3.0914765689994965,
+            "detection_seconds": 20.667496184998527,
+            "tracking_seconds": 10.896558283000559,
+            "events_and_decision_seconds": 2.8429705279995687,
+            "total_seconds": 46.49848932999885
+          }
+        }
+      }
+    }
+  },
+  "additional_previously_exposed_regressions": [
+    {
+      "id": "case_02",
+      "file": "video/8k 30 4k 24 b시점 4.mp4",
+      "baseline_decision": "REVIEW",
+      "strict_decision": "REVIEW",
+      "estimate": "REVIEW",
+      "eligible": false,
+      "reason_codes": [
+        "VIDEO_ESTIMATE_NO_UNIQUE_EVENT"
+      ],
+      "source_sha256": "ae1db2f945a14c7e0c2b11d00be7085ed8c7f69b431ee621cc1d0b9efc1411c6",
+      "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+      "analysis": {
+        "width": 960,
+        "height": 540,
+        "frame_count": 82,
+        "preprocessing": "opencv_source_bgr_area_v1",
+        "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+      },
+      "family_status": "review",
+      "member_event_ids": null,
+      "native_status": null,
+      "native_reason_codes": null,
+      "native_observed_frame_count": null,
+      "native_decoded_frame_count": null,
+      "frame_interval": null,
+      "time_interval": null,
+      "possible_contact_polygon_px": null,
+      "uncertainty_px": null,
+      "minimum_clearance_px": null,
+      "temporal_model": null,
+      "contact_observed": false,
+      "target_identity_verified": false,
+      "evaluation_eligible": false,
+      "timings": {
+        "decode_and_preview_seconds": 6.428132199000174,
+        "calibration_seconds": 5.502126061999661,
+        "detection_seconds": 17.47995032399922,
+        "tracking_seconds": 8.077863997999884,
+        "events_and_decision_seconds": 2.877117976999216,
+        "total_seconds": 42.23056730999997
+      }
+    },
+    {
+      "id": "case_03",
+      "file": "video/a-4시점(uhd30 4k30).mp4",
+      "baseline_decision": "REVIEW",
+      "strict_decision": "REVIEW",
+      "estimate": "REVIEW",
+      "eligible": false,
+      "reason_codes": [
+        "VIDEO_ESTIMATE_NO_UNIQUE_EVENT"
+      ],
+      "source_sha256": "973355dc2d10ab4eebe1564e4c223b02f1ba225d600a9889405eae646b8213b3",
+      "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+      "analysis": {
+        "width": 960,
+        "height": 540,
+        "frame_count": 97,
+        "preprocessing": "opencv_source_bgr_area_v1",
+        "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+      },
+      "family_status": "review",
+      "member_event_ids": null,
+      "native_status": null,
+      "native_reason_codes": null,
+      "native_observed_frame_count": null,
+      "native_decoded_frame_count": null,
+      "frame_interval": null,
+      "time_interval": null,
+      "possible_contact_polygon_px": null,
+      "uncertainty_px": null,
+      "minimum_clearance_px": null,
+      "temporal_model": null,
+      "contact_observed": false,
+      "target_identity_verified": false,
+      "evaluation_eligible": false,
+      "timings": {
+        "decode_and_preview_seconds": 10.9212817610005,
+        "calibration_seconds": 3.413675666999552,
+        "detection_seconds": 21.31195046799985,
+        "tracking_seconds": 11.722617742998409,
+        "events_and_decision_seconds": 4.640808950000064,
+        "total_seconds": 54.71695956300027
+      }
+    },
+    {
+      "id": "case_06",
+      "file": "video/b시점(uhd30 hd30) 3.mp4",
+      "baseline_decision": "REVIEW",
+      "strict_decision": "REVIEW",
+      "estimate": "REVIEW",
+      "eligible": false,
+      "reason_codes": [
+        "VIDEO_ESTIMATE_NO_UNIQUE_EVENT"
+      ],
+      "source_sha256": "22f90d5ebb1e66a3750b659fda24b0df90d27e7bf3fb1ff2472467c2f497ee5f",
+      "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+      "analysis": {
+        "width": 960,
+        "height": 540,
+        "frame_count": 85,
+        "preprocessing": "opencv_source_bgr_area_v1",
+        "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+      },
+      "family_status": "review",
+      "member_event_ids": null,
+      "native_status": null,
+      "native_reason_codes": null,
+      "native_observed_frame_count": null,
+      "native_decoded_frame_count": null,
+      "frame_interval": null,
+      "time_interval": null,
+      "possible_contact_polygon_px": null,
+      "uncertainty_px": null,
+      "minimum_clearance_px": null,
+      "temporal_model": null,
+      "contact_observed": false,
+      "target_identity_verified": false,
+      "evaluation_eligible": false,
+      "timings": {
+        "decode_and_preview_seconds": 1.9507583159993374,
+        "calibration_seconds": 4.2666857190015435,
+        "detection_seconds": 23.14541828000074,
+        "tracking_seconds": 7.992549480000889,
+        "events_and_decision_seconds": 2.1900549299989507,
+        "total_seconds": 41.295693358999415
+      }
+    },
+    {
+      "id": "case_07",
+      "file": "video/a시점 4.mp4",
+      "baseline_decision": "REVIEW",
+      "strict_decision": "REVIEW",
+      "estimate": "REVIEW",
+      "eligible": false,
+      "reason_codes": [
+        "VIDEO_ESTIMATE_NO_UNIQUE_EVENT"
+      ],
+      "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+      "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+      "analysis": {
+        "width": 960,
+        "height": 540,
+        "frame_count": 281,
+        "preprocessing": "opencv_source_bgr_area_v1",
+        "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+      },
+      "family_status": "review",
+      "member_event_ids": null,
+      "native_status": null,
+      "native_reason_codes": null,
+      "native_observed_frame_count": null,
+      "native_decoded_frame_count": null,
+      "frame_interval": null,
+      "time_interval": null,
+      "possible_contact_polygon_px": null,
+      "uncertainty_px": null,
+      "minimum_clearance_px": null,
+      "temporal_model": null,
+      "contact_observed": false,
+      "target_identity_verified": false,
+      "evaluation_eligible": false,
+      "timings": {
+        "decode_and_preview_seconds": 29.458759016999466,
+        "calibration_seconds": 7.407593062998785,
+        "detection_seconds": 76.9098397559992,
+        "tracking_seconds": 23.801009230999625,
+        "events_and_decision_seconds": 9.905496753999614,
+        "total_seconds": 159.34340217099998
+      }
+    }
+  ],
+  "negative_controls": [
+    {
+      "id": "static_A",
+      "source_transform": {
+        "frame_indices": [
+          0
+        ],
+        "repeat_count": 60,
+        "fps": 30,
+        "output_size": [
+          960,
+          540
+        ],
+        "codec": "lossless"
+      },
+      "expected": "REVIEW",
+      "strict_decision": "REVIEW",
+      "estimate": "REVIEW",
+      "eligible": false,
+      "reason_codes": [
+        "VIDEO_ESTIMATE_NO_UNIQUE_EVENT"
+      ],
+      "source_sha256": "4e91343387f1930477206654a67bc89de547b0b3fb031cf853774a3698a4235d",
+      "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+      "analysis": {
+        "width": 960,
+        "height": 540,
+        "frame_count": 60,
+        "preprocessing": "opencv_source_bgr_area_v1",
+        "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+      },
+      "family_status": "review",
+      "member_event_ids": null,
+      "native_status": null,
+      "native_reason_codes": null,
+      "native_observed_frame_count": null,
+      "native_decoded_frame_count": null,
+      "frame_interval": null,
+      "time_interval": null,
+      "possible_contact_polygon_px": null,
+      "uncertainty_px": null,
+      "minimum_clearance_px": null,
+      "temporal_model": null,
+      "contact_observed": false,
+      "target_identity_verified": false,
+      "evaluation_eligible": false,
+      "timings": {
+        "decode_and_preview_seconds": 0.7323903179985791,
+        "calibration_seconds": 5.311444789998859,
+        "detection_seconds": 2.2317413559994748,
+        "tracking_seconds": 0.0014087420004216256,
+        "events_and_decision_seconds": 0.002491888999429648,
+        "total_seconds": 9.145938805999322
+      }
+    },
+    {
+      "id": "static_camera_motion_A",
+      "source_transform": {
+        "repeat_source_frame": 0,
+        "repeat_count": 60,
+        "fps": 30,
+        "output_size": [
+          960,
+          540
+        ],
+        "affine_translation_px_per_frame": [
+          3,
+          0
+        ],
+        "border": "reflect"
+      },
+      "expected": "REVIEW",
+      "strict_decision": "REVIEW",
+      "estimate": "REVIEW",
+      "eligible": false,
+      "reason_codes": [
+        "VIDEO_ESTIMATE_NO_UNIQUE_EVENT"
+      ],
+      "source_sha256": "81236069bb537e822ed95cbf943f7b35d8ada53bd8dd1e058d78a77efc09fbfe",
+      "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+      "analysis": {
+        "width": 960,
+        "height": 540,
+        "frame_count": 60,
+        "preprocessing": "opencv_source_bgr_area_v1",
+        "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+      },
+      "family_status": "review",
+      "member_event_ids": null,
+      "native_status": null,
+      "native_reason_codes": null,
+      "native_observed_frame_count": null,
+      "native_decoded_frame_count": null,
+      "frame_interval": null,
+      "time_interval": null,
+      "possible_contact_polygon_px": null,
+      "uncertainty_px": null,
+      "minimum_clearance_px": null,
+      "temporal_model": null,
+      "contact_observed": false,
+      "target_identity_verified": false,
+      "evaluation_eligible": false,
+      "timings": {
+        "decode_and_preview_seconds": 0.8704901000000973,
+        "calibration_seconds": 3.918349149000278,
+        "detection_seconds": 6.827058913000656,
+        "tracking_seconds": 2.450322109998524,
+        "events_and_decision_seconds": 0.5152652640008455,
+        "total_seconds": 15.254629540999304
+      }
+    },
+    {
+      "id": "airborne_prefix_A",
+      "source_transform": {
+        "frame_indices_inclusive": [
+          0,
+          29
+        ],
+        "preserve_native_decoded_pixels": true,
+        "preserve_source_frame_timing_then_rebase": true
+      },
+      "expected": "REVIEW",
+      "strict_decision": "REVIEW",
+      "estimate": "REVIEW",
+      "eligible": false,
+      "reason_codes": [
+        "VIDEO_ESTIMATE_NO_UNIQUE_EVENT"
+      ],
+      "source_sha256": "2f12778427899450526c365b8cfc25037c755c70bed94755d12e126ef8ecbd84",
+      "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+      "analysis": {
+        "width": 960,
+        "height": 540,
+        "frame_count": 30,
+        "preprocessing": "opencv_source_bgr_area_v1",
+        "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+      },
+      "family_status": "review",
+      "member_event_ids": null,
+      "native_status": null,
+      "native_reason_codes": null,
+      "native_observed_frame_count": null,
+      "native_decoded_frame_count": null,
+      "frame_interval": null,
+      "time_interval": null,
+      "possible_contact_polygon_px": null,
+      "uncertainty_px": null,
+      "minimum_clearance_px": null,
+      "temporal_model": null,
+      "contact_observed": false,
+      "target_identity_verified": false,
+      "evaluation_eligible": false,
+      "timings": {
+        "decode_and_preview_seconds": 11.408257379000133,
+        "calibration_seconds": 4.822317991998716,
+        "detection_seconds": 17.342772002000856,
+        "tracking_seconds": 12.723055144000682,
+        "events_and_decision_seconds": 5.606954053000663,
+        "total_seconds": 57.36575120000089
+      }
+    },
+    {
+      "id": "first_contact_gap_A",
+      "source_transform": {
+        "remove_frame_indices_inclusive": [
+          44,
+          54
+        ],
+        "preserve_remaining_native_pixels": true,
+        "preserve_remaining_source_pts_then_rebase": true
+      },
+      "expected": "REVIEW",
+      "strict_decision": "REVIEW",
+      "estimate": "REVIEW",
+      "eligible": false,
+      "reason_codes": [
+        "VIDEO_ESTIMATE_NO_UNIQUE_EVENT"
+      ],
+      "source_sha256": "7e6e058ab04d2afa1f6474d2fc98302acd542279253d60124d658b81e1d5f662",
+      "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+      "analysis": {
+        "width": 960,
+        "height": 540,
+        "frame_count": 97,
+        "preprocessing": "opencv_source_bgr_area_v1",
+        "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+      },
+      "family_status": "review",
+      "member_event_ids": null,
+      "native_status": null,
+      "native_reason_codes": null,
+      "native_observed_frame_count": null,
+      "native_decoded_frame_count": null,
+      "frame_interval": null,
+      "time_interval": null,
+      "possible_contact_polygon_px": null,
+      "uncertainty_px": null,
+      "minimum_clearance_px": null,
+      "temporal_model": null,
+      "contact_observed": false,
+      "target_identity_verified": false,
+      "evaluation_eligible": false,
+      "timings": {
+        "decode_and_preview_seconds": 30.04469515600067,
+        "calibration_seconds": 4.051710533000005,
+        "detection_seconds": 47.82849174799958,
+        "tracking_seconds": 20.54457979700055,
+        "events_and_decision_seconds": 18.216620727998816,
+        "total_seconds": 128.02508415300144
+      }
+    },
+    {
+      "id": "contact_occlusion_A",
+      "source_transform": {
+        "frame_indices_inclusive": [
+          44,
+          54
+        ],
+        "analysis_size": [
+          960,
+          540
+        ],
+        "occlusion_rectangle_px": [
+          336,
+          418,
+          390,
+          475
+        ],
+        "map_rectangle_to_source_pixels": true,
+        "mask_mode": "opaque cover preserving all other source pixels and source timestamps"
+      },
+      "expected": "REVIEW",
+      "strict_decision": "REVIEW",
+      "estimate": "REVIEW",
+      "eligible": false,
+      "reason_codes": [
+        "VIDEO_ESTIMATE_NO_UNIQUE_EVENT"
+      ],
+      "source_sha256": "de10d8890f89038823ecbfed86f6b22a86ccd71b3e99db0fbd119a2a49907721",
+      "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+      "analysis": {
+        "width": 960,
+        "height": 540,
+        "frame_count": 108,
+        "preprocessing": "opencv_source_bgr_area_v1",
+        "source_scaling": "Global source-frame scan with native ROI refinement and temporal contact evidence"
+      },
+      "family_status": "review",
+      "member_event_ids": null,
+      "native_status": null,
+      "native_reason_codes": null,
+      "native_observed_frame_count": null,
+      "native_decoded_frame_count": null,
+      "frame_interval": null,
+      "time_interval": null,
+      "possible_contact_polygon_px": null,
+      "uncertainty_px": null,
+      "minimum_clearance_px": null,
+      "temporal_model": null,
+      "contact_observed": false,
+      "target_identity_verified": false,
+      "evaluation_eligible": false,
+      "timings": {
+        "decode_and_preview_seconds": 35.22668979700029,
+        "calibration_seconds": 4.591068687999723,
+        "detection_seconds": 46.61353688499912,
+        "tracking_seconds": 22.379862530000537,
+        "events_and_decision_seconds": 20.24390605300141,
+        "total_seconds": 143.03374282500045
+      }
+    }
+  ],
+  "tests": {
+    "python": "1316 passed, 12 skipped in 130.69s (0:02:10)"
+  },
+  "images": {
+    "A-doubles-estimate.jpg": {
+      "sha256": "a5148d0c1d86ca023ed4db2327e630b2ab558556b3ad41ce131a4f408da8cb87",
+      "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+      "actual_analysis_artifact": true
+    },
+    "A-singles-estimate.jpg": {
+      "sha256": "c1dcfc594a69aaedc388628b004cba644b8eba8a89b7c352169a95fa5c1e22ca",
+      "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+      "actual_analysis_artifact": true
+    }
+  },
+  "initial_full_attempt": {
+    "implementation_fingerprint": "3fb776d4bd952d1f9e69007098262f5f4fd10796096c18a778b079037572f591",
+    "both_modes_final": "REVIEW",
+    "A_native_reason": "NATIVE_ESTIMATE_SECOND_OBJECT_SUPPORT",
+    "correction": "Require temporal and spatial association for a second object; isolated fragments at separate times are not one observed competing path."
+  },
+  "scope": "A is development data; B and four additional originals are previously exposed sources in the same gym. Five transformed negative controls are not independent contact truth or IN/OUT accuracy.",
+  "browser_checks": {
+    "doubles": {
+      "status": "passed",
+      "provenance": "Read-only production ReviewServer and actual saved analysis; no request interception",
+      "origin": "http://127.0.0.1:18868",
+      "job_id": "c5e26cfa44154da88327c475fffa99e5",
+      "decision": "IN",
+      "decision_kind": "video_estimate",
+      "source_camera_ids": [
+        "A"
+      ],
+      "checks": [
+        "final result and estimate provenance match production API",
+        "per-view strict decisions unchanged; estimate display matches backend",
+        "native evidence images load and source intervals seek",
+        "375/390/1440px no horizontal overflow",
+        "reload and actual history preserve estimate distinction",
+        "no JavaScript or native evidence HTTP errors"
+      ],
+      "views": {
+        "A": {
+          "strict": [
+            "REVIEW",
+            "REVIEW",
+            "REVIEW"
+          ],
+          "estimated_decision": "IN",
+          "eligible": true,
+          "artifact_url": "/pair-media/jobs/c5e26cfa44154da88327c475fffa99e5/views/A/evidence/video-estimate.jpg",
+          "time_interval": [
+            1.599933,
+            1.699933
+          ],
+          "seek_verified": true
+        },
+        "B": {
+          "strict": [
+            "REVIEW",
+            "REVIEW",
+            "REVIEW"
+          ],
+          "estimated_decision": "REVIEW",
+          "eligible": false,
+          "artifact_url": null,
+          "time_interval": null
+        }
+      },
+      "javascript_errors": [],
+      "media_failures": []
+    },
+    "singles": {
+      "status": "passed",
+      "provenance": "Read-only production ReviewServer and actual saved analysis; no request interception",
+      "origin": "http://127.0.0.1:18869",
+      "job_id": "588ee8d3a10644be87626d83cf9d50d2",
+      "decision": "OUT",
+      "decision_kind": "video_estimate",
+      "source_camera_ids": [
+        "A"
+      ],
+      "checks": [
+        "final result and estimate provenance match production API",
+        "per-view strict decisions unchanged; estimate display matches backend",
+        "native evidence images load and source intervals seek",
+        "375/390/1440px no horizontal overflow",
+        "reload and actual history preserve estimate distinction",
+        "no JavaScript or native evidence HTTP errors"
+      ],
+      "views": {
+        "A": {
+          "strict": [
+            "REVIEW",
+            "REVIEW",
+            "REVIEW"
+          ],
+          "estimated_decision": "OUT",
+          "eligible": true,
+          "artifact_url": "/pair-media/jobs/588ee8d3a10644be87626d83cf9d50d2/views/A/evidence/video-estimate.jpg",
+          "time_interval": [
+            1.599933,
+            1.699933
+          ],
+          "seek_verified": true
+        },
+        "B": {
+          "strict": [
+            "REVIEW",
+            "REVIEW",
+            "REVIEW"
+          ],
+          "estimated_decision": "REVIEW",
+          "eligible": false,
+          "artifact_url": null,
+          "time_interval": null
+        }
+      },
+      "javascript_errors": [],
+      "media_failures": []
+    }
+  },
+  "native_isolation_negative_stress": {
+    "test_kind": "native_only_negative_stress_with_injected_original_priors",
+    "production_inference": false,
+    "independent_ground_truth": false,
+    "accuracy_evaluation": false,
+    "all_conditions_passed": true,
+    "cases": [
+      {
+        "id": "contact_occlusion_A",
+        "status": "review",
+        "reason_codes": [
+          "NATIVE_ESTIMATE_COMPACT_OBJECT_SUPPORT_INSUFFICIENT"
+        ],
+        "decoded_frame_count": 19,
+        "observed_frame_count": 5,
+        "source_sha256": "de10d8890f89038823ecbfed86f6b22a86ccd71b3e99db0fbd119a2a49907721"
+      },
+      {
+        "id": "static_A",
+        "status": "review",
+        "reason_codes": [
+          "NATIVE_ESTIMATE_NO_VISIBLE_PEAK"
+        ],
+        "decoded_frame_count": 19,
+        "observed_frame_count": 0,
+        "source_sha256": "4e91343387f1930477206654a67bc89de547b0b3fb031cf853774a3698a4235d"
+      }
+    ]
+  }
+}

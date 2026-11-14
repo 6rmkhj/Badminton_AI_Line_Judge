@@ -674,6 +674,57 @@ function renderEvidenceAssessment(camera, assessment) {
   }
   panel.append(list); return panel;
 }
+function estimateVerdict(estimate) {
+  return estimate?.eligible === true && ['IN', 'OUT'].includes(estimate.decision) ? estimate.decision : 'REVIEW';
+}
+function estimateInterval(value, integers = false) {
+  return Array.isArray(value) && value.length === 2
+    && value.every(number => typeof number === 'number' && Number.isFinite(number) && number >= 0 && (!integers || Number.isInteger(number)))
+    && value[0] <= value[1] ? value : null;
+}
+function renderVideoEstimate(camera, view, player) {
+  const estimate = view.video_estimate;
+  if (!estimate || typeof estimate !== 'object') return null;
+  const verdict = estimateVerdict(estimate), supported = verdict !== 'REVIEW';
+  const panel = el('section', 'video-estimate-panel');
+  panel.dataset.verdict = verdict;
+  const heading = el('h4', '', '원본 영상 추정 근거'); heading.id = 'estimate-heading-' + camera.toLowerCase();
+  panel.setAttribute('aria-labelledby', heading.id); panel.append(heading);
+  panel.append(el('p', 'estimate-conclusion', supported ? `영상 추정 ${verdict}` : '영상 추정 판정 보류'));
+  panel.append(el('p', 'estimate-basis', supported
+    ? verdict === 'IN' ? '위치 오차를 포함한 접촉 가능 영역 전체가 확인된 코트 내부에 있습니다.'
+      : '위치 오차를 포함한 접촉 가능 영역 전체가 관측된 경기 경계 밖에 있습니다.'
+    : '원본 영상 근거나 경계 여유가 부족해 IN·OUT을 추정하지 못했습니다.'));
+  panel.append(el('p', 'estimate-limitation', '착지 전후 원본의 움직임과 형상으로 계산한 영상 추정입니다. 코르크의 최초 바닥 접촉과 대상 셔틀을 직접 확인한 판정은 아래에 별도로 표시합니다.'));
+  const native = estimate.native_evidence || {};
+  const times = estimateInterval(estimate.time_interval), frames = estimateInterval(estimate.frame_interval, true);
+  const metrics = el('dl', 'estimate-metrics');
+  const add = (label, text) => { const row = el('div'); row.append(el('dt', '', label), el('dd', '', text)); metrics.append(row); };
+  if (times) add('접촉 가능 구간', `${fmt(times[0], 3)}–${fmt(times[1], 3)}초`);
+  if (Number.isInteger(native.observed_frame_count) && native.observed_frame_count >= 0) add('원본 관측', `${native.observed_frame_count}프레임`);
+  if (Array.isArray(estimate.member_event_ids) && estimate.member_event_ids.length) add('같은 착지의 후보', `${new Set(estimate.member_event_ids.filter(id => typeof id === 'string')).size}개를 한 사건으로 묶음`);
+  if (metrics.childNodes.length) panel.append(metrics);
+  const messages = Array.isArray(estimate.reasons) ? estimate.reasons.filter(message => typeof message === 'string' && message) : [];
+  if (messages.length) { const list = el('ul', 'estimate-reasons'); messages.forEach(message => list.append(el('li', '', message))); panel.append(list); }
+  const artifact = safeUrl(estimate.artifact_url);
+  if (artifact) {
+    const figure = el('figure', 'trajectory-context estimate-evidence');
+    const link = el('a'); link.href = artifact; link.target = '_blank'; link.rel = 'noopener';
+    const image = el('img'); image.src = artifact; image.loading = 'lazy'; image.alt = camera + ' 시점 원본 영상의 접촉 가능 영역과 전후 프레임';
+    link.append(image); figure.append(link, el('figcaption', '', '원본 확대와 접촉 가능 범위 ↗ · 표시 영역은 직접 관측한 접촉점이 아니라 위치 오차를 비교할 영상 추정 범위입니다.')); panel.append(figure);
+  }
+  if (times && player) {
+    const button = el('button', 'seek-button', '추정 접촉 구간부터 보기'); button.type = 'button'; button.dataset.estimateSeekCamera = camera;
+    button.addEventListener('click', () => seek(player, times[0])); panel.append(button);
+  }
+  const uncertainty = estimate.uncertainty_px;
+  const details = el('details', 'estimate-details'); details.append(el('summary', '', '추정 범위와 한계 자세히 보기'));
+  if (frames) details.append(el('p', '', `원본 프레임 ${frames[0]}–${frames[1]} · 프레임 번호는 0부터 시작합니다.`));
+  if (typeof uncertainty === 'number' && Number.isFinite(uncertainty) && uncertainty >= 0) details.append(el('p', '', `접촉 위치의 추가 오차: ${fmt(uncertainty, 2)} 분석 픽셀. 코트 라인의 위치 오차도 경계 비교에 별도로 반영합니다.`));
+  if (Array.isArray(estimate.reason_codes) && estimate.reason_codes.length) details.append(el('p', '', estimate.reason_codes.filter(code => typeof code === 'string').join(' · ')));
+  details.append(el('p', '', '영상 추정은 직접 접촉을 확인한 결과나 측정된 판정 정확도로 취급하지 않습니다.'));
+  panel.append(details); return panel;
+}
 function renderCalibration(camera, view) {
   const summary = view.calibration_summary;
   if (!summary || typeof summary !== 'object') return null;
@@ -729,6 +780,12 @@ function renderView(camera, view, diagnostics) {
     verdicts.append(cell);
   }
   card.append(verdicts);
+  if (view.video_estimate && typeof view.video_estimate === 'object') {
+    const estimate = estimateVerdict(view.video_estimate), strip = el('div', 'view-estimate-verdict');
+    strip.dataset.verdict = estimate;
+    strip.append(el('span', '', '원본 영상의 접촉 가능 영역 비교'), el('strong', '', estimate === 'REVIEW' ? '영상 추정 REVIEW' : `영상 추정 ${estimate}`));
+    card.append(strip);
+  }
   const preview = safeUrl(view.preview_url);
   let player;
   if (preview) {
@@ -740,12 +797,19 @@ function renderView(camera, view, diagnostics) {
   const body = el('div', 'view-body');
   if (view.error) body.append(el('p', 'message error', view.error));
   if (view.rationale) body.append(el('p', 'rationale', view.rationale));
+  const estimatePanel = renderVideoEstimate(camera, view, player);
+  if (estimatePanel) body.append(estimatePanel);
   const candidatePanel = renderLandingCandidate(camera, view, player);
   if (candidatePanel) body.append(candidatePanel);
   const calibrationPanel = renderCalibration(camera, view);
   if (calibrationPanel) body.append(calibrationPanel);
   const assessmentPanel = renderEvidenceAssessment(camera, view.assessment);
-  if (assessmentPanel) body.append(assessmentPanel);
+  if (assessmentPanel) {
+    if (estimateVerdict(view.video_estimate) !== 'REVIEW') {
+      const direct = el('details', 'direct-contact-assessment');
+      direct.append(el('summary', '', `직접 접촉 기반 판정 조건 · ${view.direct_decision || 'REVIEW'}`), assessmentPanel); body.append(direct);
+    } else body.append(assessmentPanel);
+  }
   const trajectoryContext = safeUrl(view.trajectory_context_url);
   if (trajectoryContext) {
     const figure = el('figure', 'trajectory-context');
@@ -814,7 +878,14 @@ function renderResult(job) {
   state.currentJob = job;
   $('pair-result').hidden = false;
   $('result-banner').dataset.verdict = result.decision;
+  const estimated = result.decision_kind === 'video_estimate';
+  $('result-banner').dataset.decisionKind = estimated ? 'video_estimate' : result.decision_kind || 'verified';
+  $('result-heading').textContent = estimated ? 'A/B 영상 추정 판정' : 'A/B 최종 보조 판정';
+  $('result-kind').hidden = !estimated;
+  $('result-kind').textContent = estimated ? '영상 추정' : '';
+  $('estimate-result-note').hidden = !estimated;
   $('final-verdict').textContent = result.decision;
+  $('final-verdict').setAttribute('aria-label', `${estimated ? '영상 추정 ' : ''}${result.decision}`);
   const appliedRules = result.rules || job.request?.rules;
   $('result-rules').textContent = `${gameLabel(appliedRules)} 랠리 · ${gameBoundaryLabel(appliedRules)} 기준`;
   const views = result.views || {};
@@ -836,8 +907,9 @@ function renderResult(job) {
     const sourceAiUsed = sourceIds.some(camera => views[camera]?.processing_mode === 'stored_ai_review');
     $('result-provenance').textContent = `${sourceIds.join('/')} 시점의 유효한 판정${sourceAiUsed ? ' · AI 검수 근거를 활용한 보조 결과' : ''}`;
   }
+  if (estimated) $('result-provenance').textContent = `${sourceIds.length ? sourceIds.join('/') + ' 시점 · ' : ''}원본 영상의 접촉 가능 영역으로 추정한 결과${manualCameras.length ? ' · 사용자 지정 탐색 영역 사용' : ''}`;
   const hasDirectEvidence = cameras.some(camera => views[camera]?.qualified === true && ['IN', 'OUT'].includes(views[camera]?.direct_decision));
-  sources.append(el('span', '', sourceIds.length ? '최종 판정의 접촉 근거' : hasDirectEvidence ? '시점별 접촉 근거 있음 · 연결 조건 확인 필요' : '확인된 접촉 근거 추가 필요'));
+  sources.append(el('span', '', estimated ? '영상 추정의 원본 근거' : sourceIds.length ? '최종 판정의 접촉 근거' : hasDirectEvidence ? '시점별 접촉 근거 있음 · 연결 조건 확인 필요' : '확인된 접촉 근거 추가 필요'));
   sourceIds.forEach(camera => { const link = el('a', 'source-link', camera + ' 시점 보기 ↓'); link.href = '#result-view-' + camera.toLowerCase(); sources.append(link); });
   const reasons = $('result-reasons'); reasons.replaceChildren();
   const messages = Array.isArray(result.reasons) ? result.reasons : [];
@@ -846,7 +918,7 @@ function renderResult(job) {
   const eventSource = correspondenceNames[result.event_correspondence_source] || '저장된 사건 대응 기록';
   $('correspondence-status').textContent = result.same_event_confirmed ? `같은 사건 연결 확인 · ${eventSource}`
     : result.decision_scope === 'single_view' && sourceIds.length
-      ? `${sourceIds.join('/')} 시점에서 판정했습니다. 두 영상의 동일 사건 연결은 미확인입니다.`
+      ? `${sourceIds.join('/')} 시점에서 ${estimated ? '영상 추정 판정을 했습니다' : '판정했습니다'}. 두 영상의 동일 사건 연결은 미확인입니다.`
       : '동일 사건 연결이 확인되지 않았습니다.';
   $('result-timing').textContent = typeof result.elapsed_seconds === 'number' ? `이번 작업 ${fmt(result.elapsed_seconds, 1)}초${aiUsed ? ' · 기존 검수 시간은 포함하지 않습니다.' : ''}` : '';
   $('result-json').href = jobUrl(job.job_id);
@@ -911,7 +983,8 @@ async function loadHistory() {
       const date = new Date(job.created_at || job.updated_at || '');
       name.append(el('small', '', Number.isNaN(date.getTime()) ? job.job_id : date.toLocaleString('ko-KR', {timeZone: 'Asia/Seoul'}) + ' KST'));
       const decision = job.decision || job.result?.decision;
-      const label = el('span', 'history-label', decision || statusNames[job.status] || '확인 중');
+      const estimated = (job.decision_kind || job.result?.decision_kind) === 'video_estimate';
+      const label = el('span', 'history-label', decision ? `${estimated ? '영상 추정 ' : ''}${decision}` : statusNames[job.status] || '확인 중');
       if (decision) label.dataset.verdict = decision;
       item.append(name, label);
       item.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); openJob(job.job_id, true); $('job-progress').scrollIntoView({block: 'start'}); });

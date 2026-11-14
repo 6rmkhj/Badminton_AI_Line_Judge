@@ -41,6 +41,12 @@ REASONS = {
     "RULES_MISMATCH": "시점별 판정에 적용된 경기 규칙이 다릅니다.",
     "SOURCE_CHANGED": "검수 당시 원본과 현재 영상의 내용이 다릅니다.",
     "STALE_REVIEW": "저장된 검수 기록의 출처 또는 근거를 검증하지 못했습니다.",
+    "VIDEO_ESTIMATE_FROM_VIEW": "원본 영상의 착지 가능 영역 전체가 같은 결과인 시점의 영상 추정을 사용했습니다. 직접 관측한 접촉 판정과 구분합니다.",
+    "VIDEO_ESTIMATES_AGREE": "같은 랠리의 두 시점에서 착지 가능 영역을 이용한 영상 추정이 일치합니다.",
+    "CONFLICTING_VIDEO_ESTIMATES": "A와 B의 유효한 영상 추정 IN/OUT이 충돌합니다.",
+    "VERIFIED_ESTIMATE_CONFLICT": "같은 사건의 확인된 판정과 영상 추정이 서로 달라 검토가 필요합니다.",
+    "UNLINKED_ESTIMATE_CONFLICT": "연결이 미확인인 다른 시점의 영상 추정은 확인된 판정과 다릅니다. 확인된 시점의 결과를 유지합니다.",
+    "INVALID_VIDEO_ESTIMATE": "영상 추정의 출처·규칙·프레임 또는 위치 범위를 검증하지 못했습니다.",
 }
 
 
@@ -290,6 +296,122 @@ def _trajectory_replay(output, artifacts, prefix):
     return prefix + quote(relative, safe="/"), info
 
 
+def _valid_video_estimate(estimate, rules, source_sha256):
+    """Validate a source-bound *estimate*, never a replacement contact observation.
+
+    The native estimator owns evidence and geometry evaluation. This transport
+    boundary checks that a complete result belongs to the current source/rules
+    and fits trusted frame/image bounds before it can enter pair aggregation.
+    """
+    if (not isinstance(source_sha256, str) or not HASH.fullmatch(source_sha256)
+            or not isinstance(estimate, dict) or type(estimate.get("schema_version")) is not int
+            or estimate.get("schema_version") != 1
+            or estimate.get("decision") not in ("IN", "OUT") or estimate.get("eligible") is not True
+            or estimate.get("decision_kind") != "video_estimate"
+            or estimate.get("source") != "native_temporal_landing_envelope"
+            or estimate.get("rules") != rules or estimate.get("source_sha256") != source_sha256
+            or estimate.get("contact_observed") is not False
+            or estimate.get("target_identity_verified") is not False
+            or not isinstance(estimate.get("native_evidence"), dict)
+            or estimate["native_evidence"].get("status") != "supported"
+            or not isinstance(estimate.get("family_resolution"), dict)
+            or estimate["family_resolution"].get("status") != "selected"
+            or not isinstance(estimate.get("geometry"), dict)
+            or estimate["geometry"].get("status") != "resolved"):
+        return False
+    family, members = estimate.get("selected_family_id"), estimate.get("member_event_ids")
+    codes = estimate.get("reason_codes")
+    if (not isinstance(family, str) or not family
+            or not isinstance(codes, list) or any(not isinstance(code, str) for code in codes)
+            or not isinstance(members, list) or not members
+            or any(not isinstance(value, str) or not value for value in members)
+            or len(set(members)) != len(members)):
+        return False
+    size = estimate.get("analysis_size")
+    if not isinstance(size, dict):
+        return False
+    width, height, count = (size.get(key) for key in ("width", "height", "frame_count"))
+    if (not all(isinstance(value, int) and not isinstance(value, bool) and value > 0
+                for value in (width, height, count))):
+        return False
+    frames, times = estimate.get("frame_interval"), estimate.get("time_interval")
+    bounds, frame_times = estimate.get("time_bounds"), estimate.get("frame_time_interval")
+    if (not isinstance(frames, (list, tuple)) or len(frames) != 2
+            or not all(isinstance(value, int) and not isinstance(value, bool) for value in frames)
+            or not 0 <= frames[0] <= frames[1] < count):
+        return False
+    if any(not isinstance(values, (list, tuple)) or len(values) != 2
+           or not all(_finite(value) for value in values) for values in (times, bounds, frame_times)):
+        return False
+    if (bounds[0] < 0 or bounds[1] < bounds[0] or frame_times[1] < frame_times[0] or times[1] < times[0]
+            or frame_times[0] < bounds[0] - 1e-6 or frame_times[1] > bounds[1] + 1e-6
+            or times[0] < frame_times[0] - 1e-6 or times[1] > frame_times[1] + 1e-6):
+        return False
+    error, polygon = estimate.get("uncertainty_px"), estimate.get("possible_contact_polygon_px")
+    if (not _finite(error) or not 0 <= error <= math.hypot(width, height)
+            or not isinstance(polygon, (list, tuple)) or not 3 <= len(polygon) <= 64):
+        return False
+    if any(not isinstance(point, (list, tuple)) or len(point) != 2
+           or not all(_finite(value) for value in point)
+           or not (0 <= point[0] < width and 0 <= point[1] < height) for point in polygon):
+        return False
+    # Convex possible-position regions must have area and cannot self-intersect.
+    crosses = [(polygon[(i+1) % len(polygon)][0] - polygon[i][0]) * (point[1] - polygon[i][1])
+               - (polygon[(i+1) % len(polygon)][1] - polygon[i][1]) * (point[0] - polygon[i][0])
+               for i in range(len(polygon)) for point in polygon]
+    if not (any(value > 1e-8 for value in crosses) and all(value >= -1e-8 for value in crosses)
+            or any(value < -1e-8 for value in crosses) and all(value <= 1e-8 for value in crosses)):
+        return False
+    try:
+        json.dumps(estimate, allow_nan=False)
+    except (TypeError, ValueError, OverflowError):
+        return False
+    return True
+
+
+def _video_estimate_summary(result, output, prefix):
+    """Expose bounded native evidence with a safe local image URL."""
+    raw = result.get("video_estimate")
+    if not isinstance(raw, dict):
+        return None
+    fields = ("schema_version", "decision", "eligible", "decision_kind", "source", "rules",
+              "contact_observed", "target_identity_verified", "reason_codes", "reasons",
+              "possible_contact_polygon_px", "uncertainty_px", "frame_interval", "time_interval",
+              "selected_family_id", "member_event_ids", "native_evidence", "family_resolution",
+              "geometry", "native_summary", "family_summary", "assumptions")
+    summary = {key: deepcopy(raw[key]) for key in fields if key in raw}
+    summary["source_sha256"] = result.get("source_sha256")
+    analysis = result.get("analysis") or {}
+    summary["analysis_size"] = {key: analysis.get(key) for key in ("width", "height", "frame_count")}
+    times = result.get("timestamps")
+    count, frames = analysis.get("frame_count"), raw.get("frame_interval")
+    if (isinstance(times, list) and isinstance(count, int) and not isinstance(count, bool)
+            and len(times) == count and times and all(_finite(value) for value in times)
+            and all(right > left for left, right in zip(times, times[1:]))):
+        summary["time_bounds"] = [times[0], times[-1]]
+        summary["duration_seconds"] = times[-1]
+        if (isinstance(frames, (list, tuple)) and len(frames) == 2
+                and all(isinstance(value, int) and not isinstance(value, bool) for value in frames)
+                and 0 <= frames[0] <= frames[1] < count):
+            summary["frame_time_interval"] = [times[frames[0]], times[frames[1]]]
+    summary["artifact_url"] = _calibration_preview(output, {"calibration_overlay": raw.get("artifact_path")}, prefix)
+    rules = (result.get("config") or {}).get("rules", RULES)
+    valid = (raw.get("source_sha256", result.get("source_sha256")) == result.get("source_sha256")
+             and _valid_video_estimate(summary, rules, result.get("source_sha256")))
+    if not valid:
+        summary.update(decision="REVIEW", eligible=False)
+        if raw.get("eligible") is True or raw.get("decision") in ("IN", "OUT"):
+            codes = summary.get("reason_codes")
+            codes = [code for code in codes if isinstance(code, str)] if isinstance(codes, list) else []
+            summary["reason_codes"] = list(dict.fromkeys([*codes, "INVALID_VIDEO_ESTIMATE"]))
+        try:
+            json.dumps(summary, allow_nan=False)
+        except (TypeError, ValueError, OverflowError):
+            summary = {"decision": "REVIEW", "eligible": False, "decision_kind": "video_estimate",
+                       "reason_codes": ["INVALID_VIDEO_ESTIMATE"], "artifact_url": None}
+    return summary
+
+
 def combine_views(views, *, same_event_confirmed=False, event_source=None, different_event=False, rules=None):
     """Keep a valid single-view verdict without claiming an unconfirmed transfer.
 
@@ -321,33 +443,59 @@ def combine_views(views, *, same_event_confirmed=False, event_source=None, diffe
                  if views[camera].get("direct_decision") in {"IN", "OUT"}
                  and views[camera].get("qualified") is True and views[camera].get("status") == "completed"
                  and valid_hashes[camera] and rules_match[camera]}
+    estimates = {camera: views[camera]["video_estimate"]["decision"] for camera in ("A", "B")
+                 if views[camera].get("status") == "completed" and valid_hashes[camera] and rules_match[camera]
+                 and _valid_video_estimate(views[camera].get("video_estimate"), selected_rules,
+                                          views[camera].get("source_sha256"))}
+    if any(isinstance(view.get("video_estimate"), dict)
+           and (isinstance(view["video_estimate"].get("reason_codes"), list)
+                and "INVALID_VIDEO_ESTIMATE" in view["video_estimate"]["reason_codes"]
+                or view["video_estimate"].get("eligible") is True and camera not in estimates)
+           for camera, view in views.items()):
+        warnings.append("INVALID_VIDEO_ESTIMATE")
     labels = set(qualified.values())
     if len(labels) > 1:
         reasons.append("CONFLICTING_VIEW_DECISIONS")
-    if not labels:
+    verified_estimate_conflict = [(direct_camera, estimate_camera)
+                                 for direct_camera, direct in qualified.items()
+                                 for estimate_camera, estimate in estimates.items() if direct != estimate]
+    if any(a == b or same_event_confirmed for a, b in verified_estimate_conflict):
+        reasons.append("VERIFIED_ESTIMATE_CONFLICT")
+    elif verified_estimate_conflict:
+        warnings.append("UNLINKED_ESTIMATE_CONFLICT")
+    selected = qualified or estimates
+    kind = "verified" if qualified else "video_estimate"
+    if not qualified and len(set(estimates.values())) > 1:
+        reasons.append("CONFLICTING_VIDEO_ESTIMATES")
+    if not selected:
         reasons.append("NO_QUALIFIED_CONTACT")
-    label = next(iter(labels)) if len(labels) == 1 and not reasons else "REVIEW"
+    selected_labels = set(selected.values())
+    label = next(iter(selected_labels)) if len(selected_labels) == 1 and not reasons else "REVIEW"
     linked = (same_event_confirmed and not duplicate and all(valid_hashes.values())
               and all(rules_match.values()) and not different_event)
-    donors = list(qualified) if linked else list(qualified)[:1]
+    donors = list(selected) if linked else list(selected)[:1]
     if label != "REVIEW":
-        reasons = ["QUALIFIED_VIEWS_AGREE" if linked and len(qualified) == 2 else "VERDICT_FROM_QUALIFIED_VIEW"]
+        reasons = (["QUALIFIED_VIEWS_AGREE" if linked and len(qualified) == 2 else "VERDICT_FROM_QUALIFIED_VIEW"]
+                   if kind == "verified" else
+                   ["VIDEO_ESTIMATES_AGREE" if linked and len(estimates) == 2 else "VIDEO_ESTIMATE_FROM_VIEW"])
     else:
         reasons = list(dict.fromkeys(reasons + warnings))
     public_views = deepcopy(views)
     for camera, view in public_views.items():
         direct = view.get("direct_decision", "REVIEW") if camera in qualified else "REVIEW"
-        transfer = label != "REVIEW" and linked and view.get("status") == "completed"
+        transfer = label != "REVIEW" and kind == "verified" and linked and view.get("status") == "completed"
         view["assisted_decision"] = label if transfer else direct
         view["verdict_source_camera_ids"] = donors if transfer else [camera] if direct in {"IN", "OUT"} else []
         view.pop("assistance_mode", None)
         if transfer and camera not in qualified:
             view["assistance_mode"] = "other_view_verdict"
+        view["estimated_decision"] = estimates.get(camera, "REVIEW")
         for key in list(view):
             if key.startswith("_"):
                 view.pop(key)
     result = {
         "decision": label, "reason_codes": reasons, "reasons": [REASONS[code] for code in reasons],
+        "decision_kind": kind if label != "REVIEW" else "unresolved",
         "warning_codes": warnings, "warnings": [REASONS[code] for code in warnings],
         "same_event_confirmed": bool(same_event_confirmed),
         "event_correspondence_source": event_source if same_event_confirmed else None,
@@ -356,10 +504,16 @@ def combine_views(views, *, same_event_confirmed=False, event_source=None, diffe
         "views": public_views, "rules": selected_rules, "court_position_m": None,
         "assistance_used": True, "automatic_benchmark_eligible": False, "evaluation_eligible": False,
         "ground_truth_created": False, "human_verified": False,
+        "video_estimate_used": label != "REVIEW" and kind == "video_estimate",
         "scope": "A/B verdict linkage; no 3D reconstruction or common pixel coordinates.",
     }
     from .review_diagnostics import pair_diagnostics
     result["review_diagnostics"] = pair_diagnostics(result)
+    if result["video_estimate_used"]:
+        result["review_diagnostics"].update(
+            summary="착지 가능 영역으로 영상 추정을 계산했습니다. 직접 관측한 최초 접촉은 아직 확정되지 않았습니다.",
+            note="영상 추정은 관측된 경로와 원본 영역의 조건부 계산이며, 직접 접촉 확인이나 검증된 정확도를 뜻하지 않습니다.",
+            decision_kind="video_estimate")
     result["refinement_available"] = any(view.get("refinement_available") is True for view in views.values())
     return result
 
@@ -677,7 +831,8 @@ class PairWorkspace:
             keys = ("job_id", "status", "phase", "last_phase", "created_at", "updated_at", "views", "started_at",
                     "finished_at", "elapsed_seconds", "queue_seconds", "server_time")
             return {"jobs": [{key: job[key] for key in keys if key in job}
-                             | {"decision": (job.get("result") or {}).get("decision")} for job in snapshots]}
+                             | {"decision": (job.get("result") or {}).get("decision"),
+                                "decision_kind": (job.get("result") or {}).get("decision_kind")} for job in snapshots]}
 
     def _analysis_progress(self, identifier, camera, event):
         stage = event.get("stage")
@@ -834,6 +989,7 @@ class PairWorkspace:
         base = {"camera_id": camera, "file": selected["file"], "status": "completed", "rules": rules,
                 "source_sha256": None, "automatic_decision": "REVIEW", "direct_decision": "REVIEW",
                 "assisted_decision": "REVIEW", "qualified": False, "preview_url": None, "evidence_urls": [],
+                "estimated_decision": "REVIEW", "video_estimate": None,
                 "trajectory_replay_url": None, "trajectory_replay_info": None,
                 "calibration_summary": None, "calibration_preview_url": None,
                 "contact_time_seconds": None, "reason_codes": [], "rationale": "", "_candidate_ids": []}
@@ -934,8 +1090,11 @@ class PairWorkspace:
                 if (result.get("selected_landing") or {}).get("contact_observed") is False:
                     contact = None
                 replay_url, replay_info = _trajectory_replay(output, artifacts, prefix)
+                video_estimate = _video_estimate_summary(result, output, prefix)
                 base.update(automatic_decision=decision, direct_decision=decision, assisted_decision=decision,
                     qualified=decision in {"IN", "OUT"},
+                    video_estimate=video_estimate,
+                    estimated_decision=video_estimate["decision"] if video_estimate else "REVIEW",
                     review_source=("operator_region_guided_search" if manual_region is not None else
                                    "ai_review_guided_search" if regions else "automatic"),
                     processing_mode=("user_region_reanalysis" if manual_region is not None else

@@ -16,8 +16,9 @@ for (const [name, size] of [['wide', '320x180'], ['portrait', '180x320']]) {
     '-c:v','libx264','-threads','1','-pix_fmt','yuv420p','-y',path.join(output, name + '.mp4')]);
 }
 const submissions = [], jobs = {}, errors = [];
+fs.writeFileSync(path.join(output, 'estimate.svg'), '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="320"><rect width="640" height="320" fill="#e5ece0"/><path d="M80 270 L230 80 L550 80 L580 270 Z" fill="none" stroke="#607e42" stroke-width="6"/><rect x="290" y="170" width="45" height="30" fill="#a8c766" stroke="#355e30"/><text x="20" y="40" font-family="sans-serif" font-size="22">SYNTHETIC UI FIXTURE — NO ANALYSIS</text></svg>');
 let uploadCount = 0, nextDecision = null;
-const makeJob = (id, request, verdict = 'REVIEW', donor = 'A') => {
+const makeJob = (id, request, verdict = 'REVIEW', donor = 'A', kind = 'verified') => {
   const views = Object.fromEntries(['A', 'B'].map(camera => [camera, {
     status: 'completed', file: camera + '.mp4', preview_url: '/fixture/' + (camera === 'A' ? 'wide' : 'portrait') + '.mp4',
     processing_mode: request.views[camera].review_region ? 'user_region_reanalysis' : 'fresh_analysis',
@@ -34,11 +35,26 @@ const makeJob = (id, request, verdict = 'REVIEW', donor = 'A') => {
       } : {}),
       detail: camera === 'A' ? '직선 후보 8개를 찾았습니다. 전체 코트 좌표 보정은 확인되지 않았습니다.' : '직선 후보를 찾지 못했습니다.'},
   }]));
-  if (verdict !== 'REVIEW') Object.assign(views[donor], {
+  if (verdict !== 'REVIEW' && kind !== 'video_estimate') Object.assign(views[donor], {
     automatic_decision: verdict, direct_decision: verdict, assisted_decision: verdict, qualified: true,
   });
+  if (kind === 'video_estimate') Object.assign(views[donor], {
+    estimated_decision: verdict,
+    video_estimate: {decision: verdict, eligible: verdict !== 'REVIEW', decision_kind: kind,
+      source: 'native_temporal_landing_envelope', rules: request.rules,
+      reason_codes: verdict === 'REVIEW' ? ['ESTIMATE_UNCERTAINTY_OVERLAPS_BOUNDARY'] : ['ESTIMATE_ENTIRE_REGION_' + verdict],
+      reasons: verdict === 'REVIEW' ? ['접촉 가능 영역이 라인 양쪽에 걸쳐 있어 판정을 보류합니다.'] : ['원본 관측 경로의 접촉 가능 범위 전체를 비교했습니다.'],
+      frame_interval: [2, 4], time_interval: [.2, .4], uncertainty_px: 6,
+      member_event_ids: ['event_000', 'event_001', 'event_002'],
+      native_evidence: {observed_frame_count: 7, contact_observed: false, identity_confirmed: false},
+      artifact_url: '/fixture/estimate.svg'},
+    assessment: {schema_version: 1, summary: '착지 후보 발견 · 직접 접촉 판정 보류', stages: [
+      {label: '최초 바닥 접촉', status: 'blocked', status_label: '확인 필요', detail: '직접 접촉을 확인하지 못했습니다.'},
+      {label: '대상 셔틀 식별', status: 'blocked', status_label: '확인 필요', detail: '대상 셔틀을 직접 확인하지 못했습니다.'},
+    ]},
+  });
   return {job_id: id, status: 'completed', request, views,
-    result: {decision: verdict, views, rules: request.rules,
+    result: {decision: verdict, decision_kind: verdict === 'REVIEW' ? 'unresolved' : kind, views, rules: request.rules,
       decision_scope: verdict === 'REVIEW' ? 'unresolved' : 'single_view',
       source_camera_ids: verdict === 'REVIEW' ? [] : [donor], reasons: verdict === 'REVIEW' ? ['실제 접촉 미확정'] : [donor + ' 시점의 유효한 판정'],
       warning_codes: ['SAME_EVENT_UNCONFIRMED'], warnings: ['두 시점의 동일 사건 연결은 확인되지 않았습니다.'],
@@ -59,7 +75,7 @@ const server = http.createServer(async (req, res) => {
     let body = ''; for await (const chunk of req) body += chunk;
     const request = JSON.parse(body); submissions.push(request);
     const id = 'fixture-' + submissions.length;
-    jobs[id] = makeJob(id, request, nextDecision?.label || nextDecision || 'REVIEW', nextDecision?.camera || 'A'); nextDecision = null;
+    jobs[id] = makeJob(id, request, nextDecision?.label || nextDecision || 'REVIEW', nextDecision?.camera || 'A', nextDecision?.kind || 'verified'); nextDecision = null;
     return setTimeout(() => json(202, {job_id: id, status: 'queued'}), 150);
   }
   if (url.pathname === '/api/pair-jobs') return json(200, {jobs: []});
@@ -67,9 +83,9 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/favicon.ico') {res.writeHead(204); return res.end();}
   const name = url.pathname === '/pair' ? 'pair.html' : url.pathname.slice(1);
   const file = ['pair.html', 'pair.js', 'pair.css'].includes(name) ? path.join(staticRoot, name)
-    : /^fixture\/(wide|portrait)\.mp4$/.test(name) ? path.join(output, name.split('/')[1]) : null;
+    : /^fixture\/(wide\.mp4|portrait\.mp4|estimate\.svg)$/.test(name) ? path.join(output, name.split('/')[1]) : null;
   if (!file) {res.writeHead(404); return res.end();}
-  const data = fs.readFileSync(file), type = file.endsWith('.mp4') ? 'video/mp4' : file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html';
+  const data = fs.readFileSync(file), type = file.endsWith('.mp4') ? 'video/mp4' : file.endsWith('.svg') ? 'image/svg+xml' : file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html';
   res.writeHead(200, {'Content-Type': type, 'Content-Length': data.length, 'Accept-Ranges': 'bytes'}); res.end(data);
 });
 (async () => {
@@ -192,13 +208,57 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('#final-verdict').innerText(), 'OUT');
     assert.match(await page.locator('#result-provenance').innerText(), /B 시점의 유효한 판정/);
     assert.deepEqual(await page.locator('#result-view-a .view-verdicts strong').allTextContents(), ['REVIEW', 'REVIEW', 'REVIEW']);
+    nextDecision = {camera: 'A', label: 'IN', kind: 'video_estimate'};
+    await submit();
+    assert.equal(await page.locator('#final-verdict').innerText(), 'IN');
+    assert.equal(await page.locator('#final-verdict').getAttribute('aria-label'), '영상 추정 IN');
+    assert.equal(await page.locator('#result-kind').innerText(), '영상 추정');
+    assert.match(await page.locator('#result-provenance').innerText(), /A 시점.*원본 영상.*추정한 결과/);
+    assert.match(await page.locator('#source-cameras').innerText(), /영상 추정의 원본 근거/);
+    assert.match(await page.locator('#result-view-a .view-estimate-verdict').innerText(), /영상 추정 IN/);
+    assert.deepEqual(await page.locator('#result-view-a .view-verdicts strong').allTextContents(), ['REVIEW', 'REVIEW', 'REVIEW']);
+    assert.deepEqual(await page.locator('#result-view-b .view-verdicts strong').allTextContents(), ['REVIEW', 'REVIEW', 'REVIEW']);
+    assert.equal(await page.locator('#result-view-a .direct-contact-assessment').getAttribute('open'), null);
+    await page.locator('#result-view-a .direct-contact-assessment>summary').click();
+    assert.equal(await page.locator('#result-view-a .assessment-stages li[data-status="blocked"]').count(), 2);
+    assert.match(await page.locator('#result-view-a .video-estimate-panel').innerText(), /0\.200–0\.400초/);
+    assert.match(await page.locator('#result-view-a .estimate-metrics').innerText(), /7프레임.*3개를 한 사건으로 묶음/s);
+    await page.locator('#result-view-a .estimate-evidence').scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => document.querySelector('#result-view-a .estimate-evidence img')?.naturalWidth > 0);
+    await page.locator('[data-estimate-seek-camera="A"]').click();
+    await page.waitForFunction(() => Math.abs(document.querySelector('#result-view-a .view-video').currentTime - .2) < .05);
+    await page.locator('#pair-result').screenshot({path: path.join(output, 'video-estimate-in.png')});
+    await page.reload(); await page.locator('#final-verdict').waitFor();
+    assert.equal(await page.locator('#result-kind').innerText(), '영상 추정');
+    for (const width of [375, 390, 1440]) {
+      await page.setViewportSize({width, height: 1000});
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'estimate horizontal overflow at ' + width);
+      if (width === 375) await page.locator('#result-view-a .video-estimate-panel').screenshot({path: path.join(output, 'video-estimate-mobile.png')});
+    }
+    nextDecision = {camera: 'B', label: 'OUT', kind: 'video_estimate'};
+    await submit();
+    assert.equal(await page.locator('#final-verdict').getAttribute('aria-label'), '영상 추정 OUT');
+    assert.match(await page.locator('#result-view-b .estimate-basis').innerText(), /영역 전체가 관측된 경기 경계 밖/);
+    assert.deepEqual(await page.locator('#result-view-b .view-verdicts strong').allTextContents(), ['REVIEW', 'REVIEW', 'REVIEW']);
+    nextDecision = {camera: 'A', label: 'REVIEW', kind: 'video_estimate'};
+    await submit();
+    assert.equal(await page.locator('#final-verdict').innerText(), 'REVIEW');
+    assert.equal(await page.locator('#result-kind').isHidden(), true);
+    assert.match(await page.locator('#result-view-a .video-estimate-panel').innerText(), /라인 양쪽에 걸쳐/);
+    assert.match(await page.locator('#result-view-a .estimate-conclusion').innerText(), /판정 보류/);
+    assert.equal(await page.locator('#result-view-a .assessment-stages li[data-status="blocked"]').count(), 2);
+    nextDecision = 'IN'; await submit();
+    assert.equal(await page.locator('#result-kind').isHidden(), true);
+    assert.equal(await page.locator('#estimate-result-note').isHidden(), true);
+    assert.equal(await page.locator('#result-view-a .video-estimate-panel').count(), 0);
     await page.locator('#library-b').selectOption('v_a');
     assert.equal(await page.locator('#region-box-b').isHidden(), true);
     assert.deepEqual(errors, []);
     fs.writeFileSync(path.join(output, 'browser-validation.json'), JSON.stringify({status: 'passed', fixture: 'Synthetic media and mocked API; no analysis executed',
       checks: ['automatic input sources preserved', 'drag selection', 'keyboard selection', 'native preview seeking', 'portrait letterboxing', 'escape cancellation',
         'per-view normalized payload', 'manual provenance', 'reload restoration', '375/390px no overflow', 'resize preservation', 'upload ID reuse', 'refine preservation', 'clear/reset',
-        'singles/doubles keyboard selection', 'busy rule control disabled', 'rule payload/reload/refinement preservation', 'selected game labels', 'A-only IN with B REVIEW', 'B-only OUT with A REVIEW', 'correspondence warning preserves final verdict'],
+        'singles/doubles keyboard selection', 'busy rule control disabled', 'rule payload/reload/refinement preservation', 'selected game labels', 'A-only IN with B REVIEW', 'B-only OUT with A REVIEW', 'correspondence warning preserves final verdict',
+        'explicit video estimate IN/OUT provenance', 'strict REVIEW evidence remains blocked', 'native evidence image and interval seeking', 'estimate reload restoration', 'estimate mobile widths', 'near-line estimate remains REVIEW', 'verified result clears estimate label'],
       submissions: submissions.length, uploads: uploadCount, javascript_errors: errors}, null, 2));
     console.log(JSON.stringify({status: 'passed', output, submissions: submissions.length, uploads: uploadCount}));
   } finally {await browser.close(); await new Promise(resolve => server.close(resolve));}

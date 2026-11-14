@@ -19,6 +19,7 @@ def implementation_fingerprint():
     for name in ('media.py', 'pipeline.py', 'calibration.py', 'primary_court.py', 'detection.py', 'tracking.py',
                  'events.py', 'identity.py', 'identity_continuity.py', 'candidate_identity.py',
                  'event_continuity.py', 'event_sequence.py', 'landing_recovery.py', 'observation_support.py', 'scene_context.py',
+                 'landing_families.py', 'native_landing.py', 'video_estimate.py',
                  'evidence.py', 'decision.py', 'assessment.py', 'learning.py',
                  'contact_model.py', 'sync.py', 'inference.py', 'gpu_candidates.py'):
         digest.update(name.encode())
@@ -245,6 +246,25 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
                            or config.get('request_context') or review_regions)
     if assistance_used:
         decision.update(assistance_used=True, evaluation_eligible=False)
+    # Keep the strict physical-contact decision intact. Native video inference
+    # has its own evidence contract, uncertainty envelope and visible provenance.
+    from .video_estimate import estimate_video_verdict, write_estimate_overlay, _result
+    estimate_options = dict(config.get('video_estimate') or {})
+    try:
+        report('contact', detail='주 코트 착지 사건 통합·원본 접촉 가능 범위 계산')
+        with SourceFrameSequence(source, len(frames), verified_seek=False) as originals:
+            video_estimate = estimate_video_verdict(requested, tracks, originals, timestamps,
+                (frames[0].shape[1], frames[0].shape[0]), calibration, config.get('rules'),
+                output_dir=output, config=estimate_options)
+        video_estimate['source_sha256'] = source_sha
+        if assistance_used:
+            video_estimate.update(assistance_used=True, evaluation_eligible=False)
+        overlay = write_estimate_overlay(frames, calibration, video_estimate, output)
+        if overlay:
+            video_estimate['artifact_path'] = overlay
+    except (ValueError, TypeError, OSError, RuntimeError, KeyError, IndexError, cv2.error) as error:
+        video_estimate = _result(config.get('rules') or {'game': 'doubles', 'phase': 'rally'},
+            ['VIDEO_ESTIMATE_PROCESSING_FAILED'], error=f'{type(error).__name__}: {str(error)[:300]}')
     timings['events_and_decision_seconds'] = time.perf_counter() - clock
     display_candidates = prioritize_review_candidates(requested, review_regions)
     selected = display_candidates[0] if display_candidates else None
@@ -326,6 +346,11 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
               'native_endpoint_recovery': endpoint_recovery,
               'detection_quality': summarize_detection_quality(detections, tracks),
               'landings': landings, 'selected_landing': selected, 'decision': decision,
+              'video_estimate': video_estimate,
+              'display_decision': ({**decision, 'decision_kind': 'verified'} if decision.get('decision') in {'IN', 'OUT'}
+                                   else {key: video_estimate.get(key) for key in
+                                         ('decision', 'decision_kind', 'source', 'eligible', 'reason_codes', 'reasons')}
+                                   if video_estimate.get('eligible') is True else {**decision, 'decision_kind': 'unresolved'}),
               'review_refinement': review_refinement,
               'timings': timings, 'artifacts': artifacts, 'config': config,
               'assistance_used': assistance_used, 'automatic_evaluation_eligible': not assistance_used,

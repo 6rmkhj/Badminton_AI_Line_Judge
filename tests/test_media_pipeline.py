@@ -50,6 +50,9 @@ def test_actual_pipeline_stays_review_without_ground_contact(tmp_path):
     result = analyze_video(source, tmp_path / 'run', {'analysis_width': 160, 'source_crop_count': 0},
                            progress_callback=progress.append)
     assert result['decision']['decision'] == 'REVIEW'
+    assert result['video_estimate']['decision'] == 'REVIEW'
+    assert result['video_estimate']['eligible'] is False
+    assert result['display_decision']['decision'] == 'REVIEW'
     assert result['assessment']['line_verdict'] == result['decision']['decision']
     assert result['assessment']['changes_decision'] is False
     assert json.loads((tmp_path / 'run/result.json').read_text())['assessment'] == result['assessment']
@@ -111,6 +114,45 @@ def test_pipeline_applies_requested_singles_to_calibration_and_decisions(tmp_pat
 def test_multiple_unselected_landings_cannot_confirm_judgment():
     assert aggregate_decision([{'decision':'IN'}, {'decision':'IN'}])['decision'] == 'REVIEW'
     assert aggregate_decision([])['decision'] == 'REVIEW'
+
+
+def test_estimate_display_never_rewrites_strict_contact_or_evaluation(tmp_path, monkeypatch):
+    # Inject an estimator result only to test pipeline separation and storage.
+    # The synthetic colour clip is not a positive contact-detection example.
+    from badminton import video_estimate
+    monkeypatch.setattr(video_estimate, 'estimate_video_verdict', lambda *args, **kwargs: {
+        'decision': 'IN', 'eligible': True, 'decision_kind': 'video_estimate',
+        'source': video_estimate.SOURCE, 'contact_observed': False,
+        'target_identity_verified': False, 'evaluation_eligible': False,
+        'frame_interval': [4, 6], 'time_interval': [4/30, 6/30],
+        'possible_contact_polygon_px': [[60, 50], [80, 50], [80, 70], [60, 70]],
+        'uncertainty_px': 2, 'reason_codes': ['VIDEO_ESTIMATE_ALL_POSITIONS_INSIDE'],
+        'rules': {'game': 'doubles', 'phase': 'rally'}})
+    result = analyze_video(clip(tmp_path), tmp_path / 'estimate-run', {
+        'analysis_width': 160, 'source_crop_count': 0, 'evidence': {'annotated_clip': False}})
+    stored = json.loads((tmp_path / 'estimate-run/result.json').read_text())
+    assert stored['decision'] == result['decision']
+    assert stored['decision']['decision'] == 'REVIEW'
+    assert stored['assessment']['line_verdict'] == 'REVIEW'
+    assert stored['display_decision']['decision'] == 'IN'
+    assert stored['display_decision']['decision_kind'] == 'video_estimate'
+    assert stored['video_estimate']['contact_observed'] is False
+    assert stored['video_estimate']['evaluation_eligible'] is False
+    assert stored['video_estimate']['source_sha256'] == stored['source_sha256']
+    assert all(row.get('contact_observed') is False for row in stored['landings'])
+    assert (tmp_path / 'estimate-run' / stored['video_estimate']['artifact_path']).is_file()
+
+
+def test_estimate_failure_preserves_a_completed_strict_analysis(tmp_path, monkeypatch):
+    from badminton import video_estimate
+    def unavailable(*args, **kwargs):
+        raise ValueError('invalid native evidence')
+    monkeypatch.setattr(video_estimate, 'estimate_video_verdict', unavailable)
+    result = analyze_video(clip(tmp_path), tmp_path / 'estimate-failed', {
+        'analysis_width': 160, 'source_crop_count': 0, 'evidence': {'annotated_clip': False}})
+    assert result['decision']['decision'] == 'REVIEW'
+    assert result['video_estimate']['reason_codes'] == ['VIDEO_ESTIMATE_PROCESSING_FAILED']
+    assert result['display_decision']['decision'] == 'REVIEW'
 
 
 def test_original_resolution_sequence_keeps_frame_order_and_one_cache(tmp_path):
