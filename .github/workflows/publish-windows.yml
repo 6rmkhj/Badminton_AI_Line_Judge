@@ -1,62 +1,55 @@
-name: Publish verified Windows 0.5.10 package
+name: Verify Windows startup and publish 0.5.11
 
 on:
   push:
-    branches: [downloads/windows-portable-0.5.10]
+    branches: [downloads/windows-portable-0.5.11]
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: publish-windows-v0.5.10
+  group: publish-windows-v0.5.11
   cancel-in-progress: false
 
 jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test complete package and the existing 0.5.10 hotfix
+        run: python release/validate_windows.py
+      - name: Preserve Windows startup evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-start-validation
+          path: reports/*.json
+          if-no-files-found: warn
+
   publish:
+    needs: windows
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - name: Reassemble and verify the existing package
         run: python3 release/assemble.py
-      - name: Verify source tag and publish package
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-start-validation
+          path: dist
+      - name: Publish verified package, hotfix, and Windows reports
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          source_commit=$(python3 -c "import json; print(json.load(open('release/receipt.json'))['source_commit'])")
-          tag_commit=$(git ls-remote origin 'refs/tags/v0.5.10^{}' | cut -f1)
-          test "$tag_commit" = "$source_commit"
-          release_id=$(gh api "repos/$GH_REPO/releases?per_page=100" --jq '.[] | select(.tag_name == "v0.5.10") | .id')
-          if [ -z "$release_id" ]; then
-            gh release create v0.5.10 \
-              --verify-tag --target "$source_commit" --draft \
-              --title '0.5.10 · 단일 시점 판정 및 단식·복식 선택' \
-              --notes-file release/notes.md \
-              dist/badminton-windows-0.5.10.zip \
-              dist/badminton-windows-0.5.10.zip.sha256
-            release_id=$(gh api "repos/$GH_REPO/releases?per_page=100" --jq '.[] | select(.tag_name == "v0.5.10") | .id')
-          fi
-          [[ "$release_id" =~ ^[0-9]+$ ]]
-          gh api "repos/$GH_REPO/releases/$release_id" > /tmp/release-assets.json
-          python3 - <<'PY'
-          import hashlib, json
-          expected = json.load(open('release/receipt.json'))
-          release = json.load(open('/tmp/release-assets.json'))
-          assert release['tag_name'] == 'v0.5.10'
-          assert release['target_commitish'] == expected['source_commit']
-          assets = release['assets']
-          archive = next(item for item in assets if item['name'] == 'badminton-windows-0.5.10.zip')
-          assert archive['size'] == expected['bytes'], 'Uploaded package size mismatch'
-          assert archive['state'] == 'uploaded', 'Package upload incomplete'
-          assert archive['digest'] == 'sha256:' + expected['sha256'], 'Uploaded package SHA256 mismatch'
-          checksum = next(item for item in assets if item['name'] == 'badminton-windows-0.5.10.zip.sha256')
-          assert checksum['state'] == 'uploaded'
-          with open('dist/badminton-windows-0.5.10.zip.sha256', 'rb') as source:
-              assert checksum['digest'] == 'sha256:' + hashlib.file_digest(source, 'sha256').hexdigest()
-          PY
-          gh api --method PATCH "repos/$GH_REPO/releases/$release_id" -F draft=false -f make_latest=true --jq .html_url
+        run: python3 release/publish_release.py
