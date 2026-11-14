@@ -1,0 +1,21 @@
+{
+  "source": {
+    "head": "823e986649ecf023150d9806a54c2e3a1372e6be",
+    "parent": "39b2b9e97c7e22100f3124a397d3d1d3dda5ec15",
+    "bytes": 1284384,
+    "sha256": "6b922911fdd9bbdceca03a5f26bc9bad5cb665ce75437a63e488dc7575b3c46c",
+    "thin": false
+  },
+  "payload": {
+    "head": "e7220bdbfcac6f312af0a7caaf8ad3ce0171ced8",
+    "parent": "4ab9c42b9fd174c372428df5869e21c6e676e9d9",
+    "bytes": 1395481,
+    "sha256": "c223859e4e03398b4dcf94a464f85d67eb8c4cd18868811d790b8f6b3361ca57",
+    "thin": true
+  },
+  "tag": {
+    "name": "v0.5.12",
+    "object": "6fbf74e782e2f88a2165490b122da736df7e72be",
+    "sha256": "b3af92507b0fb5495eb950b3c36e3f618b67c208023debe00cdf0d7f76ce21f1"
+  }
+}

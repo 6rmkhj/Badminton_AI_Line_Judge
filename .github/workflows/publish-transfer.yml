@@ -1,0 +1,77 @@
+name: Restore exact 0.5.12 commits, verify Windows, and publish
+
+on:
+  push:
+    branches: [downloads/publish-0.5.12-transfer]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-windows-v0.5.12
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: true
+      - name: Restore verified Git objects and atomically publish approved refs
+        run: python3 release-transfer/promote.py
+
+  windows:
+    needs: promote
+    runs-on: windows-2022
+    timeout-minutes: 25
+    env:
+      BADMINTON_TESTING_DEPS: ${{ runner.temp }}/badminton-testing-deps-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e7220bdbfcac6f312af0a7caaf8ad3ce0171ced8
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install isolated pure-Python test harness
+        run: >-
+          python -m pip install --disable-pip-version-check --no-deps --only-binary=:all:
+          --target "$env:BADMINTON_TESTING_DEPS" -r release/native_geometry_requirements.txt
+      - name: Test package startup and geometry with the bundled native runtime
+        run: python release/validate_windows.py
+      - name: Preserve Windows startup evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-start-validation
+          path: reports/windows-0.5.12-validation.json
+          if-no-files-found: warn
+
+  publish:
+    needs: windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e7220bdbfcac6f312af0a7caaf8ad3ce0171ced8
+          persist-credentials: false
+      - name: Reassemble and verify the existing package
+        run: python3 release/assemble.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-start-validation
+          path: dist
+      - name: Publish verified package, checksum, and Windows report
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python3 release/publish_release.py

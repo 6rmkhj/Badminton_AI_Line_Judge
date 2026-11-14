@@ -1,0 +1,6 @@
+object 823e986649ecf023150d9806a54c2e3a1372e6be
+type commit
+tag v0.5.12
+tagger 장한 <janghan12321@gmail.com> 1794650942 +0900
+
+0.5.12: Native landing envelopes with explicit IN OUT video estimates
