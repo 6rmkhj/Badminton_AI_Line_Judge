@@ -1,0 +1,45 @@
+{
+  "app_version": "0.5.8",
+  "source_commit": "7dbdd064e563c16a366ee402fce360606d412538",
+  "source_snapshot_sha256": "0b9d6d581bc99e8212c6be18ec4df0ee5524f0968889ff714fba24f554f82a2f",
+  "source_worktree_dirty": false,
+  "validation": {
+    "archive_sha256": "7e4bbb0ed4e6cfbb33d68b5013a95d084a15f49e39e72c24aa1b518ad2b69523",
+    "archive_bytes": 281667037,
+    "source_commit": "7dbdd064e563c16a366ee402fce360606d412538",
+    "source_worktree_dirty": false,
+    "app_version": "0.5.8",
+    "source_files_verified": 729,
+    "app_files_verified": 737,
+    "payloads_verified": 9,
+    "checks": [
+      "final ZIP SHA256/CRC",
+      "nested ZIP SHA256/size/CRC",
+      "all source files match committed workspace (declared CRLF conversion)",
+      "all app metadata/license hashes",
+      "current real-frame fixtures and calibration report included"
+    ],
+    "extracted_application": "/workspace/court-package/extracted/app",
+    "windows_runtime_executed": false,
+    "extracted_application_tests": {
+      "passed": 63,
+      "failed": 0,
+      "duration_seconds": 34.81,
+      "runtime": "Linux /workspace/.venvs/badminton/bin/python",
+      "test_modules": [
+        "test_calibration.py",
+        "test_calibration_completion.py",
+        "test_calibration_robustness.py",
+        "test_calibration_evidence.py",
+        "test_calibration_evaluation.py",
+        "test_calibration_real_frames.py",
+        "test_evidence_replay.py"
+      ],
+      "log_path": "/workspace/court-package/extracted-tests.log",
+      "log_sha256": "e41f25d2f93a2538c7659f6d42dc67867c8121c4c78d5ceadd030db2184ea89c",
+      "confirmed_import_path": "/workspace/court-package/extracted/app/badminton/calibration.py",
+      "module_version": "0.5.8"
+    }
+  },
+  "download_note": "The GitHub-generated source ZIP has a different container hash from the local build ZIP. START.bat verifies the nine included payloads against PAYLOAD_CHECKSUMS.json."
+}

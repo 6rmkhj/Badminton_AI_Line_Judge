@@ -1,0 +1,47 @@
+[
+  {
+    "bytes": 12716961,
+    "file": "01-python.zip",
+    "sha256": "ae9bf332964c2cbd83fb8a21d71d8edf47872655c0e36dd10992c1064ad0cdfb"
+  },
+  {
+    "bytes": 165715,
+    "file": "02-filelock.zip",
+    "sha256": "e75521b5983d898bfc25af730e60d11644517b918ae51456b5a50fe78490bf57"
+  },
+  {
+    "bytes": 12868607,
+    "file": "03-numpy.zip",
+    "sha256": "58e98d8b38f49477fe7e22571f96caf9e7b1e736b51d43298a9499f16f5cacd1"
+  },
+  {
+    "bytes": 39307871,
+    "file": "04-opencv_python_headless.zip",
+    "sha256": "8b184e94ef585469e6befdda4b6b124675ee93be8b94c92515dbe93c1b9a31c5"
+  },
+  {
+    "bytes": 39064703,
+    "file": "05-scipy.zip",
+    "sha256": "6a377b0a481c2bb9de328ade0999bcc5c233e6217477cc3bc3fb60463a0de8a0"
+  },
+  {
+    "bytes": 67019438,
+    "file": "06-ffmpeg.zip",
+    "sha256": "b43b04448e03eca0fe223b806566fbd7917e0349eb53695d2d2c0a21db8e76cf"
+  },
+  {
+    "bytes": 66909177,
+    "file": "07-ffprobe.zip",
+    "sha256": "9de48b6db1bb77434b4de4775110f4eca583a4afa01a783731437332f03a2ef2"
+  },
+  {
+    "bytes": 41739939,
+    "file": "08-application.zip",
+    "sha256": "7e56836842a74aa9646ce118a1a0264a0cab4f45a80edf2360589f5c2f97f963"
+  },
+  {
+    "bytes": 1865077,
+    "file": "09-runtime-notes.zip",
+    "sha256": "d990626d07e19d0ccb8e39e1ede069125a7328615245a3dc3e6c8c70d1c02895"
+  }
+]
