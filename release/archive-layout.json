@@ -1,13 +1,124 @@
 {
+  "comment": "",
   "entries": [
     {
-      "filename": "badminton-windows-0.5.11/PAYLOAD_CHECKSUMS.json",
+      "filename": "badminton-windows-0.5.12/PAYLOAD_CHECKSUMS.json",
       "date_time": [
         2026,
         11,
         14,
-        17,
-        47,
+        19,
+        6,
+        30
+      ],
+      "compress_type": 0,
+      "comment": "",
+      "extra": "",
+      "create_system": 3,
+      "create_version": 20,
+      "extract_version": 20,
+      "reserved": 0,
+      "flag_bits": 0,
+      "volume": 0,
+      "internal_attr": 0,
+      "external_attr": 2172649472
+    },
+    {
+      "filename": "badminton-windows-0.5.12/README.md",
+      "date_time": [
+        2026,
+        11,
+        14,
+        19,
+        6,
+        30
+      ],
+      "compress_type": 0,
+      "comment": "",
+      "extra": "",
+      "create_system": 3,
+      "create_version": 20,
+      "extract_version": 20,
+      "reserved": 0,
+      "flag_bits": 0,
+      "volume": 0,
+      "internal_attr": 0,
+      "external_attr": 2172649472
+    },
+    {
+      "filename": "badminton-windows-0.5.12/RUN.bat",
+      "date_time": [
+        2026,
+        11,
+        14,
+        19,
+        6,
+        30
+      ],
+      "compress_type": 0,
+      "comment": "",
+      "extra": "",
+      "create_system": 3,
+      "create_version": 20,
+      "extract_version": 20,
+      "reserved": 0,
+      "flag_bits": 0,
+      "volume": 0,
+      "internal_attr": 0,
+      "external_attr": 2172649472
+    },
+    {
+      "filename": "badminton-windows-0.5.12/SETUP_GPU.bat",
+      "date_time": [
+        2026,
+        11,
+        14,
+        19,
+        6,
+        30
+      ],
+      "compress_type": 0,
+      "comment": "",
+      "extra": "",
+      "create_system": 3,
+      "create_version": 20,
+      "extract_version": 20,
+      "reserved": 0,
+      "flag_bits": 0,
+      "volume": 0,
+      "internal_attr": 0,
+      "external_attr": 2172649472
+    },
+    {
+      "filename": "badminton-windows-0.5.12/START.bat",
+      "date_time": [
+        2026,
+        11,
+        14,
+        19,
+        6,
+        30
+      ],
+      "compress_type": 0,
+      "comment": "",
+      "extra": "",
+      "create_system": 3,
+      "create_version": 20,
+      "extract_version": 20,
+      "reserved": 0,
+      "flag_bits": 0,
+      "volume": 0,
+      "internal_attr": 0,
+      "external_attr": 2172649472
+    },
+    {
+      "filename": "badminton-windows-0.5.12/payload/01-python.zip",
+      "date_time": [
+        2026,
+        11,
+        14,
+        19,
+        6,
         28
       ],
       "compress_type": 0,
@@ -23,13 +134,13 @@
       "external_attr": 2172649472
     },
     {
-      "filename": "badminton-windows-0.5.11/README.md",
+      "filename": "badminton-windows-0.5.12/payload/02-filelock.zip",
       "date_time": [
         2026,
         11,
         14,
-        17,
-        47,
+        19,
+        6,
         28
       ],
       "compress_type": 0,
@@ -45,13 +156,13 @@
       "external_attr": 2172649472
     },
     {
-      "filename": "badminton-windows-0.5.11/RUN.bat",
+      "filename": "badminton-windows-0.5.12/payload/03-numpy.zip",
       "date_time": [
         2026,
         11,
         14,
-        17,
-        47,
+        19,
+        6,
         28
       ],
       "compress_type": 0,
@@ -67,13 +178,13 @@
       "external_attr": 2172649472
     },
     {
-      "filename": "badminton-windows-0.5.11/SETUP_GPU.bat",
+      "filename": "badminton-windows-0.5.12/payload/04-opencv_python_headless.zip",
       "date_time": [
         2026,
         11,
         14,
-        17,
-        47,
+        19,
+        6,
         28
       ],
       "compress_type": 0,
@@ -89,13 +200,13 @@
       "external_attr": 2172649472
     },
     {
-      "filename": "badminton-windows-0.5.11/START.bat",
+      "filename": "badminton-windows-0.5.12/payload/05-scipy.zip",
       "date_time": [
         2026,
         11,
         14,
-        17,
-        47,
+        19,
+        6,
         28
       ],
       "compress_type": 0,
@@ -111,167 +222,13 @@
       "external_attr": 2172649472
     },
     {
-      "filename": "badminton-windows-0.5.11/payload/01-python.zip",
+      "filename": "badminton-windows-0.5.12/payload/06-ffmpeg.zip",
       "date_time": [
         2026,
         11,
         14,
-        17,
-        47,
-        26
-      ],
-      "compress_type": 0,
-      "comment": "",
-      "extra": "",
-      "create_system": 3,
-      "create_version": 20,
-      "extract_version": 20,
-      "reserved": 0,
-      "flag_bits": 0,
-      "volume": 0,
-      "internal_attr": 0,
-      "external_attr": 2172649472
-    },
-    {
-      "filename": "badminton-windows-0.5.11/payload/02-filelock.zip",
-      "date_time": [
-        2026,
-        11,
-        14,
-        17,
-        47,
-        26
-      ],
-      "compress_type": 0,
-      "comment": "",
-      "extra": "",
-      "create_system": 3,
-      "create_version": 20,
-      "extract_version": 20,
-      "reserved": 0,
-      "flag_bits": 0,
-      "volume": 0,
-      "internal_attr": 0,
-      "external_attr": 2172649472
-    },
-    {
-      "filename": "badminton-windows-0.5.11/payload/03-numpy.zip",
-      "date_time": [
-        2026,
-        11,
-        14,
-        17,
-        47,
-        26
-      ],
-      "compress_type": 0,
-      "comment": "",
-      "extra": "",
-      "create_system": 3,
-      "create_version": 20,
-      "extract_version": 20,
-      "reserved": 0,
-      "flag_bits": 0,
-      "volume": 0,
-      "internal_attr": 0,
-      "external_attr": 2172649472
-    },
-    {
-      "filename": "badminton-windows-0.5.11/payload/04-opencv_python_headless.zip",
-      "date_time": [
-        2026,
-        11,
-        14,
-        17,
-        47,
-        26
-      ],
-      "compress_type": 0,
-      "comment": "",
-      "extra": "",
-      "create_system": 3,
-      "create_version": 20,
-      "extract_version": 20,
-      "reserved": 0,
-      "flag_bits": 0,
-      "volume": 0,
-      "internal_attr": 0,
-      "external_attr": 2172649472
-    },
-    {
-      "filename": "badminton-windows-0.5.11/payload/05-scipy.zip",
-      "date_time": [
-        2026,
-        11,
-        14,
-        17,
-        47,
-        26
-      ],
-      "compress_type": 0,
-      "comment": "",
-      "extra": "",
-      "create_system": 3,
-      "create_version": 20,
-      "extract_version": 20,
-      "reserved": 0,
-      "flag_bits": 0,
-      "volume": 0,
-      "internal_attr": 0,
-      "external_attr": 2172649472
-    },
-    {
-      "filename": "badminton-windows-0.5.11/payload/06-ffmpeg.zip",
-      "date_time": [
-        2026,
-        11,
-        14,
-        17,
-        47,
-        26
-      ],
-      "compress_type": 0,
-      "comment": "",
-      "extra": "",
-      "create_system": 3,
-      "create_version": 20,
-      "extract_version": 20,
-      "reserved": 0,
-      "flag_bits": 0,
-      "volume": 0,
-      "internal_attr": 0,
-      "external_attr": 2172649472
-    },
-    {
-      "filename": "badminton-windows-0.5.11/payload/07-ffprobe.zip",
-      "date_time": [
-        2026,
-        11,
-        14,
-        17,
-        47,
-        26
-      ],
-      "compress_type": 0,
-      "comment": "",
-      "extra": "",
-      "create_system": 3,
-      "create_version": 20,
-      "extract_version": 20,
-      "reserved": 0,
-      "flag_bits": 0,
-      "volume": 0,
-      "internal_attr": 0,
-      "external_attr": 2172649472
-    },
-    {
-      "filename": "badminton-windows-0.5.11/payload/08-application.zip",
-      "date_time": [
-        2026,
-        11,
-        14,
-        17,
-        47,
+        19,
+        6,
         28
       ],
       "compress_type": 0,
@@ -287,14 +244,14 @@
       "external_attr": 2172649472
     },
     {
-      "filename": "badminton-windows-0.5.11/payload/09-runtime-notes.zip",
+      "filename": "badminton-windows-0.5.12/payload/07-ffprobe.zip",
       "date_time": [
         2026,
         11,
         14,
-        17,
-        47,
-        26
+        19,
+        6,
+        28
       ],
       "compress_type": 0,
       "comment": "",
@@ -309,14 +266,58 @@
       "external_attr": 2172649472
     },
     {
-      "filename": "badminton-windows-0.5.11/\uc0ac\uc6a9\ubc29\ubc95.txt",
+      "filename": "badminton-windows-0.5.12/payload/08-application.zip",
       "date_time": [
         2026,
         11,
         14,
-        17,
-        47,
+        19,
+        6,
+        30
+      ],
+      "compress_type": 0,
+      "comment": "",
+      "extra": "",
+      "create_system": 3,
+      "create_version": 20,
+      "extract_version": 20,
+      "reserved": 0,
+      "flag_bits": 0,
+      "volume": 0,
+      "internal_attr": 0,
+      "external_attr": 2172649472
+    },
+    {
+      "filename": "badminton-windows-0.5.12/payload/09-runtime-notes.zip",
+      "date_time": [
+        2026,
+        11,
+        14,
+        19,
+        6,
         28
+      ],
+      "compress_type": 0,
+      "comment": "",
+      "extra": "",
+      "create_system": 3,
+      "create_version": 20,
+      "extract_version": 20,
+      "reserved": 0,
+      "flag_bits": 0,
+      "volume": 0,
+      "internal_attr": 0,
+      "external_attr": 2172649472
+    },
+    {
+      "filename": "badminton-windows-0.5.12/사용방법.txt",
+      "date_time": [
+        2026,
+        11,
+        14,
+        19,
+        6,
+        30
       ],
       "compress_type": 0,
       "comment": "",
@@ -330,6 +331,5 @@
       "internal_attr": 0,
       "external_attr": 2172649472
     }
-  ],
-  "comment": ""
+  ]
 }

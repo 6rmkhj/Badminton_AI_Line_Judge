@@ -6,11 +6,14 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / 'release'
-receipt = json.loads((RELEASE / 'receipt.json').read_text())
-layout = json.loads((RELEASE / 'archive-layout.json').read_text())
+VERSION = '0.5.12'
+receipt = json.loads((RELEASE / 'receipt.json').read_text(encoding='utf-8'))
+if receipt['app_version'] != VERSION or receipt['source_worktree_dirty'] is not False:
+    raise ValueError('Expected a clean 0.5.12 package receipt')
+layout = json.loads((RELEASE / 'archive-layout.json').read_text(encoding='utf-8'))
 output = ROOT / 'dist'
 output.mkdir(exist_ok=True)
-archive_path = output / 'badminton-windows-0.5.11.zip'
+archive_path = output / f'badminton-windows-{VERSION}.zip'
 with zipfile.ZipFile(archive_path, 'w', compression=zipfile.ZIP_STORED) as archive:
     archive.comment = bytes.fromhex(layout['comment'])
     for entry in layout['entries']:
@@ -19,11 +22,12 @@ with zipfile.ZipFile(archive_path, 'w', compression=zipfile.ZIP_STORED) as archi
             if key in ('filename', 'date_time'):
                 continue
             setattr(info, key, bytes.fromhex(value) if key in ('extra', 'comment') else value)
-        relative = Path(entry['filename']).relative_to('badminton-windows-0.5.11')
+        relative = Path(entry['filename']).relative_to(f'badminton-windows-{VERSION}')
         if relative.is_absolute() or '..' in relative.parts:
             raise ValueError('Invalid package path')
         archive.writestr(info, (ROOT / relative).read_bytes())
-digest = hashlib.file_digest(archive_path.open('rb'), 'sha256').hexdigest()
+with archive_path.open('rb') as stream:
+    digest = hashlib.file_digest(stream, 'sha256').hexdigest()
 if digest != receipt['sha256'] or archive_path.stat().st_size != receipt['bytes']:
     raise ValueError('Reassembled ZIP differs from the verified package')
 with zipfile.ZipFile(archive_path) as archive:
