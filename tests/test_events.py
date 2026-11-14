@@ -33,6 +33,29 @@ def test_stationary_background_is_not_a_landing():
     assert estimate_landings([track(points)], [], [i / 30 for i in range(10)], {}) == []
 
 
+def test_target_support_uses_selected_primary_court_not_competing_plane():
+    from badminton.events import _target_support
+    calibration = {"polygon_px": [[0, 0], [99, 0], [99, 99], [0, 99]],
+                   "camera_stability": {"status": "ok", "all_frames_sampled": True},
+                   "primary_court": {"status": "selected",
+                                     "interior_polygon_px": [[20, 20], [60, 20], [60, 60], [20, 60]]}}
+    assert _target_support([{"x": 40, "y": 40}], calibration) == 1
+    assert _target_support([{"x": 80, "y": 40}], calibration) == 0
+    calibration["primary_court"]["status"] = "review"
+    assert _target_support([{"x": 40, "y": 40}], calibration) == 0
+
+
+@pytest.mark.parametrize("stability", [None, {"status": "review"},
+    {"status": "ok", "all_frames_sampled": False},
+    {"status": "ok", "all_frames_sampled": True, "reason_codes": ["CAMERA_MOVED_FROM_CALIBRATION_REFERENCE"]}])
+def test_unstable_primary_court_cannot_prioritize_a_stale_target_region(stability):
+    from badminton.events import _target_support
+    calibration = {"camera_stability": stability,
+                   "primary_court": {"status": "selected",
+                                     "interior_polygon_px": [[20, 20], [60, 20], [60, 60], [20, 60]]}}
+    assert _target_support([{"x": 40, "y": 40}], calibration) == 0
+
+
 def test_missing_observations_and_crossing_id_remain_explicit():
     points = [(10 + i * 4, 10 + i * 3) for i in range(7)] + [(34, 28)] * 5
     times = [i / 30 if i < 7 else i / 30 + 0.3 for i in range(len(points))]

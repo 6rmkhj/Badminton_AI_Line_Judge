@@ -50,6 +50,9 @@ def test_actual_pipeline_stays_review_without_ground_contact(tmp_path):
     result = analyze_video(source, tmp_path / 'run', {'analysis_width': 160, 'source_crop_count': 0},
                            progress_callback=progress.append)
     assert result['decision']['decision'] == 'REVIEW'
+    assert result['video_estimate']['decision'] == 'REVIEW'
+    assert result['video_estimate']['eligible'] is False
+    assert result['display_decision']['decision'] == 'REVIEW'
     assert result['assessment']['line_verdict'] == result['decision']['decision']
     assert result['assessment']['changes_decision'] is False
     assert json.loads((tmp_path / 'run/result.json').read_text())['assessment'] == result['assessment']
@@ -58,6 +61,7 @@ def test_actual_pipeline_stays_review_without_ground_contact(tmp_path):
     assert len(result['timestamps']) == 12
     assert json.loads((tmp_path / 'run/result.json').read_text())['source_sha256'] == result['source_sha256']
     assert (tmp_path / 'run/preview.mp4').exists()
+    assert cv2.imread(str(tmp_path / 'run' / result['artifacts']['calibration_overlay'])) is not None
     assert all(event['contact_observed'] is False for event in result['landings'])
     assert list(dict.fromkeys(event['stage'] for event in progress)) == [
         'prepare', 'calibration', 'detection', 'tracking', 'contact', 'evidence', 'save']
@@ -88,9 +92,67 @@ def test_frame_progress_throttles_intermediate_counts_and_retains_final(monkeypa
     assert all(event['total_units'] == 12 for event in events)
 
 
+def test_pipeline_applies_requested_singles_to_calibration_and_decisions(tmp_path, monkeypatch):
+    import badminton.calibration as module
+    original = module.calibrate
+    seen = []
+    def capture(frames, hint, config):
+        seen.append(config)
+        return original(frames, hint, config)
+    monkeypatch.setattr(module, 'calibrate', capture)
+    result = analyze_video(clip(tmp_path), tmp_path / 'singles-run', {
+        'analysis_width': 160, 'source_crop_count': 0,
+        'rules': {'game': 'singles', 'phase': 'rally'},
+        'calibration': {'game': 'doubles'},
+        'evidence': {'annotated_clip': False}})
+    assert seen[0]['game'] == 'singles'
+    assert result['calibration']['game'] == 'singles'
+    assert result['config']['rules']['game'] == 'singles'
+    assert all(event['decision']['rules']['game'] == 'singles' for event in result['landings'])
+
+
 def test_multiple_unselected_landings_cannot_confirm_judgment():
     assert aggregate_decision([{'decision':'IN'}, {'decision':'IN'}])['decision'] == 'REVIEW'
     assert aggregate_decision([])['decision'] == 'REVIEW'
+
+
+def test_estimate_display_never_rewrites_strict_contact_or_evaluation(tmp_path, monkeypatch):
+    # Inject an estimator result only to test pipeline separation and storage.
+    # The synthetic colour clip is not a positive contact-detection example.
+    from badminton import video_estimate
+    monkeypatch.setattr(video_estimate, 'estimate_video_verdict', lambda *args, **kwargs: {
+        'decision': 'IN', 'eligible': True, 'decision_kind': 'video_estimate',
+        'source': video_estimate.SOURCE, 'contact_observed': False,
+        'target_identity_verified': False, 'evaluation_eligible': False,
+        'frame_interval': [4, 6], 'time_interval': [4/30, 6/30],
+        'possible_contact_polygon_px': [[60, 50], [80, 50], [80, 70], [60, 70]],
+        'uncertainty_px': 2, 'reason_codes': ['VIDEO_ESTIMATE_ALL_POSITIONS_INSIDE'],
+        'rules': {'game': 'doubles', 'phase': 'rally'}})
+    result = analyze_video(clip(tmp_path), tmp_path / 'estimate-run', {
+        'analysis_width': 160, 'source_crop_count': 0, 'evidence': {'annotated_clip': False}})
+    stored = json.loads((tmp_path / 'estimate-run/result.json').read_text())
+    assert stored['decision'] == result['decision']
+    assert stored['decision']['decision'] == 'REVIEW'
+    assert stored['assessment']['line_verdict'] == 'REVIEW'
+    assert stored['display_decision']['decision'] == 'IN'
+    assert stored['display_decision']['decision_kind'] == 'video_estimate'
+    assert stored['video_estimate']['contact_observed'] is False
+    assert stored['video_estimate']['evaluation_eligible'] is False
+    assert stored['video_estimate']['source_sha256'] == stored['source_sha256']
+    assert all(row.get('contact_observed') is False for row in stored['landings'])
+    assert (tmp_path / 'estimate-run' / stored['video_estimate']['artifact_path']).is_file()
+
+
+def test_estimate_failure_preserves_a_completed_strict_analysis(tmp_path, monkeypatch):
+    from badminton import video_estimate
+    def unavailable(*args, **kwargs):
+        raise ValueError('invalid native evidence')
+    monkeypatch.setattr(video_estimate, 'estimate_video_verdict', unavailable)
+    result = analyze_video(clip(tmp_path), tmp_path / 'estimate-failed', {
+        'analysis_width': 160, 'source_crop_count': 0, 'evidence': {'annotated_clip': False}})
+    assert result['decision']['decision'] == 'REVIEW'
+    assert result['video_estimate']['reason_codes'] == ['VIDEO_ESTIMATE_PROCESSING_FAILED']
+    assert result['display_decision']['decision'] == 'REVIEW'
 
 
 def test_original_resolution_sequence_keeps_frame_order_and_one_cache(tmp_path):
@@ -177,3 +239,59 @@ def test_tail_repair_rejects_leading_editlist_without_changing_video(tmp_path):
     with pytest.raises(ValueError, match='non-tail'):
         repair_preview_tail(edited, fps=30)
     assert edited.read_bytes() == original_bytes
+
+
+@pytest.mark.parametrize('label', ['IN', 'OUT'])
+def test_optional_evidence_failures_preserve_computed_estimate(tmp_path, monkeypatch, label):
+    # Inject only the estimator output; exercise real decoding, artifact handling,
+    # result persistence, and strict assessment. This is not an accuracy test.
+    from badminton import evidence, pipeline, video_estimate
+    expected = {'decision': label, 'eligible': True, 'decision_kind': 'video_estimate',
+                'source': video_estimate.SOURCE, 'contact_observed': False,
+                'target_identity_verified': False, 'evaluation_eligible': False,
+                'reason_codes': ['test-computed-region']}
+    monkeypatch.setattr(video_estimate, 'estimate_video_verdict', lambda *a, **k: dict(expected))
+    def denied(*args, **kwargs):
+        raise PermissionError(13, 'evidence directory is read-only')
+    def encoder_failure(*args, **kwargs):
+        raise subprocess.CalledProcessError(1, ['ffmpeg'], stderr=b'encoder unavailable')
+    monkeypatch.setattr(video_estimate, 'write_estimate_overlay', denied)
+    monkeypatch.setattr(evidence, 'write_calibration_overlay', denied)
+    monkeypatch.setattr(pipeline, 'write_image', denied)
+    monkeypatch.setattr(evidence, 'write_annotated_clip', encoder_failure)
+    events = []
+    output = tmp_path / '한글 결과 폴더'
+    result = analyze_video(clip(tmp_path), output,
+                           {'analysis_width': 160, 'source_crop_count': 0},
+                           progress_callback=events.append)
+    stored = json.loads((output / 'result.json').read_text(encoding='utf-8'))
+    assert stored == result
+    assert stored['display_decision']['decision'] == label
+    assert stored['video_estimate']['eligible'] is True
+    assert stored['video_estimate']['contact_observed'] is False
+    assert stored['decision']['decision'] == stored['assessment']['line_verdict'] == 'REVIEW'
+    assert events[-1]['stage'] == 'save'
+    assert (output / 'detections.json').is_file()
+    assert set(stored['artifacts']) == {'preview', 'detections', 'evidence'}
+    assert all('image' not in row for row in stored['artifacts']['evidence'])
+    assert 'artifact_path' not in stored['video_estimate']
+    warnings = {row['artifact']: row for row in stored['evidence_warnings']}
+    assert {'video_estimate_overlay', 'calibration_overlay', 'overview', 'annotated_clip'} <= warnings.keys()
+    assert warnings['overview']['error_type'] == 'PermissionError'
+    assert 'encoder unavailable' in warnings['annotated_clip']['message']
+    assert 'EVIDENCE_ARTIFACT_UNAVAILABLE' in stored['warnings']
+
+
+def test_result_json_explicit_utf8(tmp_path, monkeypatch):
+    from badminton.pipeline import write_json
+    original = Path.write_text
+    encodings = []
+    def check_encoding(self, data, *args, **kwargs):
+        encodings.append(kwargs.get('encoding'))
+        return original(self, data, *args, **kwargs)
+    monkeypatch.setattr(Path, 'write_text', check_encoding)
+    payload = {'source': '한글 경로/셔틀 🏸.mp4'}
+    path = tmp_path / '결과.json'
+    write_json(path, payload)
+    assert encodings == ['utf-8']
+    assert json.loads(path.read_bytes().decode('utf-8')) == payload

@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "fixture": "Synthetic media and mocked API; no analysis executed",
+  "checks": [
+    "automatic input sources preserved",
+    "drag selection",
+    "keyboard selection",
+    "native preview seeking",
+    "portrait letterboxing",
+    "escape cancellation",
+    "per-view normalized payload",
+    "manual provenance",
+    "reload restoration",
+    "375/390px no overflow",
+    "resize preservation",
+    "upload ID reuse",
+    "refine preservation",
+    "clear/reset",
+    "singles/doubles keyboard selection",
+    "busy rule control disabled",
+    "rule payload/reload/refinement preservation",
+    "selected game labels",
+    "A-only IN with B REVIEW",
+    "B-only OUT with A REVIEW",
+    "correspondence warning preserves final verdict"
+  ],
+  "submissions": 8,
+  "uploads": 1,
+  "javascript_errors": []
+}

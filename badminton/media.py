@@ -55,13 +55,14 @@ def _run_ffmpeg_progress(command, callback, total, detail, timeout):
     with tempfile.TemporaryDirectory(prefix='badminton-progress-') as folder:
         progress = Path(folder) / 'ffmpeg.txt'
         observed = [command[0], '-progress', str(progress), '-stats_period', '0.5', '-nostats', *command[1:]]
-        process = subprocess.Popen(observed, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+        process = subprocess.Popen(observed, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+                                   text=True, encoding='utf-8', errors='replace')
         deadline = time.monotonic() + timeout
 
         def observed_count():
             if not progress.exists():
                 return None
-            values = [line.partition('=')[2].strip() for line in progress.read_text().splitlines()
+            values = [line.partition('=')[2].strip() for line in progress.read_text(encoding='utf-8').splitlines()
                       if line.startswith('frame=')]
             counts = [int(value) for value in values if value.isdigit()]
             return min(counts[-1], total) if counts else None
@@ -157,7 +158,7 @@ def prepare_preview(source, destination, width=1280, *, progress_callback=None):
     destination.parent.mkdir(parents=True, exist_ok=True)
     signature = {'source_sha256': file_hash(source), 'width': width, 'height': height, 'version': 1}
     sidecar = destination.with_suffix('.source.json')
-    if not destination.exists() or not sidecar.exists() or json.loads(sidecar.read_text()) != signature:
+    if not destination.exists() or not sidecar.exists() or json.loads(sidecar.read_text(encoding='utf-8')) != signature:
         temporary = destination.with_name(destination.stem + f'.partial-{uuid.uuid4().hex}.mp4')
         command = ['ffmpeg', '-hide_banner', '-nostdin', '-y', '-loglevel', 'error',
                    '-xerror', '-err_detect', 'explode', '-threads', str(decoder_threads()), '-filter_threads', '1',
@@ -168,16 +169,17 @@ def prepare_preview(source, destination, width=1280, *, progress_callback=None):
                    '-bsf:v', f'setts=pts=PTS:dts=DTS:duration=1/({metadata["fps"]:.9f}*TB)',
                    '-movflags', '+faststart', str(temporary)]
         if progress_callback is None:
-            completed = subprocess.run(command, capture_output=True, text=True, timeout=1800)
+            completed = subprocess.run(command, capture_output=True, text=True,
+                                       encoding='utf-8', errors='replace', timeout=1800)
         else:
             completed = _run_ffmpeg_progress(command, progress_callback, metadata['frame_count'],
                                              '미리보기 변환', 1800)
-        (destination.parent / 'preview-encode.log').write_text(completed.stderr)
+        (destination.parent / 'preview-encode.log').write_text(completed.stderr, encoding='utf-8')
         if completed.returncode or completed.stderr.strip():
             temporary.unlink(missing_ok=True)
             raise RuntimeError(f'Preview encoding failed: {completed.stderr[-2000:]}')
         temporary.replace(destination)
-        sidecar.write_text(json.dumps(signature, indent=2) + '\n')
+        sidecar.write_text(json.dumps(signature, indent=2) + '\n', encoding='utf-8')
     if progress_callback is not None:
         progress_callback({'detail': '미리보기 프레임·시각 검증'})
     repair_preview_tail(destination, metadata['fps'])
@@ -389,7 +391,8 @@ def source_crop(source, time_seconds, center_px, output_path, radius=192, frame_
                '-threads', str(decoder_threads()), '-filter_threads', '1', '-i', str(source), '-map', '0:v:0',
                '-vf', f'select=eq(n\\,{frame_index}),crop={x1-x0}:{y1-y0}:{x0}:{y0}',
                '-frames:v', '1', '-fps_mode', 'passthrough', '-q:v', '2', '-threads', '1', str(output_path)]
-    completed = subprocess.run(command, capture_output=True, text=True, timeout=180)
+    completed = subprocess.run(command, capture_output=True, text=True,
+                               encoding='utf-8', errors='replace', timeout=180)
     if completed.returncode or not Path(output_path).exists():
         return {'status': 'unavailable', 'error': completed.stderr[-1000:]}
     return {'status': 'saved', 'requested_time': time_seconds,

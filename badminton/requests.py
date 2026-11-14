@@ -1,8 +1,8 @@
 """Explicit, line-responsible requests over independently analysed camera clips.
 
 A shared file number or a matching model decision does not establish event
-correspondence. Multiple views require an explicit operator assertion that their
-local time windows refer to the same landing. No clock synchronization, 3D
+correspondence. One validated view may resolve its own request; combining partial
+responsibilities requires confirmed event correspondence. No clock synchronization, 3D
 reconstruction, annotation, or ground-truth label is generated here.
 """
 from __future__ import annotations
@@ -13,12 +13,14 @@ import html
 import json
 import math
 from pathlib import Path
+import re
 from urllib.parse import quote
 
-from .decision import rule_region
+from .decision import evaluate_contact, rule_region
 
 
 BOUNDARIES = frozenset(("left", "right", "near", "far"))
+_SOURCE_HASH = re.compile(r"[0-9a-f]{64}")
 
 
 def _number(value):
@@ -179,56 +181,112 @@ def _geometry(decision):
     return polygon, float(error), center, radius
 
 
-def aggregate_request(request, views):
-    """Conservatively combine already gated, line-responsible view decisions.
+def _pixel_decision_geometry(decision, region):
+    """Recognize an already gated local-boundary decision, without inventing metres."""
+    if (decision.get("decision_method") != "primary_court_observed_boundaries"
+            or decision.get("coordinate_system") != "analysis_pixels"
+            or decision.get("geometry_only") is not False):
+        return None
+    polygon, error = decision.get("contact_polygon_px"), decision.get("uncertainty_px")
+    if (not isinstance(polygon, list) or not polygon or not _number(error) or error < 0
+            or any(not isinstance(p, list) or len(p) != 2 or not all(_number(v) for v in p) for p in polygon)):
+        return None
+    rules = decision.get("rules")
+    if (not isinstance(rules, dict)
+            or any(rules.get(key) != region[key] for key in ("game", "phase", "xmin", "xmax", "ymin", "ymax"))):
+        return None
+    boundaries = decision.get("boundaries")
+    if not isinstance(boundaries, list) or not boundaries:
+        return None
+    outside, roles = set(), set()
+    for edge in boundaries:
+        if (not isinstance(edge, dict) or edge.get("role") not in BOUNDARIES or edge["role"] in roles
+                or not all(_number(edge.get(key)) for key in
+                           ("min_inside_margin_px", "max_inside_margin_px", "uncertainty_px"))
+                or edge["uncertainty_px"] < 0
+                or edge["min_inside_margin_px"] > edge["max_inside_margin_px"]):
+            return None
+        roles.add(edge["role"])
+        if (edge.get("robust_outside") is True and edge.get("within_observed_extent") is True
+                and edge["max_inside_margin_px"] < -edge["uncertainty_px"]):
+            outside.add(edge["role"])
+    if decision.get("decision") == "IN" and (outside or not {"left", "right", "near"} <= roles):
+        return None
+    return outside
 
-    Results are operator-assisted request judgments, not automatic benchmark
-    records. A single camera's confident result cannot mask an unresolved view
-    assigned to the requested boundary. Confident contradictory views also veto.
+
+def _decision_rules_match(decision, region):
+    """Legacy request decisions inherit their submitted rules; explicit rules must agree."""
+    if "rules" not in decision:
+        return True
+    rules = decision["rules"]
+    if not isinstance(rules, dict):
+        return False
+    keys = ("game", "phase", "xmin", "xmax", "ymin", "ymax")
+    if not all(key in rules for key in keys):
+        try:
+            rules = rule_region(rules)
+        except (ValueError, TypeError):
+            return False
+    return all(rules.get(key) == region[key] for key in keys)
+
+
+def aggregate_request(request, views):
+    """Use one validated responsible view when another view is unresolved.
+
+    IN needs a donor covering the requested boundaries; OUT needs one observed
+    assigned boundary proving exclusion. Partial IN responsibilities may only be
+    combined with confirmed common event/metric coordinates. Pixel coordinates
+    from separate cameras are never compared, merged, or transferred.
     """
     required = BOUNDARIES if request["requested_boundary"] == "all" else {request["requested_boundary"]}
-    covered = set()
-    relevant, reasons = [], []
+    region = rule_region(request["rules"])
+    shared_coordinates = request.get("same_court_coordinate_system_confirmed") is True
+    same_event = request.get("same_event_confirmed") is True
+    covered, relevant, donors, warnings, reasons = set(), [], [], [], []
+    if len(views) > 1 and not same_event:
+        warnings.append("CROSS_VIEW_EVENT_CORRESPONDENCE_UNCONFIRMED")
+    if len(views) > 1 and not shared_coordinates:
+        warnings.append("CROSS_VIEW_COURT_COORDINATE_SYSTEM_UNCONFIRMED")
+    hashes = [view.get("source_sha256") for view in views if view.get("source_sha256")]
+    duplicates = len(hashes) != len(set(hashes))
+    if duplicates:
+        warnings.append("DUPLICATE_SOURCE_IS_NOT_AN_INDEPENDENT_VIEW")
     for view in views:
         assigned = set(view["responsible_boundaries"]) & required
-        if assigned:
-            covered.update(assigned)
-            relevant.append(view)
-    if required - covered:
-        reasons.append("REQUESTED_BOUNDARY_WITHOUT_RESPONSIBLE_CAMERA")
-    if len(views) > 1 and not request["same_event_confirmed"]:
-        reasons.append("CROSS_VIEW_EVENT_CORRESPONDENCE_UNCONFIRMED")
-    shared_coordinates = request.get("same_court_coordinate_system_confirmed") is True
-    if len(views) > 1 and not shared_coordinates:
-        reasons.append("CROSS_VIEW_COURT_COORDINATE_SYSTEM_UNCONFIRMED")
-    hashes = [v.get("source_sha256") for v in views if v.get("source_sha256")]
-    if len(hashes) != len(set(hashes)):
-        reasons.append("DUPLICATE_SOURCE_IS_NOT_AN_INDEPENDENT_VIEW")
-    labels = {v.get("decision", {}).get("decision", "REVIEW") for v in views}
-    if {"IN", "OUT"} <= labels:
-        reasons.append("CONFLICTING_VIEW_DECISIONS")
-    accepted_geometry = []
-    outside_supported = set()
-    region = rule_region(request["rules"])
-    for view in relevant:
+        if not assigned:
+            continue
+        covered.update(assigned)
+        relevant.append(view)
         decision = view.get("decision", {})
         label = decision.get("decision", "REVIEW")
         if view.get("status") != "completed" or label not in {"IN", "OUT"}:
-            reasons.append("RESPONSIBLE_VIEW_UNRESOLVED")
+            warnings.append("RESPONSIBLE_VIEW_UNRESOLVED")
+            continue
+        digest = view.get("source_sha256")
+        if not isinstance(digest, str) or not _SOURCE_HASH.fullmatch(digest):
+            warnings.append("VIEW_SOURCE_UNVERIFIED")
+            continue
+        if not _decision_rules_match(decision, region):
+            warnings.append("VIEW_RULES_MISMATCH")
+            continue
+        if decision.get("geometry_only") is True:
+            warnings.append("VIEW_CONTACT_GEOMETRY_UNAVAILABLE")
             continue
         contact_time = decision.get("contact_time_seconds")
         start, end = view["event_window_seconds"]
         if not _number(contact_time) or not start <= contact_time <= end:
-            reasons.append("CONTACT_OUTSIDE_REQUESTED_EVENT_WINDOW")
-        geometry = _geometry(decision)
-        if geometry is None:
-            reasons.append("VIEW_CONTACT_GEOMETRY_UNAVAILABLE")
+            warnings.append("CONTACT_OUTSIDE_REQUESTED_EVENT_WINDOW")
             continue
-        accepted_geometry.append((view["camera_id"], geometry))
-        if label == "OUT":
+        geometry = _geometry(decision)
+        outside = set()
+        if geometry is not None:
             polygon, error, _, _ = geometry
+            # Imported labels cannot override their own contact geometry.
+            if evaluate_contact(polygon, request["rules"], error)["decision"] != label:
+                warnings.append("VIEW_CONTACT_GEOMETRY_UNAVAILABLE")
+                continue
             x, y = [p[0] for p in polygon], [p[1] for p in polygon]
-            outside = set()
             if max(x) + error < region["xmin"]:
                 outside.add("left")
             if min(x) - error > region["xmax"]:
@@ -237,29 +295,58 @@ def aggregate_request(request, views):
                 outside.add("near")
             if min(y) - error > region["ymax"]:
                 outside.add("far")
-            outside_supported.update(outside & set(view["responsible_boundaries"]) & required)
+        else:
+            outside = _pixel_decision_geometry(decision, region)
+            if outside is None:
+                warnings.append("VIEW_CONTACT_GEOMETRY_UNAVAILABLE")
+                continue
+        outside &= assigned
+        if label == "OUT" and not outside:
+            warnings.append("OUT_NOT_SUPPORTED_BY_ASSIGNED_BOUNDARY")
+            continue
+        donors.append({"view": view, "label": label, "assigned": assigned,
+                       "geometry": geometry, "outside": outside})
+    if required - covered:
+        warnings.append("REQUESTED_BOUNDARY_WITHOUT_RESPONSIBLE_CAMERA")
+    if len({donor["label"] for donor in donors}) > 1:
+        reasons.append("CONFLICTING_VIEW_DECISIONS")
     agreements = []
-    for index, (camera_a, geometry_a) in enumerate(accepted_geometry):
-        if not shared_coordinates:
-            break  # Opposite cameras' near/left axes are not automatically registered.
-        for camera_b, geometry_b in accepted_geometry[index + 1:]:
-            distance = math.dist(geometry_a[2], geometry_b[2])
-            # Compare possible contact regions, never fuse them into a more
-            # precise coordinate. 20 mm is the existing PoC line-placement floor.
-            allowance = geometry_a[1] + geometry_b[1] + geometry_a[3] + geometry_b[3] + 0.02
-            agreements.append({"camera_a": camera_a, "camera_b": camera_b,
-                               "distance_m": distance, "allowance_m": allowance})
-            if distance > allowance:
-                reasons.append("CROSS_VIEW_CONTACT_POSITION_DISAGREEMENT")
-    relevant_labels = {v.get("decision", {}).get("decision", "REVIEW") for v in relevant}
-    label = next(iter(relevant_labels)) if len(relevant_labels) == 1 else "REVIEW"
-    if label == "OUT" and not outside_supported:
-        reasons.append("OUT_NOT_SUPPORTED_BY_ASSIGNED_BOUNDARY")
-    if not relevant or label not in {"IN", "OUT"}:
+    linked = same_event and shared_coordinates and not duplicates
+    if linked:
+        for index, first in enumerate(donors):
+            for second in donors[index+1:]:
+                a, b = first["geometry"], second["geometry"]
+                if a is None or b is None:
+                    continue  # Local camera pixels are not a shared court plane.
+                distance = math.dist(a[2], b[2])
+                allowance = a[1] + b[1] + a[3] + b[3] + .02
+                agreements.append({"camera_a": first["view"]["camera_id"],
+                                   "camera_b": second["view"]["camera_id"],
+                                   "distance_m": distance, "allowance_m": allowance})
+                if distance > allowance:
+                    reasons.append("CROSS_VIEW_CONTACT_POSITION_DISAGREEMENT")
+    selected = []
+    if donors and not reasons:
+        independent = [donor for donor in donors
+                       if donor["label"] == "OUT" or required <= donor["assigned"]]
+        if independent:
+            selected = independent if linked and all(d["geometry"] is not None for d in independent) else independent[:1]
+        elif (linked and all(d["geometry"] is not None for d in donors)
+              and required <= set().union(*(d["assigned"] for d in donors))):
+            selected = donors
+        else:
+            reasons.append("IN_NOT_SUPPORTED_BY_ASSIGNED_BOUNDARIES")
+    if not selected:
+        reasons.extend(warnings)
         reasons.append("NO_UNIQUE_RESOLVED_REQUEST_DECISION")
-    if reasons:
-        label = "REVIEW"
-    return {"decision": label, "reason_codes": sorted(set(reasons)) or ["RESPONSIBLE_VIEWS_AGREE"],
+    label = selected[0]["label"] if selected else "REVIEW"
+    outside_supported = set().union(*(donor["outside"] for donor in selected)) if selected else set()
+    source_ids = [donor["view"]["camera_id"] for donor in selected]
+    return {"decision": label,
+            "reason_codes": sorted(set(reasons)) or ["VERDICT_FROM_QUALIFIED_VIEW" if len(selected) == 1 else "RESPONSIBLE_VIEWS_AGREE"],
+            "warning_codes": sorted(set(warnings)),
+            "decision_scope": "single_view" if len(selected) == 1 else "linked_views" if selected else "unresolved",
+            "source_camera_ids": source_ids,
             "requested_boundary": request["requested_boundary"],
             "responsible_camera_ids": [v["camera_id"] for v in relevant],
             "covered_boundaries": sorted(covered), "outside_supported_boundaries": sorted(outside_supported),
@@ -274,7 +361,7 @@ def analyze_request(request_path, video_root, output_dir, base_config=None):
 
     ``request_path`` may be a JSON filename or an already decoded request dict.
     Validation errors raise before processing; per-view runtime failures are
-    retained in request-result.json and force REVIEW when relevant.
+    retained in request-result.json; a valid responsible peer can still decide.
     """
     from .pipeline import analyze_video, write_json
 
@@ -333,6 +420,10 @@ _REASONS_KO = {
     "OUT_NOT_SUPPORTED_BY_ASSIGNED_BOUNDARY": "OUT 근거가 요청한 담당 라인에서 확인되지 않았습니다.",
     "NO_UNIQUE_RESOLVED_REQUEST_DECISION": "요청한 사건에 대해 하나의 확정 가능한 결과가 없습니다.",
     "RESPONSIBLE_VIEWS_AGREE": "담당 카메라의 판정 근거가 일치합니다.",
+    "VERDICT_FROM_QUALIFIED_VIEW": "유효한 한 시점의 판정을 최종 결과에 반영했습니다.",
+    "IN_NOT_SUPPORTED_BY_ASSIGNED_BOUNDARIES": "IN 판정에 필요한 요청 경계 전체를 확인할 수 없습니다.",
+    "VIEW_SOURCE_UNVERIFIED": "판정 근거 영상의 원본 식별값을 확인할 수 없습니다.",
+    "VIEW_RULES_MISMATCH": "시점의 판정 규칙이 요청한 단식·복식 규칙과 다릅니다.",
 }
 _BOUNDARIES_KO = {"left": "왼쪽", "right": "오른쪽", "near": "가까운 쪽", "far": "먼 쪽", "all": "전체"}
 
@@ -369,6 +460,11 @@ def write_request_summary(result, output_dir):
     escape = lambda value: html.escape(str(value), quote=True)
     decision = result["decision"]
     reasons = "".join(f"<li>{escape(_REASONS_KO.get(reason, reason))}</li>" for reason in decision["reason_codes"])
+    warnings = "".join(f"<li>{escape(_REASONS_KO.get(reason, reason))}</li>" for reason in decision.get("warning_codes", []))
+    warnings_html = f'<details><summary>다른 시점·연결 상태</summary><ul>{warnings}</ul></details>' if warnings else ''
+    source_cameras = ", ".join(decision.get("source_camera_ids", []))
+    source_detail = (f'최종 판정 근거: {escape(source_cameras)} · 다른 시점의 개별 결과는 그대로 유지됩니다.'
+                     if source_cameras else '최종 판정에 사용할 유효한 시점이 없습니다.')
     views_html = []
     for row in result["views"]:
         responsibility = ", ".join(_BOUNDARIES_KO[b] for b in row["responsible_boundaries"])
@@ -430,7 +526,7 @@ def write_request_summary(result, output_dir):
 <style>body{{margin:0;background:#f3f5f7;color:#182535;font:16px/1.6 system-ui,sans-serif}}main{{max-width:1200px;margin:auto;padding:24px}}h1,h2{{line-height:1.3}}header,article{{background:white;padding:24px;margin-bottom:20px;border-radius:12px;border:1px solid #dce2e9}}.badge{{display:inline-block;padding:4px 12px;border-radius:6px;background:#fff2c4;color:#805800}}.IN{{background:#d7f2e4;color:#126141}}.OUT{{background:#fbe0dc;color:#9e2822}}.views{{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px}}figure{{margin:16px 0}}video,img{{max-width:100%;width:100%;height:auto;border-radius:6px;background:#111}}figcaption{{font-size:13px;overflow-wrap:anywhere;color:#5b6674}}a{{color:#145fab}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}}.error{{color:#a32620}}details{{margin-top:16px}}summary{{cursor:pointer}}p{{overflow-wrap:anywhere}}.note{{font-size:14px;color:#526070}}@media(max-width:600px){{main{{padding:12px}}header,article{{padding:16px}}}}</style>
 <main><header><p>배드민턴 · 판정 요청 검토</p><h1>{escape(result["request_id"])}</h1>
 <p><span class="badge {escape(decision["decision"])}">{escape(decision["decision"])}</span> · 요청 라인: {escape(_BOUNDARIES_KO[decision["requested_boundary"]])}</p>
-<ul>{reasons}</ul><p>시점 연결: {correspondence}</p><p>좌표 방향: {orientation}</p>
+<ul>{reasons}</ul><p>{source_detail}</p>{warnings_html}<p>시점 연결: {correspondence}</p><p>좌표 방향: {orientation}</p>
 <p class="note">영상별 시간은 각 영상의 첫 표시 프레임부터의 시간입니다. 카메라 좌표를 합쳐 더 정밀한 위치로 보고하지 않습니다. 요청 구간·타격 표시를 사용한 보조 분석이며, 정답 라벨이나 독립 정확도 검증 결과가 아닙니다.</p>
 <p><a href="request-result.json">요청 결과 JSON</a> · <a href="request.json">요청 설정</a></p></header>
 <section class="views">{''.join(views_html)}</section></main></html>'''

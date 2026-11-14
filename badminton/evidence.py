@@ -11,6 +11,103 @@ import cv2
 import numpy as np
 
 from .media import probe, repair_preview_tail, _FrameProgress, _run_ffmpeg_progress
+from .image_io import write_image
+
+
+def draw_court_lines(canvas, calibration, *, reference=False):
+    """Show the selected court's observed boundaries and supported interior.
+
+    Primary-court selection suppresses candidates from neighbouring courts and
+    the net. A local interior is shading, not a fabricated far boundary. Old
+    results without a selection retain their diagnostic candidate overlays.
+    A moved camera invalidates fixed overlays on replay frames; the dedicated
+    calibration reference image can still show the original detection.
+    """
+    stability = calibration.get('camera_stability') or {}
+    if not reference and 'CAMERA_MOVED_FROM_CALIBRATION_REFERENCE' in stability.get('reason_codes', []):
+        return canvas
+    height, width = canvas.shape[:2]
+
+    def draw_segment(segment, colour, thickness):
+        try:
+            points = np.asarray(segment, dtype=float).reshape(2, 2)
+        except (TypeError, ValueError):
+            return
+        if not np.isfinite(points).all():
+            return
+        # Clip before integer conversion, including old/imported diagnostics.
+        points = np.rint(np.clip(points, [-width, -height], [2 * width, 2 * height])).astype(int)
+        visible, start, end = cv2.clipLine((0, 0, width, height), tuple(points[0]), tuple(points[1]))
+        if visible:
+            cv2.line(canvas, start, end, colour, thickness, cv2.LINE_AA)
+
+    primary = calibration.get('primary_court')
+    if isinstance(primary, dict):
+        if primary.get('status') != 'selected':
+            return canvas
+        interior = primary.get('interior_polygon_px')
+        if interior is not None and primary.get('region_supported') is True:
+            try:
+                polygon = np.asarray(interior, dtype=float)
+                if (polygon.ndim == 2 and polygon.shape[1] == 2 and len(polygon) >= 3
+                        and np.isfinite(polygon).all()):
+                    polygon = np.rint(np.clip(polygon, [-width, -height], [2 * width, 2 * height])).astype(np.int32)
+                    mask = np.zeros((height, width), dtype=np.uint8)
+                    cv2.fillPoly(mask, [polygon], 255)
+                    # A subtle fill conveys the supported area. Its artificial
+                    # closing edge is deliberately never drawn as a court line.
+                    canvas[mask > 0] = np.rint(canvas[mask > 0] * .92 + np.array([70, 220, 95]) * .08).astype(np.uint8)
+            except (TypeError, ValueError):
+                pass
+        for segment in primary.get('line_segments_px') or []:
+            draw_segment(segment, (255, 210, 40), 1)
+        for boundary in primary.get('boundary_segments_px') or []:
+            if isinstance(boundary, dict) and boundary.get('observed') is True:
+                draw_segment(boundary.get('segment_px'), (70, 240, 105), 2)
+        for corner in primary.get('near_corners_px') or []:
+            try:
+                point = np.asarray(corner, dtype=float)
+                if point.shape == (2,) and np.isfinite(point).all() and (point >= 0).all() and (point < [width, height]).all():
+                    cv2.circle(canvas, tuple(np.rint(point).astype(int)), 4, (70, 240, 105), 1, cv2.LINE_AA)
+            except (TypeError, ValueError):
+                continue
+        return canvas
+
+    segments = calibration.get('line_segments_px') or [
+        region.get('line_segment_px') for region in calibration.get('supported_line_regions_px', [])
+        if isinstance(region, dict)]
+    for segment in segments:
+        draw_segment(segment, (255, 210, 40), 1)
+    polygon = calibration.get('polygon_px')
+    if polygon and calibration.get('status') == 'ok':
+        cv2.polylines(canvas, [np.rint(polygon).astype(np.int32)], True, (0, 210, 240), 2, cv2.LINE_AA)
+    return canvas
+
+
+def write_calibration_overlay(frames, calibration, output_dir):
+    """Save the sampled background and observed lines without landing markers."""
+    count = min(len(frames), max(1, int(calibration.get('background_frame_count', 5))))
+    indices = calibration.get('background_frame_indices')
+    if not (isinstance(indices, list) and indices and all(
+            isinstance(i, int) and not isinstance(i, bool) and 0 <= i < len(frames) for i in indices)):
+        indices = np.linspace(0, len(frames) - 1, count).astype(int).tolist()
+    canvas = np.median(np.stack([frames[i] for i in indices]), axis=0).astype(np.uint8)
+    draw_court_lines(canvas, calibration, reference=True)
+    width = canvas.shape[1]
+    primary = calibration.get('primary_court')
+    if isinstance(primary, dict):
+        label = ('PRIMARY COURT - OBSERVED NEAR BOUNDARIES' if primary.get('status') == 'selected'
+                 else 'PRIMARY COURT SELECTION UNCONFIRMED')
+    else:
+        label = 'COURT PLANE SUPPORTED' if calibration.get('status') == 'ok' else 'LINE CANDIDATES - COURT PLANE UNCONFIRMED'
+    cv2.rectangle(canvas, (0, 0), (width, min(32, canvas.shape[0])), (22, 26, 32), -1)
+    cv2.putText(canvas, label, (8, 21), cv2.FONT_HERSHEY_SIMPLEX,
+                max(.25, min(.55, width / 1500)), (255, 210, 40), 1, cv2.LINE_AA)
+    relative = 'evidence/calibration.jpg'
+    destination = Path(output_dir) / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    write_image(destination, canvas, [cv2.IMWRITE_JPEG_QUALITY, 94])
+    return relative
 
 
 def draw_observed_trail(canvas, observations, colour, thickness=1):
@@ -111,8 +208,7 @@ def write_trajectory_context(source_frames, timestamps, analysis_size, landing, 
     relative = 'evidence/trajectory-context.jpg'
     destination = Path(output_dir) / relative
     destination.parent.mkdir(parents=True, exist_ok=True)
-    if not cv2.imwrite(str(destination), strip, [cv2.IMWRITE_JPEG_QUALITY, 94]):
-        raise OSError('Could not write trajectory context evidence')
+    write_image(destination, strip, [cv2.IMWRITE_JPEG_QUALITY, 94])
     return {'path': relative, 'frame_indices': indices, 'times': [timestamps[i] for i in indices],
             'analysis_size': {'width': width, 'height': height}, 'source_size': source_size,
             'analysis_roi': [*low.tolist(), *high.tolist()], 'source_roi': source_roi,
@@ -156,9 +252,7 @@ def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decis
         for ordinal, index in enumerate(indices):
             canvas = frames[index].copy()
             height, width = canvas.shape[:2]
-            polygon = calibration.get('polygon_px')
-            if polygon and calibration.get('status') == 'ok':
-                cv2.polylines(canvas, [np.rint(polygon).astype(np.int32)], True, (0, 190, 255), 1)
+            draw_court_lines(canvas, calibration)
             for identifier, observation in indexed[index]:
                 trails[identifier].append((index, (round(observation['x']), round(observation['y']))))
             for identifier in list(trails):
@@ -181,8 +275,7 @@ def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decis
             cv2.putText(canvas, 'CANDIDATES / CONTACT REQUIRES OBSERVATION', (8, 40),
                         cv2.FONT_HERSHEY_SIMPLEX, scale * .8, (80, 200, 255), 1, cv2.LINE_AA)
             name = f'frame-{ordinal:04d}.jpg'
-            if not cv2.imwrite(str(temporary / name), canvas, [cv2.IMWRITE_JPEG_QUALITY, 92]):
-                raise OSError('Could not write replay evidence frame')
+            write_image(temporary / name, canvas, [cv2.IMWRITE_JPEG_QUALITY, 92])
             duration = timestamps[indices[ordinal + 1]] - timestamps[index] if ordinal + 1 < len(indices) else period
             concat.extend([f"file '{name}'", 'option framerate 1000000', f'duration {duration:.9f}'])
             timeline.append({'replay_frame_index': ordinal, 'source_frame_index': index,

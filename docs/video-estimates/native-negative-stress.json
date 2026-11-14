@@ -1,0 +1,48 @@
+{
+  "test_kind": "native_only_negative_stress_with_injected_original_priors",
+  "production_inference": false,
+  "independent_ground_truth": false,
+  "accuracy_evaluation": false,
+  "implementation_fingerprint": "7082b731c31440d495dc81750a17e78f82ded1d3f626c4eca6f8d01b224da1e8",
+  "limitations": [
+    "Original A family, tracks, calibration and timestamps are deliberately injected; source pixels alone are replaced.",
+    "This is an adversarial native-module isolation test, not an end-to-end detector result.",
+    "REVIEW checks that original priors cannot substitute for missing source pixels; it supplies no accuracy claim."
+  ],
+  "prior_result": "/workspace/video-estimate-validation/production-initial/paired/jobs/27da1e746f674f71b752ec1fa931612d/views/A/result.json",
+  "prior_result_sha256": "772eaa4568a3e026bb036d68534d77b63edef9ff063243c767c67289a03258dc",
+  "prior_detections": "/workspace/video-estimate-validation/production-initial/paired/jobs/27da1e746f674f71b752ec1fa931612d/views/A/detections.json",
+  "prior_detections_sha256": "a076eda6b3236ee975542ba99670c659f6abc96cd15afb6cccc8066f285a2cea",
+  "selected_family_id": "family_000",
+  "cases": [
+    {
+      "id": "contact_occlusion_A",
+      "source_path": "/workspace/video-estimate-validation/controls-yuv/contact_occlusion_A.mp4",
+      "source_sha256": "de10d8890f89038823ecbfed86f6b22a86ccd71b3e99db0fbd119a2a49907721",
+      "passed": true,
+      "elapsed_seconds": 15.450090663998708,
+      "status": "review",
+      "reason_codes": [
+        "NATIVE_ESTIMATE_COMPACT_OBJECT_SUPPORT_INSUFFICIENT"
+      ],
+      "decoded_frame_count": 19,
+      "observed_frame_count": 5,
+      "result_path": "/workspace/video-estimate-validation/native-control-stress/contact_occlusion_A.json"
+    },
+    {
+      "id": "static_A",
+      "source_path": "/workspace/video-estimate-validation/controls/static_A.mp4",
+      "source_sha256": "4e91343387f1930477206654a67bc89de547b0b3fb031cf853774a3698a4235d",
+      "passed": true,
+      "elapsed_seconds": 0.36245394599973224,
+      "status": "review",
+      "reason_codes": [
+        "NATIVE_ESTIMATE_NO_VISIBLE_PEAK"
+      ],
+      "decoded_frame_count": 19,
+      "observed_frame_count": 0,
+      "result_path": "/workspace/video-estimate-validation/native-control-stress/static_A.json"
+    }
+  ],
+  "all_conditions_passed": true
+}

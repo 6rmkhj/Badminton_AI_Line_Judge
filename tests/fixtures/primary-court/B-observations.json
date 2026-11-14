@@ -1,0 +1,2105 @@
+{
+  "status": "review",
+  "homography": [
+    [
+      -0.06014807567216857,
+      0.012183550899770634,
+      7.2065379912346
+    ],
+    [
+      0.00580061826222668,
+      0.016534650537264738,
+      -10.37009328957004
+    ],
+    [
+      0.00023583784855034213,
+      -0.007178380183675595,
+      1.0
+    ]
+  ],
+  "polygon_px": [
+    [
+      230.4752655029297,
+      546.3190307617188
+    ],
+    [
+      445.8186950683594,
+      470.77313232421875
+    ],
+    [
+      205.24075317382812,
+      206.0606689453125
+    ],
+    [
+      161.7590789794922,
+      207.0791473388672
+    ]
+  ],
+  "confidence": 0.343229,
+  "reason_codes": [
+    "COURT_TEMPLATE_SUPPORT_INSUFFICIENT",
+    "COURT_LINE_ROLES_UNCONFIRMED",
+    "PARTIAL_COURT_VISIBLE",
+    "MULTIPLE_COURT_FITS_AMBIGUOUS"
+  ],
+  "method": "adaptive_colour_hough_court_template",
+  "manual_reference": false,
+  "confidence_kind": "geometric support score, not a calibrated probability",
+  "image_width": 960,
+  "image_height": 540,
+  "line_segments_px": [
+    [
+      327.4098205566406,
+      422.86688232421875,
+      958.826904296875,
+      262.3171081542969
+    ],
+    [
+      363.09722900390625,
+      499.79315185546875,
+      958.9190673828125,
+      290.7693176269531
+    ],
+    [
+      202.71554565429688,
+      203.28213500976562,
+      447.0985412597656,
+      472.181396484375
+    ],
+    [
+      186.58023071289062,
+      208.2429656982422,
+      357.73291015625,
+      498.6595764160156
+    ],
+    [
+      161.94775390625,
+      208.01058959960938,
+      229.19149780273438,
+      539.9813232421875
+    ],
+    [
+      94.3024673461914,
+      539.31884765625,
+      140.04769897460938,
+      209.00660705566406
+    ],
+    [
+      444.191650390625,
+      259.51202392578125,
+      731.8114013671875,
+      372.4621887207031
+    ],
+    [
+      703.9956665039062,
+      187.98683166503906,
+      958.9574584960938,
+      196.814208984375
+    ],
+    [
+      -0.03319549560546875,
+      299.6270751953125,
+      172.77734375,
+      283.9905700683594
+    ],
+    [
+      704.035888671875,
+      185.74851989746094,
+      866.56005859375,
+      197.57579040527344
+    ],
+    [
+      715.043701171875,
+      285.82470703125,
+      868.9452514648438,
+      324.20428466796875
+    ],
+    [
+      164.5430145263672,
+      140.083740234375,
+      176.67665100097656,
+      297.04302978515625
+    ],
+    [
+      768.03173828125,
+      192.87844848632812,
+      893.11328125,
+      189.94866943359375
+    ],
+    [
+      704.029296875,
+      183.48744201660156,
+      803.9744262695312,
+      193.57818603515625
+    ],
+    [
+      201.8384246826172,
+      155.92642211914062,
+      208.5198211669922,
+      250.02706909179688
+    ],
+    [
+      464.01153564453125,
+      182.8839569091797,
+      543.0560302734375,
+      182.2256317138672
+    ],
+    [
+      830.6151733398438,
+      181.8168487548828,
+      892.44287109375,
+      190.9939422607422
+    ],
+    [
+      366.2729187011719,
+      169.06686401367188,
+      442.00048828125,
+      165.24839782714844
+    ],
+    [
+      369.08612060546875,
+      167.06289672851562,
+      442.9847412109375,
+      166.32460021972656
+    ],
+    [
+      797.461669921875,
+      196.5781707763672,
+      869.5826416015625,
+      189.6822509765625
+    ],
+    [
+      703.9236450195312,
+      181.19393920898438,
+      763.8411865234375,
+      186.68174743652344
+    ],
+    [
+      279.99932861328125,
+      168.7969512939453,
+      340.09539794921875,
+      166.60324096679688
+    ],
+    [
+      357.8612365722656,
+      173.7344512939453,
+      415.7600402832031,
+      167.38584899902344
+    ],
+    [
+      161.7869415283203,
+      139.06825256347656,
+      170.12181091308594,
+      195.91885375976562
+    ],
+    [
+      363.11492919921875,
+      178.5139923095703,
+      415.23468017578125,
+      166.86019897460938
+    ],
+    [
+      716.3313598632812,
+      186.99356079101562,
+      763.0477294921875,
+      184.744873046875
+    ],
+    [
+      366.22906494140625,
+      180.77291870117188,
+      415.0730285644531,
+      166.87054443359375
+    ]
+  ],
+  "candidate_polygons_px": [
+    {
+      "polygon_px": [
+        [
+          230.4752655029297,
+          546.3190307617188
+        ],
+        [
+          445.8186950683594,
+          470.77313232421875
+        ],
+        [
+          205.24075317382812,
+          206.0606689453125
+        ],
+        [
+          161.7590789794922,
+          207.0791473388672
+        ]
+      ],
+      "support_score": 0.343229
+    },
+    {
+      "polygon_px": [
+        [
+          86.32971954345703,
+          596.8876342773438
+        ],
+        [
+          359.20556640625,
+          501.1584167480469
+        ],
+        [
+          185.5657196044922,
+          206.52151489257812
+        ],
+        [
+          140.24484252929688,
+          207.58306884765625
+        ]
+      ],
+      "support_score": 0.28724
+    },
+    {
+      "polygon_px": [
+        [
+          102.51040649414062,
+          480.05181884765625
+        ],
+        [
+          140.24484252929688,
+          207.58306884765625
+        ],
+        [
+          205.24075317382812,
+          206.0606689453125
+        ],
+        [
+          388.2262878417969,
+          407.40313720703125
+        ]
+      ],
+      "support_score": 0.272396
+    },
+    {
+      "polygon_px": [
+        [
+          86.32971954345703,
+          596.8876342773438
+        ],
+        [
+          140.24484252929688,
+          207.58306884765625
+        ],
+        [
+          205.24075317382812,
+          206.0606689453125
+        ],
+        [
+          445.8186950683594,
+          470.77313232421875
+        ]
+      ],
+      "support_score": 0.266927
+    },
+    {
+      "polygon_px": [
+        [
+          161.7590789794922,
+          207.0791473388672
+        ],
+        [
+          230.4752655029297,
+          546.3190307617188
+        ],
+        [
+          445.8186950683594,
+          470.77313232421875
+        ],
+        [
+          205.24075317382812,
+          206.0606689453125
+        ]
+      ],
+      "support_score": 0.257552
+    },
+    {
+      "polygon_px": [
+        [
+          102.51040649414062,
+          480.05181884765625
+        ],
+        [
+          314.9349670410156,
+          426.0388488769531
+        ],
+        [
+          185.5657196044922,
+          206.52151489257812
+        ],
+        [
+          140.24484252929688,
+          207.58306884765625
+        ]
+      ],
+      "support_score": 0.252083
+    }
+  ],
+  "line_fit_error_px": 7.2459,
+  "independent_control_point_error_px": null,
+  "lens_distortion_corrected": false,
+  "coordinate_convention": "x=0..6.1 m left-to-right across near baseline, y=0..13.4 m near-to-far",
+  "metric_accuracy_validated": false,
+  "metric_coordinates_available": false,
+  "homography_pixel_space": "raw_analysis_pixels",
+  "line_fit_error_pixel_space": "raw_analysis_pixels",
+  "judgment_region_px": null,
+  "supported_line_regions_px": [
+    {
+      "polygon_px": [
+        [
+          327.9026758035792,
+          424.80520471885933
+        ],
+        [
+          959.0,
+          264.25543054893745
+        ],
+        [
+          958.3340490499364,
+          260.3787857596563
+        ],
+        [
+          326.91696530970205,
+          420.92855992957817
+        ]
+      ],
+      "line_segment_px": [
+        327.4098205566406,
+        422.86688232421875,
+        958.826904296875,
+        262.3171081542969
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 4
+    },
+    {
+      "polygon_px": [
+        [
+          363.9248197531485,
+          502.1521969062825
+        ],
+        [
+          959.0,
+          293.12836267776686
+        ],
+        [
+          958.0914766335702,
+          288.4102725761394
+        ],
+        [
+          362.269638254664,
+          497.434106804655
+        ]
+      ],
+      "line_segment_px": [
+        363.09722900390625,
+        499.79315185546875,
+        958.9190673828125,
+        290.7693176269531
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 5.0
+    },
+    {
+      "polygon_px": [
+        [
+          201.05046205192855,
+          204.7954084804655
+        ],
+        [
+          445.4334576573973,
+          473.6946699550749
+        ],
+        [
+          448.76362486213395,
+          470.6681230136751
+        ],
+        [
+          204.3806292566652,
+          201.76886153906574
+        ]
+      ],
+      "line_segment_px": [
+        202.71554565429688,
+        203.28213500976562,
+        447.0985412597656,
+        472.181396484375
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 4.5
+    },
+    {
+      "polygon_px": [
+        [
+          183.99567107038476,
+          209.76613721003264
+        ],
+        [
+          355.14835051374416,
+          500.1827479278061
+        ],
+        [
+          360.31746979875584,
+          497.1364049042252
+        ],
+        [
+          189.1647903553965,
+          206.71979418645174
+        ]
+      ],
+      "line_segment_px": [
+        186.58023071289062,
+        208.2429656982422,
+        357.73291015625,
+        498.6595764160156
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 6.0
+    },
+    {
+      "polygon_px": [
+        [
+          158.02737253872212,
+          208.804699121741
+        ],
+        [
+          225.2711164352065,
+          539.0
+        ],
+        [
+          233.11187917026226,
+          539.0
+        ],
+        [
+          165.86813527377788,
+          207.21648007747774
+        ]
+      ],
+      "line_segment_px": [
+        161.94775390625,
+        208.01058959960938,
+        229.19149780273438,
+        539.9813232421875
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 8.0
+    },
+    {
+      "polygon_px": [
+        [
+          98.26465101938608,
+          539.0
+        ],
+        [
+          144.00988264780406,
+          209.55533334432678
+        ],
+        [
+          136.0855153014147,
+          208.45788076700134
+        ],
+        [
+          90.34028367299673,
+          538.7701213675873
+        ]
+      ],
+      "line_segment_px": [
+        94.3024673461914,
+        539.31884765625,
+        140.04769897460938,
+        209.00660705566406
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 8.0
+    },
+    {
+      "polygon_px": [
+        [
+          443.46058848681486,
+          261.3736222962139
+        ],
+        [
+          731.0803394633773,
+          374.3237870911358
+        ],
+        [
+          732.5424632709977,
+          370.60059035027047
+        ],
+        [
+          444.92271229443514,
+          257.6504255553486
+        ]
+      ],
+      "line_segment_px": [
+        444.191650390625,
+        259.51202392578125,
+        731.8114013671875,
+        372.4621887207031
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 4
+    },
+    {
+      "polygon_px": [
+        [
+          703.736154344818,
+          195.48234054965025
+        ],
+        [
+          958.6979463370055,
+          204.30971786898618
+        ],
+        [
+          959.0,
+          189.31870009976382
+        ],
+        [
+          704.2551786629945,
+          180.49132278042788
+        ]
+      ],
+      "line_segment_px": [
+        703.9956665039062,
+        187.98683166503906,
+        958.9574584960938,
+        196.814208984375
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 15.0
+    },
+    {
+      "polygon_px": [
+        [
+          0.1470352410750789,
+          301.6189378616516
+        ],
+        [
+          172.95757448668056,
+          285.9824327346985
+        ],
+        [
+          172.59711301331944,
+          281.9987074020203
+        ],
+        [
+          0.0,
+          297.6352125289734
+        ]
+      ],
+      "line_segment_px": [
+        -0.03319549560546875,
+        299.6270751953125,
+        172.77734375,
+        283.9905700683594
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 4
+    },
+    {
+      "polygon_px": [
+        [
+          703.4552451004871,
+          193.72742038831842
+        ],
+        [
+          865.9794150223621,
+          205.55469089613092
+        ],
+        [
+          867.1407021651379,
+          189.59688991441595
+        ],
+        [
+          704.6165322432629,
+          177.76961940660345
+        ]
+      ],
+      "line_segment_px": [
+        704.035888671875,
+        185.74851989746094,
+        866.56005859375,
+        197.57579040527344
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 16.0
+    },
+    {
+      "polygon_px": [
+        [
+          714.5597670240087,
+          287.7652759531203
+        ],
+        [
+          868.4613173169774,
+          326.14485358983904
+        ],
+        [
+          869.4291856127101,
+          322.26371574609846
+        ],
+        [
+          715.5276353197413,
+          283.8841381093797
+        ]
+      ],
+      "line_segment_px": [
+        715.043701171875,
+        285.82470703125,
+        868.9452514648438,
+        324.20428466796875
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 4
+    },
+    {
+      "polygon_px": [
+        [
+          161.55193849395883,
+          140.3149634346649
+        ],
+        [
+          173.6855749685682,
+          297.27425298544614
+        ],
+        [
+          179.66772703338492,
+          296.81180658486636
+        ],
+        [
+          167.53409055877555,
+          139.8525170340851
+        ]
+      ],
+      "line_segment_px": [
+        164.5430145263672,
+        140.083740234375,
+        176.67665100097656,
+        297.04302978515625
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 6.0
+    },
+    {
+      "polygon_px": [
+        [
+          768.2073622556906,
+          200.3763919523461
+        ],
+        [
+          893.2889052244406,
+          197.44661289961172
+        ],
+        [
+          892.9376572755594,
+          182.45072596757578
+        ],
+        [
+          767.8561143068094,
+          185.38050502031015
+        ]
+      ],
+      "line_segment_px": [
+        768.03173828125,
+        192.87844848632812,
+        893.11328125,
+        189.94866943359375
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 15.0
+    },
+    {
+      "polygon_px": [
+        [
+          703.2256796115228,
+          191.44697713454917
+        ],
+        [
+          803.170809006054,
+          201.53772115310386
+        ],
+        [
+          804.7780435330085,
+          185.61865091720864
+        ],
+        [
+          704.8329141384772,
+          175.52790689865395
+        ]
+      ],
+      "line_segment_px": [
+        704.029296875,
+        183.48744201660156,
+        803.9744262695312,
+        193.57818603515625
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 16.0
+    },
+    {
+      "polygon_px": [
+        [
+          199.8434470788181,
+          156.06807084077272
+        ],
+        [
+          206.5248435631931,
+          250.16871781342897
+        ],
+        [
+          210.5147987707913,
+          249.88542037016478
+        ],
+        [
+          203.8334022864163,
+          155.78477339750853
+        ]
+      ],
+      "line_segment_px": [
+        201.8384246826172,
+        155.92642211914062,
+        208.5198211669922,
+        250.02706909179688
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 4
+    },
+    {
+      "polygon_px": [
+        [
+          464.0864899004389,
+          191.8836447848519
+        ],
+        [
+          543.1309845293451,
+          191.2253195895394
+        ],
+        [
+          542.9810760175299,
+          173.22594383819498
+        ],
+        [
+          463.9365813886236,
+          173.88426903350748
+        ]
+      ],
+      "line_segment_px": [
+        464.01153564453125,
+        182.8839569091797,
+        543.0560302734375,
+        182.2256317138672
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 18.0
+    },
+    {
+      "polygon_px": [
+        [
+          829.5507167709083,
+          188.98828042595449
+        ],
+        [
+          891.3784145248145,
+          198.16537393181386
+        ],
+        [
+          893.5073276626855,
+          183.82251058967051
+        ],
+        [
+          831.6796299087792,
+          174.64541708381114
+        ]
+      ],
+      "line_segment_px": [
+        830.6151733398438,
+        181.8168487548828,
+        892.44287109375,
+        190.9939422607422
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 14.5
+    },
+    {
+      "polygon_px": [
+        [
+          366.67579666176346,
+          177.05671315798426
+        ],
+        [
+          442.4033662418416,
+          173.23824697146082
+        ],
+        [
+          441.5976103206584,
+          157.25854868283605
+        ],
+        [
+          365.8700407405803,
+          161.0770148693595
+        ]
+      ],
+      "line_segment_px": [
+        366.2729187011719,
+        169.06686401367188,
+        442.00048828125,
+        165.24839782714844
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 16.0
+    },
+    {
+      "polygon_px": [
+        [
+          369.1710370370089,
+          175.56247255320562
+        ],
+        [
+          443.06965764247764,
+          174.82417604441656
+        ],
+        [
+          442.89982477939736,
+          157.82502439503656
+        ],
+        [
+          369.0012041739286,
+          158.56332090382563
+        ]
+      ],
+      "line_segment_px": [
+        369.08612060546875,
+        167.06289672851562,
+        442.9847412109375,
+        166.32460021972656
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 17.0
+    },
+    {
+      "polygon_px": [
+        [
+          798.1993296998147,
+          204.2929849706307
+        ],
+        [
+          870.3203013795022,
+          197.397065170826
+        ],
+        [
+          868.8449818236228,
+          181.967436782299
+        ],
+        [
+          796.7240101439353,
+          188.86335658210368
+        ]
+      ],
+      "line_segment_px": [
+        797.461669921875,
+        196.5781707763672,
+        869.5826416015625,
+        189.6822509765625
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 15.5
+    },
+    {
+      "polygon_px": [
+        [
+          703.4448051771082,
+          186.42205669095705
+        ],
+        [
+          763.3623466810144,
+          191.9098649184961
+        ],
+        [
+          764.3200263658606,
+          181.45362995455076
+        ],
+        [
+          704.4024848619543,
+          175.9658217270117
+        ]
+      ],
+      "line_segment_px": [
+        703.9236450195312,
+        181.19393920898438,
+        763.8411865234375,
+        186.68174743652344
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 10.5
+    },
+    {
+      "polygon_px": [
+        [
+          280.41883820710154,
+          180.28929708149855
+        ],
+        [
+          340.51490754303904,
+          178.0955867543501
+        ],
+        [
+          339.67588835539846,
+          155.11089517924364
+        ],
+        [
+          279.57981901946096,
+          157.30460550639208
+        ]
+      ],
+      "line_segment_px": [
+        279.99932861328125,
+        168.7969512939453,
+        340.09539794921875,
+        166.60324096679688
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 23.0
+    },
+    {
+      "polygon_px": [
+        [
+          358.7877084485341,
+          182.18380924958214
+        ],
+        [
+          416.6865121594716,
+          175.83520695466026
+        ],
+        [
+          414.83356840693466,
+          158.9364910433866
+        ],
+        [
+          356.93476469599716,
+          165.28509333830849
+        ]
+      ],
+      "line_segment_px": [
+        357.8612365722656,
+        173.7344512939453,
+        415.7600402832031,
+        167.38584899902344
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 17.0
+    },
+    {
+      "polygon_px": [
+        [
+          157.33453822655636,
+          139.72101962640295
+        ],
+        [
+          165.669407611322,
+          196.571620822692
+        ],
+        [
+          174.5742142148499,
+          195.26608669683924
+        ],
+        [
+          166.23934483008426,
+          138.41548550055018
+        ]
+      ],
+      "line_segment_px": [
+        161.7869415283203,
+        139.06825256347656,
+        170.12181091308594,
+        195.91885375976562
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 9.0
+    },
+    {
+      "polygon_px": [
+        [
+          364.96969982672425,
+          186.80916113963897
+        ],
+        [
+          417.08945080328675,
+          175.15536780467804
+        ],
+        [
+          413.37990954827575,
+          158.5650301445407
+        ],
+        [
+          361.26015857171325,
+          170.21882347950165
+        ]
+      ],
+      "line_segment_px": [
+        363.11492919921875,
+        178.5139923095703,
+        415.23468017578125,
+        166.86019897460938
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 17.0
+    },
+    {
+      "polygon_px": [
+        [
+          716.6318550658725,
+          193.23633282219052
+        ],
+        [
+          763.3482246947788,
+          190.9876450780499
+        ],
+        [
+          762.7472342895962,
+          178.5021010157001
+        ],
+        [
+          716.03086466069,
+          180.75078875984073
+        ]
+      ],
+      "line_segment_px": [
+        716.3313598632812,
+        186.99356079101562,
+        763.0477294921875,
+        184.744873046875
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 12.5
+    },
+    {
+      "polygon_px": [
+        [
+          368.0084745086129,
+          187.02461459845713
+        ],
+        [
+          416.85243813165977,
+          173.122240330879
+        ],
+        [
+          413.2936189972465,
+          160.6188485363085
+        ],
+        [
+          364.4496553741996,
+          174.52122280388662
+        ]
+      ],
+      "line_segment_px": [
+        366.22906494140625,
+        180.77291870117188,
+        415.0730285644531,
+        166.87054443359375
+      ],
+      "court_line_role": null,
+      "metric_coordinates_available": false,
+      "width_px": 13.0
+    }
+  ],
+  "line_roles_confirmed": false,
+  "line_detection_status": "detected",
+  "detected_line_count": 27,
+  "segmentation_candidates": [
+    {
+      "colour": "white",
+      "mask_pixel_count": 64083,
+      "detected_line_count": 44,
+      "proposal_count": 0,
+      "raw_detected_line_count": 48,
+      "surface_rejected_line_count": 4,
+      "observed_line_strength": 108756.59,
+      "best_support_score": 0
+    },
+    {
+      "colour": "blue",
+      "mask_pixel_count": 37689,
+      "detected_line_count": 27,
+      "proposal_count": 64,
+      "raw_detected_line_count": 48,
+      "surface_rejected_line_count": 21,
+      "observed_line_strength": 884296.373,
+      "best_support_score": 0.343229
+    },
+    {
+      "colour": "yellow",
+      "mask_pixel_count": 19775,
+      "detected_line_count": 12,
+      "proposal_count": 0,
+      "raw_detected_line_count": 22,
+      "surface_rejected_line_count": 10,
+      "observed_line_strength": 6292.624,
+      "best_support_score": 0
+    }
+  ],
+  "partial_line_mode": true,
+  "background_frame_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "surface_context": {
+    "enabled": true,
+    "sample_source": "lower_image_half",
+    "sample_support": 0.9286,
+    "surface_modes": [
+      {
+        "chroma_ab": [
+          128.0,
+          131.0
+        ],
+        "minimum_lightness": 100.0,
+        "sample_support": 0.9286
+      }
+    ],
+    "scope": "partial_line_clutter_filter_only"
+  },
+  "line_colour": "blue",
+  "background_frame_count": 9,
+  "mask_pixel_count": 37689,
+  "fit_line_colour": "blue",
+  "polygon_homography_space_px": [
+    [
+      230.4752655029297,
+      546.3190307617188
+    ],
+    [
+      445.8186950683594,
+      470.77313232421875
+    ],
+    [
+      205.24075317382812,
+      206.0606689453125
+    ],
+    [
+      161.7590789794922,
+      207.0791473388672
+    ]
+  ],
+  "line_support": [
+    0.9791666666666666,
+    1.0,
+    0.4583333333333333,
+    0.0,
+    0.0,
+    0.3541666666666667,
+    0.4166666666666667,
+    0.0,
+    0.0,
+    0.0,
+    0.0625,
+    1.0
+  ],
+  "supported_line_count": 3,
+  "visible_fraction": 0.9913194444444444,
+  "competing_fit_margin": 0.05599,
+  "template_lines_m": [
+    [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        13.4
+      ]
+    ],
+    [
+      [
+        6.1,
+        0
+      ],
+      [
+        6.1,
+        13.4
+      ]
+    ],
+    [
+      [
+        0,
+        0
+      ],
+      [
+        6.1,
+        0
+      ]
+    ],
+    [
+      [
+        0,
+        13.4
+      ],
+      [
+        6.1,
+        13.4
+      ]
+    ],
+    [
+      [
+        0.46,
+        0
+      ],
+      [
+        0.46,
+        13.4
+      ]
+    ],
+    [
+      [
+        5.64,
+        0
+      ],
+      [
+        5.64,
+        13.4
+      ]
+    ],
+    [
+      [
+        0,
+        0.76
+      ],
+      [
+        6.1,
+        0.76
+      ]
+    ],
+    [
+      [
+        0,
+        12.64
+      ],
+      [
+        6.1,
+        12.64
+      ]
+    ],
+    [
+      [
+        0,
+        4.72
+      ],
+      [
+        6.1,
+        4.72
+      ]
+    ],
+    [
+      [
+        0,
+        8.68
+      ],
+      [
+        6.1,
+        8.68
+      ]
+    ],
+    [
+      [
+        3.05,
+        0
+      ],
+      [
+        3.05,
+        4.72
+      ]
+    ],
+    [
+      [
+        3.05,
+        8.68
+      ],
+      [
+        3.05,
+        13.4
+      ]
+    ]
+  ],
+  "camera_stability": {
+    "status": "ok",
+    "reason_codes": [
+      "ALL_ANALYZED_FRAMES_BACKGROUND_STABLE"
+    ],
+    "max_displacement_px": 0.2568,
+    "threshold_px": 3.0,
+    "reference_frame_index": 0,
+    "sampled_frame_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81
+    ],
+    "all_frames_sampled": true,
+    "observations": [
+      {
+        "frame_index": 1,
+        "status": "measured",
+        "inlier_count": 410,
+        "inlier_fraction": 0.9951,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0275
+      },
+      {
+        "frame_index": 2,
+        "status": "measured",
+        "inlier_count": 400,
+        "inlier_fraction": 0.9709,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1004
+      },
+      {
+        "frame_index": 3,
+        "status": "measured",
+        "inlier_count": 397,
+        "inlier_fraction": 0.9636,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1431
+      },
+      {
+        "frame_index": 4,
+        "status": "measured",
+        "inlier_count": 392,
+        "inlier_fraction": 0.9515,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1526
+      },
+      {
+        "frame_index": 5,
+        "status": "measured",
+        "inlier_count": 387,
+        "inlier_fraction": 0.9393,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1946
+      },
+      {
+        "frame_index": 6,
+        "status": "measured",
+        "inlier_count": 382,
+        "inlier_fraction": 0.9272,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.2467
+      },
+      {
+        "frame_index": 7,
+        "status": "measured",
+        "inlier_count": 373,
+        "inlier_fraction": 0.9053,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.2563
+      },
+      {
+        "frame_index": 8,
+        "status": "measured",
+        "inlier_count": 365,
+        "inlier_fraction": 0.8859,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.2568
+      },
+      {
+        "frame_index": 9,
+        "status": "measured",
+        "inlier_count": 361,
+        "inlier_fraction": 0.8762,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1761
+      },
+      {
+        "frame_index": 10,
+        "status": "measured",
+        "inlier_count": 353,
+        "inlier_fraction": 0.8568,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1341
+      },
+      {
+        "frame_index": 11,
+        "status": "measured",
+        "inlier_count": 341,
+        "inlier_fraction": 0.8277,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0777
+      },
+      {
+        "frame_index": 12,
+        "status": "measured",
+        "inlier_count": 347,
+        "inlier_fraction": 0.8422,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0803
+      },
+      {
+        "frame_index": 13,
+        "status": "measured",
+        "inlier_count": 351,
+        "inlier_fraction": 0.8519,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1009
+      },
+      {
+        "frame_index": 14,
+        "status": "measured",
+        "inlier_count": 352,
+        "inlier_fraction": 0.8564,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1492
+      },
+      {
+        "frame_index": 15,
+        "status": "measured",
+        "inlier_count": 341,
+        "inlier_fraction": 0.8277,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1053
+      },
+      {
+        "frame_index": 16,
+        "status": "measured",
+        "inlier_count": 338,
+        "inlier_fraction": 0.8204,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0758
+      },
+      {
+        "frame_index": 17,
+        "status": "measured",
+        "inlier_count": 336,
+        "inlier_fraction": 0.8155,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1568
+      },
+      {
+        "frame_index": 18,
+        "status": "measured",
+        "inlier_count": 337,
+        "inlier_fraction": 0.818,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1403
+      },
+      {
+        "frame_index": 19,
+        "status": "measured",
+        "inlier_count": 337,
+        "inlier_fraction": 0.818,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1904
+      },
+      {
+        "frame_index": 20,
+        "status": "measured",
+        "inlier_count": 332,
+        "inlier_fraction": 0.8058,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.182
+      },
+      {
+        "frame_index": 21,
+        "status": "measured",
+        "inlier_count": 329,
+        "inlier_fraction": 0.7985,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.205
+      },
+      {
+        "frame_index": 22,
+        "status": "measured",
+        "inlier_count": 326,
+        "inlier_fraction": 0.7913,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.2298
+      },
+      {
+        "frame_index": 23,
+        "status": "measured",
+        "inlier_count": 318,
+        "inlier_fraction": 0.7737,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1941
+      },
+      {
+        "frame_index": 24,
+        "status": "measured",
+        "inlier_count": 320,
+        "inlier_fraction": 0.7786,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1673
+      },
+      {
+        "frame_index": 25,
+        "status": "measured",
+        "inlier_count": 317,
+        "inlier_fraction": 0.7713,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.147
+      },
+      {
+        "frame_index": 26,
+        "status": "measured",
+        "inlier_count": 316,
+        "inlier_fraction": 0.7689,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1433
+      },
+      {
+        "frame_index": 27,
+        "status": "measured",
+        "inlier_count": 316,
+        "inlier_fraction": 0.7689,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.115
+      },
+      {
+        "frame_index": 28,
+        "status": "measured",
+        "inlier_count": 312,
+        "inlier_fraction": 0.7591,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0545
+      },
+      {
+        "frame_index": 29,
+        "status": "measured",
+        "inlier_count": 311,
+        "inlier_fraction": 0.7567,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0769
+      },
+      {
+        "frame_index": 30,
+        "status": "measured",
+        "inlier_count": 314,
+        "inlier_fraction": 0.764,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0884
+      },
+      {
+        "frame_index": 31,
+        "status": "measured",
+        "inlier_count": 316,
+        "inlier_fraction": 0.7689,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1974
+      },
+      {
+        "frame_index": 32,
+        "status": "measured",
+        "inlier_count": 314,
+        "inlier_fraction": 0.764,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1878
+      },
+      {
+        "frame_index": 33,
+        "status": "measured",
+        "inlier_count": 315,
+        "inlier_fraction": 0.7664,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.2154
+      },
+      {
+        "frame_index": 34,
+        "status": "measured",
+        "inlier_count": 317,
+        "inlier_fraction": 0.7713,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.231
+      },
+      {
+        "frame_index": 35,
+        "status": "measured",
+        "inlier_count": 319,
+        "inlier_fraction": 0.7762,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.2157
+      },
+      {
+        "frame_index": 36,
+        "status": "measured",
+        "inlier_count": 319,
+        "inlier_fraction": 0.7762,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.207
+      },
+      {
+        "frame_index": 37,
+        "status": "measured",
+        "inlier_count": 322,
+        "inlier_fraction": 0.7835,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1197
+      },
+      {
+        "frame_index": 38,
+        "status": "measured",
+        "inlier_count": 325,
+        "inlier_fraction": 0.7908,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.096
+      },
+      {
+        "frame_index": 39,
+        "status": "measured",
+        "inlier_count": 321,
+        "inlier_fraction": 0.781,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0522
+      },
+      {
+        "frame_index": 40,
+        "status": "measured",
+        "inlier_count": 323,
+        "inlier_fraction": 0.7859,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0524
+      },
+      {
+        "frame_index": 41,
+        "status": "measured",
+        "inlier_count": 327,
+        "inlier_fraction": 0.7956,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0578
+      },
+      {
+        "frame_index": 42,
+        "status": "measured",
+        "inlier_count": 325,
+        "inlier_fraction": 0.7908,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0899
+      },
+      {
+        "frame_index": 43,
+        "status": "measured",
+        "inlier_count": 327,
+        "inlier_fraction": 0.7956,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1315
+      },
+      {
+        "frame_index": 44,
+        "status": "measured",
+        "inlier_count": 328,
+        "inlier_fraction": 0.7981,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1499
+      },
+      {
+        "frame_index": 45,
+        "status": "measured",
+        "inlier_count": 326,
+        "inlier_fraction": 0.7932,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.155
+      },
+      {
+        "frame_index": 46,
+        "status": "measured",
+        "inlier_count": 327,
+        "inlier_fraction": 0.7976,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1672
+      },
+      {
+        "frame_index": 47,
+        "status": "measured",
+        "inlier_count": 326,
+        "inlier_fraction": 0.7951,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1527
+      },
+      {
+        "frame_index": 48,
+        "status": "measured",
+        "inlier_count": 325,
+        "inlier_fraction": 0.7927,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.195
+      },
+      {
+        "frame_index": 49,
+        "status": "measured",
+        "inlier_count": 322,
+        "inlier_fraction": 0.7873,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1777
+      },
+      {
+        "frame_index": 50,
+        "status": "measured",
+        "inlier_count": 323,
+        "inlier_fraction": 0.7897,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1552
+      },
+      {
+        "frame_index": 51,
+        "status": "measured",
+        "inlier_count": 324,
+        "inlier_fraction": 0.7922,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1383
+      },
+      {
+        "frame_index": 52,
+        "status": "measured",
+        "inlier_count": 327,
+        "inlier_fraction": 0.7995,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1225
+      },
+      {
+        "frame_index": 53,
+        "status": "measured",
+        "inlier_count": 325,
+        "inlier_fraction": 0.7946,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1088
+      },
+      {
+        "frame_index": 54,
+        "status": "measured",
+        "inlier_count": 330,
+        "inlier_fraction": 0.8068,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0817
+      },
+      {
+        "frame_index": 55,
+        "status": "measured",
+        "inlier_count": 334,
+        "inlier_fraction": 0.8166,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0737
+      },
+      {
+        "frame_index": 56,
+        "status": "measured",
+        "inlier_count": 336,
+        "inlier_fraction": 0.8215,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1352
+      },
+      {
+        "frame_index": 57,
+        "status": "measured",
+        "inlier_count": 338,
+        "inlier_fraction": 0.8264,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1665
+      },
+      {
+        "frame_index": 58,
+        "status": "measured",
+        "inlier_count": 339,
+        "inlier_fraction": 0.8289,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.18
+      },
+      {
+        "frame_index": 59,
+        "status": "measured",
+        "inlier_count": 337,
+        "inlier_fraction": 0.824,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1563
+      },
+      {
+        "frame_index": 60,
+        "status": "measured",
+        "inlier_count": 335,
+        "inlier_fraction": 0.8191,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1656
+      },
+      {
+        "frame_index": 61,
+        "status": "measured",
+        "inlier_count": 334,
+        "inlier_fraction": 0.8186,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1599
+      },
+      {
+        "frame_index": 62,
+        "status": "measured",
+        "inlier_count": 337,
+        "inlier_fraction": 0.826,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1751
+      },
+      {
+        "frame_index": 63,
+        "status": "measured",
+        "inlier_count": 334,
+        "inlier_fraction": 0.8206,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1666
+      },
+      {
+        "frame_index": 64,
+        "status": "measured",
+        "inlier_count": 332,
+        "inlier_fraction": 0.8157,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1566
+      },
+      {
+        "frame_index": 65,
+        "status": "measured",
+        "inlier_count": 331,
+        "inlier_fraction": 0.8113,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1177
+      },
+      {
+        "frame_index": 66,
+        "status": "measured",
+        "inlier_count": 330,
+        "inlier_fraction": 0.8029,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1293
+      },
+      {
+        "frame_index": 67,
+        "status": "measured",
+        "inlier_count": 326,
+        "inlier_fraction": 0.7913,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0797
+      },
+      {
+        "frame_index": 68,
+        "status": "measured",
+        "inlier_count": 322,
+        "inlier_fraction": 0.7816,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0729
+      },
+      {
+        "frame_index": 69,
+        "status": "measured",
+        "inlier_count": 322,
+        "inlier_fraction": 0.7816,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0823
+      },
+      {
+        "frame_index": 70,
+        "status": "measured",
+        "inlier_count": 323,
+        "inlier_fraction": 0.784,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0549
+      },
+      {
+        "frame_index": 71,
+        "status": "measured",
+        "inlier_count": 326,
+        "inlier_fraction": 0.7932,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0657
+      },
+      {
+        "frame_index": 72,
+        "status": "measured",
+        "inlier_count": 326,
+        "inlier_fraction": 0.801,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.0975
+      },
+      {
+        "frame_index": 73,
+        "status": "measured",
+        "inlier_count": 323,
+        "inlier_fraction": 0.784,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1019
+      },
+      {
+        "frame_index": 74,
+        "status": "measured",
+        "inlier_count": 325,
+        "inlier_fraction": 0.7908,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1206
+      },
+      {
+        "frame_index": 75,
+        "status": "measured",
+        "inlier_count": 324,
+        "inlier_fraction": 0.7902,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1616
+      },
+      {
+        "frame_index": 76,
+        "status": "measured",
+        "inlier_count": 322,
+        "inlier_fraction": 0.7816,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.1958
+      },
+      {
+        "frame_index": 77,
+        "status": "measured",
+        "inlier_count": 324,
+        "inlier_fraction": 0.7902,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.2335
+      },
+      {
+        "frame_index": 78,
+        "status": "measured",
+        "inlier_count": 324,
+        "inlier_fraction": 0.798,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.2426
+      },
+      {
+        "frame_index": 79,
+        "status": "measured",
+        "inlier_count": 320,
+        "inlier_fraction": 0.7882,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.2313
+      },
+      {
+        "frame_index": 80,
+        "status": "measured",
+        "inlier_count": 318,
+        "inlier_fraction": 0.7852,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.2138
+      },
+      {
+        "frame_index": 81,
+        "status": "measured",
+        "inlier_count": 319,
+        "inlier_fraction": 0.7877,
+        "spatial_grid_cells": 12,
+        "displacement_px": 0.2271
+      }
+    ],
+    "method": "reference_optical_flow_ransac_background_motion"
+  }
+}

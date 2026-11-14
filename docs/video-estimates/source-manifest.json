@@ -1,0 +1,412 @@
+{
+  "schema_version": 1,
+  "frozen_at_utc": "2026-11-14T09:38:41.938084+00:00",
+  "frozen_at_seoul": "2026-11-14T18:38:41.938084+09:00",
+  "baseline_source_commit": "39b2b9e97c7e22100f3124a397d3d1d3dda5ec15",
+  "scope": "Predeclared source-bound regression and negative-control list for explicit video-estimate verdicts. Not independent contact, target identity, IN/OUT accuracy, or cross-gym generalization.",
+  "freeze_policy": {
+    "additional_cases_selected_before_video_estimate_evaluation": true,
+    "development_case_A_is_not_a_holdout": true,
+    "B_is_already_exposed_occlusion_negative": true,
+    "additional_cases_are_previously_exposed_regression_sources": true,
+    "forbid_reference_time_point_label_input_to_inference": true,
+    "do_not_retune_to_new_case_outputs_and_claim_holdout": true,
+    "record_each_code_fingerprint_and_all_failed_runs": true
+  },
+  "metrics": [
+    "strict verified decision and reason codes remain separate",
+    "explicit video_estimate decision with method/provenance",
+    "eligible estimate count by source and game",
+    "event family count and competing native evidence",
+    "possible-contact envelope width/height plus temporal interval",
+    "native object source frame indices and components",
+    "actual original frame evidence reviewed after inference",
+    "false decision on negative controls"
+  ],
+  "cases": [
+    {
+      "id": "A_development",
+      "local_path": "/workspace/user-court-test/a-repository-source.mp4",
+      "repository_path": "video/8k 30 4k 24 a시점 1.mp4",
+      "rally_group": "8k4k-1",
+      "role": "development",
+      "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+      "source_bytes": 73984014,
+      "source_inventory_match": true,
+      "metadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "hevc",
+            "width": 7680,
+            "height": 4320,
+            "avg_frame_rate": "9720000/323987",
+            "duration": "3.599856",
+            "nb_frames": "108"
+          }
+        ],
+        "format": {
+          "duration": "3.626604",
+          "size": "73984014"
+        }
+      },
+      "independent_human_ground_truth": false,
+      "prior_exposure": "A/B user clips and all four additional sources have already been used in this project; none are independent holdout data.",
+      "inference_input_must_not_include_reference": true,
+      "run_rules": [
+        {
+          "game": "doubles",
+          "phase": "rally"
+        },
+        {
+          "game": "singles",
+          "phase": "rally"
+        }
+      ]
+    },
+    {
+      "id": "B_occlusion_negative",
+      "local_path": "/workspace/attachments/f4cb438f-8374-46b6-bf50-d78acd633aa3/8k 30 4k 24 b시점 1.mp4",
+      "repository_path": "video/8k 30 4k 24 b시점 1.mp4",
+      "rally_group": "8k4k-1",
+      "role": "development-negative",
+      "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+      "source_bytes": 13197455,
+      "source_inventory_match": true,
+      "metadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "hevc",
+            "width": 3840,
+            "height": 2160,
+            "avg_frame_rate": "7380000/309019",
+            "duration": "3.433544",
+            "nb_frames": "82"
+          }
+        ],
+        "format": {
+          "duration": "3.498604",
+          "size": "13197455"
+        }
+      },
+      "independent_human_ground_truth": false,
+      "prior_exposure": "A/B user clips and all four additional sources have already been used in this project; none are independent holdout data.",
+      "inference_input_must_not_include_reference": true,
+      "run_rules": [
+        {
+          "game": "doubles",
+          "phase": "rally"
+        },
+        {
+          "game": "singles",
+          "phase": "rally"
+        }
+      ]
+    },
+    {
+      "id": "case_02",
+      "local_path": "/workspace/calibration-eval/case_02/source.mp4",
+      "repository_path": "video/8k 30 4k 24 b시점 4.mp4",
+      "rally_group": "8k4k-4",
+      "role": "previously-exposed-regression",
+      "source_sha256": "ae1db2f945a14c7e0c2b11d00be7085ed8c7f69b431ee621cc1d0b9efc1411c6",
+      "source_bytes": 12834379,
+      "source_inventory_match": true,
+      "metadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "hevc",
+            "width": 3840,
+            "height": 2160,
+            "avg_frame_rate": "307500/12761",
+            "duration": "3.402933",
+            "nb_frames": "82"
+          }
+        ],
+        "format": {
+          "duration": "3.477271",
+          "size": "12834379"
+        }
+      },
+      "independent_human_ground_truth": false,
+      "prior_exposure": "A/B user clips and all four additional sources have already been used in this project; none are independent holdout data.",
+      "inference_input_must_not_include_reference": true,
+      "run_rules": [
+        {
+          "game": "doubles",
+          "phase": "rally"
+        },
+        {
+          "game": "singles",
+          "phase": "rally"
+        }
+      ]
+    },
+    {
+      "id": "case_03",
+      "local_path": "/workspace/calibration-eval/case_03/source.mp4",
+      "repository_path": "video/a-4시점(uhd30 4k30).mp4",
+      "rally_group": "uhd4k-4",
+      "role": "previously-exposed-regression",
+      "source_sha256": "973355dc2d10ab4eebe1564e4c223b02f1ba225d600a9889405eae646b8213b3",
+      "source_bytes": 17072269,
+      "source_inventory_match": true,
+      "metadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "hevc",
+            "width": 3840,
+            "height": 2160,
+            "avg_frame_rate": "1455000/48343",
+            "duration": "3.222867",
+            "nb_frames": "97"
+          }
+        ],
+        "format": {
+          "duration": "3.278667",
+          "size": "17072269"
+        }
+      },
+      "independent_human_ground_truth": false,
+      "prior_exposure": "A/B user clips and all four additional sources have already been used in this project; none are independent holdout data.",
+      "inference_input_must_not_include_reference": true,
+      "run_rules": [
+        {
+          "game": "doubles",
+          "phase": "rally"
+        },
+        {
+          "game": "singles",
+          "phase": "rally"
+        }
+      ]
+    },
+    {
+      "id": "case_06",
+      "local_path": "/workspace/calibration-eval/case_06/source.mp4",
+      "repository_path": "video/b시점(uhd30 hd30) 3.mp4",
+      "rally_group": "uhdhd-3",
+      "role": "previously-exposed-regression",
+      "source_sha256": "22f90d5ebb1e66a3750b659fda24b0df90d27e7bf3fb1ff2472467c2f497ee5f",
+      "source_bytes": 5932477,
+      "source_inventory_match": true,
+      "metadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 1920,
+            "height": 1080,
+            "avg_frame_rate": "4400/147",
+            "duration": "2.840000",
+            "nb_frames": "88"
+          }
+        ],
+        "format": {
+          "duration": "2.840000",
+          "size": "5932477"
+        }
+      },
+      "independent_human_ground_truth": false,
+      "prior_exposure": "A/B user clips and all four additional sources have already been used in this project; none are independent holdout data.",
+      "inference_input_must_not_include_reference": true,
+      "run_rules": [
+        {
+          "game": "doubles",
+          "phase": "rally"
+        },
+        {
+          "game": "singles",
+          "phase": "rally"
+        }
+      ]
+    },
+    {
+      "id": "case_07",
+      "local_path": "/workspace/calibration-eval/case_07/source.mp4",
+      "repository_path": "video/a시점 4.mp4",
+      "rally_group": "ordinary-4",
+      "role": "previously-exposed-regression",
+      "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+      "source_bytes": 36829811,
+      "source_inventory_match": true,
+      "metadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "hevc",
+            "width": 3840,
+            "height": 2160,
+            "avg_frame_rate": "5058000/84851",
+            "duration": "4.713944",
+            "nb_frames": "281"
+          }
+        ],
+        "format": {
+          "duration": "4.735917",
+          "size": "36829811"
+        }
+      },
+      "independent_human_ground_truth": false,
+      "prior_exposure": "A/B user clips and all four additional sources have already been used in this project; none are independent holdout data.",
+      "inference_input_must_not_include_reference": true,
+      "run_rules": [
+        {
+          "game": "doubles",
+          "phase": "rally"
+        },
+        {
+          "game": "singles",
+          "phase": "rally"
+        }
+      ]
+    }
+  ],
+  "development_references": [
+    {
+      "id": "A_development",
+      "source": "Prior AI visual source review, not independent verified ground truth",
+      "reference_file": "/workspace/inout-validation-0.5.9/visual-A/review.json",
+      "first_floor_vicinity_frames_inclusive": [
+        48,
+        50
+      ],
+      "analysis_size": [
+        960,
+        540
+      ],
+      "possible_center_px": [
+        361,
+        447
+      ],
+      "geometry_expectation_under_that_contact_hypothesis": {
+        "doubles": "IN",
+        "singles": "OUT"
+      },
+      "do_not_supply_to_detector": true
+    },
+    {
+      "id": "B_occlusion_negative",
+      "source": "Prior AI visual review",
+      "reference_file": "/workspace/inout-validation-0.5.9/visual-B/review.json",
+      "expected_video_estimate": "REVIEW",
+      "reason": "First ground contact is obscured and the selected candidate is outside supported primary-court scope; do not infer an independent determinate label merely because A resolves."
+    }
+  ],
+  "additional_case_labels": "Deliberately not assigned before inference. Review any resolved estimate against original native frames and report its support and failures; do not count it as measured accuracy.",
+  "derived_negative_controls": [
+    {
+      "id": "static_A",
+      "source_case": "A_development",
+      "transform": {
+        "frame_indices": [
+          0
+        ],
+        "repeat_count": 60,
+        "fps": 30,
+        "output_size": [
+          960,
+          540
+        ],
+        "codec": "lossless"
+      },
+      "expected_video_estimate": "REVIEW",
+      "reason": "No temporal landing event exists in a repeated identical frame.",
+      "scope": "Synthetic derivative, no physical accuracy claim."
+    },
+    {
+      "id": "airborne_prefix_A",
+      "source_case": "A_development",
+      "transform": {
+        "frame_indices_inclusive": [
+          0,
+          29
+        ],
+        "preserve_native_decoded_pixels": true,
+        "preserve_source_frame_timing_then_rebase": true
+      },
+      "expected_video_estimate": "REVIEW",
+      "reason": "Prefix ends before the already reviewed first-floor-vicinity interval; primary target is still in flight. Other-court movement must not substitute for it.",
+      "reference_kind": "AI-reviewed negative, not independent physical ground truth."
+    },
+    {
+      "id": "first_contact_gap_A",
+      "source_case": "A_development",
+      "transform": {
+        "remove_frame_indices_inclusive": [
+          44,
+          54
+        ],
+        "preserve_remaining_native_pixels": true,
+        "preserve_remaining_source_pts_then_rebase": true
+      },
+      "expected_video_estimate": "REVIEW",
+      "reason": "The source frames covering the possible first contact are absent; the observed envelope cannot be bounded from missing native evidence."
+    },
+    {
+      "id": "contact_occlusion_A",
+      "source_case": "A_development",
+      "transform": {
+        "frame_indices_inclusive": [
+          44,
+          54
+        ],
+        "analysis_size": [
+          960,
+          540
+        ],
+        "occlusion_rectangle_px": [
+          336,
+          418,
+          390,
+          475
+        ],
+        "map_rectangle_to_source_pixels": true,
+        "mask_mode": "opaque cover preserving all other source pixels and source timestamps"
+      },
+      "expected_video_estimate": "REVIEW",
+      "reason": "Potential contact object is not observed; do not promote fitted or masked-out center to observed contact."
+    },
+    {
+      "id": "static_camera_motion_A",
+      "source_case": "A_development",
+      "transform": {
+        "repeat_source_frame": 0,
+        "repeat_count": 60,
+        "fps": 30,
+        "output_size": [
+          960,
+          540
+        ],
+        "affine_translation_px_per_frame": [
+          3,
+          0
+        ],
+        "border": "reflect"
+      },
+      "expected_video_estimate": "REVIEW",
+      "reason": "Camera motion over static scene is not a target-shuttle landing."
+    }
+  ],
+  "mandatory_geometry_negatives": [
+    "Possible contact envelope crosses either selected singles/doubles sideline: REVIEW, never treat envelope as one physical footprint intersecting interior.",
+    "Possible envelope crosses finite observed segment endpoint or leaves supported court scope: REVIEW.",
+    "Two credible target event families, same label or different label: REVIEW unless event association is independently resolved.",
+    "Mode mismatch, camera instability, unbounded temporal gap, empty/unreadable native frames: REVIEW."
+  ],
+  "artifact_policy": {
+    "do_not_modify_original_videos": true,
+    "derived_controls_not_yet_materialized": true,
+    "negative_generation_does_not_count_as_independent_test_data": true,
+    "strict_contact_observed_and_identity_confidence_must_not_be_promoted_by_estimate": true
+  }
+}
