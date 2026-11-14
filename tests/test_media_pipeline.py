@@ -89,6 +89,25 @@ def test_frame_progress_throttles_intermediate_counts_and_retains_final(monkeypa
     assert all(event['total_units'] == 12 for event in events)
 
 
+def test_pipeline_applies_requested_singles_to_calibration_and_decisions(tmp_path, monkeypatch):
+    import badminton.calibration as module
+    original = module.calibrate
+    seen = []
+    def capture(frames, hint, config):
+        seen.append(config)
+        return original(frames, hint, config)
+    monkeypatch.setattr(module, 'calibrate', capture)
+    result = analyze_video(clip(tmp_path), tmp_path / 'singles-run', {
+        'analysis_width': 160, 'source_crop_count': 0,
+        'rules': {'game': 'singles', 'phase': 'rally'},
+        'calibration': {'game': 'doubles'},
+        'evidence': {'annotated_clip': False}})
+    assert seen[0]['game'] == 'singles'
+    assert result['calibration']['game'] == 'singles'
+    assert result['config']['rules']['game'] == 'singles'
+    assert all(event['decision']['rules']['game'] == 'singles' for event in result['landings'])
+
+
 def test_multiple_unselected_landings_cannot_confirm_judgment():
     assert aggregate_decision([{'decision':'IN'}, {'decision':'IN'}])['decision'] == 'REVIEW'
     assert aggregate_decision([])['decision'] == 'REVIEW'

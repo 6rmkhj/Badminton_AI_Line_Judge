@@ -78,7 +78,8 @@
       </div>
       <div class="submit-panel">
         <div class="options">
-          <label class="check-option"><input type="checkbox" id="same-event"><span><strong>두 영상이 같은 랠리의 같은 착지 사건임을 확인했습니다.</strong><small>확인하지 않으면 저장된 시점 대응 근거를 사용합니다. 대응이 미확정이면 REVIEW로 남습니다.</small></span></label>
+          <div class="game-option"><label for="game-mode">경기 방식</label><select id="game-mode" aria-describedby="game-mode-help"><option value="doubles" selected>복식 · 바깥 사이드라인</option><option value="singles">단식 · 안쪽 사이드라인</option></select><p id="game-mode-help">단식은 안쪽 사이드라인, 복식은 바깥 사이드라인으로 코트 표시와 랠리 판정을 적용합니다.</p></div>
+          <label class="check-option"><input type="checkbox" id="same-event"><span><strong>두 영상이 같은 랠리의 같은 착지 사건임을 확인했습니다.</strong><small>확인하면 두 시점의 판정을 연결합니다. 한 시점에 유효한 판정이 있으면 그 시점의 결과를 표시합니다.</small></span></label>
           <label class="check-option"><input type="checkbox" id="reuse-review"><span><strong>기존 검수 근거 활용</strong><small>기본은 두 영상을 새로 분석합니다. 선택하면 동일 원본의 저장된 AI 검수 기록을 활용합니다.</small></span></label>
         </div>
         <div class="submit-action"><button id="submit-pair" class="primary" type="submit"><span>A/B 연결 분석</span><span aria-hidden="true">↗</span></button><p>같은 작업에 두 영상을 함께 입력합니다.</p></div>
@@ -102,7 +103,7 @@
 
     <section id="pair-result" aria-labelledby="result-heading" hidden>
       <div class="result-banner" id="result-banner">
-        <div class="result-heading"><p class="eyebrow">A/B LINKED RESULT</p><h2 id="result-heading">A/B 최종 보조 판정</h2><div id="final-verdict" class="final-verdict">—</div><p id="result-provenance" class="result-provenance"></p></div>
+        <div class="result-heading"><p class="eyebrow">A/B LINKED RESULT</p><h2 id="result-heading">A/B 최종 보조 판정</h2><p id="result-rules" class="result-rules"></p><div id="final-verdict" class="final-verdict">—</div><p id="result-provenance" class="result-provenance"></p></div>
         <div class="result-explanation"><div id="source-cameras" class="source-cameras"></div><ul id="result-reasons"></ul><p id="correspondence-status" class="muted"></p><p id="result-timing" class="muted"></p><a id="result-json" class="secondary" href="#" download>결과 JSON 내려받기 ↗</a></div>
       </div>
       <div class="region-result-action"><button id="edit-regions" class="secondary" type="button">검토 영역 지정 후 다시 분석</button><span>저장된 원본을 사용합니다. 수동 탐색 보조 · 접촉 미확정</span></div>

@@ -49,21 +49,59 @@ def test_transferred_label_cannot_be_used_as_a_direct_donor():
     assert combine_views(views, same_event_confirmed=True)['decision'] == 'REVIEW'
 
 
-@pytest.mark.parametrize('adjust,reason', [
-    ({'same_event_confirmed': False}, 'SAME_EVENT_UNCONFIRMED'),
-    ({'different_event': True}, 'KNOWN_DIFFERENT_RALLY'),
-])
-def test_event_identity_is_a_required_condition(adjust, reason):
-    options = {'same_event_confirmed': True, **adjust}
-    result = combine_views({'A': source_view('IN'), 'B': source_view('IN','b')}, **options)
-    assert result['decision'] == 'REVIEW' and reason in result['reason_codes']
+def test_known_different_events_still_prevent_a_joint_verdict():
+    result = combine_views({'A': source_view('IN'), 'B': source_view('IN','b')},
+                           same_event_confirmed=True, different_event=True)
+    assert result['decision'] == 'REVIEW' and 'KNOWN_DIFFERENT_RALLY' in result['reason_codes']
 
 
-def test_duplicate_and_failed_other_view_veto_a_positive():
+def test_duplicate_and_failed_other_view_do_not_erase_a_valid_single_view():
     result = combine_views({'A': source_view('IN'), 'B': source_view('REVIEW')}, same_event_confirmed=True)
-    assert 'DUPLICATE_SOURCE' in result['reason_codes']
+    assert result['decision'] == 'IN'
+    assert 'DUPLICATE_SOURCE' in result['warning_codes']
+    assert result['decision_scope'] == 'single_view'
+    assert result['views']['B']['assisted_decision'] == 'REVIEW'
     result = combine_views({'A': source_view('IN'), 'B': source_view('REVIEW','b',status='failed')}, same_event_confirmed=True)
-    assert result['decision'] == 'REVIEW' and 'VIEW_ANALYSIS_FAILED' in result['reason_codes']
+    assert result['decision'] == 'IN' and 'VIEW_ANALYSIS_FAILED' in result['warning_codes']
+    assert result['views']['B']['assisted_decision'] == 'REVIEW'
+
+
+@pytest.mark.parametrize('left,right,donor,label', [('IN','REVIEW','A','IN'),
+    ('REVIEW','OUT','B','OUT'), ('IN','IN','A','IN')])
+def test_unconfirmed_correspondence_preserves_direct_verdict_without_transfer(left,right,donor,label):
+    result = combine_views({'A': source_view(left), 'B': source_view(right, 'b')})
+    assert result['decision'] == label
+    assert result['source_camera_ids'] == [donor]
+    assert result['decision_scope'] == 'single_view'
+    assert 'SAME_EVENT_UNCONFIRMED' in result['warning_codes']
+    assert result['same_event_confirmed'] is False
+    assert result['views']['A']['assisted_decision'] == left
+    assert result['views']['B']['assisted_decision'] == right
+
+
+@pytest.mark.parametrize('invalid', [{'status':'failed'}, {'qualified':False},
+    {'source_sha256':None}, {'source_sha256':'bad'}, {'rules':{'game':'singles','phase':'rally'}}])
+def test_invalid_direct_donor_is_never_promoted(invalid):
+    result = combine_views({'A':source_view('IN', **invalid), 'B':source_view('REVIEW','b')})
+    assert result['decision'] == 'REVIEW'
+    assert result['source_camera_ids'] == []
+
+
+def test_bad_peer_source_and_rules_do_not_veto_valid_matching_donor():
+    result = combine_views({'A':source_view('OUT'),
+                            'B':source_view('REVIEW',source_sha256=None,rules={'game':'singles','phase':'rally'})})
+    assert result['decision'] == 'OUT'
+    assert result['source_camera_ids'] == ['A']
+    assert {'SOURCE_CHANGED','RULES_MISMATCH'} <= set(result['warning_codes'])
+
+
+def test_singles_pair_uses_requested_rules_and_rejects_doubles_donor():
+    singles={'game':'singles','phase':'rally'}
+    result=combine_views({'A':source_view('IN'), 'B':source_view('OUT','b',rules=singles)}, rules=singles)
+    assert result['decision']=='OUT' and result['rules']==singles
+    assert result['source_camera_ids']==['B']
+    assert 'RULES_MISMATCH' in result['warning_codes']
+    assert result['views']['A']['assisted_decision']=='REVIEW'
 
 
 @pytest.fixture
@@ -144,10 +182,52 @@ def test_no_filename_only_propagation_and_explicit_operator_selection(pair_fixtu
     _write(root/'annotations/ai-visual/v_b.json', report['videos'][1]['annotation'])
     _write(workspace.report_path, report)
     unresolved = wait_job(workspace, submit_fixture(workspace))['result']
-    assert unresolved['decision'] == 'REVIEW'
+    assert unresolved['decision'] == 'IN'
+    assert unresolved['decision_scope'] == 'single_view'
+    assert unresolved['views']['B']['assisted_decision'] == 'REVIEW'
     accepted = wait_job(workspace, submit_fixture(workspace,same_event_confirmed=True))['result']
     assert accepted['decision'] == 'IN'
     assert accepted['event_correspondence_source'] == 'operator_pair_selection'
+
+
+@pytest.mark.parametrize('rules', [None, [], 'singles', {'game':[]}, {'game':False},
+    {'game':'other'}, {'game':'singles','phase':'service'}, {'game':'singles','extra':1}])
+def test_invalid_game_selection_is_rejected_at_submission(pair_fixture, rules):
+    workspace, _, _ = pair_fixture
+    with pytest.raises(PairWorkspaceError) as error:
+        submit_fixture(workspace, rules=rules)
+    assert error.value.status == 400
+
+
+@pytest.mark.parametrize('reuse', [False, True])
+def test_singles_selection_is_persisted_and_reanalyses_doubles_review(pair_fixture, monkeypatch, reuse):
+    workspace, _, _ = pair_fixture
+    calls=[]
+    monkeypatch.setattr('badminton.media.probe', lambda _:{'frame_count':3,'width':960,'height':540,'timestamps':[0,.1,.2]})
+    def analyze(source, output, config, **kwargs):
+        calls.append(deepcopy(config))
+        return {'source_sha256':hashlib.sha256(Path(source).read_bytes()).hexdigest(),
+                'decision':{'decision':'OUT' if Path(source).name=='a.mp4' else 'REVIEW',
+                            'reason_codes':[]}, 'artifacts':{}, 'config':deepcopy(config)}
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    job=wait_job(workspace,submit_fixture(workspace,reuse_review=reuse,rules={'game':'singles'}))
+    singles={'game':'singles','phase':'rally'}
+    assert job['request']['rules']==singles and job['result']['rules']==singles
+    assert len(calls)==2 and all(config['rules']==singles for config in calls)
+    assert job['result']['decision']=='OUT'
+    assert all(view['processing_mode']=='fresh_analysis' for view in job['result']['views'].values())
+    if reuse:
+        assert all(view['review_reuse_skipped']=='RULES_CHANGED' for view in job['result']['views'].values())
+
+
+def test_changed_rules_cannot_reuse_portable_review_without_originals(pair_fixture):
+    workspace, root, _ = pair_fixture
+    for source in (root/'video').iterdir():
+        source.unlink()
+    job=wait_job(workspace,submit_fixture(workspace,rules={'game':'singles','phase':'rally'}))
+    assert job['result']['decision']=='REVIEW'
+    assert all(view['status']=='failed' for view in job['result']['views'].values())
+    assert all('경기 규칙' in view['error'] for view in job['result']['views'].values())
 
 
 def test_known_mismatch_overrides_operator_confirmation(pair_fixture):

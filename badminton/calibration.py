@@ -820,12 +820,24 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: 
     Camera stability and first-contact evidence are checked by downstream
     consumers before using the selected image-space boundary for a verdict.
     """
-    result = _calibrate_full_court(frames, court_hint, config)
     cfg = dict(config or {})
+    game = cfg.get("game", "doubles")
+    if game not in ("singles", "doubles"):
+        raise ValueError("calibration game must be singles or doubles")
+    result = _calibrate_full_court(frames, court_hint, config)
+    result["game"] = game
     if cfg.get("primary_court_enabled", True) and result.get("status") == "ok":
         # A supported full fit already identifies its court. Display only that
         # accepted boundary, never unrelated raw Hough lines from other courts.
-        polygon = np.asarray(result["polygon_px"], dtype=float)
+        physical_polygon = np.asarray(result["polygon_px"], dtype=float)
+        polygon = physical_polygon.copy()
+        if game == "singles":
+            # Keep the physical doubles coordinate system for metric decisions;
+            # the active display follows the singles sidelines inside it.
+            singles_m = np.array([[.46, 0], [5.64, 0], [5.64, 13.4], [.46, 13.4]], np.float32)
+            image_points = cv2.perspectiveTransform(singles_m[None],
+                np.linalg.inv(np.asarray(result["homography"], dtype=float)))[0]
+            polygon = _raw_points(image_points, result.get("lens"))
         inside = polygon.mean(axis=0).tolist()
         error = max(2.5, float(result.get("line_fit_error_px") or 0))
         boundaries = [{"role": role, "segment_px": np.r_[polygon[a], polygon[b]].tolist(),
@@ -833,8 +845,11 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: 
                       for role, a, b in (("left", 0, 3), ("right", 1, 2), ("near", 0, 1), ("far", 3, 2))]
         result["primary_court"] = {
             "status": "selected", "scope": "full", "region_supported": True,
+            "game": game, "rules": {"game": game, "phase": "rally"},
             "method": "accepted_full_court_template", "confidence": result["confidence"],
             "polygon_px": polygon.tolist(), "interior_polygon_px": polygon.tolist(),
+            "physical_court_polygon_px": physical_polygon.tolist(),
+            "physical_near_corners_px": physical_polygon[:2].tolist(),
             "near_corners_px": polygon[:2].tolist(), "boundary_segments_px": boundaries,
             "line_segments_px": [row["segment_px"] for row in boundaries],
             "reason_codes": ["FULL_COURT_TEMPLATE_SUPPORTED"],
@@ -842,5 +857,6 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: 
     elif (cfg.get("primary_court_enabled", True) and result.get("status") == "review"
             and not result.get("manual_reference") and result.get("line_segments_px")):
         from .primary_court import select_primary_court
-        result["primary_court"] = select_primary_court(frames, result, cfg.get("primary_court"))
+        selection = {**(cfg.get("primary_court") or {}), "game": game}
+        result["primary_court"] = select_primary_court(frames, result, selection)
     return result

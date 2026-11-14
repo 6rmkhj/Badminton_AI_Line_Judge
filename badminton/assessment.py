@@ -109,7 +109,7 @@ def assess_result(result, *, requested_landings=None):
     elif "CONTACT_OUTSIDE_PRIMARY_COURT_SCOPE" in geometry_reasons:
         geometry_detail = "접촉점이 선택한 주 코트의 확인 가능한 범위 밖에 있습니다. 옆 코트나 보이지 않는 먼 영역을 OUT으로 판정하지 않습니다."
     elif "PRIMARY_COURT_RULES_UNSUPPORTED" in geometry_reasons:
-        geometry_detail = "선택한 부분 코트는 복식 랠리 경계입니다. 단식·서비스 판정에는 해당 경계의 추가 확인이 필요합니다."
+        geometry_detail = "선택한 코트 선과 판정 규칙이 다르거나 서비스 경계가 확인되지 않았습니다. 선택한 단식·복식 규칙으로 다시 분석해야 합니다."
     elif geometry_status == "blocked":
         geometry_detail = "규칙 선택, 접촉 좌표, 코트 변환 또는 위치 오차 조건을 충족하지 못했습니다."
     elif geometry_status == "passed":

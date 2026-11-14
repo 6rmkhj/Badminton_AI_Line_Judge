@@ -1,5 +1,6 @@
 """Request integration: distinct camera clocks, responsibilities, and failures."""
 from copy import deepcopy
+import hashlib
 import json
 
 import pytest
@@ -30,7 +31,7 @@ def video_root(tmp_path, monkeypatch):
 
 
 def row(camera, label="IN", point=(3, 3), time=0.7, assigned=None):
-    return {"camera_id": camera, "status": "completed", "source_sha256": camera,
+    return {"camera_id": camera, "status": "completed", "source_sha256": hashlib.sha256(camera.encode()).hexdigest(),
             "responsible_boundaries": assigned or ["left", "right", "near", "far"],
             "event_window_seconds": [0.5, 1.0],
             "decision": {"decision": label, "contact_time_seconds": time,
@@ -105,11 +106,14 @@ def test_an_outside_unassigned_line_is_not_an_authorized_line_result():
     assert result["outside_supported_boundaries"] == ["near"]
 
 
-def test_multi_view_needs_explicit_correspondence_and_consistent_contact():
+def test_single_donor_does_not_require_linkage_but_linked_contacts_must_agree():
     payload = request(2)
     payload["same_event_confirmed"] = False
     result = aggregate_request(payload, [row("A"), row("B")])
-    assert "CROSS_VIEW_EVENT_CORRESPONDENCE_UNCONFIRMED" in result["reason_codes"]
+    assert result["decision"] == "IN"
+    assert result["decision_scope"] == "single_view"
+    assert result["source_camera_ids"] == ["A"]
+    assert "CROSS_VIEW_EVENT_CORRESPONDENCE_UNCONFIRMED" in result["warning_codes"]
     payload["same_event_confirmed"] = True
     result = aggregate_request(payload, [row("A"), row("B", point=(3, 11))])
     assert "CROSS_VIEW_CONTACT_POSITION_DISAGREEMENT" in result["reason_codes"]
@@ -119,11 +123,14 @@ def test_multi_view_needs_explicit_correspondence_and_consistent_contact():
     assert result["decision"] == "IN"
 
 
-def test_duplicate_source_and_contact_outside_window_remain_review():
+def test_duplicate_source_is_only_single_view_and_bad_contact_window_still_blocks():
     first, second = row("A"), row("B")
     second["source_sha256"] = first["source_sha256"]
     result = aggregate_request(request(2), [first, second])
-    assert "DUPLICATE_SOURCE_IS_NOT_AN_INDEPENDENT_VIEW" in result["reason_codes"]
+    assert result["decision"] == "IN"
+    assert result["decision_scope"] == "single_view"
+    assert result["source_camera_ids"] == ["A"]
+    assert "DUPLICATE_SOURCE_IS_NOT_AN_INDEPENDENT_VIEW" in result["warning_codes"]
     result = aggregate_request(request(), [row("A", time=2.0)])
     assert "CONTACT_OUTSIDE_REQUESTED_EVENT_WINDOW" in result["reason_codes"]
 
@@ -132,10 +139,143 @@ def test_same_event_does_not_establish_shared_court_axes():
     payload = request(2)
     payload["same_court_coordinate_system_confirmed"] = False
     result = aggregate_request(payload, [row("A"), row("B", point=(3.1, 10.4))])
-    assert result["decision"] == "REVIEW"
-    assert "CROSS_VIEW_COURT_COORDINATE_SYSTEM_UNCONFIRMED" in result["reason_codes"]
+    assert result["decision"] == "IN"
+    assert result["source_camera_ids"] == ["A"]
+    assert "CROSS_VIEW_COURT_COORDINATE_SYSTEM_UNCONFIRMED" in result["warning_codes"]
     assert "CROSS_VIEW_CONTACT_POSITION_DISAGREEMENT" not in result["reason_codes"]
     assert result["cross_view_contact_checks"] == []
+
+
+@pytest.mark.parametrize("resolved_camera", ["A", "B"])
+@pytest.mark.parametrize("label,point", [("IN", (3, 3)), ("OUT", (3, -1))])
+@pytest.mark.parametrize("peer_status", ["completed", "failed"])
+def test_one_valid_view_resolves_despite_an_unresolved_peer(resolved_camera, label, point, peer_status):
+    payload = request(2)
+    payload.update(same_event_confirmed=False, same_court_coordinate_system_confirmed=False)
+    views = [row(camera, label if camera == resolved_camera else "REVIEW", point=point)
+             for camera in ("A", "B")]
+    peer = next(view for view in views if view["camera_id"] != resolved_camera)
+    peer["status"] = peer_status
+    original = deepcopy(views)
+    result = aggregate_request(payload, views)
+    assert result["decision"] == label
+    assert result["source_camera_ids"] == [resolved_camera]
+    assert result["decision_scope"] == "single_view"
+    assert "RESPONSIBLE_VIEW_UNRESOLVED" in result["warning_codes"]
+    assert views == original  # Do not relabel the unobserved peer.
+
+
+def test_out_needs_one_assigned_boundary_not_complete_camera_coverage():
+    result = aggregate_request(request(), [row("A", "OUT", point=(3, -1), assigned=["near"])])
+    assert result["decision"] == "OUT"
+    assert result["source_camera_ids"] == ["A"]
+    assert result["outside_supported_boundaries"] == ["near"]
+    assert "REQUESTED_BOUNDARY_WITHOUT_RESPONSIBLE_CAMERA" in result["warning_codes"]
+    result = aggregate_request(request(), [row("A", "IN", assigned=["near"])])
+    assert result["decision"] == "REVIEW"
+    assert "IN_NOT_SUPPORTED_BY_ASSIGNED_BOUNDARIES" in result["reason_codes"]
+
+
+def test_partial_in_responsibilities_cannot_be_combined_without_linkage():
+    payload = request(2)
+    first = row("A", assigned=["near", "left"])
+    second = row("B", assigned=["far", "right"])
+    payload["same_event_confirmed"] = False
+    result = aggregate_request(payload, [first, second])
+    assert result["decision"] == "REVIEW"
+    payload["same_event_confirmed"] = True
+    result = aggregate_request(payload, [first, second])
+    assert result["decision"] == "IN"
+    assert result["decision_scope"] == "linked_views"
+    assert result["source_camera_ids"] == ["A", "B"]
+
+
+@pytest.mark.parametrize("change,code", [
+    ({"source_sha256": None}, "VIEW_SOURCE_UNVERIFIED"),
+    ({"source_sha256": "invalid"}, "VIEW_SOURCE_UNVERIFIED"),
+    ({"status": "failed"}, "RESPONSIBLE_VIEW_UNRESOLVED"),
+])
+def test_invalid_donor_cannot_determine_result(change, code):
+    invalid = {**row("A"), **change}
+    result = aggregate_request(request(), [invalid])
+    assert result["decision"] == "REVIEW"
+    assert code in result["reason_codes"]
+
+
+def test_invalid_peer_label_does_not_create_a_false_conflict():
+    invalid = row("B", "OUT", point=(3, -1), time=2)
+    result = aggregate_request(request(2), [row("A"), invalid])
+    assert result["decision"] == "IN"
+    assert result["source_camera_ids"] == ["A"]
+    assert "CONTACT_OUTSIDE_REQUESTED_EVENT_WINDOW" in result["warning_codes"]
+    assert "CONFLICTING_VIEW_DECISIONS" not in result["reason_codes"]
+    invalid = row("B", "IN", point=(3, -1))
+    result = aggregate_request(request(2), [row("A", "OUT", point=(3, -1)), invalid])
+    assert result["decision"] == "OUT"
+    assert result["source_camera_ids"] == ["A"]
+
+
+def test_rules_mismatch_cannot_reuse_a_doubles_verdict_for_singles():
+    payload = request()
+    payload["rules"]["game"] = "singles"
+    donor = row("A")
+    donor["decision"]["rules"] = {"game": "doubles", "phase": "rally"}
+    result = aggregate_request(payload, [donor])
+    assert result["decision"] == "REVIEW"
+    assert "VIEW_RULES_MISMATCH" in result["reason_codes"]
+
+
+def test_geometry_only_probe_cannot_be_used_as_a_verified_video_verdict():
+    from badminton.decision import evaluate_contact
+    donor = row("A")
+    donor["decision"] = {**evaluate_contact([[3, 3]], uncertainty_m=.02), "contact_time_seconds": .7}
+    result = aggregate_request(request(), [donor])
+    assert result["decision"] == "REVIEW"
+    assert "VIEW_CONTACT_GEOMETRY_UNAVAILABLE" in result["reason_codes"]
+
+
+def primary_pixel_row(camera, point):
+    from badminton.decision import decide
+    primary = {"status": "selected", "scope": "near_half", "game": "doubles",
+               "rules": {"game": "doubles", "phase": "rally"}, "confidence": .9,
+               "region_supported": True,
+               "polygon_px": [[200, 500], [800, 500], [650, 200], [350, 200]],
+               "judgment_scope_polygon_px": [[100, 580], [900, 580], [720, 140], [280, 140]],
+               "boundary_segments_px": [
+                   {"role": role, "segment_px": segment, "observed": True,
+                    "inside_point_px": [500, 350], "uncertainty_px": 3}
+                   for role, segment in [("near", [200, 500, 800, 500]),
+                                         ("left", [200, 500, 350, 200]),
+                                         ("right", [800, 500, 650, 200])]]}
+    calibration = {"status": "review", "image_width": 1000, "image_height": 700,
+                   "camera_stability": {"status": "ok", "all_frames_sampled": True},
+                   "primary_court": primary}
+    contact = {"contact_observed": True, "contact_px": list(point), "confidence": .95,
+               "identity_confidence": .95, "uncertainty_px": 1, "time": .7}
+    value = row(camera)
+    value["decision"] = decide(contact, calibration)
+    return value
+
+
+@pytest.mark.parametrize("point,label", [((500, 400), "IN"), ((500, 520), "OUT")])
+def test_local_pixel_verdict_can_resolve_without_metric_geometry(point, label):
+    donor = primary_pixel_row("A", point)
+    assert donor["decision"]["decision"] == label
+    result = aggregate_request(request(2), [donor, row("B", "REVIEW")])
+    assert result["decision"] == label
+    assert result["source_camera_ids"] == ["A"]
+    assert result["court_position_m"] is None
+    assert result["cross_view_contact_checks"] == []
+
+
+def test_pixel_out_proof_must_match_responsible_boundary_and_observed_extent():
+    donor = primary_pixel_row("A", (500, 520))
+    donor["responsible_boundaries"] = ["left"]
+    assert aggregate_request(request(boundary="left"), [donor])["decision"] == "REVIEW"
+    donor["responsible_boundaries"] = ["near"]
+    for edge in donor["decision"]["boundaries"]:
+        edge["within_observed_extent"] = False
+    assert aggregate_request(request(boundary="near"), [donor])["decision"] == "REVIEW"
 
 
 def test_request_routes_per_camera_windows_and_anchors_and_persists_errors(video_root, tmp_path, monkeypatch):
@@ -144,7 +284,7 @@ def test_request_routes_per_camera_windows_and_anchors_and_persists_errors(video
         calls.append((path, output, deepcopy(config)))
         if config["request_context"]["camera_id"] == "camera-1":
             raise RuntimeError("decoder failed")
-        return {"source_sha256": "a", "calibration": {"status": "ok"}, "landings": [],
+        return {"source_sha256": "a" * 64, "calibration": {"status": "ok"}, "landings": [],
                 "decision": row("A")["decision"]}
     monkeypatch.setattr("badminton.pipeline.analyze_video", analyze)
     config = {"identity": {"hit_anchors": [{"time": 999}], "min_margin": .2},
@@ -159,7 +299,8 @@ def test_request_routes_per_camera_windows_and_anchors_and_persists_errors(video
     assert "target_track_id" not in calls[0][2]["events"]
     assert config == before
     assert result["status"] == "completed_with_errors"
-    assert result["decision"]["decision"] == "REVIEW"
+    assert result["decision"]["decision"] == "IN"
+    assert result["decision"]["source_camera_ids"] == ["camera-0"]
     assert result["ground_truth_created"] is False
     assert json.loads((output / "request-result.json").read_text()) == result
 

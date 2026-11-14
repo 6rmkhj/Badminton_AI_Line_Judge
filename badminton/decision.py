@@ -263,7 +263,14 @@ def _decide_primary_court(landing, calibration, rules):
     Only observed, role-assigned outer boundary lines may produce OUT.
     """
     region = rule_region(rules)
-    if region['game'] != 'doubles' or region['phase'] != 'rally':
+    primary = calibration['primary_court']
+    # Historical partial-court records describe doubles. Never reuse those
+    # boundaries for singles merely because the caller changed the rule menu.
+    game = primary.get('game', 'doubles')
+    selected_rules = primary.get('rules', {'game': 'doubles', 'phase': 'rally'})
+    if (region['phase'] != 'rally' or game not in ('singles', 'doubles')
+            or region['game'] != game
+            or selected_rules != {'game': game, 'phase': 'rally'}):
         return _review(['PRIMARY_COURT_RULES_UNSUPPORTED'], rules)
     stability = calibration.get('camera_stability')
     if (not isinstance(stability, dict) or stability.get('status') != 'ok'

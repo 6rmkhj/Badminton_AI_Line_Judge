@@ -21,6 +21,9 @@ const analysisStages = [
   ['tracking', '궤적 연결'], ['contact', '착지·라인 확인'], ['evidence', '근거 영상 생성'], ['save', '결과 저장'],
 ];
 const workflowLabels = ['입력 전송', '분석 대기', '시점별 분석', '결과 연결'];
+function selectedRules() { return {game: $('game-mode').value, phase: 'rally'}; }
+function gameLabel(rules) { return rules?.game === 'singles' ? '단식' : '복식'; }
+function gameBoundaryLabel(rules) { return rules?.game === 'singles' ? '안쪽 사이드라인' : '바깥 사이드라인'; }
 function secondsText(value) {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return '—';
   const seconds = Math.floor(value), hours = Math.floor(seconds / 3600);
@@ -526,6 +529,7 @@ function restoreJobSources(job) {
   if (first) {
     $('same-event').checked = job.request.same_event_confirmed === true;
     $('reuse-review').checked = job.request.reuse_review === true && !cameras.some(camera => state.sources[camera].reviewRegion);
+    $('game-mode').value = job.request.rules?.game === 'singles' ? 'singles' : 'doubles';
     state.restoredJobId = job.job_id;
   }
 }
@@ -676,6 +680,8 @@ function renderCalibration(camera, view) {
   const panel = el('section', 'evidence-assessment court-calibration');
   const heading = el('h4', '', '주 코트와 판정 경계'); heading.id = 'calibration-heading-' + camera.toLowerCase();
   panel.setAttribute('aria-labelledby', heading.id); panel.append(heading);
+  const rules = view.rules || state.currentJob?.result?.rules || state.currentJob?.request?.rules;
+  panel.append(el('p', 'calibration-rules', `${gameLabel(rules)} 랠리 · ${gameBoundaryLabel(rules)}`));
   const count = Number.isInteger(summary.detected_line_count) && summary.detected_line_count >= 0 ? summary.detected_line_count : 0;
   const found = summary.line_detection_status === 'detected' && count > 0;
   const supported = summary.court_geometry_status === 'supported';
@@ -809,6 +815,8 @@ function renderResult(job) {
   $('pair-result').hidden = false;
   $('result-banner').dataset.verdict = result.decision;
   $('final-verdict').textContent = result.decision;
+  const appliedRules = result.rules || job.request?.rules;
+  $('result-rules').textContent = `${gameLabel(appliedRules)} 랠리 · ${gameBoundaryLabel(appliedRules)} 기준`;
   const views = result.views || {};
   const aiUsed = cameras.some(camera => views[camera]?.processing_mode === 'stored_ai_review');
   const refinedCameras = Array.isArray(result.refinement_applied_camera_ids)
@@ -824,14 +832,22 @@ function renderResult(job) {
       : aiUsed ? '기존 AI 검수 근거를 활용한 보조 결과' : '두 시점의 분석·대응 검토 결과';
   const sources = $('source-cameras'); sources.replaceChildren();
   const sourceIds = Array.isArray(result.source_camera_ids) ? result.source_camera_ids.filter(id => cameras.includes(id)) : [];
+  if (result.decision_scope === 'single_view' && sourceIds.length) {
+    const sourceAiUsed = sourceIds.some(camera => views[camera]?.processing_mode === 'stored_ai_review');
+    $('result-provenance').textContent = `${sourceIds.join('/')} 시점의 유효한 판정${sourceAiUsed ? ' · AI 검수 근거를 활용한 보조 결과' : ''}`;
+  }
   const hasDirectEvidence = cameras.some(camera => views[camera]?.qualified === true && ['IN', 'OUT'].includes(views[camera]?.direct_decision));
   sources.append(el('span', '', sourceIds.length ? '최종 판정의 접촉 근거' : hasDirectEvidence ? '시점별 접촉 근거 있음 · 연결 조건 확인 필요' : '확인된 접촉 근거 추가 필요'));
   sourceIds.forEach(camera => { const link = el('a', 'source-link', camera + ' 시점 보기 ↓'); link.href = '#result-view-' + camera.toLowerCase(); sources.append(link); });
   const reasons = $('result-reasons'); reasons.replaceChildren();
   const messages = Array.isArray(result.reasons) ? result.reasons : [];
   (messages.length ? messages : ['시점별 판정 근거를 확인해 주세요.']).forEach(message => reasons.append(el('li', '', String(message))));
+  if (Array.isArray(result.warnings)) result.warnings.forEach(message => reasons.append(el('li', 'muted', String(message))));
   const eventSource = correspondenceNames[result.event_correspondence_source] || '저장된 사건 대응 기록';
-  $('correspondence-status').textContent = result.same_event_confirmed ? `같은 사건 연결 확인 · ${eventSource}` : '동일 사건 연결이 확인되지 않았습니다.';
+  $('correspondence-status').textContent = result.same_event_confirmed ? `같은 사건 연결 확인 · ${eventSource}`
+    : result.decision_scope === 'single_view' && sourceIds.length
+      ? `${sourceIds.join('/')} 시점에서 판정했습니다. 두 영상의 동일 사건 연결은 미확인입니다.`
+      : '동일 사건 연결이 확인되지 않았습니다.';
   $('result-timing').textContent = typeof result.elapsed_seconds === 'number' ? `이번 작업 ${fmt(result.elapsed_seconds, 1)}초${aiUsed ? ' · 기존 검수 시간은 포함하지 않습니다.' : ''}` : '';
   $('result-json').href = jobUrl(job.job_id);
   $('result-json').download = 'pair-' + job.job_id + '.json';
@@ -991,7 +1007,7 @@ $('pair-form').addEventListener('submit', async event => {
     const failure = uploads.find(result => result.status === 'rejected');
     if (failure) throw failure.reason;
     const views = {A: withRegion('A', uploads[0].value), B: withRegion('B', uploads[1].value)};
-    const job = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, same_event_confirmed: $('same-event').checked, reuse_review: $('reuse-review').checked})});
+    const job = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, rules: selectedRules(), same_event_confirmed: $('same-event').checked, reuse_review: $('reuse-review').checked})});
     if (!job.job_id) throw new Error('작업 ID가 응답에 없습니다. 최근 작업 목록을 확인해 주세요.');
     openJob(job.job_id, true);
     $('job-progress').scrollIntoView({block: 'start', behavior: 'auto'});
@@ -1019,7 +1035,8 @@ $('refine-pair').addEventListener('click', async () => {
   }
   setBusy(true); $('refine-error').hidden = true; beginSubmission(job);
   try {
-    const created = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, same_event_confirmed: job.request?.same_event_confirmed === true, reuse_review: false, refine_review_regions: true})});
+    const rules = {game: job.request?.rules?.game === 'singles' ? 'singles' : 'doubles', phase: 'rally'};
+    const created = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, rules, same_event_confirmed: job.request?.same_event_confirmed === true, reuse_review: false, refine_review_regions: true})});
     if (!created.job_id) throw new Error('재분석 작업 ID가 응답에 없습니다. 최근 작업 목록을 확인해 주세요.');
     openJob(created.job_id, true);
     $('job-progress').scrollIntoView({block: 'start', behavior: 'auto'});

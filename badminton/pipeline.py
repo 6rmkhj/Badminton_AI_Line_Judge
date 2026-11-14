@@ -110,7 +110,7 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     from .events import (estimate_landings, refine_source_contacts, validate_contact_modes,
                          prioritize_review_candidates, review_refinement_regions, review_region_indices)
     from .identity import apply_identity
-    from .decision import decide
+    from .decision import decide, rule_region
     config = dict(config or {})
     from .inference import resolve_device
     resource_settings = config.get('resource_settings') or {}
@@ -168,9 +168,13 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     metadata.pop('timestamps', None)
     timings['decode_and_preview_seconds'] = time.perf_counter() - start
     clock = time.perf_counter()
-    report('calibration', detail='앞쪽 두 모서리의 주 코트 선택·카메라 안정성 확인')
+    selected_rules = rule_region(config.get('rules'))
+    calibration_options = dict(config.get('calibration') or {})
+    calibration_options['game'] = selected_rules['game']
+    game_name = '단식' if selected_rules['game'] == 'singles' else '복식'
+    report('calibration', detail=f'{game_name} 주 코트 경계 선택·카메라 안정성 확인')
     calibration_frames = [frames[int(i)] for i in np.linspace(0, len(frames)-1, min(9, len(frames)))]
-    calibration = calibrate(calibration_frames, config.get('court_hint'), config.get('calibration'))
+    calibration = calibrate(calibration_frames, config.get('court_hint'), calibration_options)
     stability = assess_camera_stability(frames, config.get('camera_stability'))
     calibration = guard_calibration_stability(calibration, stability)
     timings['calibration_seconds'] = time.perf_counter() - clock

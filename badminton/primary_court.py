@@ -174,7 +174,9 @@ def select_primary_court(frames, calibration, config=None):
     Inputs are actual analysis frames and the unmodified line detector result.
     ``confidence`` is a structural support score, not a probability. The scope
     polygon includes a small outside strip; its closing edge is never an OUT
-    boundary. Global metric calibration remains governed by its own evidence.
+    boundary. ``config['game']`` chooses measured singles or doubles sidelines
+    on the same physical court. Global metric calibration remains governed by
+    its own evidence.
     """
     base = {'status': 'not_found', 'scope': 'near_half', 'region_supported': False,
             'confidence': 0.0, 'confidence_kind': 'observed_court_pattern_support',
@@ -183,6 +185,12 @@ def select_primary_court(frames, calibration, config=None):
             'method': 'near_baseline_service_alley_projective_pattern',
             'metric_accuracy_validated': False, 'metric_coordinates_available': False,
             'reason_codes': ['PRIMARY_COURT_PATTERN_NOT_FOUND']}
+    if config is not None and not isinstance(config, dict):
+        return {**base, 'reason_codes': ['PRIMARY_COURT_RULES_UNSUPPORTED']}
+    game = (config or {}).get('game', 'doubles')
+    if game not in ('singles', 'doubles'):
+        return {**base, 'reason_codes': ['PRIMARY_COURT_RULES_UNSUPPORTED']}
+    base.update(game=game, rules={'game': game, 'phase': 'rally'})
     if not frames or not isinstance(calibration, dict):
         return base
     first = np.asarray(frames[0])
@@ -275,13 +283,23 @@ def select_primary_court(frames, calibration, config=None):
     boundary_models = [('left', [[0, 0], [0, _NEAR_HALF]]),
                        ('right', [[_WIDTH, 0], [_WIDTH, _NEAR_HALF]]),
                        ('near', [[0, 0], [_WIDTH, 0]])]
-    refined = {}
+    physical_refined = {}
     for role, endpoints in boundary_models:
         line = _refine_tape(_project(endpoints, inverse), signal, unit)
         if line is None:
             return {**base, 'status': 'review', 'confidence': round(best['score'], 6),
                     'reason_codes': ['PRIMARY_COURT_OUTER_TAPE_SUPPORT_INSUFFICIENT']}
-        refined[role] = line
+        physical_refined[role] = line
+    refined = dict(physical_refined)
+    if game == 'singles':
+        # The regulation pattern locates the same physical court, but only
+        # directly measured inner tape can become a singles OUT boundary.
+        for role, x in (('left', _ALLEY), ('right', _WIDTH-_ALLEY)):
+            line = _refine_tape(_project([[x, 0], [x, _NEAR_HALF]], inverse), signal, unit)
+            if line is None:
+                return {**base, 'status': 'review', 'confidence': round(best['score'], 6),
+                        'reason_codes': ['PRIMARY_COURT_SINGLES_TAPE_SUPPORT_INSUFFICIENT']}
+            refined[role] = line
     left_corner = _intersection(refined['left'], refined['near'])
     right_corner = _intersection(refined['right'], refined['near'])
     # Close the safe IN region at the near short-service line, not at an
@@ -293,6 +311,15 @@ def select_primary_court(frames, calibration, config=None):
         return base
     polygon = np.asarray([left_corner, right_corner, right_top, left_top], np.float32)
     if not _inside_frame(polygon, width, height) or not cv2.isContourConvex(polygon):
+        return base
+    physical_points = [_intersection(physical_refined[first], physical_refined[second])
+                       for first, second in (('left', 'near'), ('right', 'near'))]
+    physical_points.extend(_intersection(physical_refined[role], closing) for role in ('right', 'left'))
+    if any(point is None for point in physical_points):
+        return base
+    physical_polygon = np.asarray(physical_points, np.float32)
+    if (not _inside_frame(physical_polygon, width, height)
+            or not cv2.isContourConvex(physical_polygon)):
         return base
     inside_point = polygon.mean(axis=0).tolist()
     boundaries = []
@@ -309,18 +336,25 @@ def select_primary_court(frames, calibration, config=None):
     # the supported near region and included only when measured tape supports
     # them; unrelated raw segments never appear in this list.
     segments = [boundary['segment_px'] for boundary in boundaries]
-    for x in (_ALLEY, _WIDTH-_ALLEY, _WIDTH/2):
+    internal_x = (_ALLEY, _WIDTH-_ALLEY, _WIDTH/2) if game == 'doubles' else (_WIDTH/2,)
+    for x in internal_x:
         ends = _project([[x, 0], [x, _SHORT_SERVICE]], inverse)
         if (line := _refine_tape(ends, signal, unit)) is not None:
             segments.append(line['segment'].reshape(-1).tolist())
-    service = _refine_tape(_project([[0, _LONG_SERVICE], [_WIDTH, _LONG_SERVICE]], inverse), signal, unit)
-    if service is not None:
-        segments.append(service['segment'].reshape(-1).tolist())
-    scope = _scope_polygon(polygon, width, height, max(12, 24*unit))
+    if game == 'doubles':
+        service = _refine_tape(_project([[0, _LONG_SERVICE], [_WIDTH, _LONG_SERVICE]], inverse), signal, unit)
+        if service is not None:
+            segments.append(service['segment'].reshape(-1).tolist())
+    # Singles alleys are outside the active court but remain observable floor
+    # on this same physical court. Preserve their scope so they can be OUT,
+    # rather than disappearing behind a crop of the narrower singles polygon.
+    scope = _scope_polygon(physical_polygon, width, height, max(12, 24*unit))
     return {**base, 'status': 'selected', 'region_supported': True,
             'confidence': round(best['score'], 6), 'line_segments_px': segments,
             'boundary_segments_px': boundaries, 'near_corners_px': polygon[:2].tolist(),
             'polygon_px': polygon.tolist(), 'interior_polygon_px': polygon.tolist(),
+            'physical_court_polygon_px': physical_polygon.tolist(),
+            'physical_near_corners_px': physical_polygon[:2].tolist(),
             'judgment_scope_polygon_px': scope.tolist(),
             'interior_limit': 'near_short_service_line_not_an_out_boundary',
             'geometry_uncertainty_px': max(boundary['uncertainty_px'] for boundary in boundaries),
