@@ -1,0 +1,32 @@
+{
+  "scope": "Eight existing repository clips from four camera recording families in one gym. Diagnose visible painted-line recovery separately from full-court homography acceptance; not an independent venue benchmark.",
+  "baseline_module_sha256": "068c65e343b3fbd27dcb7ccfb5dc6dce8bdc874731def0e1ec962fd2d1cc83fd",
+  "final_module_sha256": "36f4687f86887fa2b104d309400065c4fc0e69f10f97783d906beb1ee8222dcc",
+  "manifest_sha256": "887f7047bad0c0c57b54ca61e7ecf3ce3d5d68a9240009b0363e1aa3d2aa5e72",
+  "baseline_summary": {
+    "video_count": 8,
+    "full_court_fits": 0,
+    "videos_with_detected_lines": 8,
+    "wholly_non_court_segments": 121,
+    "visible_line_sample_coverage": 0.958984375,
+    "non_court_detected_length_px": 42021.949,
+    "total_detected_length_px": 73237.636
+  },
+  "final_summary": {
+    "video_count": 8,
+    "full_court_fits": 0,
+    "videos_with_detected_lines": 8,
+    "wholly_non_court_segments": 75,
+    "non_court_detected_length_px": 7054.762,
+    "total_detected_length_px": 40742.665,
+    "visible_line_sample_coverage": 0.97421875
+  },
+  "non_court_detected_length_reduction_fraction": 0.83211721449748,
+  "line_coverage_regressions": [
+    {
+      "key": "case_01",
+      "before": 0.990625,
+      "after": 0.95
+    }
+  ]
+}

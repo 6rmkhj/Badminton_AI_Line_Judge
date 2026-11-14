@@ -24,6 +24,9 @@ const makeJob = (id, request) => {
     review_source: request.views[camera].review_region ? 'operator_region_guided_search' : 'automatic',
     automatic_decision: 'REVIEW', direct_decision: 'REVIEW', assisted_decision: 'REVIEW',
     rationale: 'Synthetic UI fixture only; no analysis was run.', evidence_urls: [], qualified: false,
+    calibration_summary: {line_detection_status: camera === 'A' ? 'detected' : 'not_detected',
+      detected_line_count: camera === 'A' ? 8 : 0, court_geometry_status: 'unconfirmed',
+      detail: camera === 'A' ? '직선 후보 8개를 찾았습니다. 전체 코트 좌표 보정은 확인되지 않았습니다.' : '직선 후보를 찾지 못했습니다.'},
   }]));
   return {job_id: id, status: 'completed', request, views,
     result: {decision: 'REVIEW', views, source_camera_ids: [], reasons: ['실제 접촉 미확정'],
@@ -77,6 +80,8 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('#region-tools-a').getAttribute('open'), null);
     const automatic = await submit();
     assert.deepEqual(automatic.views, {A: {video_id: 'v_a'}, B: {video_id: 'v_b'}});
+    assert.match(await page.locator('#result-view-a .court-calibration').innerText(), /직선 후보 8개 탐지 · 전체 코트 보정 미확인/);
+    assert.match(await page.locator('#result-view-b .court-calibration').innerText(), /직선 후보 미탐지 · 전체 코트 보정 미확인/);
     await page.locator('#edit-regions').click();
     // Portrait overlay must exclude horizontal letterboxing.
     const portrait = await page.locator('#region-layer-b').boundingBox();

@@ -264,15 +264,18 @@ def test_new_sources_run_both_views_and_keep_automatic_review(pair_fixture,monke
         (output/'evidence').mkdir()
         (output/'evidence/trajectory-context.jpg').write_bytes(b'context-image')
         (output/'evidence/annotated.mp4').write_bytes(b'candidate-replay')
+        (output/'evidence/calibration.jpg').write_bytes(b'line-diagnostic')
         calls.append(source)
         return {'source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),
                 'decision':{'decision':'REVIEW','reason_codes':['NO_CONTACT'],'contact_time_seconds':.1},
                 'assessment':{'schema_version':1,'line_verdict':'REVIEW','changes_decision':False,'stages':[]},
+                'calibration':{'status':'review','line_segments_px':[[10,20,100,20]],'reason_codes':['PARTIAL_COURT_VISIBLE']},
                 'analysis':{'width':960,'height':540,'frame_count':3},
                 'selected_landing':{'candidate_px':[361,444],'frame_index':1,'time':.1,'contact_observed':False,
                     'image_motion_event':{'kind':'descent_and_rebound','inference_only':True,
                         'frame_interval':[0,2],'time_interval':[0,.2]}},
                 'artifacts':{'preview':'preview.mp4','evidence':[{'trajectory_context':'evidence/trajectory-context.jpg'}],
+                    'calibration_overlay':'evidence/calibration.jpg',
                     'annotated_clip':{'path':'evidence/annotated.mp4','source_time_origin':.05,
                         'source_start_frame':1,'source_end_frame':2,'frame_count':2}},
                 'timings':{'total_seconds':.1}}
@@ -297,6 +300,9 @@ def test_new_sources_run_both_views_and_keep_automatic_review(pair_fixture,monke
         assert view['trajectory_replay_url'].endswith('/evidence/annotated.mp4')
         assert view['trajectory_replay_info']['source_time_origin']==.05
         assert view['preview_url'] != view['trajectory_replay_url']
+        assert view['calibration_summary']['detected_line_count'] == 1
+        assert view['calibration_summary']['court_geometry_status'] == 'unconfirmed'
+        assert view['calibration_preview_url'].endswith('/evidence/calibration.jpg')
 
 
 def test_duplicate_hash_upload_does_not_choose_arbitrary_review_identity(pair_fixture,monkeypatch):

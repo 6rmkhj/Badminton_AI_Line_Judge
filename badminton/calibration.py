@@ -220,24 +220,82 @@ def court_template_lines():
     return [[list(a), list(b)] for a, b in TEMPLATE_LINES_M]
 
 
-def segment_lines(background: np.ndarray, roi_polygon=None):
-    """Return a uint8 mask of blue tape, or white tape when blue is absent."""
+def _clean_line_mask(mask):
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+    count, labels, stats, _ = cv2.connectedComponentsWithStats(mask)
+    keep = np.zeros(count, np.uint8)
+    minimum_area = max(8, round(min(mask.shape) * .02))
+    keep[1:] = (stats[1:, cv2.CC_STAT_AREA] >= minimum_area) * 255
+    return keep[labels]
+
+
+def _line_masks(background, roi_polygon=None):
+    """Separate narrow paint ridges from broad floors, clothing and shadows.
+
+    Local contrast, rather than absolute exposure, detects white tape. Colour
+    excess detects blue/yellow paint even when it is darker than a wooden floor.
+    Opening removes broad areas of the same colour before Hough voting. No
+    colour wins merely because it occupies more of the image.
+    """
     hsv = cv2.cvtColor(background, cv2.COLOR_BGR2HSV)
-    blue = cv2.inRange(hsv, np.array([85, 65, 35]), np.array([140, 255, 255]))
-    white = cv2.inRange(hsv, np.array([0, 0, 165]), np.array([179, 65, 255]))
+    b, g, r = cv2.split(background.astype(np.float32))
+    # Cyan paint has B == G, so blue excess alone is zero. Limit the shared
+    # blue/green response to the cyan hue band; green walls must not contribute
+    # through the broad B - (G + R)/2 response used by the old detector.
+    cyan = np.where((hsv[:, :, 0] >= 89) & (hsv[:, :, 0] <= 95),
+                    np.maximum(0, np.minimum(b, g) - r), 0)
+    signals = {
+        "white": (np.minimum(np.minimum(b, g), r), hsv[:, :, 1] <= 105),
+        "blue": (np.maximum(cyan, np.maximum(0, b - np.maximum(g, r))),
+                 (hsv[:, :, 0] >= 85) & (hsv[:, :, 0] <= 140) & (hsv[:, :, 1] >= 45)),
+        "yellow": (np.maximum(0, np.minimum(r, g) - b),
+                   (hsv[:, :, 0] >= 15) & (hsv[:, :, 0] <= 40) & (hsv[:, :, 1] >= 55)),
+    }
+    radius = max(5, round(min(background.shape[:2]) * .025))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (radius * 2 + 1, radius * 2 + 1))
+    roi = np.ones(background.shape[:2], np.uint8)
     if roi_polygon is not None:
-        roi = np.zeros(background.shape[:2], np.uint8)
-        cv2.fillPoly(roi, [np.asarray(roi_polygon, np.int32)], 255)
-        blue = cv2.bitwise_and(blue, roi)
-        white = cv2.bitwise_and(white, roi)
-    chosen, colour = (blue, "blue") if np.count_nonzero(blue) > background.shape[0] * background.shape[1] * .0015 else (white, "white")
-    chosen = cv2.morphologyEx(chosen, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
-    count, labels, stats, _ = cv2.connectedComponentsWithStats(chosen)
-    clean = np.zeros_like(chosen)
-    for component in range(1, count):
-        if stats[component, cv2.CC_STAT_AREA] >= 20:
-            clean[labels == component] = 255
-    return clean, colour
+        roi[:] = 0
+        cv2.fillPoly(roi, [np.rint(roi_polygon).astype(np.int32)], 1)
+    masks = []
+    for colour, (signal, eligible) in signals.items():
+        ridge = cv2.morphologyEx(signal, cv2.MORPH_TOPHAT, kernel)
+        # A relative requirement avoids accepting tiny compression ripples on a
+        # bright floor, while still finding dim tape in the shadows.
+        threshold = np.maximum(5.0, signal * .045)
+        for multiplier in (1, 1.5, 2.25, 3.375, 5.0625, 7.59375):
+            mask = ((ridge >= threshold * multiplier) & eligible & (roi != 0)).astype(np.uint8) * 255
+            mask = cv2.bitwise_and(_clean_line_mask(mask), roi * 255)
+            # Fine wooden grain can fill most of a white mask after closing.
+            # Adapt contrast until the response is sparse paint evidence; a
+            # dense floor texture must not certify arbitrary template lines.
+            if np.count_nonzero(mask) <= mask.size * .20:
+                break
+        if np.count_nonzero(mask) > mask.size * .20:
+            mask[:] = 0
+        masks.append((colour, mask))
+    return masks
+
+
+def segment_lines(background: np.ndarray, roi_polygon=None):
+    """Return all locally supported paint colours; geometry selects the court."""
+    masks = [(name, mask) for name, mask in _line_masks(background, roi_polygon) if np.any(mask)]
+    if not masks:
+        return np.zeros(background.shape[:2], np.uint8), "none"
+    return np.bitwise_or.reduce([mask for _, mask in masks]), "+".join(name for name, _ in masks)
+
+
+def _temporal_line_masks(frames, background, roi):
+    masks = _line_masks(background, roi)
+    if len(frames) < 3:
+        return masks
+    votes = [np.zeros(background.shape[:2], np.uint16) for _ in masks]
+    for frame in frames:
+        for vote, (_, mask) in zip(votes, _line_masks(frame, roi)):
+            vote += mask != 0
+    minimum = max(2, math.ceil(len(frames) * .4))
+    return [(name, _clean_line_mask(cv2.bitwise_or(mask, (vote >= minimum).astype(np.uint8) * 255)))
+            for (name, mask), vote in zip(masks, votes)]
 
 
 def _line(segment):
@@ -258,23 +316,77 @@ def _angle_distance(a, b):
     return min(distance, np.pi-distance)
 
 
+def _centre_line(candidate, mask):
+    """Fit tape centres from perpendicular runs, rather than one Hough edge."""
+    height, width = mask.shape
+    start, end = np.asarray(candidate["segment"]).reshape(2, 2)
+    direction = (end - start) / candidate["length"]
+    normal = np.array([-direction[1], direction[0]])
+    radius = max(6, round(min(height, width) * .03))
+    offsets = np.arange(-radius, radius + 1)
+    stations = np.linspace(start, end, min(80, max(16, round(candidate["length"] / 6))))
+    coordinates = np.rint(stations[:, None, :] + offsets[None, :, None] * normal).astype(int)
+    valid = ((coordinates[:, :, 0] >= 0) & (coordinates[:, :, 0] < width)
+             & (coordinates[:, :, 1] >= 0) & (coordinates[:, :, 1] < height))
+    samples = mask[coordinates[:, :, 1].clip(0, height - 1), coordinates[:, :, 0].clip(0, width - 1)] != 0
+    samples &= valid
+    centres, widths = [], []
+    for station, row in zip(stations, samples):
+        occupied = np.flatnonzero(row)
+        if not len(occupied):
+            continue
+        nearest = occupied[np.argmin(np.abs(occupied - radius))]
+        if abs(nearest - radius) > 3:
+            continue
+        left = right = int(nearest)
+        while left > 0 and row[left - 1]:
+            left -= 1
+        while right < len(row) - 1 and row[right + 1]:
+            right += 1
+        if left == 0 or right == len(row) - 1:
+            continue  # Broad object or crossing: both tape edges are required.
+        centres.append(station + ((left + right) / 2 - radius) * normal)
+        widths.append(right - left + 1)
+    if len(centres) < max(8, len(stations) * .35):
+        return None
+    points = np.asarray(centres, np.float32)
+    vx, vy, x, y = cv2.fitLine(points, cv2.DIST_HUBER, 0, .01, .01).reshape(-1)
+    axis, origin = np.array([vx, vy]), np.array([x, y])
+    positions = (points - origin) @ axis
+    refined = _line(np.concatenate((origin + positions.min() * axis, origin + positions.max() * axis)))
+    if refined is None:
+        return None
+    residual = np.abs((points - origin) @ np.array([-vy, vx]))
+    refined.update(width_px=float(np.median(widths)), observed_fraction=len(centres) / len(stations),
+                   centre_residual_px=float(np.median(residual)))
+    return refined
+
+
 def _merged_lines(mask):
     height, width = mask.shape
-    raw = cv2.HoughLinesP(mask, 1, np.pi/360, max(35, int(width*.055)),
-                          minLineLength=max(40, int(width*.10)), maxLineGap=max(8, int(width*.025)))
+    unit = min(height, width)
+    raw = cv2.HoughLinesP(mask, 1, np.pi/720, max(20, int(unit*.05)),
+                          minLineLength=max(25, int(unit*.075)), maxLineGap=max(8, int(unit*.035)))
     if raw is None:
         return []
     candidates = [_line(segment) for segment in raw[:, 0]]
     candidates = sorted((r for r in candidates if r), key=lambda r: r["length"], reverse=True)
     lines = []
-    for candidate in candidates:
+    for candidate in candidates[:240]:
+        candidate = _centre_line(candidate, mask)
+        if candidate is None:
+            continue
         midpoint = np.array([(candidate["segment"][0]+candidate["segment"][2])/2,
                              (candidate["segment"][1]+candidate["segment"][3])/2, 1])
-        if any(_angle_distance(candidate["angle"], old["angle"]) < np.deg2rad(2.5)
-               and abs(float(old["line"] @ midpoint)) < max(5, width*.006) for old in lines):
+        if any(_angle_distance(candidate["angle"], old["angle"]) < np.deg2rad(1.5)
+               and abs(float(old["line"] @ midpoint)) < max(2.5, unit*.004)
+               and abs(float(candidate["line"] @ np.array([
+                   (old["segment"][0]+old["segment"][2])/2,
+                   (old["segment"][1]+old["segment"][3])/2, 1]))) < max(2.5, unit*.004)
+               for old in lines):
             continue
         lines.append(candidate)
-        if len(lines) >= 32:
+        if len(lines) >= 48:
             break
     return lines
 
@@ -298,7 +410,7 @@ def _families(lines):
                 norm = np.linalg.norm(centre)
                 if norm:
                     centres[i] = centre/norm
-    groups = [[row for i, row in enumerate(lines) if assignment[i] == k][:12] for k in range(2)]
+    groups = [[row for i, row in enumerate(lines) if assignment[i] == k][:16] for k in range(2)]
     return groups
 
 
@@ -356,7 +468,14 @@ _TEMPLATE_SAMPLES = [np.linspace(a, b, 48, dtype=np.float32) for a, b in TEMPLAT
 _TEMPLATE_SAMPLES_ARRAY = np.concatenate(_TEMPLATE_SAMPLES)
 
 
-def _score(polygon, distance, mask):
+def _line_evidence(lines):
+    segments = np.asarray([line["segment"] for line in lines], float).reshape(-1, 2, 2)
+    vectors = segments[:, 1] - segments[:, 0]
+    lengths = np.linalg.norm(vectors, axis=1)
+    return segments[:, 0], vectors / np.maximum(lengths[:, None], 1e-9), lengths
+
+
+def _score(polygon, distance, mask, evidence):
     height, width = mask.shape
     homography = cv2.getPerspectiveTransform(polygon, COURT_CORNERS_M)
     inverse = cv2.getPerspectiveTransform(COURT_CORNERS_M, polygon)
@@ -367,6 +486,22 @@ def _score(polygon, distance, mask):
     coords[:, 1] = coords[:, 1].clip(0, height-1)
     errors = distance[coords[:, 1], coords[:, 0]]
     tolerance = max(2.5, width*.0035)
+    starts, axes, lengths = evidence
+    directed_errors = np.full((len(TEMPLATE_LINES_M), 48), tolerance * 4, float)
+    for index, samples in enumerate(projected.reshape(len(TEMPLATE_LINES_M), 48, 2)):
+        direction = samples[-1] - samples[0]
+        direction /= max(float(np.linalg.norm(direction)), 1e-9)
+        aligned = np.abs(axes @ direction) >= math.cos(math.radians(3))
+        if not aligned.any():
+            continue
+        # Near a textured floor almost every projected point can be close to
+        # *some* white pixel. Require a finite, measured line of the correct
+        # orientation too, so wood grain cannot support a different court grid.
+        delta = samples[:, None, :] - starts[aligned]
+        along = np.sum(delta * axes[aligned], axis=2)
+        nearest = starts[aligned] + np.clip(along, 0, lengths[aligned])[:, :, None] * axes[aligned]
+        directed_errors[index] = np.linalg.norm(samples[:, None, :] - nearest, axis=2).min(axis=1)
+    errors = np.maximum(errors, directed_errors.reshape(-1))
     supports = ((errors <= tolerance) & good).reshape(len(TEMPLATE_LINES_M), -1).mean(axis=1)
     visible = good.reshape(len(TEMPLATE_LINES_M), -1).mean(axis=1)
     interior = supports[4:]
@@ -382,6 +517,97 @@ def _iou(a, b):
     intersection, _ = cv2.intersectConvexConvex(np.asarray(a, np.float32), np.asarray(b, np.float32))
     union = abs(cv2.contourArea(a)) + abs(cv2.contourArea(b)) - intersection
     return intersection/union if union > 0 else 0.0
+
+
+def _same_plane(a, b, width, height):
+    # Nearby service/baseline substitutions can have >90% polygon IoU while
+    # assigning different metric coordinates. Compare corresponding corners.
+    return bool(np.max(np.linalg.norm(a - b, axis=1)) < max(4, min(width, height) * .015))
+
+
+def _full_template_support(fit):
+    return (fit["score"] >= .74 and fit["supported_line_count"] >= 9
+            and min(fit["line_support"][:4]) >= .60 and min(fit["line_support"][4:10]) >= .45)
+
+
+def _floor_context(background, roi=None):
+    """Estimate an optional surface prior from the foreground or target ROI.
+
+    This is a photographic heuristic, not a floor segmentation model. It is
+    used only when the full court template is unconfirmed, never to override
+    an otherwise supported court. A fragmented colour distribution disables it.
+    """
+    lab = cv2.cvtColor(background, cv2.COLOR_BGR2LAB).astype(np.float32)
+    height, width = background.shape[:2]
+    selector = np.zeros((height, width), np.uint8)
+    if roi is None:
+        selector[height // 2:] = 1
+    else:
+        cv2.fillPoly(selector, [np.rint(roi).astype(np.int32)], 1)
+    samples = lab[selector != 0][::8]
+    if len(samples) < 64:
+        return None, {"enabled": False, "reason": "insufficient_surface_samples"}
+    bins = (samples[:, 1:] // 8).astype(int)
+    histogram = np.zeros((32, 32), np.float32)
+    np.add.at(histogram, (bins[:, 0], bins[:, 1]), 1)
+    smooth = cv2.boxFilter(histogram, -1, (3, 3), normalize=False, borderType=cv2.BORDER_CONSTANT)
+    centre = np.array(np.unravel_index(smooth.argmax(), smooth.shape))
+    supported = (np.abs(bins - centre) <= 1).all(axis=1)
+    fraction = float(supported.mean())
+    if fraction < .45:
+        return None, {"enabled": False, "reason": "mixed_surface_colours", "sample_support": fraction}
+    modes = []
+    remaining = np.ones(len(samples), bool)
+    # A mat and its surrounding floor can both dominate the foreground. Keep
+    # substantial secondary colours so a partial mat does not lose its inside
+    # lines while only its outer boundary survives the surface check.
+    for index in range(3):
+        if index:
+            histogram[:] = 0
+            np.add.at(histogram, (bins[remaining, 0], bins[remaining, 1]), 1)
+            smooth = cv2.boxFilter(histogram, -1, (3, 3), normalize=False, borderType=cv2.BORDER_CONSTANT)
+            centre = np.array(np.unravel_index(smooth.argmax(), smooth.shape))
+            supported = (np.abs(bins - centre) <= 1).all(axis=1) & remaining
+            if float(supported.mean()) < .15:
+                break
+        chroma = np.median(samples[supported, 1:], axis=0)
+        minimum_light = max(0.0, float(np.quantile(samples[supported, 0], .1)) - 70)
+        modes.append({"chroma_ab": chroma.tolist(), "minimum_lightness": minimum_light,
+                      "sample_support": round(float(supported.mean()), 4)})
+        remaining[supported] = False
+    metadata = {"enabled": True, "sample_source": "target_roi" if roi is not None else "lower_image_half",
+                "sample_support": round(fraction, 4), "surface_modes": modes,
+                "scope": "partial_line_clutter_filter_only"}
+    return (lab, modes), metadata
+
+
+def _surface_lines(lines, context):
+    if context is None:
+        return lines
+    lab, modes = context
+    chromas = np.array([mode["chroma_ab"] for mode in modes])
+    minimum_lights = np.array([mode["minimum_lightness"] for mode in modes])
+    height, width = lab.shape[:2]
+    kept = []
+    for line in lines:
+        a, b = np.asarray(line["segment"]).reshape(2, 2)
+        direction = (b - a) / line["length"]
+        normal = np.array([-direction[1], direction[0]])
+        offset = max(6, line.get("width_px", 3) * 2)
+        stations = np.linspace(a, b, 32)
+        positions = np.rint(stations[:, None, :] + np.array([-offset, offset])[None, :, None] * normal).astype(int)
+        valid = ((positions[:, :, 0] >= 0) & (positions[:, :, 0] < width)
+                 & (positions[:, :, 1] >= 0) & (positions[:, :, 1] < height))
+        pixels = lab[positions[:, :, 1].clip(0, height - 1), positions[:, :, 0].clip(0, width - 1)]
+        matches = (((np.linalg.norm(pixels[:, :, None, 1:] - chromas, axis=3) <= 25)
+                    & (pixels[:, :, None, 0] >= minimum_lights)).any(axis=2) & valid)
+        # A boundary can legitimately separate two differently coloured floors.
+        if np.mean(matches.any(axis=1)) >= .5:
+            kept.append(line)
+    # Do not erase a partial court if the foreground colour assumption fails.
+    if not kept or sum(r["length"] for r in kept) < .25 * sum(r["length"] for r in lines):
+        return lines
+    return kept
 
 
 def _manual_reference(hint, width, height):
@@ -411,7 +637,7 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: 
     """
     cfg = dict(config or {})
     base = {"status": "failed", "homography": None, "polygon_px": None, "confidence": 0.0,
-            "reason_codes": [], "method": "colour_hough_court_template",
+            "reason_codes": [], "method": "adaptive_colour_hough_court_template",
             "manual_reference": False, "confidence_kind": "geometric support score, not a calibrated probability",
             "image_width": None, "image_height": None, "line_segments_px": [],
             "candidate_polygons_px": [], "line_fit_error_px": None,
@@ -420,15 +646,19 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: 
             "metric_accuracy_validated": False, "metric_coordinates_available": False,
             "homography_pixel_space": "raw_analysis_pixels", "line_fit_error_pixel_space": "raw_analysis_pixels",
             "judgment_region_px": None,
-            "supported_line_regions_px": [], "line_roles_confirmed": False}
+            "supported_line_regions_px": [], "line_roles_confirmed": False,
+            "line_detection_status": "not_detected", "detected_line_count": 0,
+            "segmentation_candidates": [], "partial_line_mode": False}
     if not frames:
         return {**base, "reason_codes": ["NO_VIDEO_FRAMES"]}
     first = np.asarray(frames[0])
-    if first.ndim != 3 or first.shape[2] != 3:
+    if first.ndim != 3 or first.shape[2] != 3 or not first.size:
         return {**base, "reason_codes": ["INVALID_VIDEO_FRAME_SHAPE"]}
     height, width = first.shape[:2]
     base.update(image_width=width, image_height=height)
-    selected = [np.asarray(frames[int(i)]) for i in np.linspace(0, len(frames)-1, min(5, len(frames)))]
+    selected_indices = np.unique(np.linspace(0, len(frames)-1, min(9, len(frames))).astype(int))
+    selected = [np.asarray(frames[i]) for i in selected_indices]
+    base["background_frame_indices"] = selected_indices.tolist()
     if any(f.shape != first.shape or f.dtype != np.uint8 for f in selected):
         return {**base, "reason_codes": ["INCONSISTENT_VIDEO_FRAME_FORMAT"]}
     try:
@@ -464,51 +694,100 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: 
     background = np.median(np.stack(selected), axis=0).astype(np.uint8)
     if cfg.get("line_model_path"):
         try:
-            mask, colour = _segment_model(background, cfg, roi), "learned_line_mask"
+            masks = [("learned_line_mask", _segment_model(background, cfg, roi))]
             base.update(method="onnx_line_segmentation_hough_court_template",
                         line_model_path=str(cfg["line_model_path"]), line_model_accuracy_validated=False)
         except (ValueError, TypeError, KeyError, OSError, cv2.error) as error:
             return {**base, "reason_codes": ["LINE_SEGMENTATION_MODEL_FAILED"], "model_error": str(error)[:500]}
     else:
-        mask, colour = segment_lines(background, roi)
-    lines = _merged_lines(mask)
+        masks = _temporal_line_masks(selected, background, roi)
+    if cfg.get("floor_context", not bool(cfg.get("line_model_path"))):
+        surface, surface_metadata = _floor_context(background, roi)
+    else:
+        surface, surface_metadata = None, {"enabled": False, "reason": "disabled"}
+    base["surface_context"] = surface_metadata
+    candidates, scored = [], []
+    for colour, mask in masks:
+        lines = _merged_lines(mask)
+        raw_line_count = len(lines)
+        proposals = _proposals(lines, width, height)
+        distance = cv2.distanceTransform(255-mask, cv2.DIST_L2, 3) if proposals else None
+        evidence = _line_evidence(lines)
+        fits = [_score(polygon, distance, mask, evidence) for polygon in proposals]
+        if not any(_full_template_support(fit) for fit in fits):
+            surface_lines = _surface_lines(lines, surface)
+            if len(surface_lines) != len(lines):
+                lines = surface_lines
+                proposals = _proposals(lines, width, height)
+                if proposals and distance is None:
+                    distance = cv2.distanceTransform(255-mask, cv2.DIST_L2, 3)
+                evidence = _line_evidence(lines)
+                fits = [_score(polygon, distance, mask, evidence) for polygon in proposals]
+        for fit in fits:
+            fit["colour"] = colour
+        scored.extend(fits)
+        support_score = max((f["score"] for f in fits), default=0)
+        # A long Hough segment through sparse wood grain is not a long painted
+        # line: rank the actually observed length and straight centre fit.
+        strength = sum((r["length"] * r.get("observed_fraction", 1)
+                        / (1 + r.get("centre_residual_px", 0))) ** 2 for r in lines)
+        candidates.append({"colour": colour, "mask": mask, "lines": lines,
+                           "detection_strength": strength * (1 + 3 * support_score)})
+        base["segmentation_candidates"].append({
+            "colour": colour, "mask_pixel_count": int(np.count_nonzero(mask)),
+            "detected_line_count": len(lines), "proposal_count": len(proposals),
+            "raw_detected_line_count": raw_line_count, "surface_rejected_line_count": raw_line_count - len(lines),
+            "observed_line_strength": round(strength, 3),
+            "best_support_score": round(max((f["score"] for f in fits), default=0), 6)})
+    scored.sort(key=lambda row: row["score"], reverse=True)
+    # A weak rectangle in another colour (e.g. a white sign) must not hide
+    # strong partial blue court lines merely because it generated a homography.
+    plausible_full_fit = scored and _full_template_support(scored[0])
+    selected_candidate = (next(c for c in candidates if c["colour"] == scored[0]["colour"])
+                          if plausible_full_fit else max(candidates, key=lambda c: c["detection_strength"]))
+    colour, mask, lines = (selected_candidate[k] for k in ("colour", "mask", "lines"))
     raw_segments = [_raw_points(np.asarray(r["segment"]).reshape(2, 2), lens).reshape(-1).tolist() for r in lines]
     regions = []
     for segment in raw_segments:
         a, b = np.asarray(segment).reshape(2, 2)
         direction = b-a
         normal = np.array([-direction[1], direction[0]]) / max(np.linalg.norm(direction), 1e-9)
-        polygon = np.array([a+normal*3, b+normal*3, b-normal*3, a-normal*3])
+        half_width = max(2, lines[len(regions)].get("width_px", 6) / 2)
+        polygon = np.array([a+normal*half_width, b+normal*half_width, b-normal*half_width, a-normal*half_width])
         polygon[:, 0] = polygon[:, 0].clip(0, width-1)
         polygon[:, 1] = polygon[:, 1].clip(0, height-1)
         regions.append({"polygon_px": polygon.tolist(), "line_segment_px": segment,
-                        "court_line_role": None, "metric_coordinates_available": False})
+                        "court_line_role": None, "metric_coordinates_available": False,
+                        "width_px": round(half_width * 2, 2)})
     base.update(line_segments_px=raw_segments, line_colour=colour,
                 supported_line_regions_px=regions,
-                background_frame_count=len(selected), mask_pixel_count=int(np.count_nonzero(mask)))
+                background_frame_count=len(selected), mask_pixel_count=int(np.count_nonzero(mask)),
+                detected_line_count=len(lines), line_detection_status="detected" if lines else "not_detected")
     if len(lines) < 4:
         return {**base, "reason_codes": ["INSUFFICIENT_COURT_LINES"],
                 "partial_line_mode": bool(lines)}
-    proposals = _proposals(lines, width, height)
-    if not proposals:
+    if not scored:
         return {**base, "status": "review", "reason_codes": ["PARTIAL_LINES_NO_UNIQUE_COURT_PLANE"],
                 "partial_line_mode": True}
-    distance = cv2.distanceTransform(255-mask, cv2.DIST_L2, 3)
-    scored = sorted((_score(polygon, distance, mask) for polygon in proposals), key=lambda r: r["score"], reverse=True)
     distinct = []
     for candidate in scored:
-        if not any(_iou(candidate["polygon"], existing["polygon"]) > .90 for existing in distinct):
+        if not any(_same_plane(candidate["polygon"], existing["polygon"], width, height) for existing in distinct):
             distinct.append(candidate)
         if len(distinct) == 6:
             break
     best = scored[0]
-    runner_up = next((r for r in distinct if _iou(r["polygon"], best["polygon"]) < .75), None)
+    runner_up = next((r for r in distinct if not _same_plane(r["polygon"], best["polygon"], width, height)), None)
     margin = best["score"] - runner_up["score"] if runner_up else best["score"]
     corners_inside = bool((best["polygon"][:, 0] >= 2).all() and (best["polygon"][:, 0] < width-2).all()
                           and (best["polygon"][:, 1] >= 2).all() and (best["polygon"][:, 1] < height-2).all())
     reasons = []
     if best["score"] < .74 or best["supported_line_count"] < 9 or min(best["line_support"][:4]) < .60:
         reasons.append("COURT_TEMPLATE_SUPPORT_INSUFFICIENT")
+    # Both ends need evidence of the narrow baseline/service spacing as well as
+    # the short-service lines. Otherwise a cropped court can shift by 0.76 m and
+    # still score 10/12 lines, despite having the wrong baseline identity.
+    if min(best["line_support"][4:10]) < .45:
+        reasons.append("COURT_LINE_ROLES_UNCONFIRMED")
     if not corners_inside or best["visible_fraction"] < .97:
         reasons.append("PARTIAL_COURT_VISIBLE")
     if runner_up and margin < .08:
@@ -518,6 +797,7 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: 
     # passed to downstream evidence gates, not official judging accuracy.
     raw_polygon = _raw_points(best["polygon"], lens).tolist()
     base.update(status="review" if reasons else "ok", homography=best["homography"].tolist(),
+                fit_line_colour=best["colour"],
                 polygon_px=raw_polygon, polygon_homography_space_px=best["polygon"].tolist(),
                 confidence=round(best["score"], 6),
                 reason_codes=reasons or ["FULL_COURT_TEMPLATE_SUPPORTED"],

@@ -67,11 +67,9 @@ def aggregate_decision(decisions):
 
 
 def _draw_frame(frame, calibration, tracks, frame_index, landing=None):
-    from .evidence import draw_observed_trail
+    from .evidence import draw_court_lines, draw_observed_trail
     canvas = frame.copy()
-    polygon = calibration.get('polygon_px')
-    if polygon and calibration.get('status') == 'ok':
-        cv2.polylines(canvas, [np.asarray(polygon, dtype=np.int32)], True, (0, 210, 240), 2)
+    draw_court_lines(canvas, calibration)
     for track in tracks:
         if landing and str(track['track_id']) != str(landing.get('track_id')):
             continue
@@ -250,6 +248,8 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     artifacts = {'preview': 'preview.mp4', 'detections': 'detections.json', 'evidence': []}
     evidence_dir = output / 'evidence'
     evidence_dir.mkdir(exist_ok=True)
+    from .evidence import write_calibration_overlay
+    artifacts['calibration_overlay'] = write_calibration_overlay(calibration_frames, calibration, output)
     trajectory_context = None
     if selected and selected.get('image_motion_event'):
         from .evidence import write_trajectory_context

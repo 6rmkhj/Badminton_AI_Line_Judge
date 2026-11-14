@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "scope": "Lossless temporal median frames from existing repository videos. Fixed approximate AI line references are assertion-only regression data; they are never calibration inputs. This is not an independent venue or metric-accuracy benchmark.",
+  "derivation": "Per-channel np.median over all nine frozen BGR uint8 analysis frames, then uint8 and lossless PNG.",
+  "cases": [
+    {
+      "key": "case_04",
+      "source_path": "video/b-3시점(uhd30 4k30).mp4",
+      "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+      "source_sha256": "1469100923fd649976a9ebb3ffff518018c7a6ad660f036fd35d007443ae54c5",
+      "source_size": [
+        3840,
+        2160
+      ],
+      "frame_indices": [
+        0,
+        12,
+        24,
+        36,
+        48,
+        60,
+        72,
+        84,
+        97
+      ],
+      "analysis_size": [
+        960,
+        540
+      ],
+      "frames_sha256": "4f0849639263f0011f8ea27fb4a85199971cabada87aa46f122be06ebe2bcd26",
+      "visible_line_references_px": [
+        [
+          [
+            201,
+            303
+          ],
+          [
+            486,
+            511
+          ]
+        ],
+        [
+          [
+            486,
+            511
+          ],
+          [
+            756,
+            317
+          ]
+        ],
+        [
+          [
+            201,
+            283
+          ],
+          [
+            538,
+            473
+          ]
+        ],
+        [
+          [
+            404,
+            450
+          ],
+          [
+            705,
+            313
+          ]
+        ],
+        [
+          [
+            419,
+            298
+          ],
+          [
+            683,
+            366
+          ]
+        ]
+      ],
+      "image": "case_04.png",
+      "image_sha256": "967e6183a78224fdd51bf801cf967668e17e12b6ac65a73ad283563b525e6f58"
+    },
+    {
+      "key": "case_08",
+      "source_path": "video/b시점 7.mp4",
+      "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+      "source_sha256": "27050156feb5987b60dbe4e0d42eb0f59e61b5679c95f6efd2d39901a9208d1c",
+      "source_size": [
+        3840,
+        2160
+      ],
+      "frame_indices": [
+        0,
+        22,
+        44,
+        67,
+        89,
+        111,
+        134,
+        156,
+        179
+      ],
+      "analysis_size": [
+        960,
+        540
+      ],
+      "frames_sha256": "2e8f59e3a395c0b57533ff4e94f036d5b275d46b17b55c17959ef51d55a947b3",
+      "visible_line_references_px": [
+        [
+          [
+            173,
+            310
+          ],
+          [
+            436,
+            525
+          ]
+        ],
+        [
+          [
+            436,
+            525
+          ],
+          [
+            811,
+            322
+          ]
+        ],
+        [
+          [
+            172,
+            284
+          ],
+          [
+            503,
+            488
+          ]
+        ],
+        [
+          [
+            363,
+            462
+          ],
+          [
+            747,
+            318
+          ]
+        ],
+        [
+          [
+            408,
+            302
+          ],
+          [
+            705,
+            379
+          ]
+        ]
+      ],
+      "image": "case_08.png",
+      "image_sha256": "48dd2524aaf8b4a55af5dd58a04ef4f3af4a07bd8846804d081ddde008d3aec0"
+    }
+  ]
+}

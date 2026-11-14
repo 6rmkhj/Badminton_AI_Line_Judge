@@ -8,9 +8,11 @@
 
 **A/B 영상을 함께 입력하고 하나의 결과 받기:** `start-pair-windows.bat` 또는 `python3 start.py --pair`를 실행합니다. A와 B에 기존 영상을 선택하거나 새 영상 파일을 각각 올리고 `A/B 연결 분석`을 누릅니다. [A/B 통합 판정 안내](docs/PAIR_WORKSPACE.md)에 연결 기준과 실행 범위를 설명합니다. 기존 검수 화면에서도 `A/B 통합 판정`으로 이동할 수 있습니다.
 
+0.5.8에서는 **저조도·흰색·파란색·노란색 코트선 탐지, 선 중심 정합, 벽·천장 오탐 제거**를 개선했습니다. 전체 코트가 보이지 않아도 탐지한 선과 진단 이미지를 A/B 결과에 표시하고, 전체 좌표 보정 여부를 따로 안내합니다. 부분 코트의 서비스라인을 베이스라인으로 잘못 승인하는 경우도 막았습니다. [실제 영상 비교·테스트·남은 한계](docs/CALIBRATION_REPORT.md)를 확인하세요. 새 버전 적용 후 **기존 검수 재사용을 끄고 새 분석**을 실행해야 합니다.
+
 0.5.7에서는 **첫 반동의 순서 확인·원본 관측 복구·외형 및 가림 검증**을 추가했습니다. 같은 관측 경로를 공유하는 후속 반동을 첫 낙하와 구분하고, 끊긴 궤적 주변의 원본 픽셀을 다시 확인합니다. 작은 배경 조각으로 바뀐 연결은 비행 우선순위를 낮춥니다. 고정된 AI 근사 참조와의 첫 낙하 부근 일치는 **7/17 → 9/17**, 별도 대조 영상 **2/2 유지**였으며 기존 성공 사례의 회귀는 없었습니다. 설정 확정 후 별도 검증에서는 **0/1 → 0/1**로 새 영상에 대한 개선은 확인되지 않았습니다. 이는 독립적으로 확인한 코르크 접촉 또는 IN/OUT 정확도가 아니며, 공식 판정은 개발·대조 34개와 별도 검증 4개 모두 `REVIEW`였습니다. 화면에는 착지 후보 위치·최초 접촉·대상 식별·코트 보정·사건 선택·라인 경계 조건을 따로 표시합니다. [설계·반복 실험·검증 범위](docs/LANDING_ENGINE.md)를 확인하세요.
 
-**[Windows 64비트 실행 패키지 0.5.7 다운로드](https://github.com/6rmkhj/Badminton_AI_Line_Judge/archive/refs/heads/downloads/windows-portable-0.5.7.zip)**: 새 폴더에 모두 압축 해제하고 `START.bat`을 실행하세요. Python·기본 분석 의존성·FFmpeg를 포함합니다. NVIDIA GPU를 사용하려면 서버를 종료하고 `SETUP_GPU.bat`으로 GPU 실행 환경을 준비한 뒤 다시 실행하세요. GPU 준비에는 인터넷과 호환 드라이버가 필요합니다. [패키지 사용법과 검증 범위](docs/WINDOWS_PACKAGE.md)를 확인하세요.
+**[Windows 64비트 실행 패키지 0.5.8 다운로드](https://github.com/6rmkhj/Badminton_AI_Line_Judge/archive/refs/heads/downloads/windows-portable-0.5.8.zip)**: 새 폴더에 모두 압축 해제하고 `START.bat`을 실행하세요. Python·기본 분석 의존성·FFmpeg를 포함합니다. NVIDIA GPU를 사용하려면 서버를 종료하고 `SETUP_GPU.bat`으로 GPU 실행 환경을 준비한 뒤 다시 실행하세요. GPU 준비에는 인터넷과 호환 드라이버가 필요합니다. [패키지 사용법과 검증 범위](docs/WINDOWS_PACKAGE.md)를 확인하세요.
 
 0.5.5에서는 **분석 전 장치 설정 창**과 **입력 영상 정보**를 추가했습니다. `python start.py --pair` 또는 기존 A/B 실행기를 열면 서버 컴퓨터의 OS·CPU·메모리·GPU를 확인하고, 시점당 OpenCV/영상 처리 스레드, A/B 순차·동시 처리, 전체 프레임 버퍼 예산(MiB)을 정합니다. 설정을 확인하기 전에는 분석 API도 실행을 차단하며, 대기·진행 중에는 설정을 바꿀 수 없습니다. 같은 환경의 설정은 실행 폴더에 저장되지만 서버 재시작마다 다시 확인합니다.
 
@@ -50,7 +52,7 @@ python3 scripts/setup_gpu.py --backend mps
 
 Windows에서는 `setup-gpu-windows.bat`를 실행해도 됩니다. ONNX용 설치는 `setup-gpu-windows.bat --onnx`입니다. `--dry-run`을 붙이면 실제 명령만 확인하고, `--check-only`를 붙이면 설치 없이 기존 환경의 GPU 연산을 확인합니다. 설치기는 모델 파일을 내려받지 않으며, `onnxruntime`과 `onnxruntime-gpu`의 충돌은 프로젝트 가상환경 안에서 정리합니다. 다른 프로그램의 Python 환경은 변경하지 않습니다.
 
-설치가 완료되면 기존 `start-pair-windows.bat` 또는 `python start.py --pair`를 실행합니다. 실행기는 준비된 `.venv`를 우선 사용합니다. 설정 창에는 실제 연산 확인을 통과한 GPU만 선택 가능하게 표시합니다. GPU 메모리 부족·드라이버 오류 시 CPU로 자동 대체하지 않고 실패 원인을 표시하므로, 문제를 해결하거나 장치 설정을 CPU로 바꿔 다시 실행하세요. AMD/Intel GPU용 설치기는 제공하지 않습니다. 0.5.7 Windows 패키지는 상단 링크에서 받고, 패키지 루트의 `SETUP_GPU.bat`를 사용하세요.
+설치가 완료되면 기존 `start-pair-windows.bat` 또는 `python start.py --pair`를 실행합니다. 실행기는 준비된 `.venv`를 우선 사용합니다. 설정 창에는 실제 연산 확인을 통과한 GPU만 선택 가능하게 표시합니다. GPU 메모리 부족·드라이버 오류 시 CPU로 자동 대체하지 않고 실패 원인을 표시하므로, 문제를 해결하거나 장치 설정을 CPU로 바꿔 다시 실행하세요. AMD/Intel GPU용 설치기는 제공하지 않습니다. 0.5.8 Windows 패키지는 상단 링크에서 받고, 패키지 루트의 `SETUP_GPU.bat`를 사용하세요.
 
 기존 모델을 사용하려면 `configs/poc.json`의 `detector.scorer_path`, `events.contact_model_path` 또는 `events.source_contact_model_path`에 호환되는 PyTorch 체크포인트를 지정합니다. ONNX는 `detector.backend: "onnx"`, `detector.model_path`와 해당 모델의 `onnx_format`, `shuttle_class_id`를 명시합니다. 모델의 학습 전처리·입력 크기·검증 기준은 그대로 적용되며, GPU 선택만으로 미검증 모델이 판정 근거로 승격되지 않습니다.
 

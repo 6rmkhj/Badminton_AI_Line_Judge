@@ -13,6 +13,60 @@ import numpy as np
 from .media import probe, repair_preview_tail, _FrameProgress, _run_ffmpeg_progress
 
 
+def draw_court_lines(canvas, calibration, *, reference=False):
+    """Show measured line candidates even when no court plane is accepted.
+
+    Candidate segments remain image evidence, never an inferred full boundary.
+    A moved camera invalidates fixed overlays on replay frames; the dedicated
+    calibration reference image can still show the original detection.
+    """
+    stability = calibration.get('camera_stability') or {}
+    if not reference and 'CAMERA_MOVED_FROM_CALIBRATION_REFERENCE' in stability.get('reason_codes', []):
+        return canvas
+    segments = calibration.get('line_segments_px') or [
+        region.get('line_segment_px') for region in calibration.get('supported_line_regions_px', [])
+        if isinstance(region, dict)]
+    height, width = canvas.shape[:2]
+    for segment in segments:
+        try:
+            points = np.asarray(segment, dtype=float).reshape(2, 2)
+        except (TypeError, ValueError):
+            continue
+        if not np.isfinite(points).all():
+            continue
+        # Clip before integer conversion, including old/imported diagnostics.
+        points = np.rint(np.clip(points, [-width, -height], [2 * width, 2 * height])).astype(int)
+        visible, start, end = cv2.clipLine((0, 0, width, height), tuple(points[0]), tuple(points[1]))
+        if visible:
+            cv2.line(canvas, start, end, (255, 210, 40), 1, cv2.LINE_AA)
+    polygon = calibration.get('polygon_px')
+    if polygon and calibration.get('status') == 'ok':
+        cv2.polylines(canvas, [np.rint(polygon).astype(np.int32)], True, (0, 210, 240), 2, cv2.LINE_AA)
+    return canvas
+
+
+def write_calibration_overlay(frames, calibration, output_dir):
+    """Save the sampled background and observed lines without landing markers."""
+    count = min(len(frames), max(1, int(calibration.get('background_frame_count', 5))))
+    indices = calibration.get('background_frame_indices')
+    if not (isinstance(indices, list) and indices and all(
+            isinstance(i, int) and not isinstance(i, bool) and 0 <= i < len(frames) for i in indices)):
+        indices = np.linspace(0, len(frames) - 1, count).astype(int).tolist()
+    canvas = np.median(np.stack([frames[i] for i in indices]), axis=0).astype(np.uint8)
+    draw_court_lines(canvas, calibration, reference=True)
+    width = canvas.shape[1]
+    label = 'COURT PLANE SUPPORTED' if calibration.get('status') == 'ok' else 'LINE CANDIDATES - COURT PLANE UNCONFIRMED'
+    cv2.rectangle(canvas, (0, 0), (width, min(32, canvas.shape[0])), (22, 26, 32), -1)
+    cv2.putText(canvas, label, (8, 21), cv2.FONT_HERSHEY_SIMPLEX,
+                max(.25, min(.55, width / 1500)), (255, 210, 40), 1, cv2.LINE_AA)
+    relative = 'evidence/calibration.jpg'
+    destination = Path(output_dir) / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if not cv2.imwrite(str(destination), canvas, [cv2.IMWRITE_JPEG_QUALITY, 94]):
+        raise OSError('Could not write court-line evidence')
+    return relative
+
+
 def draw_observed_trail(canvas, observations, colour, thickness=1):
     """Connect consecutive observations only; leave missing frames visible."""
     segment = []
@@ -156,9 +210,7 @@ def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decis
         for ordinal, index in enumerate(indices):
             canvas = frames[index].copy()
             height, width = canvas.shape[:2]
-            polygon = calibration.get('polygon_px')
-            if polygon and calibration.get('status') == 'ok':
-                cv2.polylines(canvas, [np.rint(polygon).astype(np.int32)], True, (0, 190, 255), 1)
+            draw_court_lines(canvas, calibration)
             for identifier, observation in indexed[index]:
                 trails[identifier].append((index, (round(observation['x']), round(observation['y']))))
             for identifier in list(trails):

@@ -23,7 +23,6 @@ RUNTIME_FILES = (
 APPLICATION = '08-application.zip'
 SOURCE_FOLDERS = {'badminton', 'configs', 'docs', 'examples', 'scripts', 'tests', 'annotations'}
 SOURCE_ROOTS = {'README.md', 'pyproject.toml', 'start.py'}
-RUNTIME_BASE_COMMIT = '330a6163eabae1a0fae0f9a93db4c212eb8f0557'
 DOWNLOAD_URL = ('https://github.com/6rmkhj/Badminton_AI_Line_Judge/'
                 'archive/refs/heads/downloads/windows-portable-{version}.zip')
 
@@ -116,7 +115,8 @@ def source_files(project):
         if relative.suffix.lower() == '.bat':
             data = data.replace(b'\r\n', b'\n').replace(b'\r', b'\n').replace(b'\n', b'\r\n')
         files['app/' + name] = data
-    for required in ('badminton/landing_recovery.py', 'badminton/event_sequence.py',
+    for required in ('badminton/calibration.py', 'badminton/evidence.py',
+                     'badminton/landing_recovery.py', 'badminton/event_sequence.py',
                      'badminton/assessment.py', 'configs/poc.json', 'start.py',
                      'setup-gpu-windows.bat', 'scripts/setup_gpu.py'):
         if 'app/' + required not in files:
@@ -255,7 +255,7 @@ exit /b %GPU_SETUP_EXIT%
 ''')
 
 
-def usage_text(version):
+def usage_text(version, validation_report='docs/WINDOWS_PACKAGE.md'):
     return f'''배드민턴 AI Windows 실행 패키지 {version}
 
 Windows 64비트용입니다. 다운로드 ZIP을 새 폴더에 전부 압축 해제한 뒤 START.bat를 실행하세요.
@@ -277,10 +277,10 @@ GPU 설치 후 패키지 폴더를 옮기면 .venv의 경로가 달라질 수 �
 외부 모델 가중치는 포함하지 않습니다. AMD/Intel GPU용 설치 경로는 제공하지 않습니다.
 GPU 메모리 오류는 자동 CPU 전환 없이 사유를 표시합니다. 설정에서 CPU로 바꿔 다시 실행할 수 있습니다.
 
-새 엔진은 원본 관측 복구와 첫 반동 순서를 개선합니다. 후보 위치·실제 접촉·IN/OUT 판정은 구분합니다.
-개발 AI 근사 참조 일치는 7/17→9/17, 대조군 2/2 유지, 별도 검증 0/1→0/1입니다.
-공식 판정은 검증 영상 38개 모두 REVIEW였으며, 실제 접촉·대상 식별·코트 보정 근거가 부족합니다.
-세부 변경과 검증 한계는 app/docs/LANDING_ENGINE.md 및 app/docs/WINDOWS_PACKAGE.md를 확인하세요.
+분석 결과에서 코트 직선 후보 탐지와 전체 코트 좌표 보정 상태를 따로 확인할 수 있습니다.
+이전 검수 결과를 재사용하면 새 탐지를 실행하지 않습니다. 개선된 탐지를 확인하려면 검수 재사용을 끄고 새 분석을 실행하세요.
+후보 위치·실제 접촉·IN/OUT 판정은 구분합니다. 라인이 보여도 전체 코트나 최초 접촉이 확인되지 않으면 REVIEW가 남을 수 있습니다.
+이 소스의 변경 내용과 검증 범위는 app/{validation_report} 및 app/docs/WINDOWS_PACKAGE.md를 확인하세요.
 
 문제가 생기면 startup-error.log와 실행 콘솔 오류를 확인하세요.
 이 패키지의 Windows 실행 파일 자체와 GPU 실기는 Linux 빌드 환경에서 직접 실행 검증하지 못했습니다.
@@ -288,7 +288,7 @@ GPU 메모리 오류는 자동 CPU 전환 없이 사유를 표시합니다. 설�
 '''.encode('utf-8-sig')
 
 
-def build(runtime_base, output_dir, archive_path, project=PROJECT):
+def build(runtime_base, output_dir, archive_path, project=PROJECT, *, validation_report='docs/WINDOWS_PACKAGE.md'):
     runtime_base, output_dir, archive_path = (Path(p).absolute() for p in (runtime_base, output_dir, archive_path))
     for path in (runtime_base, output_dir, archive_path):
         reject_symlinks(path)
@@ -324,10 +324,20 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT):
     if not re.fullmatch(r'\d+[.]\d+[.]\d+', version):
         raise ValueError('Package version must use three numeric components')
     files = source_files(project)
+    validation_report = safe_name(validation_report)
+    if not validation_report.startswith('docs/') or 'app/' + validation_report not in files:
+        raise ValueError('Validation report must be an included, Git-tracked docs/ file')
     source_hashes = {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}
     source_digest = hashlib.sha256(json_bytes(source_hashes)).hexdigest()
     commit = subprocess.check_output(['git', '-C', str(project), 'rev-parse', 'HEAD'], text=True).strip()
     dirty = bool(subprocess.check_output(['git', '-C', str(project), 'status', '--porcelain'], text=True))
+    # Runtime payloads can also be supplied as an extracted download. Report a
+    # revision only when the input is actually the root of that Git checkout.
+    runtime_commit = None
+    runtime_checkout = subprocess.run(['git', '-C', str(runtime_base), 'rev-parse', '--show-toplevel'],
+                                      capture_output=True, text=True)
+    if runtime_checkout.returncode == 0 and Path(runtime_checkout.stdout.strip()).resolve() == runtime_base.resolve():
+        runtime_commit = subprocess.check_output(['git', '-C', str(runtime_base), 'rev-parse', 'HEAD'], text=True).strip()
     with zipfile.ZipFile(runtime_base / 'payload' / APPLICATION) as old_app:
         old_manifest = json.loads(old_app.read('PACKAGE_MANIFEST.json').decode('utf-8-sig'))
         license_names = [entry.filename for entry in old_app.infolist()
@@ -337,14 +347,14 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT):
         for name in license_names:
             files[name] = old_app.read(name)
     files['portable_start.py'] = portable_start()
-    files['사용방법.txt'] = usage_text(version)
+    files['사용방법.txt'] = usage_text(version, validation_report)
     files['PACKAGE_VALIDATION.txt'] = (
         f'패키지 검증 범위 — {version}\n\n'
         '- 빌더에서 기존 런타임 8개와 이전 앱 ZIP의 SHA256·크기·CRC를 검증했습니다.\n'
         '- 런타임 01~07·09는 바이트 그대로 재사용하며 08 앱만 최신 소스로 재생성합니다.\n'
         '- 앱 파일별 해시·소스 커밋·런타임 출처를 함께 기록했습니다.\n'
-        '- 전체 자동 테스트 986개 통과, GPU 하드웨어 테스트 5개 미실행(Linux).\n'
-        '- 실제 영상 평가 범위와 남은 실패는 app/docs/LANDING_ENGINE.md에 있습니다.\n'
+        '- 이 빌더는 자동 테스트나 영상 평가를 실행하지 않습니다.\n'
+        f'- 현재 소스의 테스트·영상 평가 기록은 app/{validation_report}에 있습니다.\n'
         '- Windows 실행 파일 및 GPU 실기를 Linux 환경에서 직접 실행 검증하지 못했습니다.\n'
         '- 패키지 생성은 Windows 실행 검증을 대신하지 않습니다.\n'
         '- 원본 경기 영상·과거 대용량 실행 폴더·학습된 모델은 미포함입니다.\n'
@@ -358,7 +368,7 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT):
         'source_snapshot_sha256': source_digest, 'source_file_count': len(source_hashes),
         'source_file_hashes': source_hashes,
         'source_transformations': ['Root/source *.bat line endings normalized to CRLF'],
-        'runtime_base_commit': RUNTIME_BASE_COMMIT,
+        'runtime_base_commit': runtime_commit,
         'runtime_base_manifest_sha256': sha256(manifest_path),
         'reused_runtime_payloads': [by_name[name] for name in RUNTIME_FILES],
         'reused_runtime_provenance': {key: old_manifest.get(key) for key in ('python', 'windows_wheels', 'ffmpeg')},
@@ -369,7 +379,8 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT):
         'gpu_setup_interpreter': 'Bundled Python creates app/.venv; START prefers that environment',
         'independent_human_ground_truth_accuracy_measured': False,
         'windows_executable_runtime_tested_in_this_linux_environment': False,
-        'validation_report': 'app/docs/LANDING_ENGINE.md',
+        'validation_report': 'app/' + validation_report,
+        'tests_run_by_package_builder': False,
         'download_url': DOWNLOAD_URL.format(version=version),
     }
     files['PACKAGE_MANIFEST.json'] = json_bytes(manifest)
@@ -396,7 +407,7 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT):
                     'sha256': sha256(payload / name)} for name in sorted(expected)]
     (output_dir / 'PAYLOAD_CHECKSUMS.json').write_bytes(json_bytes(new_entries))
     root_files = {'START.bat': start_batch(version), 'RUN.bat': run_batch(),
-                  'SETUP_GPU.bat': gpu_batch(), '사용방법.txt': usage_text(version),
+                  'SETUP_GPU.bat': gpu_batch(), '사용방법.txt': usage_text(version, validation_report),
                   'README.md': (f'# 배드민턴 AI Windows {version}\n\n'
                                 'ZIP 전체를 새 폴더에 압축 해제한 뒤 `START.bat`를 실행하세요.\n\n'
                                 'NVIDIA GPU 준비는 `SETUP_GPU.bat`를 실행하세요. 인터넷과 지원 드라이버가 필요합니다.\n\n'
@@ -426,9 +437,12 @@ def main(argv=None):
     parser.add_argument('--runtime-base', type=Path, required=True)
     parser.add_argument('--output-dir', type=Path, required=True)
     parser.add_argument('--zip', dest='archive_path', type=Path, required=True)
+    parser.add_argument('--validation-report', default='docs/WINDOWS_PACKAGE.md',
+                        help='Included docs/ report describing validation of this source revision')
     args = parser.parse_args(argv)
     try:
-        receipt = build(args.runtime_base, args.output_dir, args.archive_path)
+        receipt = build(args.runtime_base, args.output_dir, args.archive_path,
+                        validation_report=args.validation_report)
     except (OSError, ValueError, zipfile.BadZipFile, subprocess.CalledProcessError) as error:
         parser.exit(1, f'Package build failed: {error}\n')
     print(json.dumps(receipt, ensure_ascii=False, indent=2))

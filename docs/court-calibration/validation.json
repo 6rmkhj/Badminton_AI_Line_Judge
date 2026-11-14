@@ -1,0 +1,72 @@
+{
+  "scope": "Fresh full default CPU CLI analysis from the original case_08 video, separate from fixed-frame calibration replay. Windows execution and GPU hardware not tested.",
+  "python": "3.12.14",
+  "opencv": "4.12.0",
+  "numpy": "2.2.6",
+  "source_video": "video/b시점 7.mp4",
+  "source_sha256": "27050156feb5987b60dbe4e0d42eb0f59e61b5679c95f6efd2d39901a9208d1c",
+  "pipeline_version": "0.5.8",
+  "implementation_fingerprint": "f123b351e14c600f34fa067066d4e25db5e98fc97e19193c3049034b9beef406",
+  "calibration_source_sha256": "36f4687f86887fa2b104d309400065c4fc0e69f10f97783d906beb1ee8222dcc",
+  "config_sha256": "9e9b6beecbc498384d7d893b0f483138cd03ffa796e57ddfe61444e0d071b484",
+  "result_sha256": "b383d64d7bc03e31d881b0f7f6dfa1a73808207de12c68ff20aaa9f7b294d4a4",
+  "decision": {
+    "decision": "REVIEW",
+    "reason_codes": [
+      "CALIBRATION_NOT_ACCEPTED",
+      "CALIBRATION_SUPPORT_INSUFFICIENT",
+      "CONTACT_EVIDENCE_UNCERTAIN",
+      "CONTACT_OCCLUDED_OR_MISSING",
+      "FIRST_CONTACT_NOT_OBSERVED",
+      "MULTIPLE_LANDING_CANDIDATES",
+      "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+    ],
+    "confidence": null,
+    "note": "A unique, observed target landing is required for automatic IN/OUT."
+  },
+  "calibration": {
+    "status": "review",
+    "detected_line_count": 28,
+    "line_colour": "blue",
+    "reason_codes": [
+      "COURT_TEMPLATE_SUPPORT_INSUFFICIENT",
+      "COURT_LINE_ROLES_UNCONFIRMED",
+      "PARTIAL_COURT_VISIBLE",
+      "MULTIPLE_COURT_FITS_AMBIGUOUS"
+    ]
+  },
+  "timings": {
+    "decode_and_preview_seconds": 9.803182405999905,
+    "calibration_seconds": 4.627711452000085,
+    "detection_seconds": 36.028264804999935,
+    "tracking_seconds": 18.36400056100001,
+    "events_and_decision_seconds": 2.818798728999809,
+    "total_seconds": 73.84055617299987
+  },
+  "artifacts": {
+    "evidence/calibration.jpg": {
+      "sha256": "c3ef83f9280cfe84a32187edcdb64adcf61e4f209fdab6537899ed9e7ae2b5d8",
+      "bytes": 165076
+    },
+    "overview.jpg": {
+      "sha256": "44d6cae5e20aab05916e0b3d33897a973748c83fdb370170c55795528cab3be6",
+      "bytes": 199603
+    },
+    "evidence/annotated.mp4": {
+      "sha256": "3a66a3496ded8c60368a27584f9ff0b31834c4a5912b1fdafa43e4346596e10f",
+      "bytes": 213291
+    },
+    "preview.mp4": {
+      "sha256": "b4187d634ef0330776c4dfe4fe02feac415be9496abe41e1c8d1aea28c2dbb53",
+      "bytes": 314512
+    }
+  },
+  "browser_ui_test_log": "{\"status\":\"passed\",\"output\":\"/tmp/pair-region-ui-ENc5kM\",\"submissions\":6,\"uploads\":1}",
+  "tests": {
+    "passed": 1033,
+    "skipped": 5,
+    "skipped_scope": "Actual GPU hardware unavailable in this Linux CPU environment",
+    "summary": "1033 passed, 5 skipped in 97.23s (0:01:37)",
+    "log_sha256": "121367bc74d53d08dc6420f0db9c679d98d9e7fc9c8876809249f31ad926186b"
+  }
+}

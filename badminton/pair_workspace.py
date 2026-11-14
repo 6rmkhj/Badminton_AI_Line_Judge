@@ -187,6 +187,46 @@ def _landing_candidate(result):
     return candidate
 
 
+def _calibration_summary(result):
+    """Separate observable line candidates from an accepted metric court fit."""
+    calibration = result.get("calibration")
+    if not isinstance(calibration, dict):
+        return None
+    segments = calibration.get("line_segments_px")
+    if not isinstance(segments, list):
+        segments = [region.get("line_segment_px") for region in calibration.get("supported_line_regions_px", [])
+                    if isinstance(region, dict)]
+    count = sum(isinstance(segment, (list, tuple)) and len(segment) == 4
+                and all(_finite(value) for value in segment) for segment in segments)
+    accepted = calibration.get("status") == "ok" and calibration.get("manual_reference") is not True
+    stability = calibration.get("camera_stability") or {}
+    moved = "CAMERA_MOVED_FROM_CALIBRATION_REFERENCE" in stability.get("reason_codes", [])
+    detail = (f"직선 후보 {count}개를 찾았습니다. " if count else "직선 후보를 찾지 못했습니다. ")
+    detail += ("전체 코트 규격과 선 배치가 맞아 좌표 보정 조건을 충족했습니다." if accepted else
+               "전체 코트 좌표 보정은 확인되지 않아 라인의 역할과 IN/OUT 경계를 확정할 수 없습니다.")
+    if moved:
+        detail += " 카메라 이동이 감지되어 고정 라인 표시는 진단 이미지에서만 제공합니다."
+    return {"line_detection_status": "detected" if count else "not_detected", "detected_line_count": count,
+            "court_geometry_status": "supported" if accepted else "unconfirmed", "detail": detail,
+            "overlay_legend": "하늘색: 탐지한 직선 후보 · 노란색: 전체 코트 보정이 확인된 외곽선",
+            "camera_moved": moved, "metric_accuracy_validated": calibration.get("metric_accuracy_validated") is True,
+            "reason_codes": [code for code in calibration.get("reason_codes", []) if isinstance(code, str)]}
+
+
+def _calibration_preview(output, artifacts, prefix):
+    relative = artifacts.get("calibration_overlay")
+    if (not isinstance(relative, str) or not relative.startswith("evidence/")
+            or Path(relative).suffix.lower() not in {".jpg", ".png"}):
+        return None
+    try:
+        path = _safe(output, relative)
+        if not path.is_file() or path.stat().st_size == 0:
+            return None
+    except (PairWorkspaceError, OSError):
+        return None
+    return prefix + quote(relative, safe="/")
+
+
 def _trajectory_replay(output, artifacts, prefix):
     """Expose only an existing, local MP4 and bounded source-timeline metadata."""
     clip = artifacts.get("annotated_clip")
@@ -735,6 +775,7 @@ class PairWorkspace:
                 "source_sha256": None, "automatic_decision": "REVIEW", "direct_decision": "REVIEW",
                 "assisted_decision": "REVIEW", "qualified": False, "preview_url": None, "evidence_urls": [],
                 "trajectory_replay_url": None, "trajectory_replay_info": None,
+                "calibration_summary": None, "calibration_preview_url": None,
                 "contact_time_seconds": None, "reason_codes": [], "rationale": "", "_candidate_ids": []}
         try:
             original, digest, candidates, entry = self._resolve(selected, catalog)
@@ -837,6 +878,8 @@ class PairWorkspace:
                     evidence_urls=evidence, contact_time_seconds=contact if _finite(contact) else None,
                     landing_candidate=_landing_candidate(result), trajectory_context_url=trajectory_context,
                     trajectory_replay_url=replay_url, trajectory_replay_info=replay_info,
+                    calibration_summary=_calibration_summary(result),
+                    calibration_preview_url=_calibration_preview(output, artifacts, prefix),
                     reason_codes=(result.get("decision") or {}).get("reason_codes", []),
                     rationale="새 원본 분석의 접촉·경계 검증 결과입니다.", analysis_timings=result.get("timings", {}),
                     execution=deepcopy(result.get("execution")), assessment=deepcopy(result.get("assessment")),

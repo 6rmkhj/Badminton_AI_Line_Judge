@@ -58,6 +58,7 @@ def test_actual_pipeline_stays_review_without_ground_contact(tmp_path):
     assert len(result['timestamps']) == 12
     assert json.loads((tmp_path / 'run/result.json').read_text())['source_sha256'] == result['source_sha256']
     assert (tmp_path / 'run/preview.mp4').exists()
+    assert cv2.imread(str(tmp_path / 'run' / result['artifacts']['calibration_overlay'])) is not None
     assert all(event['contact_observed'] is False for event in result['landings'])
     assert list(dict.fromkeys(event['stage'] for event in progress)) == [
         'prepare', 'calibration', 'detection', 'tracking', 'contact', 'evidence', 'save']
