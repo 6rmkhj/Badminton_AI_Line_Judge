@@ -29,16 +29,19 @@ jobs:
     needs: promote
     runs-on: windows-2022
     timeout-minutes: 25
-    env:
-      BADMINTON_TESTING_DEPS: ${{ runner.temp }}/badminton-testing-deps-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: e7220bdbfcac6f312af0a7caaf8ad3ce0171ced8
+          ref: 30cf899797df4b2543d530a831a825f9ae026d3d
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Prepare isolated test dependency location
+        shell: pwsh
+        run: |
+          $testingDeps = Join-Path $env:RUNNER_TEMP "badminton-testing-deps-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          "BADMINTON_TESTING_DEPS=$testingDeps" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Install isolated pure-Python test harness
         run: >-
           python -m pip install --disable-pip-version-check --no-deps --only-binary=:all:
@@ -62,7 +65,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: e7220bdbfcac6f312af0a7caaf8ad3ce0171ced8
+          ref: 30cf899797df4b2543d530a831a825f9ae026d3d
           persist-credentials: false
       - name: Reassemble and verify the existing package
         run: python3 release/assemble.py

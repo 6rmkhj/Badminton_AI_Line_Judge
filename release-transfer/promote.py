@@ -11,31 +11,24 @@ from urllib.parse import urlsplit
 REPOSITORY = '6rmkhj/Badminton_AI_Line_Judge'
 BOOTSTRAP_REF = 'refs/heads/downloads/publish-0.5.12-transfer'
 TRANSFER = Path(__file__).resolve().parent
-EXPECTED = {
-    'source': {
-        'head': '823e986649ecf023150d9806a54c2e3a1372e6be',
-        'parent': '39b2b9e97c7e22100f3124a397d3d1d3dda5ec15',
-        'tree': '1bde9c9b5d06e21099fb545c129ff7e424936f1e',
-        'ref': 'refs/heads/codex/court-line-calibration',
-        'bytes': 1284384,
-        'sha256': '6b922911fdd9bbdceca03a5f26bc9bad5cb665ce75437a63e488dc7575b3c46c',
-        'thin': False,
-    },
-    'payload': {
-        'head': 'e7220bdbfcac6f312af0a7caaf8ad3ce0171ced8',
-        'parent': '4ab9c42b9fd174c372428df5869e21c6e676e9d9',
-        'tree': '905a8f04b692992ca49d0af50a430e395e66a508',
-        'ref': 'refs/heads/downloads/windows-portable-0.5.12',
-        'bytes': 1395481,
-        'sha256': 'c223859e4e03398b4dcf94a464f85d67eb8c4cd18868811d790b8f6b3361ca57',
-        'thin': True,
-    },
-    'tag': {
-        'name': 'v0.5.12',
-        'object': '6fbf74e782e2f88a2165490b122da736df7e72be',
-        'sha256': 'b3af92507b0fb5495eb950b3c36e3f618b67c208023debe00cdf0d7f76ce21f1',
-    },
-}
+EXPECTED = {'source': {'head': '823e986649ecf023150d9806a54c2e3a1372e6be',
+            'parent': '39b2b9e97c7e22100f3124a397d3d1d3dda5ec15',
+            'tree': '1bde9c9b5d06e21099fb545c129ff7e424936f1e',
+            'ref': 'refs/heads/codex/court-line-calibration',
+            'bytes': 1284384,
+            'sha256': '6b922911fdd9bbdceca03a5f26bc9bad5cb665ce75437a63e488dc7575b3c46c',
+            'thin': False},
+ 'payload': {'head': '30cf899797df4b2543d530a831a825f9ae026d3d',
+             'parent': 'e7220bdbfcac6f312af0a7caaf8ad3ce0171ced8',
+             'tree': 'c60b5a53975aff6de70b9edbe3df50181a2e4f82',
+             'ref': 'refs/heads/downloads/windows-portable-0.5.12',
+             'bytes': 1396056,
+             'sha256': 'b460ddfd8a7e12fd757436b191604184ac209f9142817821a55762c386eac06b',
+             'thin': True,
+             'base': '4ab9c42b9fd174c372428df5869e21c6e676e9d9'},
+ 'tag': {'name': 'v0.5.12',
+         'object': '6fbf74e782e2f88a2165490b122da736df7e72be',
+         'sha256': 'b3af92507b0fb5495eb950b3c36e3f618b67c208023debe00cdf0d7f76ce21f1'}}
 
 
 def git(*arguments, input_bytes=None):
@@ -58,7 +51,7 @@ def verify_inputs():
         raise RuntimeError('Unexpected transfer manifest sections')
     for kind in ('source', 'payload'):
         expected = EXPECTED[kind]
-        for key in ('head', 'parent', 'bytes', 'sha256', 'thin'):
+        for key in ('head', 'parent', 'bytes', 'sha256', 'thin') + (('base',) if 'base' in expected else ()):
             if manifest[kind].get(key) != expected[key]:
                 raise RuntimeError(f'Unexpected {kind} manifest field: {key}')
         if type(manifest[kind]['thin']) is not bool or type(manifest[kind]['bytes']) is not int:
@@ -135,7 +128,7 @@ def main():
     # bootstrap replaces an old workflow with its approved new contents.
     git('fetch', '--no-tags', '--filter=blob:none', 'origin',
         EXPECTED['source']['parent'])
-    git('fetch', '--no-tags', '--no-filter', '--depth=1', 'origin', EXPECTED['payload']['parent'])
+    git('fetch', '--no-tags', '--no-filter', '--depth=1', 'origin', EXPECTED['payload']['base'])
     for kind in ('source', 'payload'):
         arguments = ['index-pack', '--stdin']
         if EXPECTED[kind]['thin']:
