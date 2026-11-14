@@ -230,6 +230,24 @@ def test_dark_foreground_alternatives_are_audited_against_independent_frames():
     assert result['observed_frame_count'] == 10
 
 
+def test_native_recovery_counts_a_real_neighbor_only_after_independent_disambiguation():
+    args = list(scene())
+    args[0]['requires_contiguous_native_peak'] = True
+    original = args[1][0]['observations'][16]
+    x, y = int(original['x'])+17, int(original['y'])+20
+    cv2.circle(args[2][16], (x, y), 8, (60, 60, 60), -1)
+    args[0]['track_ids'].append(2)
+    args[1].append({'track_id': 2, 'observations': [{**original, 'x': float(x), 'y': float(y)}]})
+    result = estimate(args)
+    assert result['status'] == 'supported'
+    assert result['recovery_peak_coverage']['observed_frame_indices'] == list(range(11, 18))
+    assert result['recovery_peak_coverage']['contiguous'] is True
+    audit = result['alternative_component_audit']
+    assert [row['frame_index'] for row in audit] == [16]
+    assert audit[0]['matching_component_count'] == 1 and len(audit[0]['components']) == 2
+    assert result['contact_observed'] is False
+
+
 def _add_small_alternatives(args, positions):
     secondary = []
     for index, x_offset in positions:

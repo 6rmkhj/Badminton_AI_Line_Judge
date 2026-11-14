@@ -168,12 +168,27 @@ def test_gap_turn_conflicting_with_same_measured_descending_flight_is_explained(
     assert len(excluded['continuation_frame_indices']) >= 5
 
 
-def test_only_inferred_peak_cannot_become_selected_observed_family():
+def test_only_inferred_peak_requires_native_confirmation_before_selection():
     inferred = event()
     inferred['image_motion_event']['point_kind'] = 'inferred_object_center'
     result = resolve([inferred], [track()])
+    assert result['status'] == 'native_confirmation_required'
+    assert result['selected_family'] is None
+    assert result['candidate_family']['member_event_ids'] == ['event_000']
+    assert result['candidate_family']['selection_evidence']['observed_peak_member_ids'] == []
+    assert result['reason_codes'] == ['EVENT_FAMILY_ONLY_INFERRED_LOCATIONS',
+                                      'UNIQUE_FLIGHT_REQUIRES_NATIVE_PEAK']
+
+
+def test_independent_inferred_flights_cannot_enter_native_recovery():
+    first, second = event(), event('event_001', 2, x=180)
+    for candidate in (first, second):
+        candidate['image_motion_event']['point_kind'] = 'inferred_object_center'
+    result = resolve([first, second], [track(), track(2, x=180)])
     assert result['status'] == 'review'
-    assert result['reason_codes'] == ['EVENT_FAMILY_ONLY_INFERRED_LOCATIONS']
+    assert result['selected_family'] is None
+    assert 'candidate_family' not in result
+    assert result['reason_codes'] == ['MULTIPLE_PRIMARY_COURT_FLIGHT_FAMILIES']
 
 
 def test_horizontal_mirror_preserves_selection():
