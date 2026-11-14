@@ -16,6 +16,8 @@ PowerShell 7에서 실행할 때 전달되는 모듈 검색 경로 때문에 Win
 
 `tests/test_windows_package.py`는 Windows PowerShell 5.1과 실제 `cmd.exe → START.bat` 실행을 사용한다. 기존 배열 개수가 1이고 직접 대입한 배열 개수가 9임을 재현하며, 한글·공백 경로에서 9개 ZIP 추출·재실행, 개수 오류·누락·크기 오류·같은 크기의 SHA256 손상을 검사한다. 준비 완료 표시가 있어도 손상 파일을 다시 거부하는지 확인한다.
 
+Windows Server 2022 / Windows PowerShell 5.1에서 **13개 테스트가 모두 통과**했다. Linux에서는 패키징 검사 6개가 통과했고 Windows 전용 7개는 건너뛰었다. [실제 Windows 회귀 실행](https://github.com/6rmkhj/Badminton_AI_Line_Judge/actions/runs/43577373911)에 로그를 보관한다. 첫 실행에서 발견한 PowerShell 7 모듈 경로 상속 문제를 수정한 뒤 전체 13개를 다시 실행한 결과다.
+
 별도 배포 검증은 실제 구성 ZIP을 포함한 전체 패키지를 Windows에서 준비하고 재실행한다. 포함된 Python·분석 의존성과 FFmpeg를 로드한 뒤 A/B 서버를 실행해 `/pair` 응답과 경기 방식 선택 화면을 확인한다. 이 절차와 0.5.10 패치 적용 검증에 통과한 뒤 릴리스를 공개하며 결과 JSON을 릴리스에 첨부한다. GPU 실기, 사용자 PC의 모든 환경과 경기 판정 정확도는 이 시작 호환성 시험의 범위가 아니다.
 
 소스 CI: [Windows launcher compatibility](https://github.com/6rmkhj/Badminton_AI_Line_Judge/actions/workflows/windows-launcher.yml). 배포 검증의 실행 링크와 상세 결과는 릴리스 노트를 참고한다.
