@@ -204,6 +204,8 @@ setlocal
 chcp 65001 >nul
 cd /d "%~dp0"
 echo 배드민턴 AI {version} 구성 파일을 확인합니다.
+rem Let Windows PowerShell rebuild its own module paths when called from pwsh.
+set "PSModulePath="
 powershell.exe -NoLogo -NoProfile -Command "{prepare}"
 if errorlevel 1 goto failed
 if /I "%~1"=="--prepare-only" exit /b 0
