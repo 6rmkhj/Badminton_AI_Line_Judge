@@ -1,0 +1,180 @@
+{
+  "01-python.zip": {
+    "entries": 881,
+    "bytes": 12716961,
+    "uncompressed_bytes": 33420399,
+    "sha256": "ae9bf332964c2cbd83fb8a21d71d8edf47872655c0e36dd10992c1064ad0cdfb",
+    "crc_ok": true,
+    "python_version_files": [
+      "runtime/python312.dll"
+    ],
+    "venv_files": [
+      "runtime/Lib/ensurepip/__init__.py",
+      "runtime/Lib/ensurepip/__main__.py",
+      "runtime/Lib/ensurepip/_bundled/pip-25.0.1-py3-none-any.whl",
+      "runtime/Lib/ensurepip/_uninstall.py",
+      "runtime/Lib/venv/__init__.py",
+      "runtime/Lib/venv/__main__.py",
+      "runtime/Lib/venv/scripts/common/Activate.ps1",
+      "runtime/Lib/venv/scripts/common/activate",
+      "runtime/Lib/venv/scripts/nt/activate.bat",
+      "runtime/Lib/venv/scripts/nt/deactivate.bat",
+      "runtime/Lib/venv/scripts/nt/python.exe",
+      "runtime/Lib/venv/scripts/nt/pythonw.exe",
+      "runtime/Lib/venv/scripts/posix/activate.csh",
+      "runtime/Lib/venv/scripts/posix/activate.fish"
+    ],
+    "root_files": [
+      "runtime/LICENSE.txt",
+      "runtime/python.exe",
+      "runtime/python3.dll",
+      "runtime/python312.dll",
+      "runtime/pythonw.exe",
+      "runtime/vcruntime140.dll",
+      "runtime/vcruntime140_1.dll"
+    ],
+    "venv_available_by_inventory": true,
+    "ensurepip_available_by_inventory": true,
+    "windows_execution_tested": false,
+    "python_version_from_dll_version_resource": "3.12.10",
+    "declared_sha256_and_bytes_verified": true,
+    "paths_checked": true
+  },
+  "02-filelock.zip": {
+    "entries": 28,
+    "bytes": 165715,
+    "uncompressed_bytes": 578584,
+    "sha256": "e75521b5983d898bfc25af730e60d11644517b918ae51456b5a50fe78490bf57",
+    "crc_ok": true,
+    "metadata": {
+      "runtime/Lib/site-packages/filelock-4.2.4.dist-info/METADATA": [
+        "Name: filelock",
+        "Version: 4.2.4",
+        "Requires-Python: >=3.11"
+      ]
+    },
+    "declared_sha256_and_bytes_verified": true,
+    "paths_checked": true
+  },
+  "03-numpy.zip": {
+    "entries": 896,
+    "bytes": 12868607,
+    "uncompressed_bytes": 42479138,
+    "sha256": "58e98d8b38f49477fe7e22571f96caf9e7b1e736b51d43298a9499f16f5cacd1",
+    "crc_ok": true,
+    "metadata": {
+      "runtime/Lib/site-packages/numpy-2.2.6.dist-info/METADATA": [
+        "Name: numpy",
+        "Version: 2.2.6",
+        "Requires-Python: >=3.10"
+      ]
+    },
+    "wheel_tags": [
+      "cp312-cp312-win_amd64"
+    ],
+    "windows_extensions": 19,
+    "declared_sha256_and_bytes_verified": true,
+    "paths_checked": true
+  },
+  "04-opencv_python_headless.zip": {
+    "entries": 86,
+    "bytes": 39307871,
+    "uncompressed_bytes": 109783571,
+    "sha256": "8b184e94ef585469e6befdda4b6b124675ee93be8b94c92515dbe93c1b9a31c5",
+    "crc_ok": true,
+    "metadata": {
+      "runtime/Lib/site-packages/opencv_python_headless-4.12.0.88.dist-info/METADATA": [
+        "Name: opencv-python-headless",
+        "Version: 4.12.0.88",
+        "Requires-Python: >=3.6"
+      ]
+    },
+    "wheel_tags": [
+      "cp37-abi3-win_amd64"
+    ],
+    "windows_extensions": 1,
+    "declared_sha256_and_bytes_verified": true,
+    "paths_checked": true
+  },
+  "05-scipy.zip": {
+    "entries": 1530,
+    "bytes": 39064703,
+    "uncompressed_bytes": 115692598,
+    "sha256": "6a377b0a481c2bb9de328ade0999bcc5c233e6217477cc3bc3fb60463a0de8a0",
+    "crc_ok": true,
+    "metadata": {
+      "runtime/Lib/site-packages/scipy-1.16.3.dist-info/METADATA": [
+        "Name: scipy",
+        "Version: 1.16.3",
+        "Requires-Python: >=3.11"
+      ]
+    },
+    "wheel_tags": [
+      "cp312-cp312-win_amd64"
+    ],
+    "windows_extensions": 114,
+    "declared_sha256_and_bytes_verified": true,
+    "paths_checked": true
+  },
+  "06-ffmpeg.zip": {
+    "entries": 1,
+    "bytes": 67019438,
+    "uncompressed_bytes": 170051584,
+    "sha256": "b43b04448e03eca0fe223b806566fbd7917e0349eb53695d2d2c0a21db8e76cf",
+    "crc_ok": true,
+    "embedded_version_strings": [],
+    "embedded_libx264_configuration": [
+      "--prefix=/ffbuild/prefix --pkg-config-flags=--static --pkg-config=pkg-config --cross-prefix=x86_64-w64-mingw32- --arch=x86_64 --target-os=mingw32 --enable-gpl --enable-version3 --disable-debug --disable-w32threads --enable-pthreads --enable-iconv --enable-zlib --enable-libxml2 --enable-libvmaf --disable-libxcb --disable-xlib --enable-fontconfig --enable-libharfbuzz --enable-libfreetype --enable-libfribidi --enable-lcms2 --enable-vulkan --enable-libdav1d --enable-libvorbis --enable-librav1e --enable-librsvg --disable-libpulse --enable-gmp --enable-lzma --enable-liblcevc-dec --enable-opencl --enable-amf --enable-libaom --enable-avisynth --enable-chromaprint --enable-libdavs2 --enable-libdvdread --enable-libdvdnav --disable-libfdk-aac --enable-ffnvcodec --enable-cuda-llvm --enable-frei0r --enable-libgme --enable-libkvazaar --enable-libaribb24 --enable-libaribcaption --enable-libass --enable-libbluray --enable-libcurl --enable-libjxl --enable-libmp3lame --enable-libopus --enable-libplacebo --enable-librist --enable-libssh --enable-libtheora --enable-libvpx --enable-libwebp --enable-libzmq --enable-lv2 --enable-libvpl --enable-openal --enable-liboapv --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenh264 --enable-libopenjpeg --enable-libopenmpt --enable-librubberband --enable-schannel --enable-sdl2 --enable-libsnappy --enable-libsoxr --enable-libsrt --enable-libsvtav1 --enable-libtwolame --enable-libuavs3d --disable-libdrm --enable-vaapi --enable-vapoursynth --enable-libvidstab --enable-libvvenc --disable-whisper --enable-libx264 --enable-libx265 --enable-libxavs2 --enable-libxvid --enable-libzimg --disable-libzvbi --extra-cflags=-DLIBTWOLAME_STATIC --extra-cxxflags= --extra-libs=-lgomp --extra-ldflags=-pthread --extra-ldexeflags= --cc=x86_64-w64-mingw32-gcc --cxx=x86_64-w64-mingw32-g++ --ar=x86_64-w64-mingw32-gcc-ar --ranlib=x86_64-w64-mingw32-gcc-ranlib --nm=x86_64-w64-mingw32-gcc-nm --extra-version=20261111"
+    ],
+    "declared_sha256_and_bytes_verified": true,
+    "paths_checked": true
+  },
+  "07-ffprobe.zip": {
+    "entries": 1,
+    "bytes": 66909177,
+    "uncompressed_bytes": 169836032,
+    "sha256": "9de48b6db1bb77434b4de4775110f4eca583a4afa01a783731437332f03a2ef2",
+    "crc_ok": true,
+    "embedded_version_strings": [
+      "show ffprobe version"
+    ],
+    "embedded_libx264_configuration": [
+      "--prefix=/ffbuild/prefix --pkg-config-flags=--static --pkg-config=pkg-config --cross-prefix=x86_64-w64-mingw32- --arch=x86_64 --target-os=mingw32 --enable-gpl --enable-version3 --disable-debug --disable-w32threads --enable-pthreads --enable-iconv --enable-zlib --enable-libxml2 --enable-libvmaf --disable-libxcb --disable-xlib --enable-fontconfig --enable-libharfbuzz --enable-libfreetype --enable-libfribidi --enable-lcms2 --enable-vulkan --enable-libdav1d --enable-libvorbis --enable-librav1e --enable-librsvg --disable-libpulse --enable-gmp --enable-lzma --enable-liblcevc-dec --enable-opencl --enable-amf --enable-libaom --enable-avisynth --enable-chromaprint --enable-libdavs2 --enable-libdvdread --enable-libdvdnav --disable-libfdk-aac --enable-ffnvcodec --enable-cuda-llvm --enable-frei0r --enable-libgme --enable-libkvazaar --enable-libaribb24 --enable-libaribcaption --enable-libass --enable-libbluray --enable-libcurl --enable-libjxl --enable-libmp3lame --enable-libopus --enable-libplacebo --enable-librist --enable-libssh --enable-libtheora --enable-libvpx --enable-libwebp --enable-libzmq --enable-lv2 --enable-libvpl --enable-openal --enable-liboapv --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenh264 --enable-libopenjpeg --enable-libopenmpt --enable-librubberband --enable-schannel --enable-sdl2 --enable-libsnappy --enable-libsoxr --enable-libsrt --enable-libsvtav1 --enable-libtwolame --enable-libuavs3d --disable-libdrm --enable-vaapi --enable-vapoursynth --enable-libvidstab --enable-libvvenc --disable-whisper --enable-libx264 --enable-libx265 --enable-libxavs2 --enable-libxvid --enable-libzimg --disable-libzvbi --extra-cflags=-DLIBTWOLAME_STATIC --extra-cxxflags= --extra-libs=-lgomp --extra-ldflags=-pthread --extra-ldexeflags= --cc=x86_64-w64-mingw32-gcc --cxx=x86_64-w64-mingw32-g++ --ar=x86_64-w64-mingw32-gcc-ar --ranlib=x86_64-w64-mingw32-gcc-ranlib --nm=x86_64-w64-mingw32-gcc-nm --extra-version=20261111"
+    ],
+    "declared_sha256_and_bytes_verified": true,
+    "paths_checked": true
+  },
+  "08-application.zip": {
+    "entries": 639,
+    "bytes": 35746082,
+    "uncompressed_bytes": 40101931,
+    "sha256": "420fdf448638520c686ea6f81d8d272bd1e66ecec66930be243e417837666c67",
+    "crc_ok": true,
+    "licenses_to_preserve": [
+      "licenses/FFmpeg-LICENSE.txt",
+      "licenses/FFmpeg-documentation.html",
+      "licenses/Python-LICENSE.txt",
+      "licenses/THIRD_PARTY_NOTICES.txt"
+    ],
+    "declared_sha256_and_bytes_verified": true,
+    "paths_checked": true
+  },
+  "09-runtime-notes.zip": {
+    "entries": 441,
+    "bytes": 1865077,
+    "uncompressed_bytes": 5758943,
+    "sha256": "d990626d07e19d0ccb8e39e1ede069125a7328615245a3dc3e6c8c70d1c02895",
+    "crc_ok": true,
+    "license_files": [
+      "runtime/Lib/site-packages/pip-25.0.1.dist-info/LICENSE.txt",
+      "runtime/Lib/site-packages/pip/_internal/index/sources.py",
+      "runtime/Lib/site-packages/pip/_internal/metadata/pkg_resources.py",
+      "runtime/Lib/site-packages/pip/_vendor/distlib/resources.py",
+      "runtime/Lib/site-packages/pip/_vendor/pkg_resources/__init__.py",
+      "runtime/Lib/site-packages/pip/_vendor/packaging/licenses/_spdx.py",
+      "runtime/Lib/site-packages/pip/_vendor/packaging/licenses/__init__.py"
+    ],
+    "declared_sha256_and_bytes_verified": true,
+    "paths_checked": true
+  }
+}

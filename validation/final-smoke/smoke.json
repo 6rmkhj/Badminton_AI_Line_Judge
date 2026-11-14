@@ -1,0 +1,367 @@
+{
+  "scope": "Linux HTTP smoke of freshly extracted application using Linux Python/FFmpeg; no Windows executable or GPU hardware execution",
+  "app": "/workspace/package-build/extracted/badminton-windows-0.5.7/app",
+  "python": "/workspace/.venvs/badminton/bin/python",
+  "started_at": "2026-11-14T00:38:45.693472+00:00",
+  "checks": {
+    "frozen_engine": {
+      "python_files_matching": 35,
+      "source_tree_sha256": "3134ea49b9e02d3557279bb58b78814b3107e0ae46daeb3a030a080102f4ec7c",
+      "configuration_matches": true,
+      "gpu_setup_included": true
+    },
+    "/pair": {
+      "bytes": 15945,
+      "sha256": "ee2ec7e914e6345925f48f9f20a753c73353210f192809bf50dbc9020b60dcf6"
+    },
+    "/pair.js": {
+      "bytes": 74506,
+      "sha256": "66c0afe8262841bc090a8227d9fa656d3d2aed3b53abffedc01df5c9b80422ca"
+    },
+    "/pair.css": {
+      "bytes": 31923,
+      "sha256": "051c6c7bba0a6ab1e0410ce4fbaa846ffbc84bfe145684a55aab9ba2fe174d68"
+    },
+    "/resources.js": {
+      "bytes": 11988,
+      "sha256": "407265e39d18e7122fd22d6ee9f895adc61a5facb887f2fd46c17ef4989ed854"
+    },
+    "/resources.css": {
+      "bytes": 5410,
+      "sha256": "9e0e831b246c3271eed64c5b2a3032b44206acf6eb0776e84e9fb82c232d9ce3"
+    },
+    "resource_initial": {
+      "confirmed": false,
+      "settings": {
+        "device": "cpu",
+        "cpu_threads": 2,
+        "parallel_views": 1,
+        "frame_memory_mb": 4096
+      },
+      "environment": {
+        "system": {
+          "os": "Linux",
+          "release": "6.18.57",
+          "machine": "x86_64"
+        },
+        "cpu": {
+          "name": "AMD EPYC 9V74 80-Core Processor",
+          "logical_cores": 5,
+          "available_cores": 4
+        },
+        "memory": {
+          "total_mb": 16384,
+          "available_mb": 13274
+        },
+        "accelerators": [],
+        "limits": {
+          "cpu_threads": {
+            "min": 1,
+            "max": 4
+          },
+          "parallel_views": {
+            "min": 1,
+            "max": 2
+          },
+          "frame_memory_mb": {
+            "min": 64,
+            "max": 16384
+          }
+        },
+        "fingerprint": "55e0f5008450154dc99a4eae",
+        "defaults": {
+          "device": "cpu",
+          "cpu_threads": 2,
+          "parallel_views": 1,
+          "frame_memory_mb": 4096
+        }
+      }
+    },
+    "analysis_before_confirmation": {
+      "http_status": 409,
+      "response": {
+        "error": "분석 전에 실행 환경과 장치 사용 설정을 확인해 주세요."
+      }
+    },
+    "resource_confirmation": {
+      "device": "cpu",
+      "cpu_threads": 1,
+      "parallel_views": 1,
+      "frame_memory_mb": 512
+    },
+    "video_metadata": [
+      {
+        "width": 320,
+        "height": 240,
+        "coded_width": 320,
+        "coded_height": 240,
+        "rotation_degrees": 0.0,
+        "codec": "h264",
+        "duration": 0.5,
+        "fps": 23.999808001535985,
+        "frame_count": 12,
+        "average_fps": 24.0,
+        "variable_frame_rate": false,
+        "extension": ".mp4",
+        "size_bytes": 20619,
+        "container": "mov,mp4,m4a,3gp,3g2,mj2",
+        "pixel_format": "yuv420p",
+        "bitrate_bps": 313616.0,
+        "container_bitrate_bps": 329904.0,
+        "stored_frame_count": 12,
+        "time_origin_seconds": 0.0,
+        "warnings": []
+      },
+      {
+        "width": 320,
+        "height": 240,
+        "coded_width": 320,
+        "coded_height": 240,
+        "rotation_degrees": 0.0,
+        "codec": "h264",
+        "duration": 0.5,
+        "fps": 23.999808001535985,
+        "frame_count": 12,
+        "average_fps": 24.0,
+        "variable_frame_rate": false,
+        "extension": ".mp4",
+        "size_bytes": 20068,
+        "container": "mov,mp4,m4a,3gp,3g2,mj2",
+        "pixel_format": "yuv420p",
+        "bitrate_bps": 304800.0,
+        "container_bitrate_bps": 321088.0,
+        "stored_frame_count": 12,
+        "time_origin_seconds": 0.0,
+        "warnings": []
+      }
+    ],
+    "fresh_analysis": {
+      "status": "completed",
+      "job_id": "de7fca61ff544694a7f55c9aedeac2be",
+      "views": {
+        "A": {
+          "status": "completed",
+          "processing_mode": "fresh_analysis",
+          "automatic_decision": "REVIEW",
+          "assessment": {
+            "schema_version": 1,
+            "scope": "selected_candidate_evidence_and_requested_set_verdict",
+            "summary": "착지 후보 발견 · 라인 판정 보류",
+            "line_verdict": "REVIEW",
+            "candidate_count": 12,
+            "requested_candidate_count": 12,
+            "selected_event_id": "event_000",
+            "localization_kind": "observed_object_center",
+            "stages": [
+              {
+                "id": "candidate",
+                "label": "착지 후보 위치",
+                "status": "found",
+                "status_label": "후보 발견",
+                "detail": "실제 추적 관측에서 물체 중심을 찾았습니다. 코르크의 바닥 접촉점과 다를 수 있습니다.",
+                "reason_codes": []
+              },
+              {
+                "id": "contact",
+                "label": "최초 바닥 접촉",
+                "status": "blocked",
+                "status_label": "확인 필요",
+                "detail": "움직임이나 반동만으로 최초 바닥 접촉을 확정할 수 없습니다. 접촉 구간의 원본 근거가 필요합니다.",
+                "reason_codes": [
+                  "FIRST_CONTACT_NOT_OBSERVED",
+                  "CONTACT_EVIDENCE_UNCERTAIN"
+                ]
+              },
+              {
+                "id": "identity",
+                "label": "대상 셔틀 식별",
+                "status": "blocked",
+                "status_label": "확인 필요",
+                "detail": "후보가 해당 랠리의 셔틀인지 확정하지 못했습니다. 다른 물체나 다른 코트의 움직임일 수 있습니다.",
+                "reason_codes": [
+                  "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+                ]
+              },
+              {
+                "id": "calibration",
+                "label": "코트 보정 근거",
+                "status": "blocked",
+                "status_label": "확인 필요",
+                "detail": "라인 위치를 판정할 코트 보정 근거가 부족합니다. 코트 선, 촬영 범위와 카메라 움직임을 확인해야 합니다.",
+                "reason_codes": [
+                  "CALIBRATION_NOT_ACCEPTED",
+                  "CALIBRATION_SUPPORT_INSUFFICIENT"
+                ]
+              },
+              {
+                "id": "event",
+                "label": "판정 대상 사건",
+                "status": "blocked",
+                "status_label": "확인 필요",
+                "detail": "여러 후보가 남아 하나의 최초 착지 사건으로 확정하지 못했습니다. 화면의 대표 후보만으로 전체 판정을 확정하지 않습니다.",
+                "reason_codes": [
+                  "MULTIPLE_LANDING_CANDIDATES"
+                ]
+              },
+              {
+                "id": "geometry",
+                "label": "라인 경계와 위치 오차",
+                "status": "not_evaluated",
+                "status_label": "아직 평가하지 않음",
+                "detail": "접촉·대상 식별·코트 보정 조건이 확인되면 라인과 위치 오차를 비교합니다.",
+                "reason_codes": []
+              }
+            ],
+            "blocking_stages": [
+              "contact",
+              "identity",
+              "calibration",
+              "event"
+            ],
+            "reason_codes": [
+              "CALIBRATION_NOT_ACCEPTED",
+              "CALIBRATION_SUPPORT_INSUFFICIENT",
+              "CONTACT_EVIDENCE_UNCERTAIN",
+              "FIRST_CONTACT_NOT_OBSERVED",
+              "MULTIPLE_LANDING_CANDIDATES",
+              "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+            ],
+            "selected_reason_codes": [
+              "FIRST_CONTACT_NOT_OBSERVED",
+              "CALIBRATION_NOT_ACCEPTED",
+              "TARGET_SHUTTLE_IDENTITY_UNCERTAIN",
+              "CONTACT_EVIDENCE_UNCERTAIN",
+              "CALIBRATION_SUPPORT_INSUFFICIENT"
+            ],
+            "changes_decision": false
+          },
+          "execution": {
+            "requested_device": "cpu",
+            "detector_device": "cpu",
+            "gpu_stages": [],
+            "cpu_stages": [
+              "video_decode",
+              "calibration",
+              "connected_components",
+              "tracking",
+              "evidence"
+            ],
+            "automatic_cpu_fallback": false
+          }
+        },
+        "B": {
+          "status": "completed",
+          "processing_mode": "fresh_analysis",
+          "automatic_decision": "REVIEW",
+          "assessment": {
+            "schema_version": 1,
+            "scope": "selected_candidate_evidence_and_requested_set_verdict",
+            "summary": "착지 후보 발견 · 라인 판정 보류",
+            "line_verdict": "REVIEW",
+            "candidate_count": 12,
+            "requested_candidate_count": 12,
+            "selected_event_id": "event_000",
+            "localization_kind": "observed_object_center",
+            "stages": [
+              {
+                "id": "candidate",
+                "label": "착지 후보 위치",
+                "status": "found",
+                "status_label": "후보 발견",
+                "detail": "실제 추적 관측에서 물체 중심을 찾았습니다. 코르크의 바닥 접촉점과 다를 수 있습니다.",
+                "reason_codes": []
+              },
+              {
+                "id": "contact",
+                "label": "최초 바닥 접촉",
+                "status": "blocked",
+                "status_label": "확인 필요",
+                "detail": "움직임이나 반동만으로 최초 바닥 접촉을 확정할 수 없습니다. 접촉 구간의 원본 근거가 필요합니다.",
+                "reason_codes": [
+                  "FIRST_CONTACT_NOT_OBSERVED",
+                  "CONTACT_EVIDENCE_UNCERTAIN"
+                ]
+              },
+              {
+                "id": "identity",
+                "label": "대상 셔틀 식별",
+                "status": "blocked",
+                "status_label": "확인 필요",
+                "detail": "후보가 해당 랠리의 셔틀인지 확정하지 못했습니다. 다른 물체나 다른 코트의 움직임일 수 있습니다.",
+                "reason_codes": [
+                  "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+                ]
+              },
+              {
+                "id": "calibration",
+                "label": "코트 보정 근거",
+                "status": "blocked",
+                "status_label": "확인 필요",
+                "detail": "라인 위치를 판정할 코트 보정 근거가 부족합니다. 코트 선, 촬영 범위와 카메라 움직임을 확인해야 합니다.",
+                "reason_codes": [
+                  "CALIBRATION_NOT_ACCEPTED",
+                  "CALIBRATION_SUPPORT_INSUFFICIENT"
+                ]
+              },
+              {
+                "id": "event",
+                "label": "판정 대상 사건",
+                "status": "blocked",
+                "status_label": "확인 필요",
+                "detail": "여러 후보가 남아 하나의 최초 착지 사건으로 확정하지 못했습니다. 화면의 대표 후보만으로 전체 판정을 확정하지 않습니다.",
+                "reason_codes": [
+                  "MULTIPLE_LANDING_CANDIDATES"
+                ]
+              },
+              {
+                "id": "geometry",
+                "label": "라인 경계와 위치 오차",
+                "status": "not_evaluated",
+                "status_label": "아직 평가하지 않음",
+                "detail": "접촉·대상 식별·코트 보정 조건이 확인되면 라인과 위치 오차를 비교합니다.",
+                "reason_codes": []
+              }
+            ],
+            "blocking_stages": [
+              "contact",
+              "identity",
+              "calibration",
+              "event"
+            ],
+            "reason_codes": [
+              "CALIBRATION_NOT_ACCEPTED",
+              "CALIBRATION_SUPPORT_INSUFFICIENT",
+              "CONTACT_EVIDENCE_UNCERTAIN",
+              "FIRST_CONTACT_NOT_OBSERVED",
+              "MULTIPLE_LANDING_CANDIDATES",
+              "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+            ],
+            "selected_reason_codes": [
+              "FIRST_CONTACT_NOT_OBSERVED",
+              "CALIBRATION_NOT_ACCEPTED",
+              "TARGET_SHUTTLE_IDENTITY_UNCERTAIN",
+              "CONTACT_EVIDENCE_UNCERTAIN",
+              "CALIBRATION_SUPPORT_INSUFFICIENT"
+            ],
+            "changes_decision": false
+          },
+          "execution": {
+            "requested_device": "cpu",
+            "detector_device": "cpu",
+            "gpu_stages": [],
+            "cpu_stages": [
+              "video_decode",
+              "calibration",
+              "connected_components",
+              "tracking",
+              "evidence"
+            ],
+            "automatic_cpu_fallback": false
+          }
+        }
+      }
+    }
+  },
+  "passed": true,
+  "finished_at": "2026-11-14T00:38:52.199265+00:00"
+}

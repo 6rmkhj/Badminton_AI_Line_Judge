@@ -1,0 +1,8 @@
+{
+  "scope": "Controlled launcher re-execution test with a fake Windows sys object and os.execv spy; no Windows binary executed",
+  "passed": true,
+  "launcher_sha256": "10955d493fa0aa1b399bb86b2419eb449826bc3b38741437bc864b411bf738ab",
+  "prepared_venv_selected_before_dependency_import": true,
+  "paths_with_spaces_and_korean_handled": true,
+  "utf8_and_arguments_preserved": true
+}

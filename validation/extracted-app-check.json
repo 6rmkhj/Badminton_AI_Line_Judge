@@ -1,0 +1,13 @@
+{
+  "scope": "Read-only validation of actual ZIP-extracted application and launch script after Linux HTTP smoke",
+  "passed": true,
+  "app_version": "0.5.7",
+  "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+  "source_worktree_dirty": false,
+  "application_files_matching_declared_hashes": 717,
+  "portable_launcher_matches_controlled_venv_test": true,
+  "app_source_not_modified_by_smoke": true,
+  "linux_smoke_report": "final-smoke/smoke.json",
+  "windows_binary_execution": false,
+  "gpu_hardware_execution": false
+}

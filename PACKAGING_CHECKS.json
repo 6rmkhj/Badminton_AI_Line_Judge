@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "version": "0.5.7",
+  "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+  "source_worktree_dirty": false,
+  "passed": true,
+  "scope": "Runtime inventory and SHA/CRC/path checks, exact extracted application hashes, Linux HTTP smoke, and controlled Windows launcher re-execution simulation. Windows executables and GPU hardware were not run.",
+  "engine_python_files_matching_frozen_source": 35,
+  "application_files_sha256_verified": 717,
+  "included_reports": {
+    "runtime-audit.json": {
+      "path": "validation/runtime-audit.json",
+      "sha256": "66d33ff8cc24b574d51f1374143db70ebe976313e342c6915f8912d39a1a2931"
+    },
+    "launcher.json": {
+      "path": "validation/launcher.json",
+      "sha256": "de2720016e5d5dac95d3cfce2a86f3716f89ff421c7694c92b72aed0aa70b0eb"
+    },
+    "extracted-app-check.json": {
+      "path": "validation/extracted-app-check.json",
+      "sha256": "5f3e888781b8400d7c942c7f54caf9780d70d906ccb722dde8913fec3a197f49"
+    },
+    "final-smoke/smoke.json": {
+      "path": "validation/final-smoke/smoke.json",
+      "sha256": "0ad63ed259be0fe41f66ab1c083a6578267747190fb957942859c1c6674b8bc9"
+    }
+  },
+  "application_payload_sha256": "edc1d74e9519e4179c21064aef09045646354c47c247353c263cb3edb34aa3a4",
+  "payload_manifest_sha256": "2f7b5c5469893555c645603a0ba61cf7b7a6627fca85fc7024ec661ba5a4b525",
+  "original_game_videos_included": false,
+  "windows_executables_tested": false,
+  "gpu_hardware_tested": false
+}

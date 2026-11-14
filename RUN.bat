@@ -2,9 +2,14 @@
 setlocal
 chcp 65001 >nul
 cd /d "%~dp0"
+if not exist "%~dp0portable_start.py" goto prepare
+if not exist "%~dp0runtime\python.exe" goto prepare
 set "PYTHONNOUSERSITE=1"
 set "PYTHONPATH="
-"%~dp0runtime\python.exe" -X utf8 "%~dp0portable_start.py"
+"%~dp0runtime\python.exe" -X utf8 "%~dp0portable_start.py" %*
 set "APP_EXIT=%ERRORLEVEL%"
 if not "%APP_EXIT%"=="0" pause
 exit /b %APP_EXIT%
+:prepare
+call "%~dp0START.bat" %*
+exit /b %ERRORLEVEL%
