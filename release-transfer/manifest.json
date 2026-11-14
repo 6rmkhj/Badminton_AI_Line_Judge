@@ -1,0 +1,22 @@
+{
+  "source": {
+    "head": "29a2679b95a3ea6185818086307d394abe563eb1",
+    "parent": "823e986649ecf023150d9806a54c2e3a1372e6be",
+    "bytes": 181149,
+    "sha256": "b5403217f9fa393c92aee6aaef463dff064298fb4ef1e04591128bb88be783b1",
+    "thin": false
+  },
+  "payload": {
+    "head": "c298c0e4d277713d901b74a4e2a216432393d430",
+    "parent": "30cf899797df4b2543d530a831a825f9ae026d3d",
+    "base": "30cf899797df4b2543d530a831a825f9ae026d3d",
+    "bytes": 274074,
+    "sha256": "06dcd22b8f62d8e3c120b0002249dbbee2e585e9eeaba533cd59bbd9f61d3a76",
+    "thin": true
+  },
+  "tag": {
+    "name": "v0.5.13",
+    "object": "deaf7a41c841d4ca0ff598ea909f2cbb3d2368d5",
+    "sha256": "e0b07bee585e0d18c38e0fbae38cede795438585e78739a71a1d8560ab17ac32"
+  }
+}

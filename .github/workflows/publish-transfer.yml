@@ -1,0 +1,91 @@
+name: Restore exact 0.5.13 commits, verify Windows, and publish
+
+on:
+  push:
+    branches: [downloads/publish-0.5.13-transfer]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-windows-v0.5.13
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: true
+      - name: Restore verified Git objects and atomically publish approved refs
+        run: python3 release-transfer/promote.py
+
+  windows:
+    needs: promote
+    runs-on: windows-2022
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c298c0e4d277713d901b74a4e2a216432393d430
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare isolated test dependency location
+        shell: pwsh
+        run: |
+          $testingDeps = Join-Path $env:RUNNER_TEMP "badminton-testing-deps-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          "BADMINTON_TESTING_DEPS=$testingDeps" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Install isolated pure-Python test harness
+        run: >-
+          python -m pip install --disable-pip-version-check --no-deps --only-binary=:all:
+          --target "$env:BADMINTON_TESTING_DEPS" -r release/native_geometry_requirements.txt
+      - name: Test startup, geometry, and real videos with the bundled native runtime
+        run: python release/validate_windows.py
+      - name: Preserve Windows validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-start-validation
+          path: reports/windows-0.5.13-validation.json
+          if-no-files-found: warn
+      - name: Preserve real Windows evidence images and replays
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-analysis-evidence
+          path: |
+            reports/windows-full-analysis.json
+            reports/한글 분석 검증/* 결과/result.json
+            reports/한글 분석 검증/* 결과/overview.jpg
+            reports/한글 분석 검증/* 결과/evidence/**
+          if-no-files-found: warn
+
+  publish:
+    needs: windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c298c0e4d277713d901b74a4e2a216432393d430
+          persist-credentials: false
+      - name: Reassemble and verify the existing package
+        run: python3 release/assemble.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-start-validation
+          path: dist
+      - name: Publish verified package, checksum, and Windows report
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python3 release/publish_release.py

@@ -1,20 +1,20 @@
-name: Verify Windows startup and publish 0.5.12
+name: Verify Windows video analysis and publish 0.5.13
 
 on:
   push:
-    branches: [downloads/windows-portable-0.5.12]
+    branches: [downloads/windows-portable-0.5.13]
 
 permissions:
   contents: read
 
 concurrency:
-  group: publish-windows-v0.5.12
+  group: publish-windows-v0.5.13
   cancel-in-progress: false
 
 jobs:
   windows:
     runs-on: windows-2022
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,14 +31,25 @@ jobs:
         run: >-
           python -m pip install --disable-pip-version-check --no-deps --only-binary=:all:
           --target "$env:BADMINTON_TESTING_DEPS" -r release/native_geometry_requirements.txt
-      - name: Test package startup and geometry with the bundled native runtime
+      - name: Test startup, geometry, and real videos with the bundled native runtime
         run: python release/validate_windows.py
-      - name: Preserve Windows startup evidence
+      - name: Preserve Windows validation evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: windows-start-validation
-          path: reports/windows-0.5.12-validation.json
+          path: reports/windows-0.5.13-validation.json
+          if-no-files-found: warn
+      - name: Preserve real Windows evidence images and replays
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-analysis-evidence
+          path: |
+            reports/windows-full-analysis.json
+            reports/한글 분석 검증/* 결과/result.json
+            reports/한글 분석 검증/* 결과/overview.jpg
+            reports/한글 분석 검증/* 결과/evidence/**
           if-no-files-found: warn
 
   publish:
