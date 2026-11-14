@@ -20,6 +20,8 @@
 
 **[Windows 64비트 실행 패키지 0.5.13 다운로드](https://github.com/6rmkhj/Badminton_AI_Line_Judge/releases/download/v0.5.13/badminton-windows-0.5.13.zip)**: 한글 경로에서 근거 사진·영상 생성이 중단되는 오류를 수정하고, 선택적 근거 파일 저장 실패에도 계산된 판정을 보존합니다. [오류 수정·검증 범위](docs/WINDOWS_EVIDENCE_FIX.md)를 확인하세요. 새 폴더에 모두 압축 해제하고 `START.bat`을 실행하세요. Python·기본 분석 의존성·FFmpeg를 포함합니다. NVIDIA GPU를 사용하려면 서버를 종료하고 `SETUP_GPU.bat`으로 GPU 실행 환경을 준비한 뒤 다시 실행하세요. GPU 준비에는 인터넷과 호환 드라이버가 필요합니다. [패키지 사용법과 검증 범위](docs/WINDOWS_PACKAGE.md)를 확인하세요.
 
+**PyTorch CPU 포함판**도 별도로 생성할 수 있습니다. `badminton-windows-pytorch-cpu-0.5.13.zip`은 PyTorch 2.10.0+cpu와 필수 의존성을 함께 담아 `START.bat` 실행 시 추가 설치 없이 사용합니다. 학습된 모델은 별도로 준비해야 합니다. [포함 범위·빌드·Windows 검증 방법](docs/WINDOWS_PACKAGE.md#pytorch-cpu-포함판)을 확인하세요.
+
 0.5.5에서는 **분석 전 장치 설정 창**과 **입력 영상 정보**를 추가했습니다. `python start.py --pair` 또는 기존 A/B 실행기를 열면 서버 컴퓨터의 OS·CPU·메모리·GPU를 확인하고, 시점당 OpenCV/영상 처리 스레드, A/B 순차·동시 처리, 전체 프레임 버퍼 예산(MiB)을 정합니다. 설정을 확인하기 전에는 분석 API도 실행을 차단하며, 대기·진행 중에는 설정을 바꿀 수 없습니다. 같은 환경의 설정은 실행 폴더에 저장되지만 서버 재시작마다 다시 확인합니다.
 
 0.5.5의 초기 장치 설정은 CPU 실행만 지원했으며, 0.5.6부터 아래 GPU 실행을 지원합니다. 스레드 수는 전체 CPU 사용률 상한이 아니며, 프레임 버퍼 예산은 프로그램 전체 RAM 상한이 아닙니다. 동시 처리 시 예산을 두 시점에 나누고, 초과 영상은 프레임을 생략하지 않고 사유와 함께 중단합니다. 순차 처리로 바꾸거나 예산을 늘려 다시 실행할 수 있습니다.

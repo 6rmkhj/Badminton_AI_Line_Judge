@@ -4,12 +4,15 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import hashlib
+import importlib.util
 import json
+from email.parser import BytesParser
 from pathlib import Path, PurePosixPath
 import re
 import shutil
 import stat
 import subprocess
+import tempfile
 import tomllib
 import zipfile
 
@@ -21,6 +24,9 @@ RUNTIME_FILES = (
     '06-ffmpeg.zip', '07-ffprobe.zip', '09-runtime-notes.zip',
 )
 APPLICATION = '08-application.zip'
+PYTORCH_PAYLOAD = '10-pytorch_cpu.zip'
+MSVCP_SOURCE = 'runtime/Lib/site-packages/numpy.libs/msvcp140-263139962577ecda4cd9469ca360a746.dll'
+MSVCP_SHA256 = 'a4c2229bdc2a2a630acdc095b4d86008e5c3e3bc7773174354f3da4f5beb9cde'
 SOURCE_FOLDERS = {'badminton', 'configs', 'docs', 'examples', 'scripts', 'tests', 'annotations'}
 SOURCE_ROOTS = {'README.md', 'pyproject.toml', 'start.py'}
 DOWNLOAD_URL = ('https://github.com/6rmkhj/Badminton_AI_Line_Judge/'
@@ -37,6 +43,31 @@ def sha256(path):
         for block in iter(lambda: stream.read(1024 * 1024), b''):
             digest.update(block)
     return digest.hexdigest()
+
+
+def add_pytorch_msvc(runtime_base, destination, existing_files):
+    """Reuse the base's Microsoft runtime under the name PyTorch imports.
+
+    NumPy ships this redistributable with a hashed filename; torch_cpu.dll
+    imports MSVCP140.dll literally. Keep its bytes and original attribution.
+    """
+    with zipfile.ZipFile(runtime_base / 'payload/03-numpy.zip') as archive:
+        try:
+            content = archive.read(MSVCP_SOURCE)
+        except KeyError as error:
+            raise ValueError('Base NumPy payload is missing the checked MSVCP140 runtime') from error
+    if hashlib.sha256(content).hexdigest() != MSVCP_SHA256:
+        raise ValueError('Base MSVCP140 runtime hash mismatch')
+    target = 'runtime/Lib/site-packages/torch/lib/msvcp140.dll'
+    if target.casefold() in existing_files:
+        raise ValueError('PyTorch MSVCP140 runtime already exists')
+    with zipfile.ZipFile(destination, 'a', zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+        archive.writestr(target, content)
+    existing_files.add(target.casefold())
+    return {'file': target, 'sha256': MSVCP_SHA256, 'bytes': len(content),
+            'source_payload': '03-numpy.zip', 'source_entry': MSVCP_SOURCE,
+            'version': '14.40.33810.0', 'copyright': 'Microsoft Corporation. All rights reserved.',
+            'redistribution_conditions': 'licenses/Python-LICENSE.txt: Additional Conditions for this Windows binary build'}
 
 
 def reject_symlinks(path):
@@ -89,6 +120,8 @@ def source_files(project):
     # Include the builder and its usage guide even during a first, uncommitted
     # packaging dry run. All other inputs must already be Git-tracked.
     names.update({'scripts/package_windows_portable.py', 'docs/WINDOWS_PACKAGE.md'})
+    if (project / 'scripts/portable_pytorch.py').is_file():
+        names.add('scripts/portable_pytorch.py')
     files, seen = {}, set()
     for name in sorted(names):
         relative = PurePosixPath(name)
@@ -124,8 +157,8 @@ def source_files(project):
     return files
 
 
-def portable_start():
-    return '''"""Launch the Windows A/B workspace using its prepared GPU or CPU runtime."""
+def portable_start(pytorch=False):
+    source = '''"""Launch the Windows A/B workspace using its prepared GPU or CPU runtime."""
 from pathlib import Path
 import importlib
 import os
@@ -150,6 +183,7 @@ try:
     print('배드민턴 A/B 영상 분석을 준비합니다.', flush=True)
     for module in ('numpy', 'cv2', 'scipy', 'filelock'):
         importlib.import_module(module)
+    # PYTORCH_CHECK
     options = {'capture_output': True, 'text': True, 'encoding': 'utf-8', 'errors': 'replace', 'timeout': 30, 'check': True}
     encoders = subprocess.run([str(root / 'tools/ffmpeg.exe'), '-hide_banner', '-encoders'], **options)
     if 'libx264' not in encoders.stdout:
@@ -168,16 +202,26 @@ except Exception:
     print('실행하지 못했습니다. 같은 폴더의 startup-error.log를 확인해 주세요.', file=sys.stderr)
     print(error, file=sys.stderr)
     raise SystemExit(1)
-'''.encode('utf-8')
+'''
+    check = '''import torch
+    with torch.inference_mode():
+        value = torch.ones(2, device='cpu').sum().item()
+        if value != 2:
+            raise RuntimeError('PyTorch CPU 연산 확인에 실패했습니다.')
+    print(f'PyTorch {torch.__version__} CPU 연산 확인 완료.', flush=True)'''
+    return source.replace('# PYTORCH_CHECK', check if pytorch else '').encode('utf-8')
 
 
 def batch_bytes(text):
     return text.replace('\r\n', '\n').replace('\n', '\r\n').encode('utf-8')
 
 
-def start_batch(version):
+def start_batch(version, pytorch=False):
     # Validate every payload before first extraction or launch. The marker binds
     # extraction to this exact payload manifest, not just a loose version file.
+    names = sorted((*RUNTIME_FILES, APPLICATION, *((PYTORCH_PAYLOAD,) if pytorch else ())))
+    expected_names = ','.join("'" + name + "'" for name in names)
+    count_message = 'Expected ten payload archives' if pytorch else 'Expected nine payload archives'
     prepare = (
         "$ErrorActionPreference='Stop'; "
         "$manifest='PAYLOAD_CHECKSUMS.json'; "
@@ -185,9 +229,10 @@ def start_batch(version):
         # Assign it first so @() cannot wrap that output in a second array.
         "$items=Get-Content -LiteralPath $manifest -Raw -Encoding UTF8 | ConvertFrom-Json; "
         "$items=@($items); "
-        "if($items.Count -ne 9){throw 'Expected nine payload archives'}; "
+        f"if($items.Count -ne {len(names)}){{throw '{count_message}'}}; "
+        f"$expected=@({expected_names}); "
         "$seen=@{}; foreach($item in $items){ "
-        "if($item.file -notmatch '^(0[1-9])-[a-z_-]+[.]zip$' -or $seen.ContainsKey($item.file)){throw 'Invalid payload name'}; "
+        "if($item.file -cnotin $expected -or $seen.ContainsKey($item.file)){throw 'Invalid payload name'}; "
         "$seen[$item.file]=$true; $path=Join-Path 'payload' $item.file; "
         "if(!(Test-Path -LiteralPath $path -PathType Leaf)){throw ('Missing '+$path)}; "
         "if((Get-Item -LiteralPath $path).Length -ne $item.bytes){throw ('Size mismatch: '+$path)}; "
@@ -260,8 +305,13 @@ exit /b %GPU_SETUP_EXIT%
 ''')
 
 
-def usage_text(version, validation_report='docs/WINDOWS_PACKAGE.md'):
+def usage_text(version, validation_report='docs/WINDOWS_PACKAGE.md', pytorch=False):
+    variant = ('PyTorch CPU 포함판: PyTorch 2.10.0+cpu와 필요한 의존성을 포함합니다.\n'
+               'PyTorch CPU 추론·학습에 추가 다운로드가 필요하지 않습니다. CUDA는 별도 GPU 설치가 필요합니다.\n'
+               if pytorch else '기본판: PyTorch는 포함하지 않습니다.\n')
     return f'''배드민턴 AI Windows 실행 패키지 {version}
+
+{variant}
 
 Windows 64비트용입니다. 다운로드 ZIP을 새 폴더에 전부 압축 해제한 뒤 START.bat를 실행하세요.
 첫 실행에서는 구성 파일의 SHA256을 확인하고 포함된 실행 환경을 압축 해제합니다.
@@ -293,7 +343,8 @@ GPU 메모리 오류는 자동 CPU 전환 없이 사유를 표시합니다. 설�
 '''.encode('utf-8-sig')
 
 
-def build(runtime_base, output_dir, archive_path, project=PROJECT, *, validation_report='docs/WINDOWS_PACKAGE.md'):
+def build(runtime_base, output_dir, archive_path, project=PROJECT, *, validation_report='docs/WINDOWS_PACKAGE.md',
+          pytorch_wheels=None):
     runtime_base, output_dir, archive_path = (Path(p).absolute() for p in (runtime_base, output_dir, archive_path))
     for path in (runtime_base, output_dir, archive_path):
         reject_symlinks(path)
@@ -351,12 +402,42 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT, *, validation
             raise ValueError('Runtime distribution is missing its licenses')
         for name in license_names:
             files[name] = old_app.read(name)
-    files['portable_start.py'] = portable_start()
-    files['사용방법.txt'] = usage_text(version, validation_report)
+    provenance = old_manifest.get('reused_runtime_provenance') or {
+        key: old_manifest.get(key) for key in ('python', 'windows_wheels', 'ffmpeg')}
+    pytorch = pytorch_wheels is not None
+    torch_metadata = None
+    torch_payload = None
+    if pytorch:
+        python_version = (provenance.get('python') or {}).get('version', '')
+        if python_version != '3.12.10':
+            raise ValueError('PyTorch CPU payload requires the checked Python 3.12.10 runtime')
+        bundled_versions = {}
+        for name in RUNTIME_FILES:
+            with zipfile.ZipFile(runtime_base / 'payload' / name) as archive:
+                for entry in archive.namelist():
+                    if entry.endswith('.dist-info/METADATA'):
+                        metadata = BytesParser().parsebytes(archive.read(entry))
+                        bundled_versions[metadata['Name']] = metadata['Version']
+        spec = importlib.util.spec_from_file_location('portable_pytorch', Path(__file__).with_name('portable_pytorch.py'))
+        helper = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(helper)
+        # Validate and create the optional payload before writing any outputs.
+        with tempfile.TemporaryDirectory(prefix='badminton-pytorch-') as folder:
+            temporary = Path(folder) / PYTORCH_PAYLOAD
+            torch_metadata = helper.prepare_payload(
+                pytorch_wheels, temporary, runtime_names, safe_name=safe_name,
+                inspect_zip=inspect_zip, bundled_versions=bundled_versions)
+            torch_metadata['native_runtime'] = add_pytorch_msvc(runtime_base, temporary, runtime_names)
+            inspect_zip(temporary)
+            torch_payload = temporary.read_bytes()
+        expected.add(PYTORCH_PAYLOAD)
+    files['portable_start.py'] = portable_start(pytorch)
+    files['사용방법.txt'] = usage_text(version, validation_report, pytorch)
     files['PACKAGE_VALIDATION.txt'] = (
         f'패키지 검증 범위 — {version}\n\n'
         '- 빌더에서 기존 런타임 8개와 이전 앱 ZIP의 SHA256·크기·CRC를 검증했습니다.\n'
         '- 런타임 01~07·09는 바이트 그대로 재사용하며 08 앱만 최신 소스로 재생성합니다.\n'
+        + ('- 10-pytorch_cpu.zip에 Windows Python 3.12용 CPU PyTorch와 의존성을 추가했습니다.\n' if pytorch else '') +
         '- 앱 파일별 해시·소스 커밋·런타임 출처를 함께 기록했습니다.\n'
         '- 이 빌더는 자동 테스트나 영상 평가를 실행하지 않습니다.\n'
         f'- 현재 소스의 테스트·영상 평가 기록은 app/{validation_report}에 있습니다.\n'
@@ -367,6 +448,8 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT, *, validation
     manifest = {
         'schema_version': 1, 'name': 'Badminton AI Windows portable',
         'app_version': version, 'platform': 'Windows x86_64', 'entrypoint': 'START.bat',
+        'package_variant': 'pytorch-cpu' if pytorch else 'standard',
+        'pytorch': torch_metadata,
         'built_at_utc': datetime.now(timezone.utc).isoformat(),
         'source_repository': 'https://github.com/6rmkhj/Badminton_AI_Line_Judge',
         'source_commit': commit, 'source_worktree_dirty': dirty,
@@ -376,7 +459,7 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT, *, validation
         'runtime_base_commit': runtime_commit,
         'runtime_base_manifest_sha256': sha256(manifest_path),
         'reused_runtime_payloads': [by_name[name] for name in RUNTIME_FILES],
-        'reused_runtime_provenance': {key: old_manifest.get(key) for key in ('python', 'windows_wheels', 'ffmpeg')},
+        'reused_runtime_provenance': provenance,
         'preserved_runtime_license_files': license_names,
         'original_videos_included': False, 'full_analysis_runs_included': False,
         'trained_pytorch_models_included': False,
@@ -386,7 +469,7 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT, *, validation
         'windows_executable_runtime_tested_in_this_linux_environment': False,
         'validation_report': 'app/' + validation_report,
         'tests_run_by_package_builder': False,
-        'download_url': DOWNLOAD_URL.format(version=version),
+        'download_url': None if pytorch else DOWNLOAD_URL.format(version=version),
     }
     files['PACKAGE_MANIFEST.json'] = json_bytes(manifest)
     files['APP_FILE_CHECKSUMS.json'] = json_bytes({name: hashlib.sha256(data).hexdigest()
@@ -404,6 +487,8 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT, *, validation
         shutil.copyfile(runtime_base / 'payload' / name, payload / name)
         if sha256(payload / name) != by_name[name]['sha256']:
             raise ValueError(f'Copied runtime changed: {name}')
+    if torch_payload is not None:
+        (payload / PYTORCH_PAYLOAD).write_bytes(torch_payload)
     with zipfile.ZipFile(payload / APPLICATION, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
         for name, data in sorted(files.items()):
             archive.writestr(name, data)
@@ -411,16 +496,17 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT, *, validation
     new_entries = [{'file': name, 'bytes': (payload / name).stat().st_size,
                     'sha256': sha256(payload / name)} for name in sorted(expected)]
     (output_dir / 'PAYLOAD_CHECKSUMS.json').write_bytes(json_bytes(new_entries))
-    root_files = {'START.bat': start_batch(version), 'RUN.bat': run_batch(),
-                  'SETUP_GPU.bat': gpu_batch(), '사용방법.txt': usage_text(version, validation_report),
+    root_files = {'START.bat': start_batch(version, pytorch), 'RUN.bat': run_batch(),
+                  'SETUP_GPU.bat': gpu_batch(), '사용방법.txt': usage_text(version, validation_report, pytorch),
                   'README.md': (f'# 배드민턴 AI Windows {version}\n\n'
+                                + ('PyTorch 2.10.0+cpu 포함판입니다. CPU 추론·학습용이며 학습된 모델은 별도로 준비하세요.\n\n' if pytorch else '') +
                                 'ZIP 전체를 새 폴더에 압축 해제한 뒤 `START.bat`를 실행하세요.\n\n'
                                 'NVIDIA GPU 준비는 `SETUP_GPU.bat`를 실행하세요. 인터넷과 지원 드라이버가 필요합니다.\n\n'
                                 '자세한 실행 방법과 검증 한계는 `사용방법.txt`에 있습니다.\n').encode('utf-8')}
     for name, data in root_files.items():
         (output_dir / name).write_bytes(data)
     archive_path.parent.mkdir(parents=True, exist_ok=True)
-    prefix = f'badminton-windows-{version}'
+    prefix = f'badminton-windows-{"pytorch-cpu-" if pytorch else ""}{version}'
     with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_STORED) as archive:
         for path in sorted(output_dir.rglob('*')):
             if path.is_file():
@@ -433,6 +519,7 @@ def build(runtime_base, output_dir, archive_path, project=PROJECT, *, validation
                'sha256': digest, 'output_dir': str(output_dir), 'source_commit': commit,
                'source_worktree_dirty': dirty, 'source_snapshot_sha256': source_digest,
                'app_version': version, 'runtime_payloads_reused': len(RUNTIME_FILES),
+               'package_variant': manifest['package_variant'],
                'application_source_files': len(source_hashes), 'windows_runtime_executed': False}
     return receipt
 
@@ -444,10 +531,12 @@ def main(argv=None):
     parser.add_argument('--zip', dest='archive_path', type=Path, required=True)
     parser.add_argument('--validation-report', default='docs/WINDOWS_PACKAGE.md',
                         help='Included docs/ report describing validation of this source revision')
+    parser.add_argument('--pytorch-wheels', type=Path,
+                        help='Add offline CPU PyTorch from Windows Python 3.12 wheels in this directory')
     args = parser.parse_args(argv)
     try:
         receipt = build(args.runtime_base, args.output_dir, args.archive_path,
-                        validation_report=args.validation_report)
+                        validation_report=args.validation_report, pytorch_wheels=args.pytorch_wheels)
     except (OSError, ValueError, zipfile.BadZipFile, subprocess.CalledProcessError) as error:
         parser.exit(1, f'Package build failed: {error}\n')
     print(json.dumps(receipt, ensure_ascii=False, indent=2))

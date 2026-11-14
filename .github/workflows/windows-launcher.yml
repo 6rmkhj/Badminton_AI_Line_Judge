@@ -2,10 +2,13 @@ name: Windows launcher compatibility
 
 on:
   push:
-    branches: [codex/court-line-calibration]
+    branches: [codex/court-line-calibration, codex/pytorch-portable]
     paths:
       - scripts/package_windows_portable.py
+      - scripts/portable_pytorch.py
+      - scripts/verify_windows_portable.py
       - tests/test_windows_package.py
+      - tests/test_portable_pytorch.py
       - .github/workflows/windows-launcher.yml
   workflow_dispatch:
 
@@ -32,6 +35,98 @@ jobs:
           $PSVersionTable | Format-Table
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
       - name: Install test runner
-        run: python -m pip install pytest
+        run: python -m pip install pytest packaging
       - name: Run packaging and actual Windows launcher regression tests
-        run: python -m pytest -q tests/test_windows_package.py
+        run: python -m pytest -q tests/test_windows_package.py tests/test_portable_pytorch.py
+
+  pytorch-cpu-package:
+    needs: launcher
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            badminton
+            configs
+            docs
+            examples
+            scripts
+            tests
+            annotations
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install package builder dependencies
+        run: python -m pip install packaging
+      - name: Download and check the published base runtime
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $buildRoot = Join-Path $env:RUNNER_TEMP 'badminton-pytorch'
+          New-Item -ItemType Directory -Path $buildRoot | Out-Null
+          "PYTORCH_BUILD_ROOT=$buildRoot" >> $env:GITHUB_ENV
+          gh release download v0.5.13 --repo $env:GITHUB_REPOSITORY --pattern 'badminton-windows-0.5.13.zip*' --dir $buildRoot
+          if ($LASTEXITCODE -ne 0) { throw 'Base release download failed' }
+          $baseZip = Join-Path $buildRoot 'badminton-windows-0.5.13.zip'
+          $checksum = ((Get-Content -LiteralPath "$baseZip.sha256" -Raw).Trim() -split '\s+')[0]
+          $expected = '2b9bd45e91ad09cee2597e4fdb9de20821015707f04eea24cdc7169a25d3ded7'
+          if ($checksum -ne $expected -or (Get-FileHash -LiteralPath $baseZip -Algorithm SHA256).Hash -ne $expected) { throw 'Base ZIP SHA256 mismatch' }
+          Expand-Archive -LiteralPath $baseZip -DestinationPath (Join-Path $buildRoot 'base')
+          "PYTORCH_PACKAGE_ROOT=$(Join-Path $buildRoot '한글 package/badminton-windows-pytorch-cpu-0.5.13')" >> $env:GITHUB_ENV
+      - name: Download the pinned Windows CPU PyTorch wheel
+        run: >-
+          python -m pip download --only-binary=:all: --no-deps
+          --platform win_amd64 --python-version 312 --implementation cp --abi cp312
+          --index-url https://download.pytorch.org/whl/cpu
+          --dest "${{ env.PYTORCH_BUILD_ROOT }}/wheels" "torch==2.10.0+cpu"
+      - name: Download pinned PyTorch dependencies
+        run: >-
+          python -m pip download --only-binary=:all: --no-deps
+          --platform win_amd64 --python-version 312 --implementation cp --abi cp312
+          --index-url https://pypi.org/simple
+          --dest "${{ env.PYTORCH_BUILD_ROOT }}/wheels"
+          "typing_extensions==4.16.0" "sympy==1.14.0" "networkx==3.7"
+          "Jinja2==3.1.6" "fsspec==2026.9.0" "mpmath==1.3.0"
+          "MarkupSafe==3.0.3" "setuptools==78.1.0"
+      - name: Build the separate PyTorch CPU ZIP
+        run: >-
+          python scripts/package_windows_portable.py
+          --runtime-base "${{ env.PYTORCH_BUILD_ROOT }}/base/badminton-windows-0.5.13"
+          --pytorch-wheels "${{ env.PYTORCH_BUILD_ROOT }}/wheels"
+          --output-dir "${{ env.PYTORCH_BUILD_ROOT }}/staging"
+          --zip "${{ env.PYTORCH_BUILD_ROOT }}/badminton-windows-pytorch-cpu-0.5.13.zip"
+      - name: Extract the final ZIP into a fresh Korean path
+        shell: pwsh
+        run: |
+          Expand-Archive -LiteralPath (Join-Path $env:PYTORCH_BUILD_ROOT 'badminton-windows-pytorch-cpu-0.5.13.zip') -DestinationPath (Join-Path $env:PYTORCH_BUILD_ROOT '한글 package')
+      - name: Verify bundled startup and CPU tensors without package downloads
+        env:
+          PIP_NO_INDEX: '1'
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          HTTP_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          NO_PROXY: 127.0.0.1,localhost
+        run: >-
+          python scripts/verify_windows_portable.py
+          --package "${{ env.PYTORCH_PACKAGE_ROOT }}"
+          --report "${{ env.PYTORCH_BUILD_ROOT }}/windows-pytorch-cpu-validation.json"
+      - name: Upload verified package, checksum, and report
+        uses: actions/upload-artifact@v4
+        with:
+          name: badminton-windows-pytorch-cpu-0.5.13
+          compression-level: 0
+          if-no-files-found: error
+          path: |
+            ${{ env.PYTORCH_BUILD_ROOT }}/badminton-windows-pytorch-cpu-0.5.13.zip
+            ${{ env.PYTORCH_BUILD_ROOT }}/badminton-windows-pytorch-cpu-0.5.13.zip.sha256
+            ${{ env.PYTORCH_BUILD_ROOT }}/windows-pytorch-cpu-validation.json
+      - name: Upload validation diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-pytorch-cpu-diagnostics
+          if-no-files-found: ignore
+          path: ${{ env.PYTORCH_BUILD_ROOT }}/windows-pytorch-cpu-validation.json
