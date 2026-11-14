@@ -11,9 +11,11 @@ import math
 
 _CONTACT = {"FIRST_CONTACT_NOT_OBSERVED", "CONTACT_OCCLUDED_OR_MISSING", "CONTACT_EVIDENCE_UNCERTAIN"}
 _IDENTITY = {"TARGET_SHUTTLE_IDENTITY_UNCERTAIN"}
-_CALIBRATION = {"CALIBRATION_NOT_ACCEPTED", "MANUAL_CALIBRATION_REFERENCE_ONLY", "CALIBRATION_SUPPORT_INSUFFICIENT"}
+_CALIBRATION = {"CALIBRATION_NOT_ACCEPTED", "MANUAL_CALIBRATION_REFERENCE_ONLY", "CALIBRATION_SUPPORT_INSUFFICIENT",
+                "PRIMARY_COURT_CAMERA_UNSTABLE"}
 _GEOMETRY = {"INVALID_OR_INCOMPLETE_RULE_SELECTION", "INVALID_CONTACT_GEOMETRY_OR_CALIBRATION",
-             "CONTACT_POSITION_UNCERTAINTY_TOO_LARGE", "CONTACT_UNCERTAINTY_OVERLAPS_BOUNDARY"}
+             "CONTACT_POSITION_UNCERTAINTY_TOO_LARGE", "CONTACT_UNCERTAINTY_OVERLAPS_BOUNDARY",
+             "PRIMARY_COURT_RULES_UNSUPPORTED", "CONTACT_OUTSIDE_PRIMARY_COURT_SCOPE"}
 _TERMINAL = {"CONTACT_INSIDE_OR_TOUCHING_VALID_BOUNDARY", "ENTIRE_POSSIBLE_CONTACT_OUTSIDE"}
 _INVALID_CONFIDENCE = "INVALID_CONFIDENCE_VALUE"
 _PRECONDITIONS = _CONTACT | _IDENTITY | _CALIBRATION | {_INVALID_CONFIDENCE}
@@ -104,6 +106,10 @@ def assess_result(result, *, requested_landings=None):
     geometry_status = "blocked" if geometry_reasons else "passed" if code_set & _TERMINAL else "not_evaluated"
     if "CONTACT_UNCERTAINTY_OVERLAPS_BOUNDARY" in geometry_reasons:
         geometry_detail = "접촉 위치의 불확실성 범위가 라인 경계와 겹쳐 IN/OUT을 구분할 수 없습니다."
+    elif "CONTACT_OUTSIDE_PRIMARY_COURT_SCOPE" in geometry_reasons:
+        geometry_detail = "접촉점이 선택한 주 코트의 확인 가능한 범위 밖에 있습니다. 옆 코트나 보이지 않는 먼 영역을 OUT으로 판정하지 않습니다."
+    elif "PRIMARY_COURT_RULES_UNSUPPORTED" in geometry_reasons:
+        geometry_detail = "선택한 부분 코트는 복식 랠리 경계입니다. 단식·서비스 판정에는 해당 경계의 추가 확인이 필요합니다."
     elif geometry_status == "blocked":
         geometry_detail = "규칙 선택, 접촉 좌표, 코트 변환 또는 위치 오차 조건을 충족하지 못했습니다."
     elif geometry_status == "passed":

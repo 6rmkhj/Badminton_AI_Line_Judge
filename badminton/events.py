@@ -412,6 +412,15 @@ def _mark_review_guidance(candidate, regions):
 
 def _target_support(observations, calibration):
     polygon = calibration.get("polygon_px") if isinstance(calibration, dict) else None
+    primary = calibration.get("primary_court") if isinstance(calibration, dict) else None
+    if isinstance(primary, dict):
+        # Prioritize the selected court rather than an unrelated full-template
+        # hypothesis. This image cue never verifies airborne target identity.
+        stability = calibration.get("camera_stability") or {}
+        stable = (stability.get("status") == "ok" and stability.get("all_frames_sampled") is True
+                  and "CAMERA_MOVED_FROM_CALIBRATION_REFERENCE" not in stability.get("reason_codes", []))
+        polygon = (primary.get("interior_polygon_px")
+                   if primary.get("status") == "selected" and stable else None)
     if polygon is None or len(polygon) < 3:
         return 0.0
     contour = np.asarray(polygon, dtype=np.float32).reshape(-1, 2)

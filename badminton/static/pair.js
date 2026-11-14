@@ -674,19 +674,26 @@ function renderCalibration(camera, view) {
   const summary = view.calibration_summary;
   if (!summary || typeof summary !== 'object') return null;
   const panel = el('section', 'evidence-assessment court-calibration');
-  const heading = el('h4', '', '코트 라인 탐지'); heading.id = 'calibration-heading-' + camera.toLowerCase();
+  const heading = el('h4', '', '주 코트와 판정 경계'); heading.id = 'calibration-heading-' + camera.toLowerCase();
   panel.setAttribute('aria-labelledby', heading.id); panel.append(heading);
   const count = Number.isInteger(summary.detected_line_count) && summary.detected_line_count >= 0 ? summary.detected_line_count : 0;
   const found = summary.line_detection_status === 'detected' && count > 0;
   const supported = summary.court_geometry_status === 'supported';
-  panel.append(el('p', 'assessment-summary', `${found ? `직선 후보 ${count}개 탐지` : '직선 후보 미탐지'} · ${supported ? '전체 코트 보정 확인' : '전체 코트 보정 미확인'}`));
+  let status = `${found ? `직선 후보 ${count}개 탐지` : '직선 후보 미탐지'} · ${supported ? '전체 코트 보정 확인' : '전체 코트 보정 미확인'}`;
+  if (summary.primary_court_status === 'selected') {
+    status = `주 코트 선택됨 · ${summary.local_region_supported ? '가까운 코트 영역 판정 설정됨' : '관측 경계 표시'}`;
+    if (summary.camera_moved) status = '주 코트 기준 이미지 · 카메라 이동으로 재설정 필요';
+  } else if (summary.primary_court_status) {
+    status = '주 코트 선택 확인 필요';
+  }
+  panel.append(el('p', 'assessment-summary', status));
   if (typeof summary.detail === 'string') panel.append(el('p', 'assessment-scope', summary.detail));
   const preview = safeUrl(view.calibration_preview_url);
   if (preview) {
     const figure = el('figure', 'trajectory-context');
     const link = el('a'); link.href = preview; link.target = '_blank'; link.rel = 'noopener';
     const image = el('img'); image.src = preview; image.loading = 'lazy';
-    image.alt = camera + ' 시점의 코트 직선 후보와 전체 코트 보정 상태'; link.append(image);
+    image.alt = camera + ' 시점의 주 코트 선택과 관측 판정 경계'; link.append(image);
     figure.append(link, el('figcaption', '', typeof summary.overlay_legend === 'string'
       ? summary.overlay_legend : '하늘색은 탐지한 직선 후보입니다. 코트 보정 확인과 구분해 표시합니다.'));
     panel.append(figure);

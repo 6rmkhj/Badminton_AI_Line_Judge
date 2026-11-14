@@ -16,7 +16,7 @@ from .media import prepare_preview, load_frames, source_crop, SourceFrameSequenc
 def implementation_fingerprint():
     package = Path(__file__).parent
     digest = hashlib.sha256()
-    for name in ('media.py', 'pipeline.py', 'calibration.py', 'detection.py', 'tracking.py',
+    for name in ('media.py', 'pipeline.py', 'calibration.py', 'primary_court.py', 'detection.py', 'tracking.py',
                  'events.py', 'identity.py', 'identity_continuity.py', 'candidate_identity.py',
                  'event_continuity.py', 'event_sequence.py', 'landing_recovery.py', 'observation_support.py', 'scene_context.py',
                  'evidence.py', 'decision.py', 'assessment.py', 'learning.py',
@@ -168,7 +168,7 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     metadata.pop('timestamps', None)
     timings['decode_and_preview_seconds'] = time.perf_counter() - start
     clock = time.perf_counter()
-    report('calibration', detail='코트 선과 카메라 안정성 확인')
+    report('calibration', detail='앞쪽 두 모서리의 주 코트 선택·카메라 안정성 확인')
     calibration_frames = [frames[int(i)] for i in np.linspace(0, len(frames)-1, min(9, len(frames)))]
     calibration = calibrate(calibration_frames, config.get('court_hint'), config.get('calibration'))
     stability = assess_camera_stability(frames, config.get('camera_stability'))

@@ -26,6 +26,11 @@ const makeJob = (id, request) => {
     rationale: 'Synthetic UI fixture only; no analysis was run.', evidence_urls: [], qualified: false,
     calibration_summary: {line_detection_status: camera === 'A' ? 'detected' : 'not_detected',
       detected_line_count: camera === 'A' ? 8 : 0, court_geometry_status: 'unconfirmed',
+      ...(request.views[camera].review_region ? {
+        primary_court_status: camera === 'A' ? 'selected' : 'review',
+        judgment_scope: camera === 'A' ? 'near_half' : null,
+        local_region_supported: camera === 'A',
+      } : {}),
       detail: camera === 'A' ? '직선 후보 8개를 찾았습니다. 전체 코트 좌표 보정은 확인되지 않았습니다.' : '직선 후보를 찾지 못했습니다.'},
   }]));
   return {job_id: id, status: 'completed', request, views,
@@ -107,6 +112,8 @@ const server = http.createServer(async (req, res) => {
     assert(Math.abs(manual.views.A.review_region.width - .55) < .01);
     assert.deepEqual(manual.views.B.review_region, {x: .3, y: .2, width: .55, height: .45});
     assert.equal(manual.reuse_review, false);
+    assert.match(await page.locator('#result-view-a .court-calibration').innerText(), /주 코트 선택됨 · 가까운 코트 영역 판정 설정됨/);
+    assert.match(await page.locator('#result-view-b .court-calibration').innerText(), /주 코트 선택 확인 필요/);
     assert.match(await page.locator('#result-provenance').innerText(), /사용자 지정 영역.*접촉 미확정/);
     await page.reload(); await page.locator('#final-verdict').waitFor(); await ready('b');
     assert.equal(await page.locator('#region-x-b').inputValue(), '30');

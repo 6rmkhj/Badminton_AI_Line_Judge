@@ -188,27 +188,49 @@ def _landing_candidate(result):
 
 
 def _calibration_summary(result):
-    """Separate observable line candidates from an accepted metric court fit."""
+    """Describe selected local boundaries separately from metric court fitting."""
     calibration = result.get("calibration")
     if not isinstance(calibration, dict):
         return None
-    segments = calibration.get("line_segments_px")
+    primary = calibration.get("primary_court")
+    selected = isinstance(primary, dict) and primary.get("status") == "selected"
+    segments = (primary.get("line_segments_px", []) if selected else []
+                if isinstance(primary, dict) else calibration.get("line_segments_px"))
     if not isinstance(segments, list):
-        segments = [region.get("line_segment_px") for region in calibration.get("supported_line_regions_px", [])
-                    if isinstance(region, dict)]
+        segments = ([] if isinstance(primary, dict) else
+                    [region.get("line_segment_px") for region in calibration.get("supported_line_regions_px", [])
+                     if isinstance(region, dict)])
     count = sum(isinstance(segment, (list, tuple)) and len(segment) == 4
                 and all(_finite(value) for value in segment) for segment in segments)
     accepted = calibration.get("status") == "ok" and calibration.get("manual_reference") is not True
     stability = calibration.get("camera_stability") or {}
     moved = "CAMERA_MOVED_FROM_CALIBRATION_REFERENCE" in stability.get("reason_codes", [])
+    stable = stability.get("status") == "ok" and stability.get("all_frames_sampled") is True and not moved
     detail = (f"직선 후보 {count}개를 찾았습니다. " if count else "직선 후보를 찾지 못했습니다. ")
     detail += ("전체 코트 규격과 선 배치가 맞아 좌표 보정 조건을 충족했습니다." if accepted else
                "전체 코트 좌표 보정은 확인되지 않아 라인의 역할과 IN/OUT 경계를 확정할 수 없습니다.")
+    legend = "하늘색: 탐지한 직선 후보 · 노란색: 전체 코트 보정이 확인된 외곽선"
+    if isinstance(primary, dict):
+        if selected:
+            detail = "앞쪽 두 모서리가 보이는 주 코트 하나를 선택했습니다. 선택한 코트의 관측 경계만 표시합니다. "
+            detail += ("옅은 초록 영역은 관측 경계로 확인한 안쪽 판정 범위입니다. "
+                       if primary.get("region_supported") is True else "안쪽 판정 범위는 추가 확인이 필요합니다. ")
+            detail += ("접촉 위치와 셔틀 식별이 확인되면 지원되는 범위에서 IN/OUT을 판정합니다." if stable else
+                       "영상 전체의 카메라 고정 여부가 확인되지 않아 이 경계로 IN/OUT을 확정하지 않습니다.")
+            legend = "초록 선: 선택한 주 코트의 관측 외곽선 · 초록 원: 앞쪽 두 모서리 · 하늘색: 선택한 코트의 관측선"
+            if primary.get("region_supported") is True:
+                legend += " · 옅은 초록: 확인된 안쪽 범위 (색 면의 닫힘은 외곽선이 아님)"
+        else:
+            detail = "앞쪽 두 모서리에 대응하는 주 코트를 확정하지 못했습니다. 다른 코트의 선을 판정 경계로 표시하지 않습니다."
+            legend = "주 코트 선택이 확인되면 해당 코트의 관측 경계만 표시합니다."
     if moved:
         detail += " 카메라 이동이 감지되어 고정 라인 표시는 진단 이미지에서만 제공합니다."
     return {"line_detection_status": "detected" if count else "not_detected", "detected_line_count": count,
             "court_geometry_status": "supported" if accepted else "unconfirmed", "detail": detail,
-            "overlay_legend": "하늘색: 탐지한 직선 후보 · 노란색: 전체 코트 보정이 확인된 외곽선",
+            "primary_court_status": primary.get("status") if isinstance(primary, dict) else None,
+            "judgment_scope": primary.get("scope") if selected else None,
+            "local_region_supported": selected and primary.get("region_supported") is True and stable,
+            "overlay_legend": legend,
             "camera_moved": moved, "metric_accuracy_validated": calibration.get("metric_accuracy_validated") is True,
             "reason_codes": [code for code in calibration.get("reason_codes", []) if isinstance(code, str)]}
 

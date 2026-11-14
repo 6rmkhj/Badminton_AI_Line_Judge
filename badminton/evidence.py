@@ -14,31 +14,69 @@ from .media import probe, repair_preview_tail, _FrameProgress, _run_ffmpeg_progr
 
 
 def draw_court_lines(canvas, calibration, *, reference=False):
-    """Show measured line candidates even when no court plane is accepted.
+    """Show the selected court's observed boundaries and supported interior.
 
-    Candidate segments remain image evidence, never an inferred full boundary.
+    Primary-court selection suppresses candidates from neighbouring courts and
+    the net. A local interior is shading, not a fabricated far boundary. Old
+    results without a selection retain their diagnostic candidate overlays.
     A moved camera invalidates fixed overlays on replay frames; the dedicated
     calibration reference image can still show the original detection.
     """
     stability = calibration.get('camera_stability') or {}
     if not reference and 'CAMERA_MOVED_FROM_CALIBRATION_REFERENCE' in stability.get('reason_codes', []):
         return canvas
-    segments = calibration.get('line_segments_px') or [
-        region.get('line_segment_px') for region in calibration.get('supported_line_regions_px', [])
-        if isinstance(region, dict)]
     height, width = canvas.shape[:2]
-    for segment in segments:
+
+    def draw_segment(segment, colour, thickness):
         try:
             points = np.asarray(segment, dtype=float).reshape(2, 2)
         except (TypeError, ValueError):
-            continue
+            return
         if not np.isfinite(points).all():
-            continue
+            return
         # Clip before integer conversion, including old/imported diagnostics.
         points = np.rint(np.clip(points, [-width, -height], [2 * width, 2 * height])).astype(int)
         visible, start, end = cv2.clipLine((0, 0, width, height), tuple(points[0]), tuple(points[1]))
         if visible:
-            cv2.line(canvas, start, end, (255, 210, 40), 1, cv2.LINE_AA)
+            cv2.line(canvas, start, end, colour, thickness, cv2.LINE_AA)
+
+    primary = calibration.get('primary_court')
+    if isinstance(primary, dict):
+        if primary.get('status') != 'selected':
+            return canvas
+        interior = primary.get('interior_polygon_px')
+        if interior is not None and primary.get('region_supported') is True:
+            try:
+                polygon = np.asarray(interior, dtype=float)
+                if (polygon.ndim == 2 and polygon.shape[1] == 2 and len(polygon) >= 3
+                        and np.isfinite(polygon).all()):
+                    polygon = np.rint(np.clip(polygon, [-width, -height], [2 * width, 2 * height])).astype(np.int32)
+                    mask = np.zeros((height, width), dtype=np.uint8)
+                    cv2.fillPoly(mask, [polygon], 255)
+                    # A subtle fill conveys the supported area. Its artificial
+                    # closing edge is deliberately never drawn as a court line.
+                    canvas[mask > 0] = np.rint(canvas[mask > 0] * .92 + np.array([70, 220, 95]) * .08).astype(np.uint8)
+            except (TypeError, ValueError):
+                pass
+        for segment in primary.get('line_segments_px') or []:
+            draw_segment(segment, (255, 210, 40), 1)
+        for boundary in primary.get('boundary_segments_px') or []:
+            if isinstance(boundary, dict) and boundary.get('observed') is True:
+                draw_segment(boundary.get('segment_px'), (70, 240, 105), 2)
+        for corner in primary.get('near_corners_px') or []:
+            try:
+                point = np.asarray(corner, dtype=float)
+                if point.shape == (2,) and np.isfinite(point).all() and (point >= 0).all() and (point < [width, height]).all():
+                    cv2.circle(canvas, tuple(np.rint(point).astype(int)), 4, (70, 240, 105), 1, cv2.LINE_AA)
+            except (TypeError, ValueError):
+                continue
+        return canvas
+
+    segments = calibration.get('line_segments_px') or [
+        region.get('line_segment_px') for region in calibration.get('supported_line_regions_px', [])
+        if isinstance(region, dict)]
+    for segment in segments:
+        draw_segment(segment, (255, 210, 40), 1)
     polygon = calibration.get('polygon_px')
     if polygon and calibration.get('status') == 'ok':
         cv2.polylines(canvas, [np.rint(polygon).astype(np.int32)], True, (0, 210, 240), 2, cv2.LINE_AA)
@@ -55,7 +93,12 @@ def write_calibration_overlay(frames, calibration, output_dir):
     canvas = np.median(np.stack([frames[i] for i in indices]), axis=0).astype(np.uint8)
     draw_court_lines(canvas, calibration, reference=True)
     width = canvas.shape[1]
-    label = 'COURT PLANE SUPPORTED' if calibration.get('status') == 'ok' else 'LINE CANDIDATES - COURT PLANE UNCONFIRMED'
+    primary = calibration.get('primary_court')
+    if isinstance(primary, dict):
+        label = ('PRIMARY COURT - OBSERVED NEAR BOUNDARIES' if primary.get('status') == 'selected'
+                 else 'PRIMARY COURT SELECTION UNCONFIRMED')
+    else:
+        label = 'COURT PLANE SUPPORTED' if calibration.get('status') == 'ok' else 'LINE CANDIDATES - COURT PLANE UNCONFIRMED'
     cv2.rectangle(canvas, (0, 0), (width, min(32, canvas.shape[0])), (22, 26, 32), -1)
     cv2.putText(canvas, label, (8, 21), cv2.FONT_HERSHEY_SIMPLEX,
                 max(.25, min(.55, width / 1500)), (255, 210, 40), 1, cv2.LINE_AA)

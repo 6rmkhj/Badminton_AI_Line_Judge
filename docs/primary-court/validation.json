@@ -1,0 +1,203 @@
+{
+  "scope": "Actual source-frame court calibration replay; synthetic contact geometry probes are not observed shuttle contacts or clip verdicts.",
+  "implementation_fingerprint": "a280663ed6dc1f77cc2268660b1c54f78998ed7bfdc940f22dbc4c0a8798339f",
+  "analysis_size": [
+    960,
+    540
+  ],
+  "reference_source": "AI visual inspection of original native-resolution crops; approximate pixel annotations for evaluation only, not independent human ground truth and never detector inputs.",
+  "camera_stability_source": "Reused source-bound optical-flow/RANSAC measurements over every decoded original frame from the immediately prior analysis.",
+  "focused_tests": {
+    "command": "python -m pytest -q tests/test_primary_court_replay.py tests/test_primary_court_decision.py tests/test_primary_court.py",
+    "passed": 75
+  },
+  "actual_shuttle_clip_verdict_evaluated": false,
+  "cases": [
+    {
+      "view": "A",
+      "source_repository_path": "video/8k 30 4k 24 a시점 1.mp4",
+      "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+      "input_kind": "repository_same_filename_original",
+      "uploaded_bytes_identity_verified": null,
+      "input_note": "A upload exceeded the 32 MiB transfer limit; same-name repository original used. Identity with the current A attachment is unverified.",
+      "sampled_frame_indices": [
+        0,
+        13,
+        26,
+        40,
+        53,
+        66,
+        80,
+        93,
+        107
+      ],
+      "first_frame_fixture": "tests/fixtures/primary-court/A.png",
+      "reference_fixture": "tests/fixtures/primary-court/references.json",
+      "photo": "docs/primary-court/A-selection.jpg",
+      "photo_sha256": "2e8ce9fbee467c46236f58a59d1ea3988a3c925687100cf54f1d1970a0b77a3c",
+      "primary_status": "selected",
+      "scope": "near_half",
+      "interior_limit": "near_short_service_line_not_an_out_boundary",
+      "near_corners_px": [
+        [
+          342.8878173828125,
+          502.3633728027344
+        ],
+        [
+          815.9884033203125,
+          294.5312194824219
+        ]
+      ],
+      "approximate_reference_corner_distances_px": [
+        1.9923,
+        1.1149
+      ],
+      "boundary_roles": [
+        "left",
+        "right",
+        "near"
+      ],
+      "full_metric_calibration_status": "review",
+      "metric_coordinates_available": false,
+      "camera_stability": {
+        "status": "ok",
+        "all_frames_sampled": true,
+        "sampled_frame_count": 108
+      },
+      "synthetic_geometry_probes": [
+        {
+          "synthetic_test_contact": true,
+          "case": "inside",
+          "point_px": [
+            700,
+            300
+          ],
+          "expected": "IN",
+          "decision": "IN",
+          "reason_codes": [
+            "CONTACT_INSIDE_OR_TOUCHING_VALID_BOUNDARY"
+          ]
+        },
+        {
+          "synthetic_test_contact": true,
+          "case": "outside",
+          "point_px": [
+            600,
+            410
+          ],
+          "expected": "OUT",
+          "decision": "OUT",
+          "reason_codes": [
+            "ENTIRE_POSSIBLE_CONTACT_OUTSIDE"
+          ]
+        },
+        {
+          "synthetic_test_contact": true,
+          "case": "outside_scope",
+          "point_px": [
+            600,
+            425
+          ],
+          "expected": "REVIEW",
+          "decision": "REVIEW",
+          "reason_codes": [
+            "CONTACT_OUTSIDE_PRIMARY_COURT_SCOPE"
+          ]
+        }
+      ]
+    },
+    {
+      "view": "B",
+      "source_repository_path": "video/8k 30 4k 24 b시점 1.mp4",
+      "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+      "input_kind": "user_upload",
+      "uploaded_bytes_identity_verified": true,
+      "input_note": "B actual upload matches repository SHA256.",
+      "sampled_frame_indices": [
+        0,
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        81
+      ],
+      "first_frame_fixture": "tests/fixtures/primary-court/B.png",
+      "reference_fixture": "tests/fixtures/primary-court/references.json",
+      "photo": "docs/primary-court/B-selection.jpg",
+      "photo_sha256": "afcdd20b5120a343083ac95ff2c0cdfa1f9aa01ced68ba90b373f973dc463e9f",
+      "primary_status": "selected",
+      "scope": "near_half",
+      "interior_limit": "near_short_service_line_not_an_out_boundary",
+      "near_corners_px": [
+        [
+          359.2213134765625,
+          501.1691589355469
+        ],
+        [
+          882.7581787109375,
+          317.35931396484375
+        ]
+      ],
+      "approximate_reference_corner_distances_px": [
+        1.1899,
+        0.6848
+      ],
+      "boundary_roles": [
+        "left",
+        "right",
+        "near"
+      ],
+      "full_metric_calibration_status": "review",
+      "metric_coordinates_available": false,
+      "camera_stability": {
+        "status": "ok",
+        "all_frames_sampled": true,
+        "sampled_frame_count": 82
+      },
+      "synthetic_geometry_probes": [
+        {
+          "synthetic_test_contact": true,
+          "case": "inside",
+          "point_px": [
+            760,
+            320
+          ],
+          "expected": "IN",
+          "decision": "IN",
+          "reason_codes": [
+            "CONTACT_INSIDE_OR_TOUCHING_VALID_BOUNDARY"
+          ]
+        },
+        {
+          "synthetic_test_contact": true,
+          "case": "outside",
+          "point_px": [
+            650,
+            420
+          ],
+          "expected": "OUT",
+          "decision": "OUT",
+          "reason_codes": [
+            "ENTIRE_POSSIBLE_CONTACT_OUTSIDE"
+          ]
+        },
+        {
+          "synthetic_test_contact": true,
+          "case": "outside_scope",
+          "point_px": [
+            650,
+            435
+          ],
+          "expected": "REVIEW",
+          "decision": "REVIEW",
+          "reason_codes": [
+            "CONTACT_OUTSIDE_PRIMARY_COURT_SCOPE"
+          ]
+        }
+      ]
+    }
+  ]
+}

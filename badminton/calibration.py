@@ -627,7 +627,7 @@ def _manual_reference(hint, width, height):
             "independent_control_point_error_px": None}
 
 
-def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: dict | None = None) -> dict:
+def _calibrate_full_court(frames: list[np.ndarray], court_hint: dict | None = None, config: dict | None = None) -> dict:
     """Estimate the full doubles-court plane from several stationary-camera frames.
 
     Optional ``court_hint['roi_polygon_px']`` restricts a target area without
@@ -810,3 +810,37 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: 
                 candidate_polygons_px=[{"polygon_px": _raw_points(r["polygon"], lens).tolist(), "support_score": round(r["score"], 6)} for r in distinct],
                 template_lines_m=court_template_lines())
     return base
+
+
+def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: dict | None = None) -> dict:
+    """Find the court plane and, for partial views, the primary near court.
+
+    The local selection names observed outer boundaries separately from the
+    full metric fit. It never upgrades an incomplete homography to ``ok``.
+    Camera stability and first-contact evidence are checked by downstream
+    consumers before using the selected image-space boundary for a verdict.
+    """
+    result = _calibrate_full_court(frames, court_hint, config)
+    cfg = dict(config or {})
+    if cfg.get("primary_court_enabled", True) and result.get("status") == "ok":
+        # A supported full fit already identifies its court. Display only that
+        # accepted boundary, never unrelated raw Hough lines from other courts.
+        polygon = np.asarray(result["polygon_px"], dtype=float)
+        inside = polygon.mean(axis=0).tolist()
+        error = max(2.5, float(result.get("line_fit_error_px") or 0))
+        boundaries = [{"role": role, "segment_px": np.r_[polygon[a], polygon[b]].tolist(),
+                       "observed": True, "inside_point_px": inside, "uncertainty_px": error}
+                      for role, a, b in (("left", 0, 3), ("right", 1, 2), ("near", 0, 1), ("far", 3, 2))]
+        result["primary_court"] = {
+            "status": "selected", "scope": "full", "region_supported": True,
+            "method": "accepted_full_court_template", "confidence": result["confidence"],
+            "polygon_px": polygon.tolist(), "interior_polygon_px": polygon.tolist(),
+            "near_corners_px": polygon[:2].tolist(), "boundary_segments_px": boundaries,
+            "line_segments_px": [row["segment_px"] for row in boundaries],
+            "reason_codes": ["FULL_COURT_TEMPLATE_SUPPORTED"],
+        }
+    elif (cfg.get("primary_court_enabled", True) and result.get("status") == "review"
+            and not result.get("manual_reference") and result.get("line_segments_px")):
+        from .primary_court import select_primary_court
+        result["primary_court"] = select_primary_court(frames, result, cfg.get("primary_court"))
+    return result
