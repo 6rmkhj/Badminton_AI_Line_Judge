@@ -158,23 +158,37 @@ def estimate_video_verdict(landings, tracks, source_frames, timestamps, analysis
     if (config or {}).get('enabled', True) is False:
         return _result(selected, ['VIDEO_ESTIMATE_DISABLED'])
     resolution = resolve_landing_families(landings, tracks, timestamps, calibration, analysis_size)
-    family = resolution.get('selected_family')
+    recovering_peak = resolution.get('status') == 'native_confirmation_required'
+    family = resolution.get('candidate_family') if recovering_peak else resolution.get('selected_family')
     # Preserve the reasoning, without duplicating every candidate/track in JSON.
     compact = deepcopy(resolution)
     if compact.get('selected_family'):
         compact['selected_family'].pop('members', None)
+    if compact.get('candidate_family'):
+        compact['candidate_family'].pop('members', None)
     for row in compact.get('families', []):
         row.pop('members', None)
     base = _result(selected, ['VIDEO_ESTIMATE_NO_UNIQUE_EVENT'], family_resolution=compact)
-    if resolution.get('status') != 'selected' or not isinstance(family, dict):
+    if resolution.get('status') not in {'selected', 'native_confirmation_required'} or not isinstance(family, dict):
         return base
-    native = estimate_native_landing(family, tracks, source_frames, timestamps, analysis_size,
+    native_family = {**family, 'requires_contiguous_native_peak': True} if recovering_peak else family
+    native = estimate_native_landing(native_family, tracks, source_frames, timestamps, analysis_size,
                                     calibration, output_dir=output_dir, config=config)
     base.update(selected_family_id=family['family_id'], member_event_ids=family['member_event_ids'],
                 native_evidence=native, artifact_warnings=deepcopy(native.get('artifact_warnings', [])))
     if native.get('status') != 'supported':
         return {**base, 'reason_codes': ['VIDEO_ESTIMATE_NATIVE_SUPPORT_MISSING'],
                 'reasons': [REASONS['VIDEO_ESTIMATE_NATIVE_SUPPORT_MISSING']]}
+    if recovering_peak:
+        # This promotes only the estimate's event association. The strict
+        # contact/identity records and their scores remain unchanged.
+        compact.update(status='selected', selected_family=compact.pop('candidate_family'),
+                       reason_codes=['UNIQUE_PRIMARY_COURT_FLIGHT_FAMILY',
+                                     'INFERRED_PEAK_RECOVERED_FROM_NATIVE_FOREGROUND'],
+                       native_peak_recovery={'required': True, 'status': 'supported',
+                           'method': native.get('method'),
+                           'observed_frame_count': native.get('observed_frame_count'),
+                           'frame_interval': native.get('frame_interval')})
     polygon, uncertainty = native.get('possible_contact_polygon_px'), native.get('uncertainty_px')
     geometry = evaluate_possible_region(polygon, uncertainty, calibration, selected)
     codes = geometry['reason_codes']

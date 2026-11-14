@@ -90,6 +90,38 @@ def aggregate_decision(decisions):
             'note': 'A unique, observed target landing is required for automatic IN/OUT.'}
 
 
+def select_display_landing(candidates, estimate, direct_decision):
+    """Keep the displayed trajectory attached to the measured estimate family.
+
+    Candidate ranking is useful for unresolved review, but its first candidate
+    can belong to a different event from the source-backed estimate. This only
+    chooses the evidence to display; it never changes a landing or verdict.
+    """
+    fallback = candidates[0] if candidates else None
+    if direct_decision.get('decision') in {'IN', 'OUT'} or not isinstance(estimate, dict):
+        return fallback
+    resolution = estimate.get('family_resolution') or {}
+    native = estimate.get('native_evidence') or {}
+    if resolution.get('status') != 'selected' or native.get('status') != 'supported':
+        return fallback
+    family = resolution.get('selected_family') or {}
+    members = estimate.get('member_event_ids') or []
+    if (not members or family.get('family_id') != estimate.get('selected_family_id')
+            or family.get('member_event_ids') != members):
+        return fallback
+    representative = (family.get('representative') or {}).get('event_id')
+    matching = [candidate for candidate in candidates if candidate.get('event_id') in members]
+    return next((candidate for candidate in matching if candidate.get('event_id') == representative),
+                matching[0] if matching else fallback)
+
+
+def select_evidence_landings(ranked, selected, limit=6):
+    """Retain the displayed event's evidence when the gallery is bounded."""
+    if selected is not None and any(item is selected for item in ranked):
+        ranked = [selected, *(item for item in ranked if item is not selected)]
+    return ranked[:limit]
+
+
 def _draw_frame(frame, calibration, tracks, frame_index, landing=None):
     from .evidence import draw_court_lines, draw_observed_trail
     canvas = frame.copy()
@@ -295,7 +327,7 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
         video_estimate['artifact_path'] = overlay
     timings['events_and_decision_seconds'] = time.perf_counter() - clock
     display_candidates = prioritize_review_candidates(requested, review_regions)
-    selected = display_candidates[0] if display_candidates else None
+    selected = select_display_landing(display_candidates, video_estimate, decision)
     report('evidence', detail='원본 확대 근거·검수 영상 생성')
     artifacts = {'preview': 'preview.mp4', 'detections': 'detections.json', 'evidence': []}
     evidence_dir = output / 'evidence'
@@ -319,7 +351,7 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
         return path.relative_to(output).as_posix()
 
     # Preserve several candidate contexts, including original-resolution crops.
-    for landing in prioritize_review_candidates(landings, review_regions)[:6]:
+    for landing in select_evidence_landings(prioritize_review_candidates(landings, review_regions), selected):
         index = max(0, min(len(frames)-1, int(landing.get('frame_index', 0))))
         filename = f"{landing['event_id']}.jpg"
         candidate_image = _optional_evidence('candidate_' + landing['event_id'],

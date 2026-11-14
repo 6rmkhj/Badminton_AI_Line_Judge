@@ -17,7 +17,7 @@ for (const [name, size] of [['wide', '320x180'], ['portrait', '180x320']]) {
 }
 const submissions = [], jobs = {}, errors = [];
 fs.writeFileSync(path.join(output, 'estimate.svg'), '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="320"><rect width="640" height="320" fill="#e5ece0"/><path d="M80 270 L230 80 L550 80 L580 270 Z" fill="none" stroke="#607e42" stroke-width="6"/><rect x="290" y="170" width="45" height="30" fill="#a8c766" stroke="#355e30"/><text x="20" y="40" font-family="sans-serif" font-size="22">SYNTHETIC UI FIXTURE — NO ANALYSIS</text></svg>');
-let uploadCount = 0, nextDecision = null, nextEvidenceWarnings = null;
+let uploadCount = 0, nextDecision = null, nextEvidenceWarnings = null, nextViewOverrides = null;
 const makeJob = (id, request, verdict = 'REVIEW', donor = 'A', kind = 'verified') => {
   const views = Object.fromEntries(['A', 'B'].map(camera => [camera, {
     status: 'completed', file: camera + '.mp4', preview_url: '/fixture/' + (camera === 'A' ? 'wide' : 'portrait') + '.mp4',
@@ -40,6 +40,9 @@ const makeJob = (id, request, verdict = 'REVIEW', donor = 'A', kind = 'verified'
   });
   if (kind === 'video_estimate') Object.assign(views[donor], {
     estimated_decision: verdict,
+    landing_candidate: {status: 'approximate', inference_only: true, contact_observed: false,
+      time_seconds: .3, time_interval: [.2, .4], frame_interval: [2, 4],
+      point_kind: 'observed_object_center', kind: 'descent_and_rebound'},
     video_estimate: {decision: verdict, eligible: verdict !== 'REVIEW', decision_kind: kind,
       source: 'native_temporal_landing_envelope', rules: request.rules,
       reason_codes: verdict === 'REVIEW' ? ['ESTIMATE_UNCERTAINTY_OVERLAPS_BOUNDARY'] : ['ESTIMATE_ENTIRE_REGION_' + verdict],
@@ -53,11 +56,41 @@ const makeJob = (id, request, verdict = 'REVIEW', donor = 'A', kind = 'verified'
       {label: '대상 셔틀 식별', status: 'blocked', status_label: '확인 필요', detail: '대상 셔틀을 직접 확인하지 못했습니다.'},
     ]},
   });
+  for (const camera of ['A', 'B']) {
+    const row = views[camera], supported = verdict !== 'REVIEW' && camera === donor;
+    row.effective_decision = supported ? verdict : 'REVIEW';
+    row.effective_decision_kind = supported ? kind : 'unresolved';
+    row.assessment ||= {schema_version: 1, summary: '직접 접촉 판정 보류', stages: [
+      {label: '최초 바닥 접촉', status: 'blocked', status_label: '확인 필요', detail: '직접 접촉을 확인하지 못했습니다.'},
+      {label: '대상 셔틀 식별', status: 'blocked', status_label: '확인 필요', detail: '대상 셔틀을 직접 확인하지 못했습니다.'},
+    ]};
+    row.analysis_assessment = {
+      schema_version: 1, title: '분석 판정 근거', line_verdict: row.effective_decision,
+      decision_kind: row.effective_decision_kind, contributes_to_final: supported,
+      supplementary: verdict !== 'REVIEW' && !supported,
+      final_source_camera_ids: verdict !== 'REVIEW' ? [donor] : [],
+      final_context: verdict !== 'REVIEW' && !supported ? `${donor} 시점의 근거로 최종 판정을 계산했습니다. 이 시점은 독립 판정 없음.` : '',
+      summary: supported ? `영상 근거로 ${verdict}` : '경계와 위치 오차 확인 필요',
+      scope_label: 'Synthetic effective assessment fixture; no physical contact promotion.',
+      explanation: verdict !== 'REVIEW' && !supported ? `${donor} 시점의 근거로 최종 판정을 계산했습니다. 이 시점은 독립 판정 없음.`
+        : supported ? '원본 관측으로 계산한 가능 영역을 비교했습니다.' : '가능한 위치가 라인 양쪽에 걸칩니다.',
+      next_action: supported ? '' : '같은 접촉 구간을 더 선명한 시점에서 확인하세요.',
+      stages: ['첫 착지 가능 구간', '주 코트 셔틀 경로', '판정 대상 사건', '라인 경계와 위치 오차'].map((label, index) => ({
+        id: ['contact', 'identity', 'event', 'geometry'][index], label,
+        status: supported || index < 3 ? 'passed' : 'blocked',
+        status_label: supported || index < 3 ? '근거 확보' : '경계 확인 필요',
+        detail: supported || index < 3 ? '원본 영상 추정의 근거가 있습니다.' : '접촉 가능 범위가 경계를 가로지릅니다.',
+      })),
+    };
+  }
   return {job_id: id, status: 'completed', request, views,
     result: {decision: verdict, decision_kind: verdict === 'REVIEW' ? 'unresolved' : kind, views, rules: request.rules,
       decision_scope: verdict === 'REVIEW' ? 'unresolved' : 'single_view',
       source_camera_ids: verdict === 'REVIEW' ? [] : [donor], reasons: verdict === 'REVIEW' ? ['실제 접촉 미확정'] : [donor + ' 시점의 유효한 판정'],
       warning_codes: ['SAME_EVENT_UNCONFIRMED'], warnings: ['두 시점의 동일 사건 연결은 확인되지 않았습니다.'],
+      review_diagnostics: {views: Object.fromEntries(['A', 'B'].map(camera => [camera, {
+        missing_requirements: ['직접 최초 접촉 미확정'], follow_up_actions: ['원본 구간 확인'],
+      }]))},
       same_event_confirmed: false, refinement_available: true, refinement_applied_camera_ids: []}};
 };
 const server = http.createServer(async (req, res) => {
@@ -78,6 +111,8 @@ const server = http.createServer(async (req, res) => {
     jobs[id] = makeJob(id, request, nextDecision?.label || nextDecision || 'REVIEW', nextDecision?.camera || 'A', nextDecision?.kind || 'verified'); nextDecision = null;
     if (nextEvidenceWarnings) jobs[id].views.A.evidence_warnings = nextEvidenceWarnings;
     nextEvidenceWarnings = null;
+    if (nextViewOverrides) for (const [camera, values] of Object.entries(nextViewOverrides)) Object.assign(jobs[id].views[camera], values);
+    nextViewOverrides = null;
     return setTimeout(() => json(202, {job_id: id, status: 'queued'}), 150);
   }
   if (url.pathname === '/api/pair-jobs') return json(200, {jobs: []});
@@ -202,6 +237,9 @@ const server = http.createServer(async (req, res) => {
     assert.match(await page.locator('#correspondence-status').innerText(), /A 시점에서 판정.*동일 사건 연결은 미확인/);
     assert.match(await page.locator('#result-reasons .muted').innerText(), /동일 사건 연결은 확인되지 않았습니다/);
     assert.deepEqual(await page.locator('#result-view-b .view-verdicts strong').allTextContents(), ['REVIEW', 'REVIEW', 'REVIEW']);
+    assert.match(await page.locator('#result-view-b .view-effective-verdict').innerText(), /보조 시점.*독립 판정 없음/s);
+    assert.equal(await page.locator('#result-view-b .supplementary-evidence').getAttribute('open'), null);
+    assert.equal(await page.locator('#result-view-b .analysis-assessment').isVisible(), false);
     await page.locator('#pair-result').screenshot({path: path.join(output, 'single-view-in.png')});
     nextDecision = {camera: 'B', label: 'OUT'};
     await page.locator('#game-mode').selectOption('doubles');
@@ -218,11 +256,24 @@ const server = http.createServer(async (req, res) => {
     assert.match(await page.locator('#result-provenance').innerText(), /A 시점.*원본 영상.*추정한 결과/);
     assert.match(await page.locator('#source-cameras').innerText(), /영상 추정의 원본 근거/);
     assert.match(await page.locator('#result-view-a .view-estimate-verdict').innerText(), /영상 추정 IN/);
+    assert.equal(await page.locator('#result-view-a>.view-effective-verdict').count(), 1);
+    assert.equal(await page.locator('#result-view-a .analysis-assessment .assessment-stages li[data-status="passed"]').count(), 4);
+    assert.equal(await page.locator('#result-view-a .analysis-assessment .assessment-stages li[data-status="blocked"]').count(), 0);
+    assert.equal(await page.locator('#result-view-a .view-verdicts').isVisible(), false);
+    assert.equal(await page.locator('#result-view-a .direct-contact-assessment .landing-candidate').count(), 1);
+    assert.equal(await page.locator('#result-view-a .landing-candidate').isVisible(), false);
+    assert.equal(await page.locator('#result-view-a .direct-contact-assessment .view-diagnosis').isVisible(), false);
     assert.deepEqual(await page.locator('#result-view-a .view-verdicts strong').allTextContents(), ['REVIEW', 'REVIEW', 'REVIEW']);
     assert.deepEqual(await page.locator('#result-view-b .view-verdicts strong').allTextContents(), ['REVIEW', 'REVIEW', 'REVIEW']);
     assert.equal(await page.locator('#result-view-a .direct-contact-assessment').getAttribute('open'), null);
+    assert.match(await page.locator('#result-view-b .supplementary-note').innerText(), /A 시점.*독립 판정 없음/);
+    await page.locator('#result-view-b .supplementary-evidence>summary').click();
+    assert.equal(await page.locator('#result-view-b .analysis-assessment').isVisible(), true);
+    assert.match(await page.locator('#result-view-b .analysis-assessment .assessment-next-action').innerText(), /더 선명한 시점/);
+    await page.locator('#result-view-b .supplementary-evidence>summary').click();
     await page.locator('#result-view-a .direct-contact-assessment>summary').click();
-    assert.equal(await page.locator('#result-view-a .assessment-stages li[data-status="blocked"]').count(), 2);
+    assert.equal(await page.locator('#result-view-a .direct-contact-assessment .assessment-stages li[data-status="blocked"]').count(), 2);
+    await page.locator('#result-view-a .direct-contact-assessment>summary').click();
     assert.match(await page.locator('#result-view-a .video-estimate-panel').innerText(), /0\.200–0\.400초/);
     assert.match(await page.locator('#result-view-a .estimate-metrics').innerText(), /7프레임.*3개를 한 사건으로 묶음/s);
     await page.locator('#result-view-a .estimate-evidence').scrollIntoViewIfNeeded();
@@ -248,7 +299,35 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('#result-kind').isHidden(), true);
     assert.match(await page.locator('#result-view-a .video-estimate-panel').innerText(), /라인 양쪽에 걸쳐/);
     assert.match(await page.locator('#result-view-a .estimate-conclusion').innerText(), /판정 보류/);
-    assert.equal(await page.locator('#result-view-a .assessment-stages li[data-status="blocked"]').count(), 2);
+    assert.equal(await page.locator('#result-view-a .analysis-assessment .assessment-stages li[data-status="blocked"]').count(), 1);
+    assert.equal(await page.locator('#result-view-a .landing-candidate').isVisible(), true);
+    assert.match(await page.locator('#result-view-a .assessment-next-action').innerText(), /더 선명한 시점/);
+    assert.equal(await page.locator('#result-view-a .direct-contact-assessment').getAttribute('open'), null);
+    // An invalid raw estimate must not override the validated presentation.
+    nextDecision = {camera: 'A', label: 'REVIEW', kind: 'video_estimate'};
+    nextViewOverrides = {A: {video_estimate: {decision: 'IN', eligible: true, reason_codes: ['INVALID_VIDEO_ESTIMATE']},
+      estimated_decision: 'REVIEW', effective_decision: 'REVIEW', effective_decision_kind: 'unresolved'}};
+    await submit();
+    assert.equal(await page.locator('#result-view-a .view-effective-verdict>strong').innerText(), 'REVIEW');
+    assert.match(await page.locator('#result-view-a .estimate-conclusion').innerText(), /판정 보류/);
+    nextDecision = {camera: 'A', label: 'REVIEW', kind: 'video_estimate'};
+    nextViewOverrides = {A: {effective_decision: 'IN', effective_decision_kind: 'video_estimate', estimated_decision: 'IN',
+      video_estimate: {decision: 'IN', eligible: true}},
+      B: {effective_decision: 'OUT', effective_decision_kind: 'video_estimate', estimated_decision: 'OUT',
+      video_estimate: {decision: 'OUT', eligible: true}}};
+    await submit();
+    assert.equal(await page.locator('#final-verdict').innerText(), 'REVIEW');
+    assert.match(await page.locator('#result-view-a .view-effective-verdict').innerText(), /영상 추정 IN/);
+    assert.match(await page.locator('#result-view-b .view-effective-verdict').innerText(), /영상 추정 OUT/);
+    assert.equal(await page.locator('.view-effective-verdict[data-supplementary="true"]').count(), 0);
+    nextDecision = {camera: 'A', label: 'IN', kind: 'video_estimate'};
+    nextViewOverrides = {B: {status: 'failed', error: '원본 영상 처리 실패: <img src=x>',
+      error_details: {log_path: 'jobs/example/views/B/analysis-error.log'}}};
+    await submit();
+    assert.equal(await page.locator('#final-verdict').innerText(), 'IN');
+    assert.equal(await page.locator('#result-view-b .message.error').isVisible(), true);
+    assert.match(await page.locator('#result-view-b .message.error').innerText(), /원본 영상 처리 실패.*<img/);
+    assert.equal(await page.locator('#result-view-b .message.error img').count(), 0);
     nextDecision = 'IN'; await submit();
     assert.equal(await page.locator('#result-kind').isHidden(), true);
     assert.equal(await page.locator('#estimate-result-note').isHidden(), true);
