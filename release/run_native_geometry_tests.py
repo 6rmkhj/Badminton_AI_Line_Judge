@@ -11,7 +11,7 @@ import time
 
 TEST_FILES = ['tests/test_native_landing.py', 'tests/test_native_scale.py',
               'tests/test_video_estimate.py']
-EXPECTED_TESTS = 61
+EXPECTED_TESTS = 63
 
 
 class TestCounts:
@@ -81,11 +81,14 @@ def run(package, dependencies, report):
     report.update(returncode=code, **vars(counts))
     if (code != 0 or counts.collected != EXPECTED_TESTS or counts.passed != EXPECTED_TESTS
             or counts.failed or counts.skipped or counts.errors):
-        raise RuntimeError('Native geometry tests did not all pass (expected 61, no skips)')
+        raise RuntimeError('Native geometry tests did not all pass (expected 63, no skips)')
     report['status'] = 'passed'
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8', errors='replace')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--package', type=Path, required=True)
     parser.add_argument('--pytest-deps', type=Path, required=True)

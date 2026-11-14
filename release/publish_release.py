@@ -10,7 +10,7 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / 'release'
 DIST = ROOT / 'dist'
-VERSION = '0.5.12'
+VERSION = '0.5.13'
 TAG = 'v' + VERSION
 REPO = '6rmkhj/Badminton_AI_Line_Judge'
 NEW_NAME = f'badminton-windows-{VERSION}.zip'
@@ -39,7 +39,7 @@ def main():
         raise RuntimeError('Unexpected release repository')
     receipt = json.loads((RELEASE / 'receipt.json').read_text(encoding='utf-8'))
     if receipt['app_version'] != VERSION or receipt['source_worktree_dirty'] is not False:
-        raise RuntimeError('Expected a clean 0.5.12 package receipt')
+        raise RuntimeError('Expected a clean 0.5.13 package receipt')
     source_commit = receipt['source_commit']
     tag_ref = command('git', 'ls-remote', 'origin', f'refs/tags/{TAG}^{{}}').split()
     if not tag_ref or tag_ref[0] != source_commit:
@@ -81,8 +81,8 @@ def main():
         raise RuntimeError('Windows PowerShell/prepare/HTTP evidence is incomplete')
     native = report.get('native_geometry_tests', {})
     if (native.get('status') != 'passed' or native.get('returncode') != 0
-            or native.get('expected_tests') != 61 or native.get('collected') != 61
-            or native.get('passed') != 61 or native.get('failed') != 0
+            or native.get('expected_tests') != 63 or native.get('collected') != 63
+            or native.get('passed') != 63 or native.get('failed') != 0
             or native.get('skipped') != 0 or native.get('errors') != 0
             or native.get('timed_out', False)
             or native.get('bundled_runtime_verified') is not True
@@ -94,6 +94,50 @@ def main():
             or set(native.get('runtime_dependencies', {})) != {'numpy', 'cv2', 'scipy', 'filelock'}):
         raise RuntimeError('Bundled-runtime native geometry evidence is incomplete')
 
+    full = report.get('full_analysis_tests', {})
+    image_io = full.get('unicode_image_io', {})
+    if (full.get('status') != 'passed' or full.get('returncode') != 0
+            or full.get('timed_out', False)
+            or full.get('app_version') != VERSION or full.get('source_commit') != source_commit
+            or full.get('source_snapshot_sha256') != receipt['source_snapshot_sha256']
+            or full.get('bundled_runtime_verified') is not True
+            or set(full.get('runtime_dependencies', {})) != {'numpy', 'cv2', 'scipy', 'filelock'}
+            or full.get('unicode_paths', {}).get('enabled') is not True
+            or image_io.get('status') != 'passed' or image_io.get('helper_roundtrip_equal') is not True):
+        raise RuntimeError('Full Windows Unicode-path analysis evidence is incomplete')
+    expected_cases = {('A', 'doubles'): 'IN', ('A', 'singles'): 'OUT', ('B', 'doubles'): 'REVIEW'}
+    source_hashes = {
+        'A': '0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb',
+        'B': 'bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9',
+    }
+    cases = full.get('cases', [])
+    if len(cases) != 3 or {(case.get('view'), case.get('game')) for case in cases} != set(expected_cases):
+        raise RuntimeError('Missing or duplicate source-bound Windows analysis cases')
+    for case in cases:
+        key = (case['view'], case['game'])
+        if (case.get('status') != 'passed'
+                or case.get('source_sha256') != source_hashes[case['view']]
+                or case.get('display_decision') != expected_cases[key]
+                or case.get('strict_decision') != 'REVIEW'
+                or case.get('evidence_warnings') != []
+                or case.get('stages') != ['prepare', 'calibration', 'detection', 'tracking',
+                                          'contact', 'evidence', 'save']
+                or (case['view'] == 'A' and (case.get('decision_kind') != 'video_estimate'
+                                            or case.get('estimate_eligible') is not True))):
+            raise RuntimeError('Full Windows verdict/evidence regression: ' + str(key))
+        artifacts = {artifact.get('path'): artifact for artifact in case.get('artifacts', [])}
+        required = {'preview.mp4', 'detections.json', 'overview.jpg', 'evidence/calibration.jpg',
+                    'evidence/annotated.mp4', 'evidence/annotated-timing.json'}
+        if case['view'] == 'A':
+            required.add('evidence/video-estimate.jpg')
+        if (not required.issubset(artifacts)
+                or any(not artifact.get('sha256') or artifact.get('bytes', 0) <= 0
+                       for artifact in artifacts.values())
+                or any(artifact.get('frame_count', 0) <= 0 for name, artifact in artifacts.items()
+                       if name and name.endswith('.mp4'))
+                or artifacts['evidence/annotated.mp4'].get('timestamp_alignment_max_error_seconds', 1) > .0001):
+            raise RuntimeError('Real Windows evidence files were not fully verified: ' + str(key))
+
     endpoint = f'repos/{REPO}/releases'
     existing = [item for item in api(endpoint + '?per_page=100') if item['tag_name'] == TAG]
     if len(existing) > 1:
@@ -101,7 +145,7 @@ def main():
     if not existing:
         command('gh', 'release', 'create', TAG, '--repo', REPO, '--verify-tag',
                 '--target', source_commit, '--draft',
-                '--title', '0.5.12 · 원본 영상 기반 착지 추정과 IN/OUT 판정 개선',
+                '--title', '0.5.13 · Windows 한글 경로 근거 저장 오류 수정',
                 '--notes-file', str(RELEASE / 'notes.md'),
                 *(str(DIST / name) for name in sorted(names)))
         existing = [item for item in api(endpoint + '?per_page=100') if item['tag_name'] == TAG]

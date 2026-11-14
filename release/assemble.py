@@ -6,10 +6,10 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / 'release'
-VERSION = '0.5.12'
+VERSION = '0.5.13'
 receipt = json.loads((RELEASE / 'receipt.json').read_text(encoding='utf-8'))
 if receipt['app_version'] != VERSION or receipt['source_worktree_dirty'] is not False:
-    raise ValueError('Expected a clean 0.5.12 package receipt')
+    raise ValueError('Expected a clean 0.5.13 package receipt')
 layout = json.loads((RELEASE / 'archive-layout.json').read_text(encoding='utf-8'))
 output = ROOT / 'dist'
 output.mkdir(exist_ok=True)

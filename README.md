@@ -1,4 +1,4 @@
-# 배드민턴 AI Windows 0.5.12
+# 배드민턴 AI Windows 0.5.13
 
 ZIP 전체를 새 폴더에 압축 해제한 뒤 `START.bat`를 실행하세요.
 
