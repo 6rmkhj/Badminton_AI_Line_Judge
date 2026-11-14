@@ -17,7 +17,7 @@ for (const [name, size] of [['wide', '320x180'], ['portrait', '180x320']]) {
 }
 const submissions = [], jobs = {}, errors = [];
 fs.writeFileSync(path.join(output, 'estimate.svg'), '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="320"><rect width="640" height="320" fill="#e5ece0"/><path d="M80 270 L230 80 L550 80 L580 270 Z" fill="none" stroke="#607e42" stroke-width="6"/><rect x="290" y="170" width="45" height="30" fill="#a8c766" stroke="#355e30"/><text x="20" y="40" font-family="sans-serif" font-size="22">SYNTHETIC UI FIXTURE — NO ANALYSIS</text></svg>');
-let uploadCount = 0, nextDecision = null;
+let uploadCount = 0, nextDecision = null, nextEvidenceWarnings = null;
 const makeJob = (id, request, verdict = 'REVIEW', donor = 'A', kind = 'verified') => {
   const views = Object.fromEntries(['A', 'B'].map(camera => [camera, {
     status: 'completed', file: camera + '.mp4', preview_url: '/fixture/' + (camera === 'A' ? 'wide' : 'portrait') + '.mp4',
@@ -76,6 +76,8 @@ const server = http.createServer(async (req, res) => {
     const request = JSON.parse(body); submissions.push(request);
     const id = 'fixture-' + submissions.length;
     jobs[id] = makeJob(id, request, nextDecision?.label || nextDecision || 'REVIEW', nextDecision?.camera || 'A', nextDecision?.kind || 'verified'); nextDecision = null;
+    if (nextEvidenceWarnings) jobs[id].views.A.evidence_warnings = nextEvidenceWarnings;
+    nextEvidenceWarnings = null;
     return setTimeout(() => json(202, {job_id: id, status: 'queued'}), 150);
   }
   if (url.pathname === '/api/pair-jobs') return json(200, {jobs: []});
@@ -251,6 +253,20 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('#result-kind').isHidden(), true);
     assert.equal(await page.locator('#estimate-result-note').isHidden(), true);
     assert.equal(await page.locator('#result-view-a .video-estimate-panel').count(), 0);
+    nextDecision = 'IN';
+    nextEvidenceWarnings = [{artifact: 'trajectory_context', error_type: 'OSError',
+      message: '한글 근거 이미지 저장 실패: <img src=x onerror="window.fixtureInjected=true">'}];
+    await submit();
+    assert.equal(await page.locator('#final-verdict').innerText(), 'IN');
+    assert.match(await page.locator('#result-view-a .evidence-warnings').innerText(), /계산된 판정 결과는 유지했습니다/);
+    assert.match(await page.locator('#result-view-a .evidence-warnings li').innerText(), /한글 근거 이미지 저장 실패.*<img/);
+    assert.equal(await page.locator('#result-view-a .evidence-warnings img').count(), 0);
+    assert.equal(await page.evaluate(() => window.fixtureInjected === true), false);
+    await page.reload(); await page.locator('#final-verdict').waitFor();
+    assert.equal(await page.locator('#final-verdict').innerText(), 'IN');
+    assert.match(await page.locator('#result-view-a .evidence-warnings').innerText(), /계산된 판정 결과는 유지했습니다/);
+    await page.setViewportSize({width: 375, height: 1000});
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'warning horizontal overflow');
     await page.locator('#library-b').selectOption('v_a');
     assert.equal(await page.locator('#region-box-b').isHidden(), true);
     assert.deepEqual(errors, []);
@@ -258,7 +274,8 @@ const server = http.createServer(async (req, res) => {
       checks: ['automatic input sources preserved', 'drag selection', 'keyboard selection', 'native preview seeking', 'portrait letterboxing', 'escape cancellation',
         'per-view normalized payload', 'manual provenance', 'reload restoration', '375/390px no overflow', 'resize preservation', 'upload ID reuse', 'refine preservation', 'clear/reset',
         'singles/doubles keyboard selection', 'busy rule control disabled', 'rule payload/reload/refinement preservation', 'selected game labels', 'A-only IN with B REVIEW', 'B-only OUT with A REVIEW', 'correspondence warning preserves final verdict',
-        'explicit video estimate IN/OUT provenance', 'strict REVIEW evidence remains blocked', 'native evidence image and interval seeking', 'estimate reload restoration', 'estimate mobile widths', 'near-line estimate remains REVIEW', 'verified result clears estimate label'],
+        'explicit video estimate IN/OUT provenance', 'strict REVIEW evidence remains blocked', 'native evidence image and interval seeking', 'estimate reload restoration', 'estimate mobile widths', 'near-line estimate remains REVIEW', 'verified result clears estimate label',
+        'optional evidence warning preserves IN and reload', 'evidence warning escapes markup', 'evidence warning mobile width'],
       submissions: submissions.length, uploads: uploadCount, javascript_errors: errors}, null, 2));
     console.log(JSON.stringify({status: 'passed', output, submissions: submissions.length, uploads: uploadCount}));
   } finally {await browser.close(); await new Promise(resolve => server.close(resolve));}

@@ -13,6 +13,7 @@ import cv2
 import numpy as np
 
 from .decision import _decide_primary_court, _primary_polygon, rule_region
+from .image_io import read_image, write_image
 
 
 SOURCE = 'native_temporal_landing_envelope'
@@ -170,7 +171,7 @@ def estimate_video_verdict(landings, tracks, source_frames, timestamps, analysis
     native = estimate_native_landing(family, tracks, source_frames, timestamps, analysis_size,
                                     calibration, output_dir=output_dir, config=config)
     base.update(selected_family_id=family['family_id'], member_event_ids=family['member_event_ids'],
-                native_evidence=native)
+                native_evidence=native, artifact_warnings=deepcopy(native.get('artifact_warnings', [])))
     if native.get('status') != 'supported':
         return {**base, 'reason_codes': ['VIDEO_ESTIMATE_NATIVE_SUPPORT_MISSING'],
                 'reasons': [REASONS['VIDEO_ESTIMATE_NATIVE_SUPPORT_MISSING']]}
@@ -213,7 +214,7 @@ def write_estimate_overlay(frames, calibration, estimate, output_dir):
     if isinstance(native, str):
         path = (output / native).resolve()
         if path.is_relative_to(output) and path.is_file():
-            panels = cv2.imread(str(path))
+            panels = read_image(path)
             if panels is not None:
                 width = max(canvas.shape[1], min(1600, panels.shape[1]))
                 scene = cv2.resize(canvas, (width, round(canvas.shape[0]*width/canvas.shape[1])))
@@ -221,6 +222,5 @@ def write_estimate_overlay(frames, calibration, estimate, output_dir):
                 canvas = np.vstack([scene, panels])
     path = output / 'evidence/video-estimate.jpg'
     path.parent.mkdir(parents=True, exist_ok=True)
-    if not cv2.imwrite(str(path), canvas):
-        raise OSError('Could not write video estimate evidence')
+    write_image(path, canvas)
     return path.relative_to(output).as_posix()

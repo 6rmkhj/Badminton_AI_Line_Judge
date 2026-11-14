@@ -74,6 +74,23 @@ def test_actual_native_components_support_conditional_envelope_without_certifyin
     json.dumps(result, allow_nan=False)
 
 
+def test_native_image_write_failure_retains_measured_envelope(tmp_path, monkeypatch):
+    from badminton import native_landing
+    args = scene()
+    baseline = estimate(args)
+    def failed_image(*args, **kwargs):
+        raise PermissionError('Evidence folder is read-only')
+    monkeypatch.setattr(native_landing, 'write_image', failed_image)
+    result = estimate(args, output_dir=tmp_path)
+    assert result['status'] == baseline['status'] == 'supported'
+    for name in ('possible_contact_polygon_px', 'uncertainty_px', 'frame_interval', 'time_interval',
+                 'support_frames', 'contact_observed', 'identity_confirmed'):
+        assert result[name] == baseline[name]
+    assert 'artifact' not in result
+    assert result['artifact_warnings'] == [{'artifact': 'native_landing',
+        'message': 'Evidence folder is read-only', 'error_type': 'PermissionError'}]
+
+
 @pytest.mark.parametrize('mode', ['blank', 'static', 'shadow', 'person'])
 def test_motion_track_does_not_replace_missing_shuttle_appearance(mode):
     result = estimate(scene(mode=mode))

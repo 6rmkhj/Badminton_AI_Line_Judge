@@ -239,3 +239,59 @@ def test_tail_repair_rejects_leading_editlist_without_changing_video(tmp_path):
     with pytest.raises(ValueError, match='non-tail'):
         repair_preview_tail(edited, fps=30)
     assert edited.read_bytes() == original_bytes
+
+
+@pytest.mark.parametrize('label', ['IN', 'OUT'])
+def test_optional_evidence_failures_preserve_computed_estimate(tmp_path, monkeypatch, label):
+    # Inject only the estimator output; exercise real decoding, artifact handling,
+    # result persistence, and strict assessment. This is not an accuracy test.
+    from badminton import evidence, pipeline, video_estimate
+    expected = {'decision': label, 'eligible': True, 'decision_kind': 'video_estimate',
+                'source': video_estimate.SOURCE, 'contact_observed': False,
+                'target_identity_verified': False, 'evaluation_eligible': False,
+                'reason_codes': ['test-computed-region']}
+    monkeypatch.setattr(video_estimate, 'estimate_video_verdict', lambda *a, **k: dict(expected))
+    def denied(*args, **kwargs):
+        raise PermissionError(13, 'evidence directory is read-only')
+    def encoder_failure(*args, **kwargs):
+        raise subprocess.CalledProcessError(1, ['ffmpeg'], stderr=b'encoder unavailable')
+    monkeypatch.setattr(video_estimate, 'write_estimate_overlay', denied)
+    monkeypatch.setattr(evidence, 'write_calibration_overlay', denied)
+    monkeypatch.setattr(pipeline, 'write_image', denied)
+    monkeypatch.setattr(evidence, 'write_annotated_clip', encoder_failure)
+    events = []
+    output = tmp_path / '한글 결과 폴더'
+    result = analyze_video(clip(tmp_path), output,
+                           {'analysis_width': 160, 'source_crop_count': 0},
+                           progress_callback=events.append)
+    stored = json.loads((output / 'result.json').read_text(encoding='utf-8'))
+    assert stored == result
+    assert stored['display_decision']['decision'] == label
+    assert stored['video_estimate']['eligible'] is True
+    assert stored['video_estimate']['contact_observed'] is False
+    assert stored['decision']['decision'] == stored['assessment']['line_verdict'] == 'REVIEW'
+    assert events[-1]['stage'] == 'save'
+    assert (output / 'detections.json').is_file()
+    assert set(stored['artifacts']) == {'preview', 'detections', 'evidence'}
+    assert all('image' not in row for row in stored['artifacts']['evidence'])
+    assert 'artifact_path' not in stored['video_estimate']
+    warnings = {row['artifact']: row for row in stored['evidence_warnings']}
+    assert {'video_estimate_overlay', 'calibration_overlay', 'overview', 'annotated_clip'} <= warnings.keys()
+    assert warnings['overview']['error_type'] == 'PermissionError'
+    assert 'encoder unavailable' in warnings['annotated_clip']['message']
+    assert 'EVIDENCE_ARTIFACT_UNAVAILABLE' in stored['warnings']
+
+
+def test_result_json_explicit_utf8(tmp_path, monkeypatch):
+    from badminton.pipeline import write_json
+    original = Path.write_text
+    encodings = []
+    def check_encoding(self, data, *args, **kwargs):
+        encodings.append(kwargs.get('encoding'))
+        return original(self, data, *args, **kwargs)
+    monkeypatch.setattr(Path, 'write_text', check_encoding)
+    payload = {'source': '한글 경로/셔틀 🏸.mp4'}
+    path = tmp_path / '결과.json'
+    write_json(path, payload)
+    assert encodings == ['utf-8']
+    assert json.loads(path.read_bytes().decode('utf-8')) == payload

@@ -566,6 +566,56 @@ def test_failure_preserves_the_actual_stage_and_partial_frame_count(pair_fixture
     assert not any(stage['stage'] == 'save' for stage in failed['stage_history'])
 
 
+def test_os_error_preserves_message_stage_and_traceback(pair_fixture, monkeypatch, caplog):
+    workspace, _, _ = pair_fixture
+    monkeypatch.setattr('badminton.media.probe', lambda _: {'frame_count':7,'width':960,'height':540})
+
+    def analyze(source, output, config, progress_callback=None):
+        progress_callback({'stage':'evidence'})
+        raise OSError(13, 'Permission denied', str(output/'한글 근거.jpg'))
+
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    job = wait_job(workspace, submit_fixture(workspace, reuse_review=False))
+    for view in job['views'].values():
+        assert view['status'] == 'failed'
+        assert '근거 영상 생성 실패: PermissionError' in view['error']
+        assert 'Permission denied' in view['error'] and '한글 근거.jpg' in view['error']
+        assert view['error_details']['stage'] == 'evidence'
+        assert view['error_details']['errno'] == 13
+        log = (workspace.root/view['error_details']['log_path']).read_text(encoding='utf-8')
+        assert 'Traceback (most recent call last)' in log and 'Permission denied' in log
+        assert 'in analyze' in log
+    assert 'stage=evidence' in caplog.text
+
+
+def test_optional_evidence_warning_preserves_verdict_and_hides_missing_preview(pair_fixture, monkeypatch):
+    workspace, _, _ = pair_fixture
+    monkeypatch.setattr('badminton.media.probe', lambda _: {'frame_count':7,'width':960,'height':540})
+    warning = {'artifact':'trajectory_context', 'error_type':'OSError',
+               'message':'이동 경로 확대 이미지를 저장하지 못했습니다: 한글 근거.jpg'}
+
+    def analyze(source, output, config, progress_callback=None):
+        progress_callback({'stage':'evidence'})
+        progress_callback({'stage':'save'})
+        return {'source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),
+                'decision':{'decision':'IN' if source.name == 'a.mp4' else 'REVIEW'},
+                'artifacts':{'preview':'missing-preview.mp4'}, 'evidence_warnings':[warning], 'timings':{}}
+
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    job = wait_job(workspace, submit_fixture(workspace, reuse_review=False))
+    assert job['status'] == job['phase'] == 'completed'
+    assert job['result']['decision'] == 'IN'
+    for camera, view in job['views'].items():
+        assert view['status'] == 'completed'
+        assert view['preview_url'] is None
+        assert view['evidence_warnings'] == [warning]
+        assert job['result']['views'][camera]['evidence_warnings'] == [warning]
+        assert 'error' not in view
+    saved = json.loads((workspace.root/f"jobs/{job['job_id']}/job.json").read_text())
+    assert saved['result']['decision'] == 'IN'
+    assert saved['views']['A']['evidence_warnings'] == [warning]
+
+
 def test_queued_time_is_distinct_from_analysis_and_stored_review_has_own_stage(pair_fixture):
     workspace, _, _ = pair_fixture
     blocker = threading.Event()

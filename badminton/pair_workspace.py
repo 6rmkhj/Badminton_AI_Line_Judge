@@ -6,12 +6,14 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
 import json
+import logging
 import math
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import re
 import shutil
 import threading
 import time
+import traceback
 from urllib.parse import quote
 import uuid
 
@@ -22,6 +24,7 @@ LABELS = {"IN", "OUT", "REVIEW"}
 RULES = {"game": "doubles", "phase": "rally"}
 SAFE_ID = re.compile(r"[A-Za-z0-9_-]{1,140}\Z")
 HASH = re.compile(r"[0-9a-f]{64}\Z")
+LOGGER = logging.getLogger(__name__)
 TERMINAL = {"completed", "completed_with_errors", "failed", "interrupted"}
 ANALYSIS_STAGES = {
     "prepare": (1, "영상 준비"), "calibration": (2, "코트 확인"),
@@ -68,6 +71,20 @@ def parse_pair_rules(value):
 
 def _now():
     return datetime.now(timezone.utc).isoformat()
+
+
+def _failure_details(error, stage):
+    """Keep the actual OS/encoder error visible instead of just its class name."""
+    detail = " ".join(str(error).split())[:600]
+    error_type = type(error).__name__
+    label = ANALYSIS_STAGES.get(stage, (None, "영상 분석"))[1]
+    message = f"{label} 실패: {error_type}" + (f" · {detail}" if detail else "")
+    diagnostics = {"stage": stage, "error_type": error_type, "message": detail}
+    for name in ("errno", "winerror"):
+        value = getattr(error, name, None)
+        if isinstance(value, int):
+            diagnostics[name] = value
+    return message, diagnostics
 
 
 def _seconds_between(start, end):
@@ -982,14 +999,13 @@ class PairWorkspace:
         return original, digest, matches, entry
 
     def _view(self, identifier, camera, selected, reuse, catalog, refine=False):
-        from .inference import InferenceDeviceError
         started = time.perf_counter()
         self._progress(identifier, camera, "running")
         rules = parse_pair_rules(self.jobs[identifier]["request"].get("rules", RULES))
         base = {"camera_id": camera, "file": selected["file"], "status": "completed", "rules": rules,
                 "source_sha256": None, "automatic_decision": "REVIEW", "direct_decision": "REVIEW",
                 "assisted_decision": "REVIEW", "qualified": False, "preview_url": None, "evidence_urls": [],
-                "estimated_decision": "REVIEW", "video_estimate": None,
+                "estimated_decision": "REVIEW", "video_estimate": None, "evidence_warnings": [],
                 "trajectory_replay_url": None, "trajectory_replay_info": None,
                 "calibration_summary": None, "calibration_preview_url": None,
                 "contact_time_seconds": None, "reason_codes": [], "rationale": "", "_candidate_ids": []}
@@ -1091,6 +1107,9 @@ class PairWorkspace:
                     contact = None
                 replay_url, replay_info = _trajectory_replay(output, artifacts, prefix)
                 video_estimate = _video_estimate_summary(result, output, prefix)
+                preview = artifacts.get("preview")
+                preview_url = (prefix + quote(preview, safe="/")
+                               if isinstance(preview, str) and _safe(output, preview).is_file() else None)
                 base.update(automatic_decision=decision, direct_decision=decision, assisted_decision=decision,
                     qualified=decision in {"IN", "OUT"},
                     video_estimate=video_estimate,
@@ -1099,7 +1118,8 @@ class PairWorkspace:
                                    "ai_review_guided_search" if regions else "automatic"),
                     processing_mode=("user_region_reanalysis" if manual_region is not None else
                                      "review_guided_reanalysis" if regions else "fresh_analysis"),
-                    preview_url=prefix + quote(artifacts.get("preview", "preview.mp4"), safe="/"),
+                    preview_url=preview_url,
+                    evidence_warnings=deepcopy(result.get("evidence_warnings") or []),
                     evidence_urls=evidence, contact_time_seconds=contact if _finite(contact) else None,
                     landing_candidate=_landing_candidate(result), trajectory_context_url=trajectory_context,
                     trajectory_replay_url=replay_url, trajectory_replay_info=replay_info,
@@ -1111,8 +1131,21 @@ class PairWorkspace:
                     source_verification="current_original_sha256")
             return self._finish_view(identifier, camera, base)
         except Exception as error:
+            with self.lock:
+                stage = self.jobs[identifier]["views"][camera].get("progress", {}).get("stage")
+            message, diagnostics = _failure_details(error, stage)
+            LOGGER.exception("Pair analysis failed: job=%s camera=%s stage=%s", identifier, camera, stage)
+            relative_log = f"jobs/{identifier}/views/{camera}/analysis-error.log"
+            try:
+                log_path = self.root / relative_log
+                log_path.parent.mkdir(parents=True, exist_ok=True)
+                log_path.write_text(f"job={identifier} camera={camera} stage={stage}\n" + traceback.format_exc(),
+                                    encoding="utf-8")
+                diagnostics["log_path"] = relative_log
+            except OSError:
+                LOGGER.exception("Could not save the analysis error log for job=%s camera=%s", identifier, camera)
             base.update(status="failed", reason_codes=["VIEW_ANALYSIS_FAILED"], review_source="none",
-                        processing_mode="failed", error=str(error) if isinstance(error, (PairWorkspaceError, ValueError, InferenceDeviceError)) else f"영상 분석 실패: {type(error).__name__}",
+                        processing_mode="failed", error=message, error_details=diagnostics,
                         elapsed_seconds=round(time.perf_counter() - started, 6))
             return self._finish_view(identifier, camera, base)
 
@@ -1194,6 +1227,7 @@ class PairWorkspace:
                 self._job_clocks.pop(identifier, None)
                 self._persist(job)
         except Exception as error:
+            LOGGER.exception("Pair job failed: job=%s", identifier)
             with self.lock:
                 now = _now()
                 self._refresh_timing(job)
@@ -1201,7 +1235,7 @@ class PairWorkspace:
                     if view.get("status") not in TERMINAL:
                         self._progress(identifier, camera, "failed")
                 job.update(status="failed", phase="failed", last_phase=job.get("phase", "analyzing"),
-                           error=f"A/B 작업 실패: {type(error).__name__}",
+                           error=f"A/B 작업 실패: {type(error).__name__} · {' '.join(str(error).split())[:600]}",
                            updated_at=now, finished_at=now,
                            elapsed_seconds=round(time.perf_counter() - started, 6))
                 self._job_clocks.pop(identifier, None)

@@ -241,3 +241,20 @@ def test_supported_native_region_passes_through_real_geometry_and_preserves_prov
     assert resolution == before
     assert 'members' not in result['family_resolution']['selected_family']
     assert 'members' not in result['family_resolution']['families'][0]
+
+
+def test_missing_native_image_preserves_line_geometry_and_reports_artifact_warning(monkeypatch):
+    from badminton import landing_families, native_landing, video_estimate
+    warning = {'artifact': 'native_landing', 'message': 'disk full', 'error_type': 'OSError'}
+    native = {'status': 'supported',
+              'possible_contact_polygon_px': [[450, 380], [470, 380], [470, 400], [450, 400]],
+              'uncertainty_px': 2., 'frame_interval': [11, 13], 'time_interval': [.44, .52],
+              'artifact_warnings': [warning]}
+    monkeypatch.setattr(landing_families, 'resolve_landing_families', lambda *args: selected_family_result())
+    monkeypatch.setattr(native_landing, 'estimate_native_landing', lambda *args, **kwargs: native)
+    result = video_estimate.estimate_video_verdict([], [], [], [], [1000, 700], court())
+    assert result['decision'] == 'IN' and result['eligible'] is True
+    assert result['artifact_path'] is None
+    assert result['artifact_warnings'] == [warning]
+    assert result['artifact_warnings'] is not native['artifact_warnings']
+    assert result['contact_observed'] is False

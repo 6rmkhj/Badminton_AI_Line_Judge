@@ -19,6 +19,7 @@ from .identity_continuity import assess_identity_continuity
 from .candidate_identity import apply_competing_continuation_evidence
 from .event_continuity import resolve_fragment_turns
 from .observation_support import rejects_moving_association
+from .image_io import write_image
 
 
 def _value(observation, name, default=0.0):
@@ -898,7 +899,6 @@ def refine_source_contacts(landings, source_frames, timestamps, analysis_size, c
         if output_dir is not None:
             relative = f"evidence/source-contact-{candidate_index:03d}.jpg"
             destination = Path(output_dir) / relative
-            destination.parent.mkdir(parents=True, exist_ok=True)
             strip = np.zeros((patch_size + 32, patch_size * len(crops), 3), np.uint8)
             for i, (crop, row) in enumerate(zip(crops, evidence["frames"])):
                 strip[:patch_size, i*patch_size:(i+1)*patch_size] = cv2.cvtColor(crop, cv2.COLOR_RGB2BGR)
@@ -906,10 +906,14 @@ def refine_source_contacts(landings, source_frames, timestamps, analysis_size, c
                             cv2.FONT_HERSHEY_SIMPLEX, 0.35, (240, 240, 240), 1)
                 cv2.putText(strip, f"{row['time']:.3f}s", (i*patch_size + 3, patch_size + 27),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.32, (240, 240, 240), 1)
-            if cv2.imwrite(str(destination), strip):
+            try:
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                write_image(destination, strip)
                 evidence["image"] = relative
-            else:
+            except (OSError, cv2.error) as error:
                 evidence["image_error"] = "cannot_write_source_temporal_strip"
+                evidence["artifact_warnings"] = [{"artifact": "source_contact",
+                    "message": str(error)[:500], "error_type": type(error).__name__}]
         if not checkpoint:
             continue
         if model_error:

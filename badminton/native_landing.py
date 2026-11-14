@@ -14,6 +14,7 @@ import re
 import cv2
 import numpy as np
 
+from .image_io import write_image
 
 _MAX_CROP_BYTES = 96 * 1024 * 1024
 
@@ -200,8 +201,7 @@ def _artifact(crops, rows, roi, scale, polygon, family_id, output_dir, scale_xy=
                     cv2.FONT_HERSHEY_SIMPLEX, .43, (235, 235, 235), 1, cv2.LINE_AA)
         cv2.putText(sheet, 'VIDEO ESTIMATE / contact unverified', (left+5, top+38),
                     cv2.FONT_HERSHEY_SIMPLEX, .35, (100, 200, 255), 1, cv2.LINE_AA)
-    if not cv2.imwrite(str(target), sheet, [cv2.IMWRITE_JPEG_QUALITY, 94]):
-        raise OSError('Could not write native landing evidence')
+    write_image(target, sheet, [cv2.IMWRITE_JPEG_QUALITY, 94])
     return 'evidence/' + name
 
 
@@ -411,7 +411,11 @@ def estimate_native_landing(family, tracks, source_frames, timestamps, analysis_
                                               'foreground_quantization_px': max(1/sx, 1/sy, .75*unit)},
                       envelope_method='visible_peak_component_union_kinematic_crossing_band')
         if output_dir is not None:
-            result['artifact'] = _artifact(crops, rows, roi, scale, polygon, result['family_id'], output_dir, scale_xy)
+            try:
+                result['artifact'] = _artifact(crops, rows, roi, scale, polygon, result['family_id'], output_dir, scale_xy)
+            except (OSError, cv2.error) as error:
+                result['artifact_warnings'] = [{'artifact': 'native_landing',
+                    'message': str(error)[:500], 'error_type': type(error).__name__}]
         return result
     except (ValueError, TypeError, KeyError, IndexError, cv2.error, np.linalg.LinAlgError) as error:
         result['error'] = type(error).__name__ + ': ' + str(error)[:240]

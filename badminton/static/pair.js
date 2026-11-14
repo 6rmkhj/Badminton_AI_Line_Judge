@@ -161,6 +161,9 @@ function renderAnalysisCard(camera, view, job) {
   const footer = el('div', 'analysis-card-footer'); footer.append(el('span', '', '시점 처리 시간'));
   const elapsed = el('strong'); elapsed.dataset.clock = 'view'; elapsed.dataset.camera = camera; footer.append(elapsed); card.append(footer);
   if (view.error) card.append(el('p', 'analysis-detail analysis-error', view.error));
+  if (Array.isArray(view.evidence_warnings) && view.evidence_warnings.length) {
+    card.append(el('p', 'analysis-detail evidence-warning-summary', `일부 근거 파일 생성 실패 (${view.evidence_warnings.length}개) · 계산된 판정 결과는 저장했습니다.`));
+  }
   return card;
 }
 function updateClocks() {
@@ -796,6 +799,16 @@ function renderView(camera, view, diagnostics) {
   } else { card.append(el('div', 'missing-media', '이 시점의 재생 가능한 미리보기가 없습니다.')); }
   const body = el('div', 'view-body');
   if (view.error) body.append(el('p', 'message error', view.error));
+  if (view.error_details?.log_path) body.append(el('p', 'analysis-detail', `오류 기록: ${view.error_details.log_path}`));
+  if (Array.isArray(view.evidence_warnings) && view.evidence_warnings.length) {
+    const warning = el('section', 'evidence-warnings message');
+    warning.append(el('strong', '', '일부 근거 파일 생성 실패 · 계산된 판정 결과는 유지했습니다.'));
+    const list = el('ul');
+    for (const item of view.evidence_warnings) {
+      if (item && typeof item.message === 'string') list.append(el('li', '', item.message));
+    }
+    warning.append(list); body.append(warning);
+  }
   if (view.rationale) body.append(el('p', 'rationale', view.rationale));
   const estimatePanel = renderVideoEstimate(camera, view, player);
   if (estimatePanel) body.append(estimatePanel);

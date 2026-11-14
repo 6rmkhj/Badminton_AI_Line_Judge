@@ -11,6 +11,7 @@ import cv2
 import numpy as np
 
 from .media import probe, repair_preview_tail, _FrameProgress, _run_ffmpeg_progress
+from .image_io import write_image
 
 
 def draw_court_lines(canvas, calibration, *, reference=False):
@@ -105,8 +106,7 @@ def write_calibration_overlay(frames, calibration, output_dir):
     relative = 'evidence/calibration.jpg'
     destination = Path(output_dir) / relative
     destination.parent.mkdir(parents=True, exist_ok=True)
-    if not cv2.imwrite(str(destination), canvas, [cv2.IMWRITE_JPEG_QUALITY, 94]):
-        raise OSError('Could not write court-line evidence')
+    write_image(destination, canvas, [cv2.IMWRITE_JPEG_QUALITY, 94])
     return relative
 
 
@@ -208,8 +208,7 @@ def write_trajectory_context(source_frames, timestamps, analysis_size, landing, 
     relative = 'evidence/trajectory-context.jpg'
     destination = Path(output_dir) / relative
     destination.parent.mkdir(parents=True, exist_ok=True)
-    if not cv2.imwrite(str(destination), strip, [cv2.IMWRITE_JPEG_QUALITY, 94]):
-        raise OSError('Could not write trajectory context evidence')
+    write_image(destination, strip, [cv2.IMWRITE_JPEG_QUALITY, 94])
     return {'path': relative, 'frame_indices': indices, 'times': [timestamps[i] for i in indices],
             'analysis_size': {'width': width, 'height': height}, 'source_size': source_size,
             'analysis_roi': [*low.tolist(), *high.tolist()], 'source_roi': source_roi,
@@ -276,8 +275,7 @@ def write_annotated_clip(frames, timestamps, calibration, tracks, landing, decis
             cv2.putText(canvas, 'CANDIDATES / CONTACT REQUIRES OBSERVATION', (8, 40),
                         cv2.FONT_HERSHEY_SIMPLEX, scale * .8, (80, 200, 255), 1, cv2.LINE_AA)
             name = f'frame-{ordinal:04d}.jpg'
-            if not cv2.imwrite(str(temporary / name), canvas, [cv2.IMWRITE_JPEG_QUALITY, 92]):
-                raise OSError('Could not write replay evidence frame')
+            write_image(temporary / name, canvas, [cv2.IMWRITE_JPEG_QUALITY, 92])
             duration = timestamps[indices[ordinal + 1]] - timestamps[index] if ordinal + 1 < len(indices) else period
             concat.extend([f"file '{name}'", 'option framerate 1000000', f'duration {duration:.9f}'])
             timeline.append({'replay_frame_index': ordinal, 'source_frame_index': index,
