@@ -260,10 +260,28 @@ def estimate_native_landing(family, tracks, source_frames, timestamps, analysis_
             return _reject(result, 'NATIVE_ESTIMATE_INCOMING_GAP')
         support_indices = list(range(center-4, center+6))
         all_indices = list(range(max(0, center-9), min(len(times), center+10)))
+        source_steps = np.diff(times[support_indices])
+        nominal_step = float(np.median(np.diff(times)))
+        if float(np.max(source_steps)) > nominal_step * 1.75:
+            # Detector gaps may be searched in intact source frames. Missing
+            # source exposures cannot be replaced by a fitted crossing.
+            return _reject(result, 'NATIVE_ESTIMATE_SOURCE_TIMESTAMP_GAP')
         by_frame = {row['frame_index']: row for row in observed}
         observation_indices = np.array([row['frame_index'] for row in observed])
         observation_points = np.asarray([row['point'] for row in observed])
         seeds = np.column_stack([np.interp(support_indices, observation_indices, observation_points[:, axis]) for axis in range(2)])
+        inferred_seeds = defaultdict(list)
+        if family.get('requires_contiguous_native_peak') is True:
+            for member in members:
+                index, point = member['frame_index'], member.get('candidate_px')
+                if (index in support_indices and index not in by_frame
+                        and (member.get('image_motion_event') or {}).get('point_kind') == 'inferred_object_center'
+                        and isinstance(point, (list, tuple)) and len(point) == 2 and all(map(_finite, point))):
+                    # At a reversal, a straight line between the surviving
+                    # detections can miss the detector's own curved-path peak.
+                    # Search its existing hypotheses too, but never count them
+                    # as observations or substitute them for native pixels.
+                    inferred_seeds[index].append(point)
         first = source_frames[all_indices[0]]
         if not isinstance(first, np.ndarray) or first.dtype != np.uint8 or first.ndim != 3 or first.shape[2] != 3:
             return _reject(result, 'NATIVE_ESTIMATE_SOURCE_INVALID')
@@ -278,7 +296,8 @@ def estimate_native_landing(family, tracks, source_frames, timestamps, analysis_
         area_scale = sx*sy
         # Search every actual branch, including alternatives far from the
         # median. The old candidate union is a search prior, never contact proof.
-        search_extent = np.vstack([seeds]+[by_frame[index]['points'] for index in support_indices if index in by_frame])
+        search_extent = np.vstack([seeds]+[by_frame[index]['points'] for index in support_indices if index in by_frame]
+                                  +[np.asarray(points) for points in inferred_seeds.values()])
         lower = np.floor((search_extent.min(axis=0)-22*unit)*scale_xy).astype(int)
         upper = np.ceil((search_extent.max(axis=0)+22*unit)*scale_xy).astype(int)
         if np.any(lower < 0) or np.any(upper > [sw, sh]):
@@ -300,7 +319,8 @@ def estimate_native_landing(family, tracks, source_frames, timestamps, analysis_
         background = np.median(np.stack(list(gray.values())), axis=0).astype(np.uint8)
         rows, alternatives = [], {}
         for index, seed in zip(support_indices, seeds):
-            search_points = by_frame[index]['points'] if index in by_frame else np.asarray([seed])
+            search_points = (by_frame[index]['points'] if index in by_frame
+                             else np.asarray([seed, *inferred_seeds.get(index, [])]))
             choices = _component(gray[index], background, search_points*scale_xy-lower, scale, unit, scale_xy)
             if not choices:
                 continue
@@ -309,6 +329,7 @@ def estimate_native_landing(family, tracks, source_frames, timestamps, analysis_
                 x, y, box_width, box_height = component['bbox']
                 converted.append({'frame_index': index, 'time': float(times[index]),
                          'observed_search_seed': index in by_frame,
+                         'inferred_candidate_search_seed_count': len(inferred_seeds.get(index, [])),
                          'bbox_px': [(x+roi[0])/sx, (y+roi[1])/sy, box_width/sx, box_height/sy],
                          'foreground_area_px': component['area']/area_scale,
                          'positive_area_px': component['positive']/area_scale,
@@ -394,6 +415,21 @@ def estimate_native_landing(family, tracks, source_frames, timestamps, analysis_
         result.update(support_frames=rows, observed_frame_count=len(rows),
                       alternative_component_audit=alternative_audit,
                       hypothesis_provenance='All observed branch seeds searched; independent native foreground replaces unsupported candidate centers.')
+        if family.get('requires_contiguous_native_peak') is True:
+            # Recover detector omissions only when the source itself supplies
+            # the complete local reversal. Ambiguous foreground may be resolved
+            # by independent frames above, but an absent component is never
+            # inserted. The same three samples on each side must be adjacent,
+            # so a visible neighbor cannot replace a hidden peak between them.
+            required = list(range(peak['frame_index']-3, peak['frame_index']+4))
+            present = {row['frame_index'] for row in rows}
+            result['recovery_peak_coverage'] = {
+                'required_frame_indices': required,
+                'observed_frame_indices': [index for index in required if index in present],
+                'contiguous': all(index in present for index in required),
+            }
+            if not result['recovery_peak_coverage']['contiguous']:
+                return _reject(result, 'NATIVE_ESTIMATE_RECOVERY_PEAK_NOT_CONTIGUOUS')
         x, y, box_width, box_height = peak['bbox_px']
         measured = np.array([[x, y], [x+box_width, y+box_height]])
         lower_point = np.minimum(measured.min(axis=0), fit['points'].min(axis=0))

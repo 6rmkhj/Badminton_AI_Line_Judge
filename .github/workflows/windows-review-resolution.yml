@@ -1,0 +1,113 @@
+name: Windows review resolution package
+
+on:
+  push:
+    branches: [codex/review-resolution]
+    paths:
+      - badminton/**
+      - configs/**
+      - scripts/**
+      - tests/**
+      - docs/**
+      - pyproject.toml
+      - start.py
+      - '*.bat'
+      - .github/workflows/windows-review-resolution.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-package:
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            badminton
+            configs
+            docs
+            examples
+            scripts
+            tests
+            annotations
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check launcher compatibility with Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          python -m pip install pytest
+          if ($LASTEXITCODE -ne 0) { throw 'Test runner installation failed' }
+          python -m pytest -q tests/test_windows_package.py
+          if ($LASTEXITCODE -ne 0) { throw 'Windows launcher regression failed' }
+      - name: Download and verify the existing standard runtime
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $buildRoot = Join-Path $env:RUNNER_TEMP 'badminton-review-resolution'
+          New-Item -ItemType Directory -Path $buildRoot | Out-Null
+          "PACKAGE_BUILD_ROOT=$buildRoot" >> $env:GITHUB_ENV
+          gh release download v0.5.13 --repo $env:GITHUB_REPOSITORY --pattern 'badminton-windows-0.5.13.zip*' --dir $buildRoot
+          if ($LASTEXITCODE -ne 0) { throw 'Base release download failed' }
+          $baseZip = Join-Path $buildRoot 'badminton-windows-0.5.13.zip'
+          $expected = '2b9bd45e91ad09cee2597e4fdb9de20821015707f04eea24cdc7169a25d3ded7'
+          $listed = ((Get-Content -LiteralPath "$baseZip.sha256" -Raw).Trim() -split '\s+')[0]
+          if ($listed -ne $expected -or (Get-FileHash -LiteralPath $baseZip -Algorithm SHA256).Hash -ne $expected) { throw 'Base ZIP SHA256 mismatch' }
+          Expand-Archive -LiteralPath $baseZip -DestinationPath (Join-Path $buildRoot 'base')
+          "PACKAGE_ROOT=$(Join-Path $buildRoot '한글 package/badminton-windows-0.5.14')" >> $env:GITHUB_ENV
+      - name: Build the standard Windows 0.5.14 ZIP
+        run: >-
+          python scripts/package_windows_portable.py
+          --runtime-base "${{ env.PACKAGE_BUILD_ROOT }}/base/badminton-windows-0.5.13"
+          --output-dir "${{ env.PACKAGE_BUILD_ROOT }}/build"
+          --zip "${{ env.PACKAGE_BUILD_ROOT }}/badminton-windows-0.5.14.zip"
+      - name: Extract the final ZIP into a fresh Korean path
+        shell: pwsh
+        run: |
+          Expand-Archive -LiteralPath (Join-Path $env:PACKAGE_BUILD_ROOT 'badminton-windows-0.5.14.zip') -DestinationPath (Join-Path $env:PACKAGE_BUILD_ROOT '한글 package')
+      - name: Verify the packaged launcher and A/B screen
+        env:
+          PIP_NO_INDEX: '1'
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+        run: >-
+          python scripts/verify_windows_portable.py
+          --package "${{ env.PACKAGE_ROOT }}"
+          --report "${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.14-launcher-validation.json"
+      - name: Analyze original A/B videos with the bundled runtime
+        shell: pwsh
+        env:
+          PYTHONNOUSERSITE: '1'
+          PYTHONPATH: ''
+          PIP_NO_INDEX: '1'
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+        run: |
+          $runtime = Join-Path $env:PACKAGE_ROOT 'runtime/python.exe'
+          $verifier = Join-Path $env:PACKAGE_ROOT 'app/scripts/verify_windows_analysis.py'
+          & $runtime $verifier --package $env:PACKAGE_ROOT --work-dir (Join-Path $env:PACKAGE_BUILD_ROOT '실제 영상 검증') --report (Join-Path $env:PACKAGE_BUILD_ROOT 'windows-0.5.14-analysis-validation.json')
+          if ($LASTEXITCODE -ne 0) { throw 'Full bundled-runtime video analysis or effective-assessment validation failed' }
+      - name: Upload the verified package and reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: badminton-windows-0.5.14
+          compression-level: 0
+          if-no-files-found: error
+          path: |
+            ${{ env.PACKAGE_BUILD_ROOT }}/badminton-windows-0.5.14.zip
+            ${{ env.PACKAGE_BUILD_ROOT }}/badminton-windows-0.5.14.zip.sha256
+            ${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.14-launcher-validation.json
+            ${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.14-analysis-validation.json
+      - name: Preserve validation diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-0.5.14-diagnostics
+          if-no-files-found: ignore
+          path: |
+            ${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.14-*-validation.json
+            ${{ env.PACKAGE_ROOT }}/startup-error.log

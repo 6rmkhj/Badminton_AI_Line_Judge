@@ -675,7 +675,9 @@ def test_restart_freezes_at_last_persisted_activity_and_keeps_legacy_jobs_compat
         assert linking['elapsed_seconds'] == 7.
         assert all(view['status'] == 'completed' for view in linking['views'].values())
         legacy = restored.get_job('legacy')
-        assert legacy['result']['decision'] == 'IN'
+        assert legacy['result']['decision'] == 'REVIEW'
+        assert legacy['result']['historical_decision']['decision'] == 'IN'
+        assert legacy['result']['reason_codes'] == ['STALE_REVIEW']
         assert 'progress' not in legacy['views']['A']
     finally:
         restored.close()
@@ -988,6 +990,130 @@ def test_native_estimate_can_decide_without_promoting_direct_contact(camera, lab
     assert views == original
 
 
+def test_effective_assessment_uses_validated_native_evidence_and_keeps_strict_diagnostics():
+    strict = {'schema_version': 1, 'line_verdict': 'REVIEW', 'blocking_stages': ['contact', 'identity', 'event'],
+              'stages': [{'id': 'contact', 'status': 'blocked'}]}
+    views = {'A': source_view('REVIEW', video_estimate=native_estimate(), assessment=deepcopy(strict)),
+             'B': source_view('REVIEW', 'b', assessment=deepcopy(strict))}
+    original = deepcopy(views)
+    result = combine_views(views)
+    a, b = (result['views'][camera] for camera in ('A', 'B'))
+    assert a['effective_decision'] == 'IN' and a['effective_decision_kind'] == 'video_estimate'
+    assessment = a['analysis_assessment']
+    assert assessment['line_verdict'] == result['decision']
+    assert [stage['id'] for stage in assessment['stages']] == ['contact', 'identity', 'event', 'geometry']
+    assert all(stage['status'] == 'passed' for stage in assessment['stages'])
+    assert assessment['blocking_stages'] == [] and assessment['contributes_to_final']
+    assert '직접 접촉 순간을 관측했다는 뜻은 아닙니다' in assessment['stages'][0]['detail']
+    assert a['assessment'] == b['assessment'] == strict
+    assert a['direct_decision'] == b['direct_decision'] == 'REVIEW'
+    assert b['analysis_assessment']['supplementary'] is True
+    assert b['effective_decision'] == 'REVIEW'
+    assert 'A 시점' in b['analysis_assessment']['final_context']
+    assert '독립적인 IN·OUT 근거가 없어' in b['analysis_assessment']['final_context']
+    assert views == original
+
+
+@pytest.mark.parametrize('invalid', [
+    {'source_sha256': 'b' * 64}, {'geometry': {'status': 'review'}},
+    {'native_evidence': {'status': 'review'}}, {'frame_interval': [0, 99]},
+    {'rules': {'game': 'singles', 'phase': 'rally'}}, {'eligible': False},
+])
+def test_rejected_estimates_cannot_create_positive_analysis_stages(invalid):
+    result = combine_views({'A': source_view('REVIEW', video_estimate=native_estimate(**invalid)),
+                            'B': source_view('REVIEW', 'b')})
+    view = result['views']['A']
+    assert view['effective_decision'] == 'REVIEW' and result['decision'] == 'REVIEW'
+    assessment = view['analysis_assessment']
+    assert assessment['blocking_stages'] == ['input']
+    assert all(stage['status'] != 'passed' for stage in assessment['stages'])
+    assert not assessment['supplementary'] and not assessment['contributes_to_final']
+
+
+@pytest.mark.parametrize('code,native_code,expected_stage,detail', [
+    ('VIDEO_ESTIMATE_NO_UNIQUE_EVENT', None, 'event', '하나의 착지 경로'),
+    ('VIDEO_ESTIMATE_NATIVE_SUPPORT_MISSING', 'NATIVE_ESTIMATE_OCCLUDER_OVERLAP', 'contact', '가리는 물체'),
+    ('VIDEO_ESTIMATE_NATIVE_SUPPORT_MISSING', 'NATIVE_ESTIMATE_SOURCE_TIMESTAMP_GAP', 'contact', '시간 간격'),
+    ('VIDEO_ESTIMATE_BOUNDARY_AMBIGUOUS', None, 'geometry', '라인 양쪽'),
+    ('VIDEO_ESTIMATE_CAMERA_UNSTABLE', None, 'calibration', '카메라 고정'),
+])
+def test_unresolved_assessment_shows_actual_estimate_stop_and_next_action(code, native_code, expected_stage, detail):
+    raw = {'decision': 'REVIEW', 'eligible': False, 'reason_codes': [code],
+           'native_evidence': {'status': 'review', 'reason_codes': [native_code] if native_code else []}}
+    result = combine_views({'A': source_view('REVIEW', video_estimate=raw), 'B': source_view('REVIEW', 'b')})
+    assessment = result['views']['A']['analysis_assessment']
+    assert result['decision'] == 'REVIEW'
+    assert assessment['blocking_stages'] == [expected_stage]
+    assert len(assessment['stages']) == 1
+    assert detail in assessment['explanation'] and assessment['next_action']
+    assert not assessment['supplementary']
+
+
+def test_direct_evidence_keeps_precedence_and_conflicts_or_errors_stay_visible():
+    result = combine_views({'A': source_view('IN', video_estimate=native_estimate()),
+                            'B': source_view('REVIEW', 'b', status='failed', error='decode failed')})
+    assert result['views']['A']['effective_decision_kind'] == 'verified'
+    assert result['views']['B']['analysis_assessment']['blocking_stages'] == ['processing']
+    assert result['views']['B']['analysis_assessment']['supplementary'] is False
+    assert result['views']['B']['error'] == 'decode failed'
+    conflict = combine_views({'A': source_view('REVIEW', video_estimate=native_estimate()),
+                              'B': source_view('REVIEW', 'b', video_estimate=native_estimate('OUT', 'b'))})
+    assert conflict['decision'] == 'REVIEW'
+    assert [conflict['views'][camera]['effective_decision'] for camera in ('A', 'B')] == ['IN', 'OUT']
+    assert all(not view['analysis_assessment']['supplementary'] for view in conflict['views'].values())
+
+
+@pytest.mark.parametrize('backup_available', [False, True])
+def test_snapshot_rejects_lost_original_estimate_donor_without_switching_sources(pair_fixture, backup_available):
+    workspace, _, _ = pair_fixture
+    original = combine_views({'A': source_view('REVIEW', video_estimate=native_estimate()),
+                              'B': source_view('REVIEW', 'b')})
+    original['views']['A']['video_estimate']['source_sha256'] = 'c' * 64
+    if backup_available:
+        original['views']['B']['video_estimate'] = native_estimate(digest='b')
+    job = {'job_id': 'historical', 'status': 'completed', 'result': original}
+    before = deepcopy(job)
+    result = workspace._snapshot(job)['result']
+    assert result['decision'] == 'REVIEW' and result['decision_kind'] == 'unresolved'
+    assert result['source_camera_ids'] == [] and result['video_estimate_used'] is False
+    assert 'INVALID_VIDEO_ESTIMATE' in result['reason_codes']
+    assert result['historical_decision']['decision'] == 'IN'
+    assert result['historical_decision']['source_camera_ids'] == ['A']
+    assert result['snapshot_revalidation']['inference_rerun'] is False
+    assert result['views']['A']['effective_decision'] == 'REVIEW'
+    assert all(not view['analysis_assessment']['contributes_to_final'] for view in result['views'].values())
+    assert all(not view['analysis_assessment']['supplementary'] for view in result['views'].values())
+    assert job == before
+
+
+def test_snapshot_detects_new_valid_estimate_conflict_and_preserves_metadata(pair_fixture):
+    workspace, _, _ = pair_fixture
+    original = combine_views({'A': source_view('REVIEW', video_estimate=native_estimate()),
+                              'B': source_view('REVIEW', 'b')})
+    original.update(elapsed_seconds=12.5, user_region_camera_ids=['A'])
+    original['views']['B']['video_estimate'] = native_estimate('OUT', 'b')
+    result = workspace._snapshot({'job_id': 'conflict', 'status': 'completed', 'result': original})['result']
+    assert result['decision'] == 'REVIEW' and 'CONFLICTING_VIDEO_ESTIMATES' in result['reason_codes']
+    assert result['source_camera_ids'] == []
+    assert [result['views'][camera]['effective_decision'] for camera in ('A', 'B')] == ['IN', 'OUT']
+    assert result['elapsed_seconds'] == 12.5 and result['user_region_camera_ids'] == ['A']
+    assert all(not view['analysis_assessment']['contributes_to_final'] for view in result['views'].values())
+
+
+def test_snapshot_does_not_promote_recorded_review_and_keeps_known_different_event(pair_fixture):
+    workspace, _, _ = pair_fixture
+    original = combine_views({'A': source_view('REVIEW'), 'B': source_view('REVIEW', 'b')})
+    original['views']['A']['video_estimate'] = native_estimate()
+    result = workspace._snapshot({'job_id': 'old-review', 'status': 'completed', 'result': original})['result']
+    assert result['decision'] == 'REVIEW' and result['source_camera_ids'] == []
+    assert result['views']['A']['effective_decision'] == 'IN'
+    assert not result['views']['A']['analysis_assessment']['contributes_to_final']
+    different = combine_views({'A': source_view('REVIEW', video_estimate=native_estimate()),
+                               'B': source_view('REVIEW', 'b')}, different_event=True)
+    restored = workspace._snapshot({'job_id': 'different', 'status': 'completed', 'result': different})['result']
+    assert restored['decision'] == 'REVIEW' and 'KNOWN_DIFFERENT_RALLY' in restored['reason_codes']
+
+
 @pytest.mark.parametrize('confirmed,source_ids', [(False, ['A']), (True, ['A', 'B'])])
 def test_native_estimate_donors_only_link_when_the_same_event_is_confirmed(confirmed, source_ids):
     views = {'A': source_view('REVIEW', video_estimate=native_estimate()),
@@ -1117,6 +1243,17 @@ def test_native_estimate_flows_through_fresh_pair_jobs_and_history_without_conta
     assert workspace.list_jobs()['jobs'][0]['decision_kind'] == 'video_estimate'
     stored = json.loads((workspace.root / 'jobs' / job['job_id'] / 'job.json').read_text())
     assert stored['result']['decision_kind'] == 'video_estimate'
+    # Opening an older saved job refreshes presentation from its source-bound
+    # evidence without rerunning inference or rewriting recorded decisions.
+    for view in stored['result']['views'].values():
+        for field in ('analysis_assessment', 'effective_decision', 'effective_decision_kind'):
+            view.pop(field, None)
+    before = deepcopy(stored)
+    snapshot = workspace._snapshot(stored)
+    assert snapshot['result']['views']['A']['analysis_assessment']['line_verdict'] == 'IN'
+    assert snapshot['result']['views']['B']['analysis_assessment']['supplementary'] is True
+    assert snapshot['result']['decision'] == before['result']['decision']
+    assert stored == before
 
 
 @pytest.mark.parametrize('malformed_label', [[], {}])

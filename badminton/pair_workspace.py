@@ -429,6 +429,61 @@ def _video_estimate_summary(result, output, prefix):
     return summary
 
 
+def _add_analysis_assessments(result):
+    """Refresh presentation from validated evidence without changing verdicts.
+
+    This also upgrades the display of stored jobs. It never reruns inference,
+    rewrites their direct diagnostics, or transfers one camera's observations
+    to another camera.
+    """
+    from .assessment import assess_analysis
+    views = result.get("views")
+    if not isinstance(views, dict):
+        return
+    try:
+        rules = parse_pair_rules(result.get("rules", RULES))
+    except PairWorkspaceError:
+        rules = None
+    valid_direct, valid_estimates = set(), set()
+    for camera, view in views.items():
+        if camera not in ("A", "B") or not isinstance(view, dict):
+            continue
+        digest = view.get("source_sha256")
+        usable = (rules is not None and view.get("status") == "completed"
+                  and isinstance(digest, str) and bool(HASH.fullmatch(digest))
+                  and view.get("rules", RULES) == rules)
+        direct = usable and view.get("qualified") is True and view.get("direct_decision") in ("IN", "OUT")
+        estimated = usable and _valid_video_estimate(view.get("video_estimate"), rules, digest)
+        if direct:
+            valid_direct.add(camera)
+        if estimated:
+            valid_estimates.add(camera)
+        assessment = assess_analysis(view, direct_qualified=bool(direct), estimate_valid=bool(estimated))
+        view.update(analysis_assessment=assessment, effective_decision=assessment["line_verdict"],
+                    effective_decision_kind=assessment["decision_kind"],
+                    estimated_decision=view["video_estimate"]["decision"] if estimated else "REVIEW")
+    source_ids = result.get("source_camera_ids")
+    source_ids = source_ids if isinstance(source_ids, list) else []
+    kind = result.get("decision_kind", "verified")
+    eligible_sources = valid_estimates if kind == "video_estimate" else valid_direct if kind == "verified" else set()
+    donors = [camera for camera in ("A", "B") if camera in source_ids and camera in eligible_sources
+              and views[camera]["effective_decision"] == result.get("decision")]
+    final_resolved = result.get("decision") in ("IN", "OUT") and bool(donors)
+    for camera, view in views.items():
+        if not isinstance(view, dict) or "analysis_assessment" not in view:
+            continue
+        assessment = view["analysis_assessment"]
+        supplementary = (final_resolved and camera not in donors and view.get("status") == "completed"
+                         and view.get("effective_decision") == "REVIEW")
+        assessment.update(supplementary=supplementary, contributes_to_final=bool(final_resolved and camera in donors),
+                          final_source_camera_ids=donors if final_resolved else [], final_context=None)
+        if supplementary:
+            assessment["final_context"] = (
+                f"최종 {result['decision']}은 {'/'.join(donors)} 시점의 근거를 사용합니다. "
+                "이 시점에는 독립적인 IN·OUT 근거가 없어 보조 영상으로 제공합니다. "
+                "이 시점의 확인되지 않은 근거는 상세에서 볼 수 있습니다.")
+
+
 def combine_views(views, *, same_event_confirmed=False, event_source=None, different_event=False, rules=None):
     """Keep a valid single-view verdict without claiming an unconfirmed transfer.
 
@@ -524,6 +579,7 @@ def combine_views(views, *, same_event_confirmed=False, event_source=None, diffe
         "video_estimate_used": label != "REVIEW" and kind == "video_estimate",
         "scope": "A/B verdict linkage; no 3D reconstruction or common pixel coordinates.",
     }
+    _add_analysis_assessments(result)
     from .review_diagnostics import pair_diagnostics
     result["review_diagnostics"] = pair_diagnostics(result)
     if result["video_estimate_used"]:
@@ -533,6 +589,84 @@ def combine_views(views, *, same_event_confirmed=False, event_source=None, diffe
             decision_kind="video_estimate")
     result["refinement_available"] = any(view.get("refinement_available") is True for view in views.values())
     return result
+
+
+def _revalidate_snapshot_result(result):
+    """Recheck stored support before presenting a historical final verdict.
+
+    No inference runs and no stored file is rewritten. A lost original donor,
+    changed verdict kind, or new conflict can only downgrade a recorded verdict;
+    opening history cannot promote REVIEW or silently switch its supporting view.
+    """
+    original = {key: deepcopy(result.get(key)) for key in
+                ("decision", "decision_kind", "source_camera_ids", "decision_scope", "reason_codes")}
+    recorded_label = original["decision"]
+    recorded_kind = original["decision_kind"] or "verified"
+    recorded_sources = original["source_camera_ids"]
+    recorded_codes = original["reason_codes"]
+    recorded_codes = recorded_codes if isinstance(recorded_codes, list) else []
+    try:
+        recomputed = combine_views(result["views"],
+            same_event_confirmed=result.get("same_event_confirmed") is True,
+            event_source=result.get("event_correspondence_source"),
+            different_event="KNOWN_DIFFERENT_RALLY" in recorded_codes,
+            rules=result.get("rules", RULES))
+    except (KeyError, TypeError, ValueError, AttributeError, PairWorkspaceError):
+        recomputed = None
+    if recorded_label == "REVIEW":
+        # Preserve a recorded abstention even if later code would qualify the
+        # same stored evidence. New analysis is the explicit way to recompute it.
+        if recomputed and recomputed["decision"] == "REVIEW":
+            result.update(recomputed)
+        _add_analysis_assessments(result)
+        return
+    donors_valid = (isinstance(recorded_sources, list) and bool(recorded_sources)
+                    and all(camera in ("A", "B") for camera in recorded_sources)
+                    and len(set(recorded_sources)) == len(recorded_sources) and recomputed is not None
+                    and all(recomputed["views"][camera]["effective_decision"] == recorded_label
+                            and recomputed["views"][camera]["effective_decision_kind"] == recorded_kind
+                            for camera in recorded_sources))
+    agrees = (recomputed is not None and recomputed["decision"] == recorded_label
+              and recomputed["decision_kind"] == recorded_kind)
+    if recorded_label in ("IN", "OUT") and donors_valid and agrees:
+        result.update(recomputed)
+        # A newly qualifying peer must not silently broaden historical provenance.
+        result["source_camera_ids"] = recorded_sources
+        result["decision_scope"] = original["decision_scope"]
+        _add_analysis_assessments(result)
+        return
+    if recomputed is not None:
+        result.update(recomputed)
+    else:
+        saved_views = result.get("views")
+        saved_views = saved_views if isinstance(saved_views, dict) else {}
+        result["views"] = {camera: saved_views[camera] if isinstance(saved_views.get(camera), dict)
+                           else {"status": "failed", "error": "저장된 시점 근거를 읽을 수 없습니다."}
+                           for camera in ("A", "B")}
+    current_codes = result.get("reason_codes")
+    codes = [code for code in current_codes if isinstance(code, str) and code in REASONS] if (
+        result.get("decision") == "REVIEW" and isinstance(current_codes, list)) else []
+    codes.append("STALE_REVIEW")
+    if recorded_kind == "video_estimate" and not donors_valid:
+        codes.append("INVALID_VIDEO_ESTIMATE")
+    codes = list(dict.fromkeys(codes))
+    result.update(decision="REVIEW", decision_kind="unresolved", decision_scope="unresolved",
+                  source_camera_ids=[], video_estimate_used=False, reason_codes=codes,
+                  reasons=[REASONS[code] for code in codes], historical_decision=original,
+                  snapshot_revalidation={"status": "historical_verdict_rejected",
+                                         "inference_rerun": False, "stored_result_modified": False})
+    _add_analysis_assessments(result)
+    current_views = result.get("views")
+    for camera, view in (current_views if isinstance(current_views, dict) else {}).items():
+        if not isinstance(view, dict):
+            continue
+        direct_valid = (view.get("effective_decision_kind") == "verified"
+                        and view.get("effective_decision") in ("IN", "OUT"))
+        view["assisted_decision"] = view["effective_decision"] if direct_valid else "REVIEW"
+        view["verdict_source_camera_ids"] = [camera] if direct_valid else []
+        view.pop("assistance_mode", None)
+    from .review_diagnostics import pair_diagnostics
+    result["review_diagnostics"] = pair_diagnostics(result)
 
 
 class PairWorkspace:
@@ -829,6 +963,8 @@ class PairWorkspace:
     def _snapshot(self, job):
         self._refresh_timing(job)
         snapshot = deepcopy(job)
+        if isinstance(snapshot.get("result"), dict):
+            _revalidate_snapshot_result(snapshot["result"])
         snapshot["server_time"] = _now()
         if job.get("status") == "queued":
             snapshot["queue_seconds"] = _seconds_between(job.get("created_at"), snapshot["server_time"])

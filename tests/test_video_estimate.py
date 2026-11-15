@@ -135,6 +135,115 @@ def selected_family_result():
             'excluded': [], 'reason_codes': ['UNIQUE_PRIMARY_COURT_FLIGHT_FAMILY']}
 
 
+def inferred_peak_video(mode='shuttle'):
+    from test_native_landing import scene
+
+    _, tracks, frames, times, size, calibration = scene(mode=mode)
+    # The detector loses three frames at the peak, while the original images
+    # remain available. No reference location or answer is injected downstream.
+    tracks[0]['observations'] = [row for row in tracks[0]['observations']
+                                 if row['frame_index'] not in (12, 13, 14)]
+    candidate = {'event_id': 'event_000', 'track_id': 1, 'frame_index': 14, 'time': times[14],
+                 'candidate_px': [360., 240.], 'contact_observed': False, 'contact_px': None,
+                 'identity_confidence': .25, 'confidence': .4, 'uncertainty_px': 3., 'contact_radius_px': 1.,
+                 'flight_trajectory_support': {'supported_for_review': True},
+                 'image_motion_event': {'kind': 'occluded_descent_and_rebound',
+                     'point_kind': 'inferred_object_center', 'frame_interval': [11, 15],
+                     'time_interval': [times[11], times[15]], 'estimated_time': times[14]}}
+    polygon = [[100, 400], [800, 400], [800, 80], [100, 80]]
+    calibration.update(image_width=960, image_height=540, status='review', confidence=.4,
+        primary_court={'status': 'selected', 'scope': 'near_half', 'region_supported': True,
+            'game': 'doubles', 'rules': {'game': 'doubles', 'phase': 'rally'}, 'confidence': .9,
+            'geometry_uncertainty_px': 2.,
+            'polygon_px': polygon, 'physical_court_polygon_px': polygon, 'interior_polygon_px': polygon,
+            'interior_limit': 'near_short_service_line_not_an_out_boundary',
+            'judgment_scope_polygon_px': [[70, 430], [830, 430], [830, 50], [70, 50]],
+            'boundary_segments_px': [
+                {'role': role, 'segment_px': segment, 'observed': True,
+                 'inside_point_px': [450, 250], 'uncertainty_px': 2.}
+                for role, segment in [('near', [100, 400, 800, 400]),
+                                      ('left', [100, 400, 100, 80]),
+                                      ('right', [800, 400, 800, 80])]]})
+    return [candidate], tracks, frames, times, size, calibration
+
+
+def test_detector_gap_is_recovered_only_from_visible_native_peak():
+    from badminton.landing_families import resolve_landing_families
+    from badminton.video_estimate import estimate_video_verdict
+
+    args = inferred_peak_video()
+    before = deepcopy((args[0], args[1]))
+    family = resolve_landing_families(args[0], args[1], args[3], args[5], args[4])
+    assert family['status'] == 'native_confirmation_required' and family['selected_family'] is None
+    result = estimate_video_verdict(*args)
+    assert result['decision'] == 'IN' and result['eligible'] is True
+    assert result['family_resolution']['status'] == 'selected'
+    assert result['family_resolution']['native_peak_recovery']['status'] == 'supported'
+    native = result['native_evidence']
+    assert native['status'] == 'supported'
+    peak = next(row for row in native['support_frames'] if row.get('peak_frame'))
+    assert peak['frame_index'] == 14 and peak['observed_search_seed'] is False
+    assert peak['inferred_candidate_search_seed_count'] == 1
+    assert peak['source_crop_sha256'] and native['observed_frame_count'] == 10
+    assert native['recovery_peak_coverage'] == {
+        'required_frame_indices': list(range(11, 18)),
+        'observed_frame_indices': list(range(11, 18)), 'contiguous': True}
+    assert result['contact_observed'] is False and result['target_identity_verified'] is False
+    assert (args[0], args[1]) == before
+
+
+@pytest.mark.parametrize('damage', ['masked_peak', 'missing_exposure', 'static', 'missing_rebound'])
+def test_inferred_peak_recovery_cannot_replace_absent_native_evidence(damage):
+    from badminton.video_estimate import estimate_video_verdict
+
+    args = inferred_peak_video('static' if damage == 'static' else 'shuttle')
+    if damage == 'masked_peak':
+        for index in (13, 14, 15):
+            args[2][index][190:270, 320:400] = 150
+    elif damage == 'missing_exposure':
+        del args[2][14]
+        del args[3][14]
+        for row in args[1][0]['observations']:
+            if row['frame_index'] > 14:
+                row['frame_index'] -= 1
+        args[0][0].update(frame_index=13, time=args[3][13])
+        args[0][0]['image_motion_event']['frame_interval'] = [11, 14]
+    elif damage == 'missing_rebound':
+        args[1][0]['observations'] = [row for row in args[1][0]['observations'] if row['frame_index'] < 12]
+    result = estimate_video_verdict(*args)
+    assert result['decision'] == 'REVIEW' and result['eligible'] is False
+    assert result['family_resolution']['status'] == 'native_confirmation_required'
+    assert result['family_resolution']['selected_family'] is None
+    assert result['native_evidence']['status'] == 'review'
+    assert 'geometry' not in result and 'possible_contact_polygon_px' not in result
+    assert result['contact_observed'] is False and result['target_identity_verified'] is False
+    if damage == 'missing_exposure':
+        assert result['native_evidence']['reason_codes'] == ['NATIVE_ESTIMATE_SOURCE_TIMESTAMP_GAP']
+
+
+@pytest.mark.parametrize('hidden_frames', [(14,), (13, 14), (14, 15)])
+def test_visible_neighbor_cannot_replace_a_hidden_native_peak(hidden_frames):
+    from badminton.video_estimate import estimate_video_verdict
+
+    args = inferred_peak_video()
+    for index in hidden_frames:
+        args[2][index][190:270, 320:400] = 150
+    result = estimate_video_verdict(*args)
+    assert result['decision'] == 'REVIEW' and result['eligible'] is False
+    assert result['family_resolution']['status'] == 'native_confirmation_required'
+    assert result['family_resolution']['selected_family'] is None
+    native = result['native_evidence']
+    assert native['status'] == 'review'
+    if hidden_frames == (14,):
+        assert native['reason_codes'] == ['NATIVE_ESTIMATE_NATIVE_REVERSAL_UNSUPPORTED']
+    else:
+        assert native['reason_codes'] == ['NATIVE_ESTIMATE_RECOVERY_PEAK_NOT_CONTIGUOUS']
+        assert native['recovery_peak_coverage']['contiguous'] is False
+        assert 14 not in native['recovery_peak_coverage']['observed_frame_indices']
+    assert 'geometry' not in result and 'possible_contact_polygon_px' not in result
+    assert result['contact_observed'] is False and result['target_identity_verified'] is False
+
+
 @pytest.mark.parametrize('resolution', [
     {'status': 'review', 'selected_family': None, 'families': [], 'reason_codes': ['NO_SUPPORTED_PRIMARY_COURT_FLIGHT_FAMILY']},
     {'status': 'review', 'selected_family': None, 'families': [

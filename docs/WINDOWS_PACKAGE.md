@@ -1,6 +1,6 @@
-# Windows 실행 패키지 0.5.13
+# Windows 실행 패키지 0.5.14
 
-배포 ZIP 이름은 `badminton-windows-0.5.13.zip`입니다. 배포된 파일의 다운로드 위치와 SHA256은 해당 배포 안내를 확인하세요.
+개선본 ZIP 이름은 `badminton-windows-0.5.14.zip`입니다. 실제 판정과 반복 REVIEW 표시를 연결한 변경은 [착지 판정 개선](REVIEW_RESOLUTION.md)을 확인하세요. 검증을 통과한 ZIP·SHA256·보고서는 Windows 작업의 `badminton-windows-0.5.14` 아티팩트에 저장합니다.
 
 ZIP을 쓰기 가능한 새 폴더에 **전부 압축 해제**한 뒤 루트의 `START.bat`를 실행합니다. 첫 실행에서는 구성 ZIP의 크기·SHA256을 확인하고 포함된 Python·NumPy·OpenCV·SciPy·FFmpeg·FFprobe를 압축 해제합니다. CPU 기본 분석에는 별도 Python 설치나 인터넷 연결이 필요하지 않습니다. 이전 패키지 폴더와 섞지 마세요.
 

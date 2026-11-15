@@ -33,7 +33,8 @@ SOURCES = {
           'sha256': 'bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9',
           'provenance': 'Repository source SHA-256 matches the supplied user attachment.'},
 }
-CASES = [('A', 'doubles', 'IN'), ('B', 'doubles', 'REVIEW'), ('A', 'singles', 'OUT')]
+CASES = [('A', 'doubles', 'IN'), ('B', 'doubles', 'REVIEW'),
+         ('A', 'singles', 'OUT'), ('B', 'singles', 'REVIEW')]
 
 
 def digest(path):
@@ -171,6 +172,68 @@ def check_artifacts(output, result):
     return checks
 
 
+def check_pair_assessments(analyzed, games=('doubles', 'singles')):
+    """Exercise the production public-result boundary with fresh real analyses.
+
+    This verifies the backend contract consumed by the screen. Browser rendering
+    is tested separately; the reports do not treat an unresolved B view as a new
+    independent verdict simply because A provides a supported video estimate.
+    """
+    from badminton.pair_workspace import _video_estimate_summary, combine_views
+
+    checks = []
+    for game in games:
+        expected = {'doubles': 'IN', 'singles': 'OUT'}[game]
+        rules = {'game': game, 'phase': 'rally'}
+        views = {}
+        for camera in ('A', 'B'):
+            result, output = analyzed[(camera, game)]
+            direct = result['decision']['decision']
+            views[camera] = {
+                'camera_id': camera, 'status': 'completed', 'rules': rules,
+                'source_sha256': result['source_sha256'], 'automatic_decision': direct,
+                'direct_decision': direct, 'assisted_decision': direct,
+                'qualified': direct in {'IN', 'OUT'},
+                'video_estimate': _video_estimate_summary(result, output, '/verified-' + camera + '/'),
+                'assessment': copy.deepcopy(result['assessment']),
+                'reason_codes': result['decision']['reason_codes'],
+            }
+            if result.get('video_estimate', {}).get('eligible') is True:
+                selected = result.get('selected_landing') or {}
+                if selected.get('event_id') not in result['video_estimate'].get('member_event_ids', []):
+                    raise RuntimeError('Displayed candidate is outside the measured estimate family')
+                if selected.get('contact_observed') is not False:
+                    raise RuntimeError('Video estimate incorrectly promoted direct contact')
+        pair = combine_views(views, same_event_confirmed=False, rules=rules)
+        if (pair['decision'] != expected or pair['decision_kind'] != 'video_estimate'
+                or pair['source_camera_ids'] != ['A']):
+            raise RuntimeError('Real pair did not retain the supported A estimate: ' + game)
+        donor, other = pair['views']['A'], pair['views']['B']
+        assessment = donor.get('analysis_assessment') or {}
+        stages = assessment.get('stages') or []
+        if (donor.get('effective_decision') != expected
+                or donor.get('effective_decision_kind') != 'video_estimate'
+                or assessment.get('contributes_to_final') is not True
+                or assessment.get('blocking_stages') != []
+                or {stage.get('id') for stage in stages} != {'contact', 'identity', 'event', 'geometry'}
+                or any(stage.get('status') != 'passed' for stage in stages)):
+            raise RuntimeError('Resolved A still exposes stale blockers in its primary assessment: ' + game)
+        if (donor['direct_decision'] != 'REVIEW' or other['direct_decision'] != 'REVIEW'
+                or other.get('effective_decision') != 'REVIEW'
+                or (other.get('analysis_assessment') or {}).get('supplementary') is not True):
+            raise RuntimeError('Pair presentation fabricated independent contact or peer evidence: ' + game)
+        checks.append({'game': game, 'decision': pair['decision'], 'decision_kind': pair['decision_kind'],
+                       'source_camera_ids': pair['source_camera_ids'],
+                       'same_event_confirmed': pair['same_event_confirmed'],
+                       'A': {'effective_decision': donor['effective_decision'],
+                             'direct_decision': donor['direct_decision'], 'assessment': assessment},
+                       'B': {'effective_decision': other['effective_decision'],
+                             'direct_decision': other['direct_decision'],
+                             'assessment': other['analysis_assessment']},
+                       'scope': 'Production backend result contract from fresh, source-bound real analyses; no browser claim.'})
+    return checks
+
+
 def run_cases(app, work, report, report_path):
     from badminton.pipeline import analyze_video, implementation_fingerprint
     from badminton.resources import apply_runtime
@@ -183,6 +246,7 @@ def run_cases(app, work, report, report_path):
     config['resource_settings'] = settings
     report['implementation_fingerprint'] = implementation_fingerprint()
     report['cases'] = []
+    analyzed = {}
     sources = {view: source_file(view, work / '원본 영상') for view in SOURCES}
     for view, game, expected in CASES:
         output = work / f'{view} 시점 {game} 결과'
@@ -225,6 +289,7 @@ def run_cases(app, work, report, report_path):
                         decision_kind=result['display_decision'].get('decision_kind'),
                         estimate_eligible=estimate.get('eligible'), evidence_warnings=[],
                         result_sha256=digest(output / 'result.json'), status='passed')
+            analyzed[(view, game)] = (result, output)
         except Exception as error:
             case.update(error=f'{type(error).__name__}: {error}', traceback=traceback.format_exc())
             print(case['traceback'], file=sys.stderr, flush=True)
@@ -233,6 +298,8 @@ def run_cases(app, work, report, report_path):
             save_report(report_path, report)
     if any(case['status'] != 'passed' for case in report['cases']):
         raise RuntimeError('At least one source-bound full Windows analysis failed')
+    report['pair_assessments'] = check_pair_assessments(analyzed)
+    save_report(report_path, report)
 
 
 def verify(package, work, report, report_path):

@@ -298,6 +298,16 @@ def resolve_landing_families(landings, tracks, timestamps, calibration, analysis
         if family['selection_evidence']['observed_peak_member_ids']:
             result.update(status='selected', selected_family=family,
                           reason_codes=['UNIQUE_PRIMARY_COURT_FLIGHT_FAMILY'])
+        elif all((member.get('image_motion_event') or {}).get('point_kind') == 'inferred_object_center'
+                 for member in family['members']):
+            # A missed detector peak is not necessarily a missing source image.
+            # The measured court-connected flight is only a search candidate:
+            # native preflight must verify actual approach/rebound observations,
+            # then independent pixels must supply the visible temporal peak.
+            # Keep selected_family empty until that source evidence succeeds.
+            result.update(status='native_confirmation_required', candidate_family=family,
+                          reason_codes=['EVENT_FAMILY_ONLY_INFERRED_LOCATIONS',
+                                        'UNIQUE_FLIGHT_REQUIRES_NATIVE_PEAK'])
         else:
             result['reason_codes'] = ['EVENT_FAMILY_ONLY_INFERRED_LOCATIONS']
     else:

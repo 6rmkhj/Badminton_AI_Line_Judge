@@ -658,13 +658,16 @@ function renderLandingCandidate(camera, view, player) {
   }
   return panel;
 }
-function renderEvidenceAssessment(camera, assessment) {
+function renderEvidenceAssessment(camera, assessment, effective = false) {
   if (!assessment || assessment.schema_version !== 1 || !Array.isArray(assessment.stages)) return null;
-  const panel = el('section', 'evidence-assessment');
-  const heading = el('h4', '', '착지 탐색과 라인 판정'); heading.id = 'assessment-heading-' + camera.toLowerCase();
+  const panel = el('section', 'evidence-assessment' + (effective ? ' analysis-assessment' : ''));
+  const heading = el('h4', '', effective ? '분석 판정 근거' : '직접 접촉 판정의 상세 조건');
+  heading.id = (effective ? 'analysis-assessment-heading-' : 'assessment-heading-') + camera.toLowerCase();
   panel.setAttribute('aria-labelledby', heading.id); panel.append(heading);
   if (typeof assessment.summary === 'string') panel.append(el('p', 'assessment-summary', assessment.summary));
-  panel.append(el('p', 'assessment-scope', '접촉·식별·보정·위치 오차는 화면의 대표 후보 기준이며, 사건 선택과 최종 판정은 전체 판정 대상 후보를 기준으로 표시합니다.'));
+  panel.append(el('p', 'assessment-scope', effective && typeof assessment.scope_label === 'string'
+    ? assessment.scope_label : '접촉·식별·보정·위치 오차는 화면의 대표 후보 기준이며, 사건 선택과 최종 판정은 전체 판정 대상 후보를 기준으로 표시합니다.'));
+  if (effective && typeof assessment.explanation === 'string' && assessment.explanation) panel.append(el('p', 'assessment-explanation', assessment.explanation));
   const list = el('ul', 'assessment-stages');
   for (const stage of assessment.stages) {
     if (!stage || typeof stage.label !== 'string' || typeof stage.detail !== 'string') continue;
@@ -675,10 +678,32 @@ function renderEvidenceAssessment(camera, assessment) {
     title.append(el('strong', '', stage.label), el('span', '', typeof stage.status_label === 'string' ? stage.status_label : '근거 확인 필요'));
     row.append(title, el('p', '', stage.detail)); list.append(row);
   }
-  panel.append(list); return panel;
+  panel.append(list);
+  if (effective && typeof assessment.next_action === 'string' && assessment.next_action) {
+    const action = el('p', 'assessment-next-action'); action.append(el('strong', '', '다음 조치: '), document.createTextNode(assessment.next_action)); panel.append(action);
+  }
+  return panel;
 }
 function estimateVerdict(estimate) {
   return estimate?.eligible === true && ['IN', 'OUT'].includes(estimate.decision) ? estimate.decision : 'REVIEW';
+}
+function viewEstimateVerdict(view) {
+  const raw = estimateVerdict(view.video_estimate);
+  // The server validates source/rules/frame bounds before setting this field.
+  // A raw eligible flag must not restore an estimate rejected by that boundary.
+  if (Object.hasOwn(view, 'estimated_decision')) return view.estimated_decision === raw ? raw : 'REVIEW';
+  if (Object.hasOwn(view, 'effective_decision')) return view.effective_decision_kind === 'video_estimate' && view.effective_decision === raw ? raw : 'REVIEW';
+  return raw; // Older saved responses predate the explicit presentation fields.
+}
+function effectiveViewDecision(view) {
+  if (Object.hasOwn(view, 'effective_decision')) {
+    const label = view.effective_decision, kind = view.effective_decision_kind;
+    if (['IN', 'OUT'].includes(label) && ['verified', 'video_estimate'].includes(kind)) return {label, kind};
+    return {label: 'REVIEW', kind: 'unresolved'};
+  }
+  if (view.qualified === true && ['IN', 'OUT'].includes(view.direct_decision)) return {label: view.direct_decision, kind: 'verified'};
+  const label = viewEstimateVerdict(view);
+  return {label, kind: label === 'REVIEW' ? 'unresolved' : 'video_estimate'};
 }
 function estimateInterval(value, integers = false) {
   return Array.isArray(value) && value.length === 2
@@ -688,7 +713,7 @@ function estimateInterval(value, integers = false) {
 function renderVideoEstimate(camera, view, player) {
   const estimate = view.video_estimate;
   if (!estimate || typeof estimate !== 'object') return null;
-  const verdict = estimateVerdict(estimate), supported = verdict !== 'REVIEW';
+  const verdict = viewEstimateVerdict(view), supported = verdict !== 'REVIEW';
   const panel = el('section', 'video-estimate-panel');
   panel.dataset.verdict = verdict;
   const heading = el('h4', '', '원본 영상 추정 근거'); heading.id = 'estimate-heading-' + camera.toLowerCase();
@@ -782,13 +807,15 @@ function renderView(camera, view, diagnostics) {
     cell.append(el('span', '', label), el('strong', '', value || 'REVIEW'));
     verdicts.append(cell);
   }
-  card.append(verdicts);
-  if (view.video_estimate && typeof view.video_estimate === 'object') {
-    const estimate = estimateVerdict(view.video_estimate), strip = el('div', 'view-estimate-verdict');
-    strip.dataset.verdict = estimate;
-    strip.append(el('span', '', '원본 영상의 접촉 가능 영역 비교'), el('strong', '', estimate === 'REVIEW' ? '영상 추정 REVIEW' : `영상 추정 ${estimate}`));
-    card.append(strip);
-  }
+  const effective = effectiveViewDecision(view), assessment = view.analysis_assessment;
+  const supplementary = assessment?.supplementary === true && effective.label === 'REVIEW' && view.status === 'completed';
+  const primary = el('div', 'view-effective-verdict' + (effective.kind === 'video_estimate' ? ' view-estimate-verdict' : ''));
+  primary.dataset.verdict = effective.label; primary.dataset.decisionKind = effective.kind;
+  primary.dataset.supplementary = String(supplementary);
+  const label = supplementary ? '독립 판정 없음' : effective.label === 'REVIEW' ? 'REVIEW'
+    : `${effective.kind === 'video_estimate' ? '영상 추정' : '직접 판정'} ${effective.label}`;
+  primary.append(el('span', '', supplementary ? '보조 시점' : assessment?.contributes_to_final === true ? '최종 판정에 사용한 시점' : '이 시점의 분석 결과'), el('strong', '', label));
+  card.append(primary);
   const preview = safeUrl(view.preview_url);
   let player;
   if (preview) {
@@ -810,19 +837,32 @@ function renderView(camera, view, diagnostics) {
     warning.append(list); body.append(warning);
   }
   if (view.rationale) body.append(el('p', 'rationale', view.rationale));
-  const estimatePanel = renderVideoEstimate(camera, view, player);
-  if (estimatePanel) body.append(estimatePanel);
-  const candidatePanel = renderLandingCandidate(camera, view, player);
-  if (candidatePanel) body.append(candidatePanel);
-  const calibrationPanel = renderCalibration(camera, view);
-  if (calibrationPanel) body.append(calibrationPanel);
-  const assessmentPanel = renderEvidenceAssessment(camera, view.assessment);
-  if (assessmentPanel) {
-    if (estimateVerdict(view.video_estimate) !== 'REVIEW') {
-      const direct = el('details', 'direct-contact-assessment');
-      direct.append(el('summary', '', `직접 접촉 기반 판정 조건 · ${view.direct_decision || 'REVIEW'}`), assessmentPanel); body.append(direct);
-    } else body.append(assessmentPanel);
+  const supplementaryDetails = supplementary ? el('details', 'supplementary-evidence') : null;
+  if (supplementaryDetails) {
+    const note = el('p', 'supplementary-note');
+    const sources = Array.isArray(assessment.final_source_camera_ids) ? assessment.final_source_camera_ids.filter(id => cameras.includes(id)) : [];
+    note.textContent = typeof assessment.final_context === 'string' && assessment.final_context
+      ? assessment.final_context : `${sources.length ? sources.join(' / ') + ' 시점의 근거로 최종 판정을 계산했습니다. ' : ''}이 시점에서는 별도의 IN/OUT을 확정하지 않았습니다.`;
+    body.append(note);
+    supplementaryDetails.append(el('summary', '', '이 시점의 미해결 근거와 후속 조치'));
   }
+  const evidenceBody = supplementaryDetails || body;
+  const effectiveAssessment = renderEvidenceAssessment(camera, assessment, true);
+  if (effectiveAssessment) evidenceBody.append(effectiveAssessment);
+  const estimatePanel = renderVideoEstimate(camera, view, player);
+  if (estimatePanel) evidenceBody.append(estimatePanel);
+  const candidatePanel = renderLandingCandidate(camera, view, player);
+  const calibrationPanel = renderCalibration(camera, view);
+  if (calibrationPanel) evidenceBody.append(calibrationPanel);
+  const assessmentPanel = renderEvidenceAssessment(camera, view.assessment);
+  const direct = el('details', 'direct-contact-assessment');
+  direct.append(el('summary', '', `직접 접촉 기반 판정 조건 · ${view.direct_decision || 'REVIEW'}`), verdicts);
+  if (assessmentPanel) direct.append(assessmentPanel);
+  if (candidatePanel) {
+    if (effective.kind === 'video_estimate') direct.append(candidatePanel);
+    else evidenceBody.append(candidatePanel);
+  }
+  evidenceBody.append(direct);
   const trajectoryContext = safeUrl(view.trajectory_context_url);
   if (trajectoryContext) {
     const figure = el('figure', 'trajectory-context');
@@ -857,7 +897,12 @@ function renderView(camera, view, diagnostics) {
     if (observationLabel || (typeof observation === 'string' && observation)) information.append(el('p', 'observation-status', observationLabel || '관측 상태 추가 확인 필요'));
     appendTextList(information, '빠진 근거', diagnostics.missing_requirements);
     appendTextList(information, '이 시점의 후속 조치', diagnostics.follow_up_actions);
-    if (information.childNodes.length) body.append(information);
+    if (information.childNodes.length) {
+      // Legacy strict blockers remain inspectable beside the strict decision;
+      // they do not override a completed native estimate on the primary panel.
+      if (effective.kind !== 'unresolved' || effectiveAssessment) direct.append(information);
+      else evidenceBody.append(information);
+    }
   }
   if (!candidatePanel && player && typeof diagnostics?.focus_time_seconds === 'number' && Number.isFinite(diagnostics.focus_time_seconds) && diagnostics.focus_time_seconds >= 0) {
     const button = el('button', 'seek-button', `검토 구간 ${fmt(diagnostics.focus_time_seconds, 3)}초로 이동`);
@@ -883,6 +928,7 @@ function renderView(camera, view, diagnostics) {
   details.append(el('p', '', `검수 출처: ${reviewSource}`));
   if (view.source_sha256) details.append(el('p', '', '원본 SHA256: ' + view.source_sha256));
   if (Array.isArray(view.reason_codes) && view.reason_codes.length) details.append(el('p', '', view.reason_codes.join(' · ')));
+  if (supplementaryDetails) body.append(supplementaryDetails);
   body.append(details); card.append(body); return card;
 }
 function renderResult(job) {
