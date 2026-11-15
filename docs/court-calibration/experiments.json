@@ -1,0 +1,460 @@
+{
+  "scope": "Development experiments on eight clips from the same gym and fixed approximate AI-visible-line references. Not a held-out or independently annotated accuracy evaluation.",
+  "experiments": [
+    {
+      "name": "baseline",
+      "description": "Unmodified 0.5.7 calibration.",
+      "module_sha256": "068c65e343b3fbd27dcb7ccfb5dc6dce8bdc874731def0e1ec962fd2d1cc83fd",
+      "summary": {
+        "video_count": 8,
+        "full_court_fits": 0,
+        "videos_with_detected_lines": 8,
+        "wholly_non_court_segments": 121,
+        "visible_line_sample_coverage": 0.958984375,
+        "non_court_detected_length_px": 42021.949,
+        "total_detected_length_px": 73237.636
+      },
+      "elapsed_seconds": 1.452,
+      "per_case": [
+        {
+          "key": "case_01",
+          "coverage": 0.990625,
+          "non_court_detected_length_px": 4658.1991,
+          "status": "review"
+        },
+        {
+          "key": "case_02",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 11070.3596,
+          "status": "review"
+        },
+        {
+          "key": "case_03",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 1494.297,
+          "status": "review"
+        },
+        {
+          "key": "case_04",
+          "coverage": 0.978125,
+          "non_court_detected_length_px": 9115.7687,
+          "status": "review"
+        },
+        {
+          "key": "case_05",
+          "coverage": 0.946875,
+          "non_court_detected_length_px": 769.9564,
+          "status": "review"
+        },
+        {
+          "key": "case_06",
+          "coverage": 0.946875,
+          "non_court_detected_length_px": 8000.1265,
+          "status": "review"
+        },
+        {
+          "key": "case_07",
+          "coverage": 0.99375,
+          "non_court_detected_length_px": 2595.67,
+          "status": "review"
+        },
+        {
+          "key": "case_08",
+          "coverage": 0.815625,
+          "non_court_detected_length_px": 4317.5714,
+          "status": "review"
+        }
+      ]
+    },
+    {
+      "name": "improved-v1",
+      "description": "Local paint-ridge masks, temporal support and centered Hough segments.",
+      "module_sha256": "f9d6d4c895e95ea85f9e4905d7d80ed488a6de70e4bf482ea1cf2f631b1295db",
+      "summary": {
+        "video_count": 8,
+        "full_court_fits": 0,
+        "videos_with_detected_lines": 8,
+        "wholly_non_court_segments": 212,
+        "visible_line_sample_coverage": 0.978515625,
+        "non_court_detected_length_px": 31720.443,
+        "total_detected_length_px": 66562.246
+      },
+      "elapsed_seconds": 17.743,
+      "per_case": [
+        {
+          "key": "case_01",
+          "coverage": 0.95625,
+          "non_court_detected_length_px": 4413.4965,
+          "status": "review"
+        },
+        {
+          "key": "case_02",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 7960.9518,
+          "status": "review"
+        },
+        {
+          "key": "case_03",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 1443.5626,
+          "status": "review"
+        },
+        {
+          "key": "case_04",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 4732.9942,
+          "status": "review"
+        },
+        {
+          "key": "case_05",
+          "coverage": 0.95,
+          "non_court_detected_length_px": 1072.5296,
+          "status": "review"
+        },
+        {
+          "key": "case_06",
+          "coverage": 0.98125,
+          "non_court_detected_length_px": 5019.6158,
+          "status": "review"
+        },
+        {
+          "key": "case_07",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 3704.0394,
+          "status": "review"
+        },
+        {
+          "key": "case_08",
+          "coverage": 0.940625,
+          "non_court_detected_length_px": 3373.2526,
+          "status": "review"
+        }
+      ]
+    },
+    {
+      "name": "blue-max",
+      "description": "Use blue excess B-max(G,R), retaining broad H>=85 blue range.",
+      "module_sha256": "6264d3cdfc9865711381d2198c709f683d902e5376fbb851e08fc63057c5c4b8",
+      "summary": {
+        "video_count": 8,
+        "full_court_fits": 0,
+        "videos_with_detected_lines": 8,
+        "wholly_non_court_segments": 173,
+        "visible_line_sample_coverage": 0.978515625,
+        "non_court_detected_length_px": 19330.198,
+        "total_detected_length_px": 55682.872
+      },
+      "elapsed_seconds": 18.719,
+      "per_case": [
+        {
+          "key": "case_01",
+          "coverage": 0.95625,
+          "non_court_detected_length_px": 1275.866,
+          "status": "review"
+        },
+        {
+          "key": "case_02",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 702.6583,
+          "status": "review"
+        },
+        {
+          "key": "case_03",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 1897.2697,
+          "status": "review"
+        },
+        {
+          "key": "case_04",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 5331.8623,
+          "status": "review"
+        },
+        {
+          "key": "case_05",
+          "coverage": 0.95,
+          "non_court_detected_length_px": 116.7814,
+          "status": "review"
+        },
+        {
+          "key": "case_06",
+          "coverage": 0.98125,
+          "non_court_detected_length_px": 5254.4146,
+          "status": "review"
+        },
+        {
+          "key": "case_07",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 2075.5768,
+          "status": "review"
+        },
+        {
+          "key": "case_08",
+          "coverage": 0.940625,
+          "non_court_detected_length_px": 2675.7685,
+          "status": "review"
+        }
+      ]
+    },
+    {
+      "name": "blue-hue",
+      "description": "Additionally narrow blue eligibility to H>=98; rejected for reduced visible-line coverage.",
+      "module_sha256": "0c0a7b3a227de0193fbeb27e9d821988370e019486d47d358cbebba48d9a8571",
+      "summary": {
+        "video_count": 8,
+        "full_court_fits": 0,
+        "videos_with_detected_lines": 8,
+        "wholly_non_court_segments": 173,
+        "visible_line_sample_coverage": 0.9753906250000001,
+        "non_court_detected_length_px": 18643.868,
+        "total_detected_length_px": 54886.354
+      },
+      "elapsed_seconds": 18.747,
+      "per_case": [
+        {
+          "key": "case_01",
+          "coverage": 0.934375,
+          "non_court_detected_length_px": 1412.117,
+          "status": "review"
+        },
+        {
+          "key": "case_02",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 781.1373,
+          "status": "review"
+        },
+        {
+          "key": "case_03",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 1832.4771,
+          "status": "review"
+        },
+        {
+          "key": "case_04",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 5163.9377,
+          "status": "review"
+        },
+        {
+          "key": "case_05",
+          "coverage": 0.946875,
+          "non_court_detected_length_px": 137.3195,
+          "status": "review"
+        },
+        {
+          "key": "case_06",
+          "coverage": 0.98125,
+          "non_court_detected_length_px": 4650.8212,
+          "status": "review"
+        },
+        {
+          "key": "case_07",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 2068.5161,
+          "status": "review"
+        },
+        {
+          "key": "case_08",
+          "coverage": 0.940625,
+          "non_court_detected_length_px": 2597.5418,
+          "status": "review"
+        }
+      ]
+    },
+    {
+      "name": "floor-ab",
+      "description": "Filter segments by dominant lower-image/ROI chroma and both flanks.",
+      "module_sha256": "a9a3a1c29969fb896213c296c36732688b32381dfbac68f925fc23affc507e52",
+      "summary": {
+        "video_count": 8,
+        "full_court_fits": 0,
+        "videos_with_detected_lines": 8,
+        "wholly_non_court_segments": 116,
+        "visible_line_sample_coverage": 0.978515625,
+        "non_court_detected_length_px": 13201.793,
+        "total_detected_length_px": 48039.024
+      },
+      "elapsed_seconds": 18.131,
+      "per_case": [
+        {
+          "key": "case_01",
+          "coverage": 0.95625,
+          "non_court_detected_length_px": 855.818,
+          "status": "review"
+        },
+        {
+          "key": "case_02",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 192.2028,
+          "status": "review"
+        },
+        {
+          "key": "case_03",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 1674.6082,
+          "status": "review"
+        },
+        {
+          "key": "case_04",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 3258.9888,
+          "status": "review"
+        },
+        {
+          "key": "case_05",
+          "coverage": 0.95,
+          "non_court_detected_length_px": 75.7353,
+          "status": "review"
+        },
+        {
+          "key": "case_06",
+          "coverage": 0.98125,
+          "non_court_detected_length_px": 3794.5661,
+          "status": "review"
+        },
+        {
+          "key": "case_07",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 1998.1832,
+          "status": "review"
+        },
+        {
+          "key": "case_08",
+          "coverage": 0.940625,
+          "non_court_detected_length_px": 1351.6911,
+          "status": "review"
+        }
+      ]
+    },
+    {
+      "name": "floor-lab",
+      "description": "Additionally require floor lightness lower decile minus 50; rejected due multicolour-floor boundary regression.",
+      "module_sha256": "7c3460b77d3083e875cb7ae2fba95f2e8577f27e0732c199b136c50b070ec192",
+      "summary": {
+        "video_count": 8,
+        "full_court_fits": 0,
+        "videos_with_detected_lines": 8,
+        "wholly_non_court_segments": 27,
+        "visible_line_sample_coverage": 0.9781249999999999,
+        "non_court_detected_length_px": 2573.708,
+        "total_detected_length_px": 32588.127
+      },
+      "elapsed_seconds": 15.845,
+      "per_case": [
+        {
+          "key": "case_01",
+          "coverage": 0.95625,
+          "non_court_detected_length_px": 0.0,
+          "status": "review"
+        },
+        {
+          "key": "case_02",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 1.7777,
+          "status": "review"
+        },
+        {
+          "key": "case_03",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 1095.5353,
+          "status": "review"
+        },
+        {
+          "key": "case_04",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 0.0,
+          "status": "review"
+        },
+        {
+          "key": "case_05",
+          "coverage": 0.95,
+          "non_court_detected_length_px": 0.0,
+          "status": "review"
+        },
+        {
+          "key": "case_06",
+          "coverage": 0.98125,
+          "non_court_detected_length_px": 0.0,
+          "status": "review"
+        },
+        {
+          "key": "case_07",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 1476.3954,
+          "status": "review"
+        },
+        {
+          "key": "case_08",
+          "coverage": 0.9375,
+          "non_court_detected_length_px": 0.0,
+          "status": "review"
+        }
+      ]
+    },
+    {
+      "name": "floor-permissive",
+      "description": "Require at least one matching flank and lower decile lightness minus 70; provisional candidate.",
+      "module_sha256": "3a026f995a27f2f96b46aa301fb2f7ae7c9f3766cf92a45bfca44112d3ff4018",
+      "summary": {
+        "video_count": 8,
+        "full_court_fits": 0,
+        "videos_with_detected_lines": 8,
+        "wholly_non_court_segments": 55,
+        "non_court_detected_length_px": 5030.681,
+        "total_detected_length_px": 39344.006,
+        "visible_line_sample_coverage": 0.978515625
+      },
+      "elapsed_seconds": 17.994,
+      "per_case": [
+        {
+          "key": "case_01",
+          "coverage": 0.95625,
+          "non_court_detected_length_px": 388.6624,
+          "status": "review"
+        },
+        {
+          "key": "case_02",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 1.7777,
+          "status": "review"
+        },
+        {
+          "key": "case_03",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 1627.6807,
+          "status": "review"
+        },
+        {
+          "key": "case_04",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 0.0,
+          "status": "review"
+        },
+        {
+          "key": "case_05",
+          "coverage": 0.95,
+          "non_court_detected_length_px": 7.573,
+          "status": "review"
+        },
+        {
+          "key": "case_06",
+          "coverage": 0.98125,
+          "non_court_detected_length_px": 0.0,
+          "status": "review"
+        },
+        {
+          "key": "case_07",
+          "coverage": 1.0,
+          "non_court_detected_length_px": 2075.5768,
+          "status": "review"
+        },
+        {
+          "key": "case_08",
+          "coverage": 0.940625,
+          "non_court_detected_length_px": 929.4107,
+          "status": "review"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,824 @@
+{
+  "schema_version": 1,
+  "scope": "Eight existing repository clips from four camera recording families in one gym. Diagnose visible painted-line recovery separately from full-court homography acceptance; not an independent venue benchmark.",
+  "cases": [
+    {
+      "key": "case_01",
+      "source_path": "video/8k 30 4k 24 a시점 4.mp4",
+      "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+      "source_sha256": "7e730a4a1bf262e2d1a43a09e7524be5d867040691a584976582a98a1255d28e",
+      "source_bytes": 75343727,
+      "source_size": [
+        7680,
+        4320
+      ],
+      "frame_indices": [
+        0,
+        13,
+        27,
+        40,
+        54,
+        68,
+        81,
+        95,
+        109
+      ],
+      "analysis_size": [
+        960,
+        540
+      ],
+      "frames_sha256": "9802ca5943a9a0dc3e1d8486fb5a065c233e57105db829e473868d0046876678",
+      "visible_line_references_px": [
+        [
+          [
+            242,
+            252
+          ],
+          [
+            341,
+            502
+          ]
+        ],
+        [
+          [
+            341,
+            502
+          ],
+          [
+            816,
+            294
+          ]
+        ],
+        [
+          [
+            251,
+            212
+          ],
+          [
+            428,
+            462
+          ]
+        ],
+        [
+          [
+            314,
+            416
+          ],
+          [
+            744,
+            282
+          ]
+        ],
+        [
+          [
+            445,
+            252
+          ],
+          [
+            687,
+            350
+          ]
+        ]
+      ],
+      "visual_scene_observation": "Near half court visible with blue tape on wood; distant/adjacent court lines, no independently established complete outer-court polygon.",
+      "non_court_regions_px": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            959,
+            0
+          ],
+          [
+            959,
+            150
+          ],
+          [
+            0,
+            150
+          ]
+        ]
+      ]
+    },
+    {
+      "key": "case_02",
+      "source_path": "video/8k 30 4k 24 b시점 4.mp4",
+      "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+      "source_sha256": "ae1db2f945a14c7e0c2b11d00be7085ed8c7f69b431ee621cc1d0b9efc1411c6",
+      "source_bytes": 12834379,
+      "source_size": [
+        3840,
+        2160
+      ],
+      "frame_indices": [
+        0,
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        81
+      ],
+      "analysis_size": [
+        960,
+        540
+      ],
+      "frames_sha256": "a4481f79e0bbd58cc574a06687e0cb3796fa343da4eff74d0a202aa178a6303c",
+      "visible_line_references_px": [
+        [
+          [
+            210,
+            252
+          ],
+          [
+            359,
+            501
+          ]
+        ],
+        [
+          [
+            359,
+            501
+          ],
+          [
+            881,
+            318
+          ]
+        ],
+        [
+          [
+            207,
+            212
+          ],
+          [
+            443,
+            470
+          ]
+        ],
+        [
+          [
+            319,
+            426
+          ],
+          [
+            798,
+            303
+          ]
+        ],
+        [
+          [
+            446,
+            261
+          ],
+          [
+            714,
+            366
+          ]
+        ]
+      ],
+      "visual_scene_observation": "Near half court visible with blue tape on wood; distant/adjacent court lines, no independently established complete outer-court polygon.",
+      "non_court_regions_px": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            959,
+            0
+          ],
+          [
+            959,
+            140
+          ],
+          [
+            0,
+            140
+          ]
+        ]
+      ]
+    },
+    {
+      "key": "case_03",
+      "source_path": "video/a-4시점(uhd30 4k30).mp4",
+      "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+      "source_sha256": "973355dc2d10ab4eebe1564e4c223b02f1ba225d600a9889405eae646b8213b3",
+      "source_bytes": 17072269,
+      "source_size": [
+        3840,
+        2160
+      ],
+      "frame_indices": [
+        0,
+        12,
+        24,
+        36,
+        48,
+        60,
+        72,
+        84,
+        96
+      ],
+      "analysis_size": [
+        960,
+        540
+      ],
+      "frames_sha256": "b0834c7f0da43f5b5f4a26178fc3f10d28e4fdb9e7d1709fb0f63a9aa0601396",
+      "visible_line_references_px": [
+        [
+          [
+            168,
+            260
+          ],
+          [
+            195,
+            521
+          ]
+        ],
+        [
+          [
+            200,
+            520
+          ],
+          [
+            845,
+            264
+          ]
+        ],
+        [
+          [
+            181,
+            187
+          ],
+          [
+            309,
+            480
+          ]
+        ],
+        [
+          [
+            190,
+            431
+          ],
+          [
+            761,
+            249
+          ]
+        ],
+        [
+          [
+            430,
+            241
+          ],
+          [
+            659,
+            336
+          ]
+        ]
+      ],
+      "visual_scene_observation": "Near half court visible with blue tape on wood; distant/adjacent court lines, no independently established complete outer-court polygon.",
+      "non_court_regions_px": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            959,
+            0
+          ],
+          [
+            959,
+            100
+          ],
+          [
+            0,
+            100
+          ]
+        ]
+      ]
+    },
+    {
+      "key": "case_04",
+      "source_path": "video/b-3시점(uhd30 4k30).mp4",
+      "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+      "source_sha256": "1469100923fd649976a9ebb3ffff518018c7a6ad660f036fd35d007443ae54c5",
+      "source_bytes": 21914516,
+      "source_size": [
+        3840,
+        2160
+      ],
+      "frame_indices": [
+        0,
+        12,
+        24,
+        36,
+        48,
+        60,
+        72,
+        84,
+        97
+      ],
+      "analysis_size": [
+        960,
+        540
+      ],
+      "frames_sha256": "4f0849639263f0011f8ea27fb4a85199971cabada87aa46f122be06ebe2bcd26",
+      "visible_line_references_px": [
+        [
+          [
+            201,
+            303
+          ],
+          [
+            486,
+            511
+          ]
+        ],
+        [
+          [
+            486,
+            511
+          ],
+          [
+            756,
+            317
+          ]
+        ],
+        [
+          [
+            201,
+            283
+          ],
+          [
+            538,
+            473
+          ]
+        ],
+        [
+          [
+            404,
+            450
+          ],
+          [
+            705,
+            313
+          ]
+        ],
+        [
+          [
+            419,
+            298
+          ],
+          [
+            683,
+            366
+          ]
+        ]
+      ],
+      "visual_scene_observation": "Near half court visible with blue tape on wood; distant/adjacent court lines, no independently established complete outer-court polygon.",
+      "non_court_regions_px": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            959,
+            0
+          ],
+          [
+            959,
+            200
+          ],
+          [
+            0,
+            200
+          ]
+        ]
+      ]
+    },
+    {
+      "key": "case_05",
+      "source_path": "video/a시점(uhd30 hd30) 2.mp4",
+      "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+      "source_sha256": "c6bc1029c316cb96713d1076ba0f098f4124914802648aade538c5a7f1e28ec7",
+      "source_bytes": 23598306,
+      "source_size": [
+        3840,
+        2160
+      ],
+      "frame_indices": [
+        0,
+        22,
+        44,
+        66,
+        89,
+        111,
+        133,
+        155,
+        178
+      ],
+      "analysis_size": [
+        960,
+        540
+      ],
+      "frames_sha256": "50b224e935366a73c2c92ea258fbfd450645e911913728d3173caf0bef8a39e5",
+      "visible_line_references_px": [
+        [
+          [
+            214,
+            251
+          ],
+          [
+            195,
+            516
+          ]
+        ],
+        [
+          [
+            195,
+            516
+          ],
+          [
+            909,
+            287
+          ]
+        ],
+        [
+          [
+            239,
+            178
+          ],
+          [
+            311,
+            476
+          ]
+        ],
+        [
+          [
+            204,
+            419
+          ],
+          [
+            820,
+            276
+          ]
+        ],
+        [
+          [
+            444,
+            227
+          ],
+          [
+            687,
+            355
+          ]
+        ]
+      ],
+      "visual_scene_observation": "Near half court visible with blue tape on wood; distant/adjacent court lines, no independently established complete outer-court polygon.",
+      "non_court_regions_px": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            959,
+            0
+          ],
+          [
+            959,
+            100
+          ],
+          [
+            0,
+            100
+          ]
+        ]
+      ]
+    },
+    {
+      "key": "case_06",
+      "source_path": "video/b시점(uhd30 hd30) 3.mp4",
+      "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+      "source_sha256": "22f90d5ebb1e66a3750b659fda24b0df90d27e7bf3fb1ff2472467c2f497ee5f",
+      "source_bytes": 5932477,
+      "source_size": [
+        1920,
+        1080
+      ],
+      "frame_indices": [
+        0,
+        10,
+        21,
+        31,
+        42,
+        52,
+        63,
+        73,
+        84
+      ],
+      "analysis_size": [
+        960,
+        540
+      ],
+      "frames_sha256": "0e949ef5c8dbd61b6ebb93cddc0b096689775a208c154baf8ec3e6368bdcbd7b",
+      "visible_line_references_px": [
+        [
+          [
+            252,
+            321
+          ],
+          [
+            518,
+            524
+          ]
+        ],
+        [
+          [
+            518,
+            524
+          ],
+          [
+            822,
+            355
+          ]
+        ],
+        [
+          [
+            251,
+            303
+          ],
+          [
+            570,
+            494
+          ]
+        ],
+        [
+          [
+            443,
+            465
+          ],
+          [
+            763,
+            343
+          ]
+        ],
+        [
+          [
+            461,
+            323
+          ],
+          [
+            734,
+            401
+          ]
+        ]
+      ],
+      "visual_scene_observation": "Near half court visible with blue tape on wood; distant/adjacent court lines, no independently established complete outer-court polygon.",
+      "non_court_regions_px": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            959,
+            0
+          ],
+          [
+            959,
+            210
+          ],
+          [
+            0,
+            210
+          ]
+        ]
+      ]
+    },
+    {
+      "key": "case_07",
+      "source_path": "video/a시점 4.mp4",
+      "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+      "source_sha256": "2626c4e1941b5bee102ea6eba529da5e4b93e3744d3c291e18bb83b9df63f1bd",
+      "source_bytes": 36829811,
+      "source_size": [
+        3840,
+        2160
+      ],
+      "frame_indices": [
+        0,
+        35,
+        70,
+        105,
+        140,
+        175,
+        210,
+        245,
+        280
+      ],
+      "analysis_size": [
+        960,
+        540
+      ],
+      "frames_sha256": "4a2487baad1e36a2b9989aa6a8203f56c69cf2c655c50d60918e1ce2763df952",
+      "visible_line_references_px": [
+        [
+          [
+            200,
+            257
+          ],
+          [
+            258,
+            535
+          ]
+        ],
+        [
+          [
+            260,
+            532
+          ],
+          [
+            874,
+            312
+          ]
+        ],
+        [
+          [
+            212,
+            211
+          ],
+          [
+            364,
+            495
+          ]
+        ],
+        [
+          [
+            244,
+            443
+          ],
+          [
+            795,
+            297
+          ]
+        ],
+        [
+          [
+            434,
+            259
+          ],
+          [
+            695,
+            374
+          ]
+        ]
+      ],
+      "visual_scene_observation": "Near half court visible with blue tape on wood; distant/adjacent court lines, no independently established complete outer-court polygon.",
+      "non_court_regions_px": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            959,
+            0
+          ],
+          [
+            959,
+            140
+          ],
+          [
+            0,
+            140
+          ]
+        ]
+      ]
+    },
+    {
+      "key": "case_08",
+      "source_path": "video/b시점 7.mp4",
+      "source_commit": "59c20cbf94d3d325651c3f71cabba9a2a80fa576",
+      "source_sha256": "27050156feb5987b60dbe4e0d42eb0f59e61b5679c95f6efd2d39901a9208d1c",
+      "source_bytes": 19439968,
+      "source_size": [
+        3840,
+        2160
+      ],
+      "frame_indices": [
+        0,
+        22,
+        44,
+        67,
+        89,
+        111,
+        134,
+        156,
+        179
+      ],
+      "analysis_size": [
+        960,
+        540
+      ],
+      "frames_sha256": "2e8f59e3a395c0b57533ff4e94f036d5b275d46b17b55c17959ef51d55a947b3",
+      "visible_line_references_px": [
+        [
+          [
+            173,
+            310
+          ],
+          [
+            436,
+            525
+          ]
+        ],
+        [
+          [
+            436,
+            525
+          ],
+          [
+            811,
+            322
+          ]
+        ],
+        [
+          [
+            172,
+            284
+          ],
+          [
+            503,
+            488
+          ]
+        ],
+        [
+          [
+            363,
+            462
+          ],
+          [
+            747,
+            318
+          ]
+        ],
+        [
+          [
+            408,
+            302
+          ],
+          [
+            705,
+            379
+          ]
+        ]
+      ],
+      "visual_scene_observation": "Near half court visible with blue tape on wood; distant/adjacent court lines, no independently established complete outer-court polygon.",
+      "non_court_regions_px": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            959,
+            0
+          ],
+          [
+            959,
+            185
+          ],
+          [
+            0,
+            185
+          ]
+        ]
+      ]
+    }
+  ],
+  "reference_limitations": {
+    "source": "AI visual annotation of five clearly visible near-half-court line segments per image, frozen before modified detector evaluation",
+    "human_verified": false,
+    "coordinate_size": [
+      960,
+      540
+    ],
+    "line_roles_confirmed": false,
+    "metric_ground_truth": false,
+    "line_sample_tolerance_px": 5,
+    "limitations": [
+      "Approximate image annotations, not surveyed line center coordinates.",
+      "Images contain partial courts, lens distortion, glare, moving players and adjacent courts.",
+      "Coverage does not measure false positives or confirm court identity.",
+      "No physical contact or IN/OUT accuracy is measured."
+    ],
+    "negative_region_source": "Conservative rectangles wholly above the floor, identified from source images before modified-detector evaluation. Only explicit non-court clutter is measured, not overall precision."
+  }
+}

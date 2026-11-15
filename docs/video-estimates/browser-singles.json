@@ -1,0 +1,49 @@
+{
+  "status": "passed",
+  "provenance": "Read-only production ReviewServer and actual saved analysis; no request interception",
+  "origin": "http://127.0.0.1:18869",
+  "job_id": "588ee8d3a10644be87626d83cf9d50d2",
+  "decision": "OUT",
+  "decision_kind": "video_estimate",
+  "source_camera_ids": [
+    "A"
+  ],
+  "checks": [
+    "final result and estimate provenance match production API",
+    "per-view strict decisions unchanged; estimate display matches backend",
+    "native evidence images load and source intervals seek",
+    "375/390/1440px no horizontal overflow",
+    "reload and actual history preserve estimate distinction",
+    "no JavaScript or native evidence HTTP errors"
+  ],
+  "views": {
+    "A": {
+      "strict": [
+        "REVIEW",
+        "REVIEW",
+        "REVIEW"
+      ],
+      "estimated_decision": "OUT",
+      "eligible": true,
+      "artifact_url": "/pair-media/jobs/588ee8d3a10644be87626d83cf9d50d2/views/A/evidence/video-estimate.jpg",
+      "time_interval": [
+        1.599933,
+        1.699933
+      ],
+      "seek_verified": true
+    },
+    "B": {
+      "strict": [
+        "REVIEW",
+        "REVIEW",
+        "REVIEW"
+      ],
+      "estimated_decision": "REVIEW",
+      "eligible": false,
+      "artifact_url": null,
+      "time_interval": null
+    }
+  },
+  "javascript_errors": [],
+  "media_failures": []
+}

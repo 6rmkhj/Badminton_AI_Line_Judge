@@ -1,0 +1,37 @@
+name: Windows launcher compatibility
+
+on:
+  push:
+    branches: [codex/court-line-calibration]
+    paths:
+      - scripts/package_windows_portable.py
+      - tests/test_windows_package.py
+      - .github/workflows/windows-launcher.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  launcher:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
+            tests
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check Windows PowerShell version
+        shell: powershell
+        run: |
+          $PSVersionTable | Format-Table
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+      - name: Install test runner
+        run: python -m pip install pytest
+      - name: Run packaging and actual Windows launcher regression tests
+        run: python -m pytest -q tests/test_windows_package.py

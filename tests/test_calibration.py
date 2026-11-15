@@ -28,6 +28,10 @@ def test_blank_and_one_line_cannot_produce_full_court_geometry():
 def test_full_projected_template_recovers_metric_court():
     image, corners = rendered_court()
     result = calibrate([image])
+    selected = result["primary_court"]
+    assert selected["status"] == "selected" and selected["scope"] == "full"
+    assert len(selected["line_segments_px"]) == 4
+    assert {edge["role"] for edge in selected["boundary_segments_px"]} == {"left", "right", "near", "far"}
     assert result["status"] == "ok", result
     assert result["supported_line_count"] >= 9
     mapped = cv2.perspectiveTransform(corners[None], np.array(result["homography"]))[0]

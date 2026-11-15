@@ -1,0 +1,83 @@
+{
+  "description": "Approximate AI visual references inspected from native-resolution source crops. Not independent human ground truth. Corner references and geometry probes are evaluation-only and must not be passed to detection. Geometry probes are synthetic contact locations, not actual shuttle landings.",
+  "analysis_size": [
+    960,
+    540
+  ],
+  "cases": [
+    {
+      "view": "A",
+      "frame_file": "A.png",
+      "observation_file": "A-observations.json",
+      "source_sha256": "0cc88d220b046572383d67714b608881da45e15e5165b421d46b5b31667727bb",
+      "source_kind": "repository_same_filename_original_uploaded_A_could_not_be_transferred_or_hash_verified",
+      "reference_near_corners_px": [
+        [
+          341,
+          503
+        ],
+        [
+          817,
+          295
+        ]
+      ],
+      "reference_centre_service_baseline_intersection_px": [
+        689,
+        350
+      ],
+      "geometry_probe_inside_px": [
+        700,
+        300
+      ],
+      "geometry_probe_outside_px": [
+        600,
+        410
+      ],
+      "frame_sha256": "f0c54efdcb343249c13b9a7e5619c9ae851ee8e62f49f7808c4c22ab7af945f7",
+      "observation_sha256": "d33142de91d2bcae31754628dfdae9036d23943a03ecd3523b4cb88ddb89709d",
+      "frame_index": 0,
+      "observation_scope": "Court-line observations from 9 uniformly sampled frames of the same source clip; no semantic line labels supplied.",
+      "geometry_probe_outside_scope_px": [
+        600,
+        425
+      ]
+    },
+    {
+      "view": "B",
+      "frame_file": "B.png",
+      "observation_file": "B-observations.json",
+      "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+      "source_kind": "uploaded_attachment",
+      "reference_near_corners_px": [
+        [
+          359,
+          500
+        ],
+        [
+          883,
+          318
+        ]
+      ],
+      "reference_centre_service_baseline_intersection_px": [
+        732,
+        372
+      ],
+      "geometry_probe_inside_px": [
+        760,
+        320
+      ],
+      "geometry_probe_outside_px": [
+        650,
+        420
+      ],
+      "frame_sha256": "04e926fbe69f624ab41def290969c3351eb1f4e4938009f0fae56aa748144316",
+      "observation_sha256": "729156725913bab37c488d0094cae0467edd55a50015ce4bf2bfccf2bf5326a2",
+      "frame_index": 0,
+      "observation_scope": "Court-line observations from 9 uniformly sampled frames of the same source clip; no semantic line labels supplied.",
+      "geometry_probe_outside_scope_px": [
+        650,
+        435
+      ]
+    }
+  ]
+}

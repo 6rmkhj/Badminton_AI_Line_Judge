@@ -2,7 +2,9 @@
 from __future__ import annotations
 import hashlib
 import json
+import logging
 from pathlib import Path
+import subprocess
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -11,15 +13,37 @@ import cv2
 import numpy as np
 from . import __version__
 from .media import prepare_preview, load_frames, source_crop, SourceFrameSequence, file_hash
+from .image_io import write_image
+
+
+logger = logging.getLogger(__name__)
+
+
+def _optional_evidence(artifact, action, warnings):
+    """A presentation failure cannot discard already computed observations."""
+    try:
+        return action()
+    except (OSError, ValueError, cv2.error, subprocess.SubprocessError) as error:
+        logger.exception('Could not generate optional evidence: %s', artifact)
+        message = str(error)
+        stderr = getattr(error, 'stderr', None)
+        if stderr:
+            if isinstance(stderr, bytes):
+                stderr = stderr.decode('utf-8', errors='replace')
+            message += ': ' + stderr[-300:]
+        warnings.append({'artifact': artifact, 'error_type': type(error).__name__,
+                         'message': message[:500]})
+        return None
 
 
 def implementation_fingerprint():
     package = Path(__file__).parent
     digest = hashlib.sha256()
-    for name in ('media.py', 'pipeline.py', 'calibration.py', 'detection.py', 'tracking.py',
+    for name in ('media.py', 'pipeline.py', 'calibration.py', 'primary_court.py', 'detection.py', 'tracking.py',
                  'events.py', 'identity.py', 'identity_continuity.py', 'candidate_identity.py',
                  'event_continuity.py', 'event_sequence.py', 'landing_recovery.py', 'observation_support.py', 'scene_context.py',
-                 'evidence.py', 'decision.py', 'assessment.py', 'learning.py',
+                 'landing_families.py', 'native_landing.py', 'video_estimate.py',
+                 'evidence.py', 'image_io.py', 'decision.py', 'assessment.py', 'learning.py',
                  'contact_model.py', 'sync.py', 'inference.py', 'gpu_candidates.py'):
         digest.update(name.encode())
         digest.update((package / name).read_bytes())
@@ -53,7 +77,7 @@ def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + f'.{uuid.uuid4().hex}.tmp')
-    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + '\n')
+    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + '\n', encoding='utf-8')
     temporary.replace(path)
 
 
@@ -67,11 +91,9 @@ def aggregate_decision(decisions):
 
 
 def _draw_frame(frame, calibration, tracks, frame_index, landing=None):
-    from .evidence import draw_observed_trail
+    from .evidence import draw_court_lines, draw_observed_trail
     canvas = frame.copy()
-    polygon = calibration.get('polygon_px')
-    if polygon and calibration.get('status') == 'ok':
-        cv2.polylines(canvas, [np.asarray(polygon, dtype=np.int32)], True, (0, 210, 240), 2)
+    draw_court_lines(canvas, calibration)
     for track in tracks:
         if landing and str(track['track_id']) != str(landing.get('track_id')):
             continue
@@ -112,7 +134,7 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     from .events import (estimate_landings, refine_source_contacts, validate_contact_modes,
                          prioritize_review_candidates, review_refinement_regions, review_region_indices)
     from .identity import apply_identity
-    from .decision import decide
+    from .decision import decide, rule_region
     config = dict(config or {})
     from .inference import resolve_device
     resource_settings = config.get('resource_settings') or {}
@@ -170,9 +192,13 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     metadata.pop('timestamps', None)
     timings['decode_and_preview_seconds'] = time.perf_counter() - start
     clock = time.perf_counter()
-    report('calibration', detail='코트 선과 카메라 안정성 확인')
+    selected_rules = rule_region(config.get('rules'))
+    calibration_options = dict(config.get('calibration') or {})
+    calibration_options['game'] = selected_rules['game']
+    game_name = '단식' if selected_rules['game'] == 'singles' else '복식'
+    report('calibration', detail=f'{game_name} 주 코트 경계 선택·카메라 안정성 확인')
     calibration_frames = [frames[int(i)] for i in np.linspace(0, len(frames)-1, min(9, len(frames)))]
-    calibration = calibrate(calibration_frames, config.get('court_hint'), config.get('calibration'))
+    calibration = calibrate(calibration_frames, config.get('court_hint'), calibration_options)
     stability = assess_camera_stability(frames, config.get('camera_stability'))
     calibration = guard_calibration_stability(calibration, stability)
     timings['calibration_seconds'] = time.perf_counter() - clock
@@ -243,26 +269,65 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
                            or config.get('request_context') or review_regions)
     if assistance_used:
         decision.update(assistance_used=True, evaluation_eligible=False)
+    # Keep the strict physical-contact decision intact. Native video inference
+    # has its own evidence contract, uncertainty envelope and visible provenance.
+    from .video_estimate import estimate_video_verdict, write_estimate_overlay, _result
+    estimate_options = dict(config.get('video_estimate') or {})
+    evidence_warnings = [warning for landing in landings
+                         for warning in (landing.get('source_contact_evidence') or {}).get('artifact_warnings', [])]
+    try:
+        report('contact', detail='주 코트 착지 사건 통합·원본 접촉 가능 범위 계산')
+        with SourceFrameSequence(source, len(frames), verified_seek=False) as originals:
+            video_estimate = estimate_video_verdict(requested, tracks, originals, timestamps,
+                (frames[0].shape[1], frames[0].shape[0]), calibration, config.get('rules'),
+                output_dir=output, config=estimate_options)
+        video_estimate['source_sha256'] = source_sha
+        if assistance_used:
+            video_estimate.update(assistance_used=True, evaluation_eligible=False)
+    except (ValueError, TypeError, OSError, RuntimeError, KeyError, IndexError, cv2.error) as error:
+        logger.exception('Could not compute native video estimate')
+        video_estimate = _result(config.get('rules') or {'game': 'doubles', 'phase': 'rally'},
+            ['VIDEO_ESTIMATE_PROCESSING_FAILED'], error=f'{type(error).__name__}: {str(error)[:300]}')
+    evidence_warnings.extend(video_estimate.get('artifact_warnings', []))
+    overlay = _optional_evidence('video_estimate_overlay',
+        lambda: write_estimate_overlay(frames, calibration, video_estimate, output), evidence_warnings)
+    if overlay:
+        video_estimate['artifact_path'] = overlay
     timings['events_and_decision_seconds'] = time.perf_counter() - clock
     display_candidates = prioritize_review_candidates(requested, review_regions)
     selected = display_candidates[0] if display_candidates else None
     report('evidence', detail='원본 확대 근거·검수 영상 생성')
     artifacts = {'preview': 'preview.mp4', 'detections': 'detections.json', 'evidence': []}
     evidence_dir = output / 'evidence'
-    evidence_dir.mkdir(exist_ok=True)
+    from .evidence import write_calibration_overlay
+    calibration_overlay = _optional_evidence('calibration_overlay',
+        lambda: write_calibration_overlay(calibration_frames, calibration, output), evidence_warnings)
+    if calibration_overlay:
+        artifacts['calibration_overlay'] = calibration_overlay
     trajectory_context = None
     if selected and selected.get('image_motion_event'):
         from .evidence import write_trajectory_context
-        with SourceFrameSequence(source, len(frames)) as originals:
-            trajectory_context = write_trajectory_context(originals, timestamps,
-                (frames[0].shape[1], frames[0].shape[0]), selected, output)
+        def trajectory():
+            with SourceFrameSequence(source, len(frames)) as originals:
+                return write_trajectory_context(originals, timestamps,
+                    (frames[0].shape[1], frames[0].shape[0]), selected, output)
+        trajectory_context = _optional_evidence('trajectory_context', trajectory, evidence_warnings)
+
+    def save_frame(path, frame):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        write_image(path, frame)
+        return path.relative_to(output).as_posix()
+
     # Preserve several candidate contexts, including original-resolution crops.
     for landing in prioritize_review_candidates(landings, review_regions)[:6]:
         index = max(0, min(len(frames)-1, int(landing.get('frame_index', 0))))
         filename = f"{landing['event_id']}.jpg"
-        cv2.imwrite(str(evidence_dir / filename), _draw_frame(frames[index], calibration, tracks, index, landing))
-        evidence = {'event_id': landing['event_id'], 'frame_index': index, 'time': timestamps[index],
-                    'image': 'evidence/' + filename}
+        candidate_image = _optional_evidence('candidate_' + landing['event_id'],
+            lambda: save_frame(evidence_dir / filename,
+                               _draw_frame(frames[index], calibration, tracks, index, landing)), evidence_warnings)
+        evidence = {'event_id': landing['event_id'], 'frame_index': index, 'time': timestamps[index]}
+        if candidate_image:
+            evidence['image'] = candidate_image
         if landing is selected and trajectory_context:
             evidence['trajectory_context'] = trajectory_context['path']
             evidence['trajectory_context_info'] = trajectory_context
@@ -275,9 +340,17 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
             crop_name = f"{landing['event_id']}-source.jpg"
             actual_center = [center[0] * metadata['width'] / frames[0].shape[1],
                              center[1] * metadata['height'] / frames[0].shape[0]]
-            evidence['source_crop_info'] = source_crop(source, timestamps[index], actual_center, evidence_dir / crop_name, frame_index=index)
-            if evidence['source_crop_info']['status'] == 'saved':
-                evidence['source_crop'] = 'evidence/' + crop_name
+            crop_info = _optional_evidence('source_crop_' + landing['event_id'],
+                lambda: source_crop(source, timestamps[index], actual_center, evidence_dir / crop_name,
+                                    frame_index=index), evidence_warnings)
+            if crop_info:
+                evidence['source_crop_info'] = crop_info
+                if crop_info['status'] == 'saved':
+                    evidence['source_crop'] = 'evidence/' + crop_name
+                elif crop_info['status'] == 'unavailable':
+                    evidence_warnings.append({'artifact': 'source_crop_' + landing['event_id'],
+                        'error_type': 'SourceCropUnavailable',
+                        'message': str(crop_info.get('error') or 'Could not generate source crop')[:500]})
         artifacts['evidence'].append(evidence)
     review_refinement = {
         'status': ('matched_candidates' if any(review_region_indices(item, review_regions) for item in landings)
@@ -290,12 +363,17 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
         'assistance_used': bool(review_regions),
     }
     representative = int(selected['frame_index']) if selected else int(len(frames) / 2)
-    cv2.imwrite(str(output / 'overview.jpg'), _draw_frame(frames[representative], calibration, tracks, representative, selected))
-    artifacts['overview'] = 'overview.jpg'
+    overview = _optional_evidence('overview', lambda: save_frame(output / 'overview.jpg',
+        _draw_frame(frames[representative], calibration, tracks, representative, selected)), evidence_warnings)
+    if overview:
+        artifacts['overview'] = overview
     if config.get('evidence', {}).get('annotated_clip', True):
         from .evidence import write_annotated_clip
-        artifacts['annotated_clip'] = write_annotated_clip(frames, timestamps, calibration, tracks,
-            selected, decision, output, config.get('evidence'), **observe('evidence'))
+        annotated_clip = _optional_evidence('annotated_clip',
+            lambda: write_annotated_clip(frames, timestamps, calibration, tracks,
+                selected, decision, output, config.get('evidence'), **observe('evidence')), evidence_warnings)
+        if annotated_clip:
+            artifacts['annotated_clip'] = annotated_clip
     report('save', detail='분석 결과·탐지 근거 저장')
     timings['total_seconds'] = time.perf_counter() - start
     gpu_stages = {stage for row in detections
@@ -322,8 +400,14 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
               'native_endpoint_recovery': endpoint_recovery,
               'detection_quality': summarize_detection_quality(detections, tracks),
               'landings': landings, 'selected_landing': selected, 'decision': decision,
+              'video_estimate': video_estimate,
+              'display_decision': ({**decision, 'decision_kind': 'verified'} if decision.get('decision') in {'IN', 'OUT'}
+                                   else {key: video_estimate.get(key) for key in
+                                         ('decision', 'decision_kind', 'source', 'eligible', 'reason_codes', 'reasons')}
+                                   if video_estimate.get('eligible') is True else {**decision, 'decision_kind': 'unresolved'}),
               'review_refinement': review_refinement,
               'timings': timings, 'artifacts': artifacts, 'config': config,
+              'evidence_warnings': evidence_warnings,
               'assistance_used': assistance_used, 'automatic_evaluation_eligible': not assistance_used,
               'identity': {'requested_event_count': len(requested),
                            'hit_anchor_count': len(identity_config.get('hit_anchors', [])),
@@ -333,7 +417,8 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
                            'trained_model_provided': bool(detector_config.get('model_path') or detector_config.get('scorer_path')),
                            'calibrated_accuracy': None},
               'validation_status': 'unvalidated_on_independent_human_ground_truth',
-              'warnings': sorted(set(metadata.get('warnings', []) + presentation.get('warnings', []))),
+              'warnings': sorted(set(metadata.get('warnings', []) + presentation.get('warnings', [])
+                                     + (['EVIDENCE_ARTIFACT_UNAVAILABLE'] if evidence_warnings else []))),
               'scope': 'Offline research pipeline. Candidate confidence is not measured judgment accuracy.'}
     from .assessment import assess_result
     result['assessment'] = assess_result(result, requested_landings=requested)
@@ -371,7 +456,7 @@ def analyze_dataset(video_dir, run_dir, config=None, limit=None, resume=True):
                'preview_path': f"videos/{entry['id']}/preview.mp4"}
         try:
             existing = folder / 'result.json'
-            result = json.loads(existing.read_text()) if resume and existing.exists() else None
+            result = json.loads(existing.read_text(encoding='utf-8')) if resume and existing.exists() else None
             if not result or result.get('source_sha256') != entry['sha256'] or result.get('run_config_digest') != config_digest:
                 result = analyze_video(entry['path'], folder, {**config, 'video_id': entry['id']})
                 result['run_config_digest'] = config_digest

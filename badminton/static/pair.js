@@ -21,6 +21,9 @@ const analysisStages = [
   ['tracking', '궤적 연결'], ['contact', '착지·라인 확인'], ['evidence', '근거 영상 생성'], ['save', '결과 저장'],
 ];
 const workflowLabels = ['입력 전송', '분석 대기', '시점별 분석', '결과 연결'];
+function selectedRules() { return {game: $('game-mode').value, phase: 'rally'}; }
+function gameLabel(rules) { return rules?.game === 'singles' ? '단식' : '복식'; }
+function gameBoundaryLabel(rules) { return rules?.game === 'singles' ? '안쪽 사이드라인' : '바깥 사이드라인'; }
 function secondsText(value) {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return '—';
   const seconds = Math.floor(value), hours = Math.floor(seconds / 3600);
@@ -158,6 +161,9 @@ function renderAnalysisCard(camera, view, job) {
   const footer = el('div', 'analysis-card-footer'); footer.append(el('span', '', '시점 처리 시간'));
   const elapsed = el('strong'); elapsed.dataset.clock = 'view'; elapsed.dataset.camera = camera; footer.append(elapsed); card.append(footer);
   if (view.error) card.append(el('p', 'analysis-detail analysis-error', view.error));
+  if (Array.isArray(view.evidence_warnings) && view.evidence_warnings.length) {
+    card.append(el('p', 'analysis-detail evidence-warning-summary', `일부 근거 파일 생성 실패 (${view.evidence_warnings.length}개) · 계산된 판정 결과는 저장했습니다.`));
+  }
   return card;
 }
 function updateClocks() {
@@ -526,6 +532,7 @@ function restoreJobSources(job) {
   if (first) {
     $('same-event').checked = job.request.same_event_confirmed === true;
     $('reuse-review').checked = job.request.reuse_review === true && !cameras.some(camera => state.sources[camera].reviewRegion);
+    $('game-mode').value = job.request.rules?.game === 'singles' ? 'singles' : 'doubles';
     state.restoredJobId = job.job_id;
   }
 }
@@ -670,6 +677,89 @@ function renderEvidenceAssessment(camera, assessment) {
   }
   panel.append(list); return panel;
 }
+function estimateVerdict(estimate) {
+  return estimate?.eligible === true && ['IN', 'OUT'].includes(estimate.decision) ? estimate.decision : 'REVIEW';
+}
+function estimateInterval(value, integers = false) {
+  return Array.isArray(value) && value.length === 2
+    && value.every(number => typeof number === 'number' && Number.isFinite(number) && number >= 0 && (!integers || Number.isInteger(number)))
+    && value[0] <= value[1] ? value : null;
+}
+function renderVideoEstimate(camera, view, player) {
+  const estimate = view.video_estimate;
+  if (!estimate || typeof estimate !== 'object') return null;
+  const verdict = estimateVerdict(estimate), supported = verdict !== 'REVIEW';
+  const panel = el('section', 'video-estimate-panel');
+  panel.dataset.verdict = verdict;
+  const heading = el('h4', '', '원본 영상 추정 근거'); heading.id = 'estimate-heading-' + camera.toLowerCase();
+  panel.setAttribute('aria-labelledby', heading.id); panel.append(heading);
+  panel.append(el('p', 'estimate-conclusion', supported ? `영상 추정 ${verdict}` : '영상 추정 판정 보류'));
+  panel.append(el('p', 'estimate-basis', supported
+    ? verdict === 'IN' ? '위치 오차를 포함한 접촉 가능 영역 전체가 확인된 코트 내부에 있습니다.'
+      : '위치 오차를 포함한 접촉 가능 영역 전체가 관측된 경기 경계 밖에 있습니다.'
+    : '원본 영상 근거나 경계 여유가 부족해 IN·OUT을 추정하지 못했습니다.'));
+  panel.append(el('p', 'estimate-limitation', '착지 전후 원본의 움직임과 형상으로 계산한 영상 추정입니다. 코르크의 최초 바닥 접촉과 대상 셔틀을 직접 확인한 판정은 아래에 별도로 표시합니다.'));
+  const native = estimate.native_evidence || {};
+  const times = estimateInterval(estimate.time_interval), frames = estimateInterval(estimate.frame_interval, true);
+  const metrics = el('dl', 'estimate-metrics');
+  const add = (label, text) => { const row = el('div'); row.append(el('dt', '', label), el('dd', '', text)); metrics.append(row); };
+  if (times) add('접촉 가능 구간', `${fmt(times[0], 3)}–${fmt(times[1], 3)}초`);
+  if (Number.isInteger(native.observed_frame_count) && native.observed_frame_count >= 0) add('원본 관측', `${native.observed_frame_count}프레임`);
+  if (Array.isArray(estimate.member_event_ids) && estimate.member_event_ids.length) add('같은 착지의 후보', `${new Set(estimate.member_event_ids.filter(id => typeof id === 'string')).size}개를 한 사건으로 묶음`);
+  if (metrics.childNodes.length) panel.append(metrics);
+  const messages = Array.isArray(estimate.reasons) ? estimate.reasons.filter(message => typeof message === 'string' && message) : [];
+  if (messages.length) { const list = el('ul', 'estimate-reasons'); messages.forEach(message => list.append(el('li', '', message))); panel.append(list); }
+  const artifact = safeUrl(estimate.artifact_url);
+  if (artifact) {
+    const figure = el('figure', 'trajectory-context estimate-evidence');
+    const link = el('a'); link.href = artifact; link.target = '_blank'; link.rel = 'noopener';
+    const image = el('img'); image.src = artifact; image.loading = 'lazy'; image.alt = camera + ' 시점 원본 영상의 접촉 가능 영역과 전후 프레임';
+    link.append(image); figure.append(link, el('figcaption', '', '원본 확대와 접촉 가능 범위 ↗ · 표시 영역은 직접 관측한 접촉점이 아니라 위치 오차를 비교할 영상 추정 범위입니다.')); panel.append(figure);
+  }
+  if (times && player) {
+    const button = el('button', 'seek-button', '추정 접촉 구간부터 보기'); button.type = 'button'; button.dataset.estimateSeekCamera = camera;
+    button.addEventListener('click', () => seek(player, times[0])); panel.append(button);
+  }
+  const uncertainty = estimate.uncertainty_px;
+  const details = el('details', 'estimate-details'); details.append(el('summary', '', '추정 범위와 한계 자세히 보기'));
+  if (frames) details.append(el('p', '', `원본 프레임 ${frames[0]}–${frames[1]} · 프레임 번호는 0부터 시작합니다.`));
+  if (typeof uncertainty === 'number' && Number.isFinite(uncertainty) && uncertainty >= 0) details.append(el('p', '', `접촉 위치의 추가 오차: ${fmt(uncertainty, 2)} 분석 픽셀. 코트 라인의 위치 오차도 경계 비교에 별도로 반영합니다.`));
+  if (Array.isArray(estimate.reason_codes) && estimate.reason_codes.length) details.append(el('p', '', estimate.reason_codes.filter(code => typeof code === 'string').join(' · ')));
+  details.append(el('p', '', '영상 추정은 직접 접촉을 확인한 결과나 측정된 판정 정확도로 취급하지 않습니다.'));
+  panel.append(details); return panel;
+}
+function renderCalibration(camera, view) {
+  const summary = view.calibration_summary;
+  if (!summary || typeof summary !== 'object') return null;
+  const panel = el('section', 'evidence-assessment court-calibration');
+  const heading = el('h4', '', '주 코트와 판정 경계'); heading.id = 'calibration-heading-' + camera.toLowerCase();
+  panel.setAttribute('aria-labelledby', heading.id); panel.append(heading);
+  const rules = view.rules || state.currentJob?.result?.rules || state.currentJob?.request?.rules;
+  panel.append(el('p', 'calibration-rules', `${gameLabel(rules)} 랠리 · ${gameBoundaryLabel(rules)}`));
+  const count = Number.isInteger(summary.detected_line_count) && summary.detected_line_count >= 0 ? summary.detected_line_count : 0;
+  const found = summary.line_detection_status === 'detected' && count > 0;
+  const supported = summary.court_geometry_status === 'supported';
+  let status = `${found ? `직선 후보 ${count}개 탐지` : '직선 후보 미탐지'} · ${supported ? '전체 코트 보정 확인' : '전체 코트 보정 미확인'}`;
+  if (summary.primary_court_status === 'selected') {
+    status = `주 코트 선택됨 · ${summary.local_region_supported ? '가까운 코트 영역 판정 설정됨' : '관측 경계 표시'}`;
+    if (summary.camera_moved) status = '주 코트 기준 이미지 · 카메라 이동으로 재설정 필요';
+  } else if (summary.primary_court_status) {
+    status = '주 코트 선택 확인 필요';
+  }
+  panel.append(el('p', 'assessment-summary', status));
+  if (typeof summary.detail === 'string') panel.append(el('p', 'assessment-scope', summary.detail));
+  const preview = safeUrl(view.calibration_preview_url);
+  if (preview) {
+    const figure = el('figure', 'trajectory-context');
+    const link = el('a'); link.href = preview; link.target = '_blank'; link.rel = 'noopener';
+    const image = el('img'); image.src = preview; image.loading = 'lazy';
+    image.alt = camera + ' 시점의 주 코트 선택과 관측 판정 경계'; link.append(image);
+    figure.append(link, el('figcaption', '', typeof summary.overlay_legend === 'string'
+      ? summary.overlay_legend : '하늘색은 탐지한 직선 후보입니다. 코트 보정 확인과 구분해 표시합니다.'));
+    panel.append(figure);
+  }
+  return panel;
+}
 function renderView(camera, view, diagnostics) {
   const card = el('article', 'result-view');
   card.id = 'result-view-' + camera.toLowerCase();
@@ -693,6 +783,12 @@ function renderView(camera, view, diagnostics) {
     verdicts.append(cell);
   }
   card.append(verdicts);
+  if (view.video_estimate && typeof view.video_estimate === 'object') {
+    const estimate = estimateVerdict(view.video_estimate), strip = el('div', 'view-estimate-verdict');
+    strip.dataset.verdict = estimate;
+    strip.append(el('span', '', '원본 영상의 접촉 가능 영역 비교'), el('strong', '', estimate === 'REVIEW' ? '영상 추정 REVIEW' : `영상 추정 ${estimate}`));
+    card.append(strip);
+  }
   const preview = safeUrl(view.preview_url);
   let player;
   if (preview) {
@@ -703,11 +799,30 @@ function renderView(camera, view, diagnostics) {
   } else { card.append(el('div', 'missing-media', '이 시점의 재생 가능한 미리보기가 없습니다.')); }
   const body = el('div', 'view-body');
   if (view.error) body.append(el('p', 'message error', view.error));
+  if (view.error_details?.log_path) body.append(el('p', 'analysis-detail', `오류 기록: ${view.error_details.log_path}`));
+  if (Array.isArray(view.evidence_warnings) && view.evidence_warnings.length) {
+    const warning = el('section', 'evidence-warnings message');
+    warning.append(el('strong', '', '일부 근거 파일 생성 실패 · 계산된 판정 결과는 유지했습니다.'));
+    const list = el('ul');
+    for (const item of view.evidence_warnings) {
+      if (item && typeof item.message === 'string') list.append(el('li', '', item.message));
+    }
+    warning.append(list); body.append(warning);
+  }
   if (view.rationale) body.append(el('p', 'rationale', view.rationale));
+  const estimatePanel = renderVideoEstimate(camera, view, player);
+  if (estimatePanel) body.append(estimatePanel);
   const candidatePanel = renderLandingCandidate(camera, view, player);
   if (candidatePanel) body.append(candidatePanel);
+  const calibrationPanel = renderCalibration(camera, view);
+  if (calibrationPanel) body.append(calibrationPanel);
   const assessmentPanel = renderEvidenceAssessment(camera, view.assessment);
-  if (assessmentPanel) body.append(assessmentPanel);
+  if (assessmentPanel) {
+    if (estimateVerdict(view.video_estimate) !== 'REVIEW') {
+      const direct = el('details', 'direct-contact-assessment');
+      direct.append(el('summary', '', `직접 접촉 기반 판정 조건 · ${view.direct_decision || 'REVIEW'}`), assessmentPanel); body.append(direct);
+    } else body.append(assessmentPanel);
+  }
   const trajectoryContext = safeUrl(view.trajectory_context_url);
   if (trajectoryContext) {
     const figure = el('figure', 'trajectory-context');
@@ -776,7 +891,16 @@ function renderResult(job) {
   state.currentJob = job;
   $('pair-result').hidden = false;
   $('result-banner').dataset.verdict = result.decision;
+  const estimated = result.decision_kind === 'video_estimate';
+  $('result-banner').dataset.decisionKind = estimated ? 'video_estimate' : result.decision_kind || 'verified';
+  $('result-heading').textContent = estimated ? 'A/B 영상 추정 판정' : 'A/B 최종 보조 판정';
+  $('result-kind').hidden = !estimated;
+  $('result-kind').textContent = estimated ? '영상 추정' : '';
+  $('estimate-result-note').hidden = !estimated;
   $('final-verdict').textContent = result.decision;
+  $('final-verdict').setAttribute('aria-label', `${estimated ? '영상 추정 ' : ''}${result.decision}`);
+  const appliedRules = result.rules || job.request?.rules;
+  $('result-rules').textContent = `${gameLabel(appliedRules)} 랠리 · ${gameBoundaryLabel(appliedRules)} 기준`;
   const views = result.views || {};
   const aiUsed = cameras.some(camera => views[camera]?.processing_mode === 'stored_ai_review');
   const refinedCameras = Array.isArray(result.refinement_applied_camera_ids)
@@ -792,14 +916,23 @@ function renderResult(job) {
       : aiUsed ? '기존 AI 검수 근거를 활용한 보조 결과' : '두 시점의 분석·대응 검토 결과';
   const sources = $('source-cameras'); sources.replaceChildren();
   const sourceIds = Array.isArray(result.source_camera_ids) ? result.source_camera_ids.filter(id => cameras.includes(id)) : [];
+  if (result.decision_scope === 'single_view' && sourceIds.length) {
+    const sourceAiUsed = sourceIds.some(camera => views[camera]?.processing_mode === 'stored_ai_review');
+    $('result-provenance').textContent = `${sourceIds.join('/')} 시점의 유효한 판정${sourceAiUsed ? ' · AI 검수 근거를 활용한 보조 결과' : ''}`;
+  }
+  if (estimated) $('result-provenance').textContent = `${sourceIds.length ? sourceIds.join('/') + ' 시점 · ' : ''}원본 영상의 접촉 가능 영역으로 추정한 결과${manualCameras.length ? ' · 사용자 지정 탐색 영역 사용' : ''}`;
   const hasDirectEvidence = cameras.some(camera => views[camera]?.qualified === true && ['IN', 'OUT'].includes(views[camera]?.direct_decision));
-  sources.append(el('span', '', sourceIds.length ? '최종 판정의 접촉 근거' : hasDirectEvidence ? '시점별 접촉 근거 있음 · 연결 조건 확인 필요' : '확인된 접촉 근거 추가 필요'));
+  sources.append(el('span', '', estimated ? '영상 추정의 원본 근거' : sourceIds.length ? '최종 판정의 접촉 근거' : hasDirectEvidence ? '시점별 접촉 근거 있음 · 연결 조건 확인 필요' : '확인된 접촉 근거 추가 필요'));
   sourceIds.forEach(camera => { const link = el('a', 'source-link', camera + ' 시점 보기 ↓'); link.href = '#result-view-' + camera.toLowerCase(); sources.append(link); });
   const reasons = $('result-reasons'); reasons.replaceChildren();
   const messages = Array.isArray(result.reasons) ? result.reasons : [];
   (messages.length ? messages : ['시점별 판정 근거를 확인해 주세요.']).forEach(message => reasons.append(el('li', '', String(message))));
+  if (Array.isArray(result.warnings)) result.warnings.forEach(message => reasons.append(el('li', 'muted', String(message))));
   const eventSource = correspondenceNames[result.event_correspondence_source] || '저장된 사건 대응 기록';
-  $('correspondence-status').textContent = result.same_event_confirmed ? `같은 사건 연결 확인 · ${eventSource}` : '동일 사건 연결이 확인되지 않았습니다.';
+  $('correspondence-status').textContent = result.same_event_confirmed ? `같은 사건 연결 확인 · ${eventSource}`
+    : result.decision_scope === 'single_view' && sourceIds.length
+      ? `${sourceIds.join('/')} 시점에서 ${estimated ? '영상 추정 판정을 했습니다' : '판정했습니다'}. 두 영상의 동일 사건 연결은 미확인입니다.`
+      : '동일 사건 연결이 확인되지 않았습니다.';
   $('result-timing').textContent = typeof result.elapsed_seconds === 'number' ? `이번 작업 ${fmt(result.elapsed_seconds, 1)}초${aiUsed ? ' · 기존 검수 시간은 포함하지 않습니다.' : ''}` : '';
   $('result-json').href = jobUrl(job.job_id);
   $('result-json').download = 'pair-' + job.job_id + '.json';
@@ -863,7 +996,8 @@ async function loadHistory() {
       const date = new Date(job.created_at || job.updated_at || '');
       name.append(el('small', '', Number.isNaN(date.getTime()) ? job.job_id : date.toLocaleString('ko-KR', {timeZone: 'Asia/Seoul'}) + ' KST'));
       const decision = job.decision || job.result?.decision;
-      const label = el('span', 'history-label', decision || statusNames[job.status] || '확인 중');
+      const estimated = (job.decision_kind || job.result?.decision_kind) === 'video_estimate';
+      const label = el('span', 'history-label', decision ? `${estimated ? '영상 추정 ' : ''}${decision}` : statusNames[job.status] || '확인 중');
       if (decision) label.dataset.verdict = decision;
       item.append(name, label);
       item.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); openJob(job.job_id, true); $('job-progress').scrollIntoView({block: 'start'}); });
@@ -959,7 +1093,7 @@ $('pair-form').addEventListener('submit', async event => {
     const failure = uploads.find(result => result.status === 'rejected');
     if (failure) throw failure.reason;
     const views = {A: withRegion('A', uploads[0].value), B: withRegion('B', uploads[1].value)};
-    const job = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, same_event_confirmed: $('same-event').checked, reuse_review: $('reuse-review').checked})});
+    const job = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, rules: selectedRules(), same_event_confirmed: $('same-event').checked, reuse_review: $('reuse-review').checked})});
     if (!job.job_id) throw new Error('작업 ID가 응답에 없습니다. 최근 작업 목록을 확인해 주세요.');
     openJob(job.job_id, true);
     $('job-progress').scrollIntoView({block: 'start', behavior: 'auto'});
@@ -987,7 +1121,8 @@ $('refine-pair').addEventListener('click', async () => {
   }
   setBusy(true); $('refine-error').hidden = true; beginSubmission(job);
   try {
-    const created = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, same_event_confirmed: job.request?.same_event_confirmed === true, reuse_review: false, refine_review_regions: true})});
+    const rules = {game: job.request?.rules?.game === 'singles' ? 'singles' : 'doubles', phase: 'rally'};
+    const created = await api('/api/pair-jobs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({views, rules, same_event_confirmed: job.request?.same_event_confirmed === true, reuse_review: false, refine_review_regions: true})});
     if (!created.job_id) throw new Error('재분석 작업 ID가 응답에 없습니다. 최근 작업 목록을 확인해 주세요.');
     openJob(created.job_id, true);
     $('job-progress').scrollIntoView({block: 'start', behavior: 'auto'});

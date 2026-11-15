@@ -1,0 +1,131 @@
+{
+  "view": "B",
+  "input_kind": "actual_user_upload",
+  "source_sha256": "bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9",
+  "version": "0.5.9",
+  "implementation_fingerprint_start": "64eb717f3d82e4dcdf9fdb6c2e40ddc19118f10534971d18af59ccf713904723",
+  "implementation_fingerprint_end": "64eb717f3d82e4dcdf9fdb6c2e40ddc19118f10534971d18af59ccf713904723",
+  "code_unchanged_during_run": true,
+  "rules": {
+    "game": "singles",
+    "phase": "rally"
+  },
+  "calibration_status": "review",
+  "primary_status": "selected",
+  "primary_game": "singles",
+  "primary_rules": {
+    "game": "singles",
+    "phase": "rally"
+  },
+  "near_corners_px": [
+    [
+      445.63067626953125,
+      470.83148193359375
+    ],
+    [
+      865.5947265625,
+      323.3852844238281
+    ]
+  ],
+  "boundaries": [
+    {
+      "role": "left",
+      "segment_px": [
+        445.63068524667807,
+        470.83149202589345,
+        268.0517777670107,
+        274.88294677155136
+      ],
+      "observed": true
+    },
+    {
+      "role": "right",
+      "segment_px": [
+        865.5947015405492,
+        323.38528119663937,
+        565.9063980710642,
+        248.42023208453284
+      ],
+      "observed": true
+    },
+    {
+      "role": "near",
+      "segment_px": [
+        445.63068524667807,
+        470.83149202589345,
+        865.5947015405492,
+        323.38528119663937
+      ],
+      "observed": true
+    }
+  ],
+  "decision": {
+    "decision": "REVIEW",
+    "reason_codes": [
+      "CONTACT_EVIDENCE_UNCERTAIN",
+      "CONTACT_OCCLUDED_OR_MISSING",
+      "FIRST_CONTACT_NOT_OBSERVED",
+      "MULTIPLE_LANDING_CANDIDATES",
+      "TARGET_SHUTTLE_IDENTITY_UNCERTAIN"
+    ],
+    "confidence": null,
+    "note": "A unique, observed target landing is required for automatic IN/OUT."
+  },
+  "landing_decision_rules": [
+    {
+      "game": "singles",
+      "phase": "rally"
+    },
+    {
+      "game": "singles",
+      "phase": "rally"
+    },
+    {
+      "game": "singles",
+      "phase": "rally"
+    },
+    {
+      "game": "singles",
+      "phase": "rally"
+    },
+    {
+      "game": "singles",
+      "phase": "rally"
+    },
+    {
+      "game": "singles",
+      "phase": "rally"
+    },
+    {
+      "game": "singles",
+      "phase": "rally"
+    },
+    {
+      "game": "singles",
+      "phase": "rally"
+    },
+    {
+      "game": "singles",
+      "phase": "rally"
+    },
+    {
+      "game": "singles",
+      "phase": "rally"
+    },
+    {
+      "game": "singles",
+      "phase": "rally"
+    },
+    {
+      "game": "singles",
+      "phase": "rally"
+    }
+  ],
+  "observed_contact_count": 0,
+  "landing_count": 12,
+  "manual_contact_input": false,
+  "reuse_previous_review": false,
+  "elapsed_seconds": 34.645,
+  "result_path": "automatic-B-singles/result.json",
+  "calibration_photo": "automatic-B-singles/evidence/calibration.jpg"
+}

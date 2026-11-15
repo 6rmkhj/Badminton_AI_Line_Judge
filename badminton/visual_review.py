@@ -23,6 +23,7 @@ import numpy as np
 
 from .decision import rule_region
 from .dataset import pair_identity
+from .image_io import read_image
 
 
 LABELS = {"IN", "OUT", "UNKNOWN"}
@@ -291,7 +292,7 @@ def validate_visual_annotation(annotation, result, project_root):
         for relative in files:
             try:
                 path = _safe_file(root, relative)
-                if path.suffix.lower() not in IMAGE_SUFFIXES or cv2.imread(str(path)) is None:
+                if path.suffix.lower() not in IMAGE_SUFFIXES or read_image(path) is None:
                     raise ValueError("Evidence must be a decodable image")
                 evidence_files.append(path.relative_to(root).as_posix())
             except (OSError, ValueError):
@@ -470,7 +471,7 @@ def _apply_cross_view_review(records, results, root, output):
             for relative in evidence:
                 try:
                     path = _safe_file(root, relative)
-                    if path.suffix.lower() not in IMAGE_SUFFIXES or cv2.imread(str(path)) is None:
+                    if path.suffix.lower() not in IMAGE_SUFFIXES or read_image(path) is None:
                         raise ValueError("Invalid correspondence image")
                     images.append(path)
                 except (OSError, ValueError):

@@ -70,6 +70,19 @@ def test_boundary_uncertainty_is_distinct_from_missing_contact():
     assert stages(assessment)["geometry"]["reason_codes"] == ["CONTACT_UNCERTAINTY_OVERLAPS_BOUNDARY"]
 
 
+@pytest.mark.parametrize("code, blocked", [
+    ("PRIMARY_COURT_CAMERA_UNSTABLE", "calibration"),
+    ("PRIMARY_COURT_RULES_UNSUPPORTED", "geometry"),
+    ("CONTACT_OUTSIDE_PRIMARY_COURT_SCOPE", "geometry"),
+])
+def test_primary_court_abstentions_explain_actual_blocking_stage(code, blocked):
+    candidate = {**landing(), "decision": {"decision": "REVIEW", "reason_codes": [code]}}
+    assessment = assess_result({"landings": [candidate], "selected_landing": candidate,
+                                "decision": candidate["decision"]})
+    assert assessment["blocking_stages"] == [blocked]
+    assert stages(assessment)[blocked]["reason_codes"] == [code]
+
+
 def test_invalid_confidence_does_not_guess_which_independent_gate_passed():
     assessment, _ = assessed(landing(confidence=float("nan")))
     for identifier in ("contact", "identity", "calibration"):
