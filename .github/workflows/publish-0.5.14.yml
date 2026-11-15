@@ -1,0 +1,152 @@
+name: Publish verified Windows 0.5.14
+
+on:
+  push:
+    branches: [codex/publish-0.5.14]
+    paths: [.github/workflows/publish-0.5.14.yml]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: publish-windows-0.5.14
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Check the verified artifact and unused release tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const repo = context.repo;
+            const run = (await github.rest.actions.getWorkflowRun({...repo, run_id: 43611749651})).data;
+            if (run.conclusion !== 'success' || run.head_sha !== 'db5fc41e88dd9a805180ccbefeb185f6791ba5a5') {
+              throw new Error('Expected successful tested source commit');
+            }
+            const artifact = (await github.rest.actions.getArtifact({...repo, artifact_id: 14120524504})).data;
+            if (artifact.expired || artifact.workflow_run.id !== run.id ||
+                artifact.name !== 'badminton-windows-0.5.14' ||
+                artifact.digest !== 'sha256:60a739854d0fc42b431194e5a32a90b6e246cc6246c14ff9f75850420fcb3ebc') {
+              throw new Error('Verified artifact identity changed');
+            }
+            for (const check of [
+              () => github.rest.repos.getReleaseByTag({...repo, tag: 'v0.5.14'}),
+              () => github.rest.git.getRef({...repo, ref: 'tags/v0.5.14'})
+            ]) {
+              try { await check(); } catch (error) {
+                if (error.status === 404) continue;
+                throw error;
+              }
+              throw new Error('v0.5.14 already exists; do not overwrite it');
+            }
+      - name: Download the exact tested package and reports
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: '14120524504'
+          run-id: 43611749651
+          github-token: ${{ github.token }}
+          path: verified
+          merge-multiple: true
+      - name: Verify ZIP bytes and successful source-bound reports
+        shell: python
+        run: |
+          import hashlib, json
+          from pathlib import Path
+          root = Path('verified')
+          expected = {'badminton-windows-0.5.14.zip', 'badminton-windows-0.5.14.zip.sha256',
+                      'windows-0.5.14-launcher-validation.json', 'windows-0.5.14-analysis-validation.json'}
+          assert {path.name for path in root.iterdir()} == expected
+          package = root / 'badminton-windows-0.5.14.zip'
+          checksum = '280b5b2b1cdd28bc4c258228a61cf7da118c24455db26bc80307cd2edfc533e7'
+          assert package.stat().st_size == 287118728
+          with package.open('rb') as stream:
+              assert hashlib.file_digest(stream, 'sha256').hexdigest() == checksum
+          assert (root / (package.name + '.sha256')).read_text().split()[0] == checksum
+          reports = {}
+          for name in ('launcher', 'analysis'):
+              report = json.loads((root / f'windows-0.5.14-{name}-validation.json').read_text())
+              assert report['status'] == 'passed' and report['app_version'] == '0.5.14'
+              assert report['source_commit'] == 'db5fc41e88dd9a805180ccbefeb185f6791ba5a5'
+              assert report['source_snapshot_sha256'] == 'deb86b8e216037dc25a13209d472c897fb2c730e01536e7327a4eeeb284bb760'
+              reports[name] = report
+          assert reports['launcher']['payload_count'] == 9
+          cases = reports['analysis']['cases']
+          expected_cases = {('A', 'doubles'): 'IN', ('B', 'doubles'): 'REVIEW',
+                            ('A', 'singles'): 'OUT', ('B', 'singles'): 'REVIEW'}
+          assert len(cases) == 4
+          assert {(case['view'], case['game']): case['display_decision'] for case in cases} == expected_cases
+          assert all(case['status'] == 'passed' and case['strict_decision'] == 'REVIEW' for case in cases)
+          pairs = reports['analysis']['pair_assessments']
+          assert len(pairs) == 2
+          assert {pair['game']: pair['decision'] for pair in pairs} == {'doubles': 'IN', 'singles': 'OUT'}
+          assert all(pair['A']['assessment']['blocking_stages'] == [] and
+                     pair['B']['assessment']['supplementary'] is True for pair in pairs)
+          print('Exact Windows-tested ZIP and both validation reports verified:', checksum)
+      - name: Publish the verified assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
+          ## Windows 0.5.14 개선본
+
+          유효한 영상 추정이 있어도 최초 접촉·대상 식별·사건 선택·라인 오차 진단에서 REVIEW가 반복되던 표시를 수정했습니다. 실제 판정에 사용한 사건과 근거 사진을 연결하고, 탐지에서 빠진 착지 정점을 원본 영상에서 다시 확인하도록 보완했습니다.
+
+          - 주 화면에 실제 근거에 따른 **영상 추정 IN/OUT**과 네 단계 진단을 표시합니다.
+          - 원본 재확인은 정점 전후 7프레임의 연속 관측과 기존 움직임·코트·위치 오차 검사를 통과해야 합니다.
+          - 독립 근거가 없는 시점은 보조 시점으로 표시합니다. 직접 접촉 확인 여부는 변경하지 않으며 근거 부족·충돌은 REVIEW를 유지합니다.
+          - 저장 결과를 다시 열 때도 판정 근거를 재검증합니다.
+
+          **실행:** 아래 `badminton-windows-0.5.14.zip`을 새 폴더에 전부 압축 해제하고 `START.bat`를 실행하세요. 기존 검수 재사용을 끄고 새 분석으로 확인하세요. PyTorch는 포함하지 않습니다.
+
+          **검증:** Windows PowerShell 5.1의 실행·재실행·HTTP, 패키징/실행기 테스트 13개, 번들 Python의 A/B 복식·단식 전체 분석 4회를 통과했습니다. 확인한 A/B 원본의 최종 영상 추정은 복식 IN·단식 OUT이며 B는 독립 판정 없이 보조 시점으로 표시됩니다. 전체 Python 테스트 1,359개와 실제 브라우저 화면 검사도 통과했습니다. 이는 회귀 시험이며 독립 데이터의 판정 정확도 측정은 아닙니다.
+
+          [Windows 검증 작업](https://github.com/6rmkhj/Badminton_AI_Line_Judge/actions/runs/43611749651) · [변경 사항](https://github.com/6rmkhj/Badminton_AI_Line_Judge/pull/10)
+
+          ZIP SHA256: `280b5b2b1cdd28bc4c258228a61cf7da118c24455db26bc80307cd2edfc533e7`
+          NOTES
+          gh release create v0.5.14 verified/* \
+            --target db5fc41e88dd9a805180ccbefeb185f6791ba5a5 \
+            --title 'Windows 0.5.14 · 착지 판정 근거 및 반복 REVIEW 개선' \
+            --notes-file "$RUNNER_TEMP/release-notes.md" --draft
+          gh api "repos/$GH_REPO/releases/tags/v0.5.14" > "$RUNNER_TEMP/uploaded-release.json"
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          release = json.loads((Path(os.environ['RUNNER_TEMP']) / 'uploaded-release.json').read_text())
+          assert release['draft'] is True
+          assert release['target_commitish'] == 'db5fc41e88dd9a805180ccbefeb185f6791ba5a5'
+          assets = {asset['name']: asset for asset in release['assets']}
+          assert len(release['assets']) == 4
+          assert set(assets) == {path.name for path in Path('verified').iterdir()}
+          for path in Path('verified').iterdir():
+              asset = assets[path.name]
+              with path.open('rb') as stream:
+                  digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+              assert asset['state'] == 'uploaded' and asset['size'] == path.stat().st_size
+              assert asset['digest'] == 'sha256:' + digest
+          print('All four uploaded assets match the locally verified bytes')
+          PY
+          gh release edit v0.5.14 --draft=false --latest
+      - name: Verify the published release points to the tested source
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const release = (await github.rest.repos.getReleaseByTag({...context.repo, tag: 'v0.5.14'})).data;
+            const tag = (await github.rest.git.getRef({...context.repo, ref: 'tags/v0.5.14'})).data;
+            if (release.draft || release.prerelease || tag.object.sha !== 'db5fc41e88dd9a805180ccbefeb185f6791ba5a5') {
+              throw new Error('Published release/source mismatch');
+            }
+            const asset = release.assets.find(asset => asset.name === 'badminton-windows-0.5.14.zip');
+            if (!asset || asset.size !== 287118728 || asset.state !== 'uploaded' ||
+                asset.digest !== 'sha256:280b5b2b1cdd28bc4c258228a61cf7da118c24455db26bc80307cd2edfc533e7') {
+              throw new Error('Published package checksum mismatch');
+            }
+            core.notice(release.html_url);
