@@ -9,8 +9,8 @@ import time
 import pytest
 
 from badminton.pair_workspace import (PairWorkspace, PairWorkspaceError, combine_views, MAX_UPLOAD_BYTES,
-                                      MAX_FRAMES, RULES, _write, _landing_candidate, _trajectory_replay,
-                                      _video_estimate_summary)
+                                      MAX_FRAMES, REASONS, RULES, _write, _landing_candidate, _trajectory_replay,
+                                      _video_estimate_summary, _best_estimate_summary)
 
 
 def wait_job(workspace, job_id):
@@ -31,17 +31,33 @@ def source_view(label, digest='a', **kwargs):
 
 @pytest.mark.parametrize('left,right,expected', [('IN','REVIEW','IN'), ('REVIEW','OUT','OUT'),
                                               ('IN','IN','IN'), ('OUT','OUT','OUT'),
-                                              ('IN','OUT','REVIEW'), ('REVIEW','REVIEW','REVIEW')])
-def test_pair_final_uses_available_direct_evidence_or_conflict(left, right, expected):
+                                              # Equal-strength verified conflict: no longer REVIEW; the
+                                              # deterministic tie-break keeps camera A and warns.
+                                              ('IN','OUT','IN'), ('REVIEW','REVIEW','REVIEW')])
+def test_pair_final_uses_available_direct_evidence_or_resolves_conflict(left, right, expected):
     views = {'A': source_view(left), 'B': source_view(right, 'b')}
     result = combine_views(views, same_event_confirmed=True, event_source='operator_pair_selection')
     assert result['decision'] == expected
     assert result['automatic_benchmark_eligible'] is False and result['ground_truth_created'] is False
     assert result['court_position_m'] is None
     assert views['B']['direct_decision'] == right
-    if expected != 'REVIEW':
-        assert result['source_camera_ids']
+    conflict = {left, right} == {'IN', 'OUT'}
+    assert result['conflict_resolved'] is conflict
+    assert ('CONFLICTING_VIEW_DECISIONS' in result['warning_codes']) is conflict
+    # Equal strength: the arbitrary camera-order tie-break is named as such.
+    assert ('VIEW_CONFLICT_TIE_BROKEN_BY_CAMERA_ORDER' in result['reason_codes']) is conflict
+    assert result.get('conflict_resolution_key') == ('camera_order' if conflict else None)
+    if expected == 'REVIEW':
+        assert result['decision_kind'] == 'unresolved' and result['confidence'] is None
+        return
+    assert result['decision_kind'] == 'verified' and result['source_camera_ids']
+    if not conflict:
         assert all(v['assisted_decision'] == expected for v in result['views'].values())
+        return
+    # Only the winning view is a donor; the dissenting view keeps its own verdict.
+    assert result['source_camera_ids'] == ['A']
+    assert result['views']['B']['direct_decision'] == result['views']['B']['assisted_decision'] == 'OUT'
+    assert result['views']['B']['verdict_source_camera_ids'] == ['B']
 
 
 def test_transferred_label_cannot_be_used_as_a_direct_donor():
@@ -52,8 +68,26 @@ def test_transferred_label_cannot_be_used_as_a_direct_donor():
 
 def test_known_different_events_still_prevent_a_joint_verdict():
     result = combine_views({'A': source_view('IN'), 'B': source_view('IN','b')},
+                           same_event_confirmed=True, event_source='operator_pair_selection',
+                           different_event=True)
+    # The known mismatch is a visible warning and no longer forces REVIEW ...
+    assert result['decision'] == 'IN' and result['decision_kind'] == 'verified'
+    assert 'KNOWN_DIFFERENT_RALLY' in result['warning_codes']
+    assert 'KNOWN_DIFFERENT_RALLY' not in result['reason_codes']
+    assert REASONS['KNOWN_DIFFERENT_RALLY'] in result['warnings']
+    # ... but it still overrides the confirmation: no joint (linked) verdict, one donor only.
+    assert result['same_event_confirmed'] is False and result['event_correspondence_source'] is None
+    assert result['decision_scope'] == 'single_view' and result['source_camera_ids'] == ['A']
+    assert result['reason_codes'] == ['VERDICT_FROM_QUALIFIED_VIEW']
+    for camera, view in result['views'].items():
+        assert view['verdict_source_camera_ids'] == [camera] and 'assistance_mode' not in view
+    # A peer without its own verdict receives nothing from a different rally.
+    single = combine_views({'A': source_view('IN'), 'B': source_view('REVIEW', 'b')},
                            same_event_confirmed=True, different_event=True)
-    assert result['decision'] == 'REVIEW' and 'KNOWN_DIFFERENT_RALLY' in result['reason_codes']
+    assert single['decision'] == 'IN' and single['source_camera_ids'] == ['A']
+    peer = single['views']['B']
+    assert peer['assisted_decision'] == 'REVIEW' and peer['verdict_source_camera_ids'] == []
+    assert 'assistance_mode' not in peer
 
 
 def test_duplicate_and_failed_other_view_do_not_erase_a_valid_single_view():
@@ -238,7 +272,17 @@ def test_known_mismatch_overrides_operator_confirmation(pair_fixture):
     _write(root/'annotations/ai-visual/v_a.json', report['videos'][0]['annotation'])
     _write(workspace.report_path, report)
     result = wait_job(workspace, submit_fixture(workspace,same_event_confirmed=True))['result']
-    assert result['decision'] == 'REVIEW' and 'KNOWN_DIFFERENT_RALLY' in result['reason_codes']
+    # The mismatch outranks the operator confirmation and the AI action match: A keeps
+    # its own verified verdict, but nothing is linked or transferred to B.
+    assert result['decision'] == 'IN' and result['decision_kind'] == 'verified'
+    assert result['source_camera_ids'] == ['A'] and result['decision_scope'] == 'single_view'
+    assert result['same_event_confirmed'] is False and result['event_correspondence_source'] is None
+    assert 'KNOWN_DIFFERENT_RALLY' in result['warning_codes']
+    assert 'KNOWN_DIFFERENT_RALLY' not in result['reason_codes']
+    peer = result['views']['B']
+    assert peer['direct_decision'] == peer['assisted_decision'] == 'REVIEW'
+    assert peer['verdict_source_camera_ids'] == [] and 'assistance_mode' not in peer
+    assert peer['contact_time_seconds'] is None
 
 
 @pytest.mark.parametrize('damage', ['annotation','original','asset','forged_direct'])
@@ -968,6 +1012,21 @@ def native_estimate(label='IN', digest='a', **overrides):
     }
 
 
+def best_estimate(label='IN', digest='a', basis='landing_candidate', confidence=.64, margin_px=None, **overrides):
+    """A source-bound record in the shape produced by badminton.best_estimate."""
+    margin = margin_px if margin_px is not None else (12. if label == 'IN' else -12.)
+    return {
+        'schema_version': 1, 'decision': label, 'decision_kind': 'best_estimate',
+        'source': 'best_available_landing_evidence', 'basis': basis, 'confidence': confidence,
+        'rules': deepcopy(RULES), 'source_sha256': digest * 64,
+        'classification': {'decision': label, 'margin_px': margin, 'boundary_role': 'near',
+                           'method': 'primary_court_boundaries', 'reason_codes': []},
+        'reason_codes': [f'BEST_ESTIMATE_FROM_{basis.upper()}'], 'contact_observed': False,
+        'target_identity_verified': False, 'point_px': [480., 400.], 'frame_index': 1, 'time': .1,
+        **overrides,
+    }
+
+
 @pytest.mark.parametrize('camera,label,confirmed', [('A', 'IN', False), ('B', 'OUT', False),
                                                   ('A', 'IN', True), ('B', 'OUT', True)])
 def test_native_estimate_can_decide_without_promoting_direct_contact(camera, label, confirmed):
@@ -1058,9 +1117,16 @@ def test_direct_evidence_keeps_precedence_and_conflicts_or_errors_stay_visible()
     assert result['views']['B']['error'] == 'decode failed'
     conflict = combine_views({'A': source_view('REVIEW', video_estimate=native_estimate()),
                               'B': source_view('REVIEW', 'b', video_estimate=native_estimate('OUT', 'b'))})
-    assert conflict['decision'] == 'REVIEW'
+    # Equal-strength estimates: resolved deterministically, never silently.
+    assert conflict['decision'] == 'IN' and conflict['decision_kind'] == 'video_estimate'
+    assert conflict['conflict_resolved'] is True and conflict['source_camera_ids'] == ['A']
+    assert 'CONFLICTING_VIDEO_ESTIMATES' in conflict['warning_codes']
+    assert 'VIEW_CONFLICT_TIE_BROKEN_BY_CAMERA_ORDER' in conflict['reason_codes']
     assert [conflict['views'][camera]['effective_decision'] for camera in ('A', 'B')] == ['IN', 'OUT']
-    assert all(not view['analysis_assessment']['supplementary'] for view in conflict['views'].values())
+    assert conflict['views']['A']['analysis_assessment']['contributes_to_final'] is True
+    dissent = conflict['views']['B']['analysis_assessment']
+    assert dissent['supplementary'] is True and dissent['contributes_to_final'] is False
+    assert '자체 결과는 OUT' in dissent['final_context']
 
 
 @pytest.mark.parametrize('backup_available', [False, True])
@@ -1086,17 +1152,37 @@ def test_snapshot_rejects_lost_original_estimate_donor_without_switching_sources
     assert job == before
 
 
-def test_snapshot_detects_new_valid_estimate_conflict_and_preserves_metadata(pair_fixture):
+@pytest.mark.parametrize('peer_outranks_donor', [False, True])
+def test_snapshot_detects_new_valid_estimate_conflict_and_preserves_metadata(pair_fixture, peer_outranks_donor):
     workspace, _, _ = pair_fixture
     original = combine_views({'A': source_view('REVIEW', video_estimate=native_estimate()),
                               'B': source_view('REVIEW', 'b')})
     original.update(elapsed_seconds=12.5, user_region_camera_ids=['A'])
     original['views']['B']['video_estimate'] = native_estimate('OUT', 'b')
-    result = workspace._snapshot({'job_id': 'conflict', 'status': 'completed', 'result': original})['result']
-    assert result['decision'] == 'REVIEW' and 'CONFLICTING_VIDEO_ESTIMATES' in result['reason_codes']
-    assert result['source_camera_ids'] == []
+    if peer_outranks_donor:
+        original['views']['B']['best_estimate'] = best_estimate('OUT', 'b', basis='video_estimate', confidence=.95)
+    job = {'job_id': 'conflict', 'status': 'completed', 'result': original}
+    before = deepcopy(job)
+    result = workspace._snapshot(job)['result']
+    assert 'CONFLICTING_VIDEO_ESTIMATES' in result['warning_codes']
     assert [result['views'][camera]['effective_decision'] for camera in ('A', 'B')] == ['IN', 'OUT']
     assert result['elapsed_seconds'] == 12.5 and result['user_region_camera_ids'] == ['A']
+    assert job == before
+    if not peer_outranks_donor:
+        # The recorded donor still wins its tier: the verdict stands and the new
+        # disagreement is shown rather than hidden.
+        assert result['decision'] == 'IN' and result['source_camera_ids'] == ['A']
+        assert result['conflict_resolved'] is True
+        assert {'VIEW_CONFLICT_RESOLVED_BY_CONFIDENCE', 'VIEW_CONFLICT_TIE_BROKEN_BY_CAMERA_ORDER'} & set(result['reason_codes'])
+        assert result['views']['A']['analysis_assessment']['contributes_to_final'] is True
+        assert result['views']['B']['analysis_assessment']['contributes_to_final'] is False
+        return
+    # The new peer would now win: history must not silently switch donors to it.
+    assert result['decision'] == 'REVIEW' and result['decision_kind'] == 'unresolved'
+    assert result['source_camera_ids'] == [] and result['confidence'] is None
+    assert 'STALE_REVIEW' in result['reason_codes'] and result['conflict_resolved'] is False
+    assert result['historical_decision']['decision'] == 'IN'
+    assert result['historical_decision']['source_camera_ids'] == ['A']
     assert all(not view['analysis_assessment']['contributes_to_final'] for view in result['views'].values())
 
 
@@ -1109,9 +1195,15 @@ def test_snapshot_does_not_promote_recorded_review_and_keeps_known_different_eve
     assert result['views']['A']['effective_decision'] == 'IN'
     assert not result['views']['A']['analysis_assessment']['contributes_to_final']
     different = combine_views({'A': source_view('REVIEW', video_estimate=native_estimate()),
-                               'B': source_view('REVIEW', 'b')}, different_event=True)
+                               'B': source_view('REVIEW', 'b')}, same_event_confirmed=True, different_event=True)
+    assert different['decision'] == 'IN' and 'KNOWN_DIFFERENT_RALLY' in different['warning_codes']
     restored = workspace._snapshot({'job_id': 'different', 'status': 'completed', 'result': different})['result']
-    assert restored['decision'] == 'REVIEW' and 'KNOWN_DIFFERENT_RALLY' in restored['reason_codes']
+    # Reopening keeps the single-view verdict and the known-mismatch warning; it
+    # neither relinks the views nor downgrades the marker to "unconfirmed".
+    assert restored['decision'] == 'IN' and restored['source_camera_ids'] == ['A']
+    assert restored['decision_scope'] == 'single_view' and restored['same_event_confirmed'] is False
+    assert 'KNOWN_DIFFERENT_RALLY' in restored['warning_codes']
+    assert 'SAME_EVENT_UNCONFIRMED' not in restored['warning_codes']
 
 
 @pytest.mark.parametrize('confirmed,source_ids', [(False, ['A']), (True, ['A', 'B'])])
@@ -1124,33 +1216,47 @@ def test_native_estimate_donors_only_link_when_the_same_event_is_confirmed(confi
     assert all(row['assisted_decision'] == 'REVIEW' for row in result['views'].values())
 
 
-def test_conflicting_native_estimates_and_known_different_rallies_remain_review():
+def test_conflicting_native_estimates_keep_one_donor_and_known_different_rallies_stay_unlinked():
     views = {'A': source_view('REVIEW', video_estimate=native_estimate()),
              'B': source_view('REVIEW', 'b', video_estimate=native_estimate('OUT', 'b'))}
-    conflict = combine_views(views)
-    assert conflict['decision'] == 'REVIEW' and conflict['decision_kind'] == 'unresolved'
-    assert 'CONFLICTING_VIDEO_ESTIMATES' in conflict['reason_codes']
-    assert conflict['source_camera_ids'] == []
+    conflict = combine_views(views, same_event_confirmed=True)
+    assert conflict['decision'] == 'IN' and conflict['decision_kind'] == 'video_estimate'
+    assert conflict['reason_codes'] == ['VIDEO_ESTIMATE_FROM_VIEW', 'VIEW_CONFLICT_TIE_BROKEN_BY_CAMERA_ORDER']
+    assert 'CONFLICTING_VIDEO_ESTIMATES' in conflict['warning_codes']
+    # Even on confirmed, linked views the dissenting estimate never becomes a donor.
+    assert conflict['source_camera_ids'] == ['A'] and conflict['conflict_resolved'] is True
+    assert conflict['views']['B']['estimated_decision'] == 'OUT'
     views['B']['video_estimate'] = native_estimate('IN', 'b')
     different = combine_views(views, same_event_confirmed=True, different_event=True)
-    assert different['decision'] == 'REVIEW' and 'KNOWN_DIFFERENT_RALLY' in different['reason_codes']
+    assert different['decision'] == 'IN' and 'KNOWN_DIFFERENT_RALLY' in different['warning_codes']
+    assert different['reason_codes'] == ['VIDEO_ESTIMATE_FROM_VIEW']
+    assert different['source_camera_ids'] == ['A'] and different['decision_scope'] == 'single_view'
 
 
-@pytest.mark.parametrize('confirmed,expected', [(False, 'IN'), (True, 'REVIEW')])
-def test_verified_verdict_and_opposite_estimate_preserve_correspondence_semantics(confirmed, expected):
+@pytest.mark.parametrize('confirmed,warning,absent', [
+    (False, 'UNLINKED_ESTIMATE_CONFLICT', 'VERIFIED_ESTIMATE_CONFLICT'),
+    (True, 'VERIFIED_ESTIMATE_CONFLICT', 'UNLINKED_ESTIMATE_CONFLICT')])
+def test_verified_verdict_and_opposite_estimate_preserve_correspondence_semantics(confirmed, warning, absent):
     views = {'A': source_view('IN'),
              'B': source_view('REVIEW', 'b', video_estimate=native_estimate('OUT', 'b'))}
     result = combine_views(views, same_event_confirmed=confirmed)
-    assert result['decision'] == expected
-    if confirmed:
-        assert 'VERIFIED_ESTIMATE_CONFLICT' in result['reason_codes']
-        assert result['source_camera_ids'] == []
-    else:
-        assert result['decision_kind'] == 'verified' and result['source_camera_ids'] == ['A']
-        assert 'UNLINKED_ESTIMATE_CONFLICT' in result['warning_codes']
+    # The verified tier always outranks an opposite estimate; correspondence only
+    # decides how the disagreement is labelled and whether the verdict is linked.
+    assert result['decision'] == 'IN' and result['decision_kind'] == 'verified'
+    assert result['source_camera_ids'] == ['A'] and result['video_estimate_used'] is False
+    assert warning in result['warning_codes'] and absent not in result['warning_codes']
+    assert warning not in result['reason_codes']
+    # Tier precedence is not a confidence resolution between two verdicts of one tier.
+    assert result['conflict_resolved'] is False
+    assert 'VIEW_CONFLICT_RESOLVED_BY_CONFIDENCE' not in result['reason_codes']
+    assert result['decision_scope'] == ('linked_views' if confirmed else 'single_view')
+    peer = result['views']['B']
+    assert peer['direct_decision'] == 'REVIEW' and peer['estimated_decision'] == 'OUT'
+    assert peer['assisted_decision'] == ('IN' if confirmed else 'REVIEW')
+    assert peer['verdict_source_camera_ids'] == (['A'] if confirmed else [])
 
 
-def test_verified_evidence_has_priority_over_agreeing_video_estimate():
+def test_verified_evidence_has_priority_over_agreeing_and_opposite_video_estimates():
     result = combine_views({'A': source_view('IN'),
                             'B': source_view('REVIEW', 'b', video_estimate=native_estimate('IN', 'b'))},
                            same_event_confirmed=True)
@@ -1158,9 +1264,15 @@ def test_verified_evidence_has_priority_over_agreeing_video_estimate():
     assert result['source_camera_ids'] == ['A'] and not result['video_estimate_used']
     assert result['views']['B']['direct_decision'] == 'REVIEW'
     assert result['views']['B']['assistance_mode'] == 'other_view_verdict'
+    # The same view's verified contact outranks its own opposite estimate, which stays visible.
     result = combine_views({'A': source_view('IN', video_estimate=native_estimate('OUT')),
                             'B': source_view('REVIEW', 'b')})
-    assert result['decision'] == 'REVIEW' and 'VERIFIED_ESTIMATE_CONFLICT' in result['reason_codes']
+    assert result['decision'] == 'IN' and result['decision_kind'] == 'verified'
+    assert 'VERIFIED_ESTIMATE_CONFLICT' in result['warning_codes']
+    assert 'VERIFIED_ESTIMATE_CONFLICT' not in result['reason_codes']
+    assert result['source_camera_ids'] == ['A'] and not result['video_estimate_used']
+    assert result['views']['A']['estimated_decision'] == 'OUT'
+    assert result['views']['A']['effective_decision_kind'] == 'verified'
 
 
 @pytest.mark.parametrize('invalid', [
@@ -1275,3 +1387,264 @@ def test_malformed_optional_estimate_does_not_discard_valid_strict_camera(pair_f
     assert job['result']['source_camera_ids'] == ['A']
     assert job['result']['views']['A']['direct_decision'] == 'IN'
     assert job['result']['views']['A']['video_estimate']['decision'] == 'REVIEW'
+
+
+# Always-decide pair policy: tier order, within-tier conflicts and best estimates.
+
+@pytest.mark.parametrize('camera,label,confirmed,peer', [
+    ('A', 'IN', False, 'unresolved'), ('B', 'OUT', True, 'unresolved'), ('B', 'IN', True, 'failed')])
+def test_best_estimate_tier_decides_only_without_verified_or_video_estimate(camera, label, confirmed, peer):
+    other = 'B' if camera == 'A' else 'A'
+    views = {'A': source_view('REVIEW'), 'B': source_view('REVIEW', 'b')}
+    views[camera]['best_estimate'] = best_estimate(label, camera.lower(), confidence=.61)
+    if peer == 'failed':
+        views[other].update(status='failed', error='decode failed')
+    else:
+        # An unresolved native estimate is no verdict and cannot veto the heuristic tier.
+        views[other]['video_estimate'] = {'decision': 'REVIEW', 'eligible': False,
+                                          'reason_codes': ['VIDEO_ESTIMATE_NO_UNIQUE_EVENT']}
+    original = deepcopy(views)
+    result = combine_views(views, same_event_confirmed=confirmed)
+    assert result['decision'] == label and result['decision_kind'] == 'best_estimate'
+    assert result['best_estimate_used'] is True and result['video_estimate_used'] is False
+    assert result['confidence'] == .61 and result['conflict_resolved'] is False
+    assert result['source_camera_ids'] == [camera]
+    assert result['reason_codes'] == ['BEST_ESTIMATE_FROM_VIEW']
+    assert ('VIEW_ANALYSIS_FAILED' in result['warning_codes']) is (peer == 'failed')
+    assert result['evaluation_eligible'] is False and result['automatic_benchmark_eligible'] is False
+    assert result['ground_truth_created'] is False and result['human_verified'] is False
+    assert result['court_position_m'] is None
+    assert result['review_diagnostics']['decision_kind'] == 'best_estimate'
+    # A heuristic location is never promoted to an observed contact or transferred.
+    for row in result['views'].values():
+        assert row['qualified'] is False
+        assert row['automatic_decision'] == row['direct_decision'] == row['assisted_decision'] == 'REVIEW'
+        assert row['verdict_source_camera_ids'] == [] and 'assistance_mode' not in row
+        assert row['estimated_decision'] == 'REVIEW'
+    donor = result['views'][camera]
+    assert donor['best_estimated_decision'] == label
+    assert donor['effective_decision'] == label and donor['effective_decision_kind'] == 'best_estimate'
+    assert donor['analysis_assessment']['contributes_to_final'] is True
+    assert result['views'][other]['best_estimated_decision'] == 'REVIEW'
+    assert views == original
+
+
+@pytest.mark.parametrize('higher', ['verified', 'video_estimate'])
+@pytest.mark.parametrize('higher_view_records_best_estimate', [False, True])
+def test_lower_tier_never_overrides_a_higher_tier_even_with_higher_confidence(
+        higher, higher_view_records_best_estimate):
+    # A's heuristic says OUT with the highest confidence a best estimate may carry.
+    views = {'A': source_view('REVIEW', best_estimate=best_estimate('OUT', basis='estimate_envelope', confidence=1.))}
+    views['B'] = (source_view('IN', 'b') if higher == 'verified' else
+                  source_view('REVIEW', 'b', video_estimate=native_estimate('IN', 'b')))
+    if higher_view_records_best_estimate:
+        # As the pipeline does, the higher-tier view also records its verdict as a best estimate.
+        basis, confidence = ('verified_contact', .97) if higher == 'verified' else ('video_estimate', .9)
+        views['B']['best_estimate'] = best_estimate('IN', 'b', basis=basis, confidence=confidence)
+    result = combine_views(views, same_event_confirmed=True)
+    assert result['decision'] == 'IN' and result['decision_kind'] == higher
+    assert result['source_camera_ids'] == ['B'] and result['best_estimate_used'] is False
+    assert result['conflict_resolved'] is False and result['confidence'] < 1.
+    # With realistic records on both views the disagreement is also a listed warning.
+    assert ('CONFLICTING_BEST_ESTIMATES' in result['warning_codes']) is higher_view_records_best_estimate
+    lower = result['views']['A']
+    assert lower['best_estimated_decision'] == lower['effective_decision'] == 'OUT'
+    assert lower['effective_decision_kind'] == 'best_estimate'
+    assert lower['analysis_assessment']['supplementary'] is True
+    assert lower['analysis_assessment']['contributes_to_final'] is False
+    assert '자체 결과는 OUT' in lower['analysis_assessment']['final_context']
+    assert lower['direct_decision'] == 'REVIEW' and lower['qualified'] is False
+    assert lower['verdict_source_camera_ids'] == (['B'] if higher == 'verified' else [])
+
+
+# A same-tier dissent lowers the final confidence: winner - (loser - 0.5), floor 0.5.
+@pytest.mark.parametrize('tier,warning,confidence', [
+    ('verified', 'CONFLICTING_VIEW_DECISIONS', .5),
+    ('video_estimate', 'CONFLICTING_VIDEO_ESTIMATES', .58),
+    ('best_estimate', 'CONFLICTING_BEST_ESTIMATES', .6)])
+def test_within_tier_conflict_is_resolved_by_confidence_and_stays_visible(tier, warning, confidence):
+    if tier == 'verified':
+        # Verified contacts share one confidence; the contact further from the boundary wins.
+        views = {'A': source_view('IN', best_estimate=best_estimate(
+                     'IN', basis='verified_contact', confidence=.97, margin_px=2.)),
+                 'B': source_view('OUT', 'b', best_estimate=best_estimate(
+                     'OUT', 'b', basis='verified_contact', confidence=.97, margin_px=-30.))}
+    elif tier == 'video_estimate':
+        views = {'A': source_view('REVIEW', video_estimate=native_estimate(),
+                                  best_estimate=best_estimate('IN', basis='video_estimate', confidence=.8)),
+                 'B': source_view('REVIEW', 'b', video_estimate=native_estimate('OUT', 'b'),
+                                  best_estimate=best_estimate('OUT', 'b', basis='video_estimate', confidence=.88))}
+    else:
+        views = {'A': source_view('REVIEW', best_estimate=best_estimate('IN', basis='landing_candidate', confidence=.6)),
+                 'B': source_view('REVIEW', 'b', best_estimate=best_estimate('OUT', 'b', basis='flight_family',
+                                                                             confidence=.7))}
+    result = combine_views(views, same_event_confirmed=True)
+    # B is the stronger view, so this is not the deterministic camera-A tie-break.
+    assert result['decision'] == 'OUT' and result['decision_kind'] == tier
+    assert result['confidence'] == confidence and result['conflict_resolved'] is True
+    assert result['source_camera_ids'] == ['B']
+    assert result['reason_codes'][-1] == 'VIEW_CONFLICT_RESOLVED_BY_CONFIDENCE'
+    assert REASONS['VIEW_CONFLICT_RESOLVED_BY_CONFIDENCE'] in result['reasons']
+    assert warning in result['warning_codes'] and REASONS[warning] in result['warnings']
+    loser = result['views']['A']
+    # The weaker view keeps and shows its own verdict; it is neither a donor nor relabelled.
+    assert loser['effective_decision'] == 'IN'
+    assert loser['analysis_assessment']['supplementary'] is True
+    assert loser['analysis_assessment']['contributes_to_final'] is False
+    assert '자체 결과는 IN' in loser['analysis_assessment']['final_context']
+    assert loser['assisted_decision'] == ('IN' if tier == 'verified' else 'REVIEW')
+    assert loser['verdict_source_camera_ids'] == (['A'] if tier == 'verified' else [])
+
+
+@pytest.mark.parametrize('invalid', [
+    {'source_sha256': 'b' * 64}, {'rules': {'game': 'singles', 'phase': 'rally'}},
+    {'confidence': .49}, {'confidence': 1.01}, {'confidence': float('nan')}, {'confidence': None},
+    {'confidence': True}, {'decision': 'REVIEW'}, {'decision': ['OUT']},
+    {'decision_kind': 'video_estimate'}, {'source': 'operator_guess'}, {'basis': 'unknown_basis'},
+    {'schema_version': True}, {'schema_version': 2}, {'contact_observed': True},
+    {'target_identity_verified': True}, {'point_px': [100]}, {'point_px': [float('inf'), 100]},
+    {'reason_codes': 'BEST_ESTIMATE_FROM_LANDING_CANDIDATE'}, {'reason_codes': [1]},
+])
+def test_invalid_best_estimate_is_ignored_and_never_becomes_a_pair_verdict(invalid):
+    record = best_estimate('OUT', **{'confidence': .9, **invalid})
+    result = combine_views({'A': source_view('REVIEW', best_estimate=record),
+                            'B': source_view('REVIEW', 'b')}, same_event_confirmed=True)
+    assert result['decision'] == 'REVIEW' and result['decision_kind'] == 'unresolved'
+    assert result['best_estimate_used'] is False and result['confidence'] is None
+    assert result['source_camera_ids'] == [] and result['conflict_resolved'] is False
+    assert result['reason_codes'][0] == 'NO_QUALIFIED_CONTACT'
+    view = result['views']['A']
+    assert view['best_estimated_decision'] == view['effective_decision'] == 'REVIEW'
+    assert not view['analysis_assessment']['contributes_to_final']
+
+
+@pytest.mark.parametrize('view_change', [{'status': 'failed'}, {'source_sha256': None}, {'source_sha256': 'bad'},
+                                         {'rules': {'game': 'singles', 'phase': 'rally'}}])
+def test_best_estimate_of_a_failed_or_unbound_view_is_ignored(view_change):
+    view = source_view('REVIEW', best_estimate=best_estimate('OUT', confidence=.9))
+    view.update(view_change)
+    result = combine_views({'A': view, 'B': source_view('REVIEW', 'b')})
+    assert result['decision'] == 'REVIEW' and result['best_estimate_used'] is False
+    assert result['views']['A']['best_estimated_decision'] == 'REVIEW'
+
+
+def test_invalid_best_estimate_cannot_veto_or_outrank_a_valid_peer_estimate():
+    result = combine_views({'A': source_view('REVIEW', best_estimate=best_estimate(
+                                'OUT', confidence=.99, source_sha256='c' * 64)),
+                            'B': source_view('REVIEW', 'b', best_estimate=best_estimate('IN', 'b', confidence=.55))})
+    assert result['decision'] == 'IN' and result['decision_kind'] == 'best_estimate'
+    assert result['source_camera_ids'] == ['B'] and result['confidence'] == .55
+    assert result['conflict_resolved'] is False
+    assert 'CONFLICTING_BEST_ESTIMATES' not in result['warning_codes']
+    assert result['views']['A']['best_estimated_decision'] == 'REVIEW'
+
+
+def test_best_estimate_summary_binds_source_and_exposes_only_safe_finite_records(tmp_path):
+    output = tmp_path / 'result'
+    (output / 'evidence').mkdir(parents=True)
+    (output / 'evidence/best estimate.jpg').write_bytes(b'best-estimate-overlay')
+    result = {'source_sha256': 'a' * 64, 'config': {'rules': deepcopy(RULES)},
+              'best_estimate': best_estimate('OUT', confidence=.7, artifact_path='evidence/best estimate.jpg')}
+    summary = _best_estimate_summary(result, None, output, '/pair-media/jobs/test/views/A/')
+    assert summary['decision'] == 'OUT' and summary['confidence'] == .7
+    assert summary['source_sha256'] == 'a' * 64 and summary['contact_observed'] is False
+    assert summary['artifact_url'].endswith('/evidence/best%20estimate.jpg')
+    for relative in ('../outside.jpg', 'evidence/missing.jpg', 'https://example.org/image.jpg'):
+        result['best_estimate']['artifact_path'] = relative
+        assert _best_estimate_summary(result, None, output, '/pair-media/')['artifact_url'] is None
+    leaking = _best_estimate_summary({'source_sha256': 'a' * 64,
+                                      'best_estimate': best_estimate(point_px=[float('nan'), 100.])})
+    json.dumps(leaking, allow_nan=False)
+    assert leaking['decision'] == 'REVIEW' and leaking['reason_codes'] == ['INVALID_BEST_ESTIMATE']
+
+
+@pytest.mark.parametrize('raw_change,job_rules', [
+    ({'source_sha256': 'b' * 64}, None), ({'confidence': .3}, None),
+    ({'rules': {'game': 'singles', 'phase': 'rally'}}, None), ({}, {'game': 'singles', 'phase': 'rally'})])
+def test_best_estimate_summary_marks_wrong_source_rules_or_confidence_and_pair_warns(raw_change, job_rules):
+    result = {'source_sha256': 'a' * 64, 'config': {'rules': deepcopy(RULES)},
+              'best_estimate': best_estimate('OUT', **{'confidence': .7, **raw_change})}
+    summary = _best_estimate_summary(result, job_rules)
+    assert summary['decision'] == 'REVIEW' and summary['confidence'] is None
+    assert 'INVALID_BEST_ESTIMATE' in summary['reason_codes']
+    pair = combine_views({'A': source_view('REVIEW', best_estimate=summary), 'B': source_view('REVIEW', 'b')})
+    assert pair['decision'] == 'REVIEW' and pair['best_estimate_used'] is False
+    assert 'INVALID_BEST_ESTIMATE' in pair['warning_codes']
+    assert pair['views']['A']['best_estimated_decision'] == 'REVIEW'
+
+
+@pytest.mark.parametrize('stale_evidence', [False, True])
+def test_review_remains_only_when_no_view_has_a_valid_verdict(stale_evidence):
+    def failed(label, digest):
+        evidence = (dict(video_estimate=native_estimate(label, digest),
+                         best_estimate=best_estimate(label, digest, confidence=.9)) if stale_evidence else {})
+        return source_view(label if stale_evidence else 'REVIEW', digest, status='failed',
+                           error='decode failed', **evidence)
+    result = combine_views({'A': failed('IN', 'a'), 'B': failed('OUT', 'b')}, same_event_confirmed=True)
+    assert result['decision'] == 'REVIEW' and result['decision_kind'] == 'unresolved'
+    assert result['confidence'] is None and result['source_camera_ids'] == []
+    assert result['decision_scope'] == 'unresolved' and result['conflict_resolved'] is False
+    assert result['best_estimate_used'] is False and result['video_estimate_used'] is False
+    assert {'NO_QUALIFIED_CONTACT', 'VIEW_ANALYSIS_FAILED'} <= set(result['reason_codes'])
+    assert not [code for code in result['warning_codes'] if code.startswith('CONFLICTING_')]
+    assert 'VIEW_ANALYSIS_FAILED' in [issue['code'] for issue in result['review_diagnostics']['issues']]
+    for view in result['views'].values():
+        assert view['assisted_decision'] == 'REVIEW' and view['verdict_source_camera_ids'] == []
+        assert view['estimated_decision'] == view['best_estimated_decision'] == 'REVIEW'
+        assert view['effective_decision'] == 'REVIEW' and view['error'] == 'decode failed'
+        assert view['analysis_assessment']['blocking_stages'] == ['processing']
+
+
+def test_best_estimate_flows_through_fresh_pair_jobs_and_history_without_contact_promotion(pair_fixture, monkeypatch):
+    # The pipeline stamps its estimator version; an outdated record would be recomputed.
+    from badminton.best_estimate import ESTIMATOR_VERSION
+    workspace, _, _ = pair_fixture
+    monkeypatch.setattr('badminton.media.probe', lambda _: {
+        'frame_count': 3, 'width': 960, 'height': 540, 'timestamps': [0, .1, .2]})
+    def analyze(source, output, config, **kwargs):
+        digest = hashlib.sha256(Path(source).read_bytes()).hexdigest()
+        first = Path(source).name == 'a.mp4'
+        (output / 'evidence').mkdir(parents=True, exist_ok=True)
+        (output / 'evidence/best-estimate.jpg').write_bytes(b'best-estimate-overlay')
+        return {'source_sha256': digest,
+                'decision': {'decision': 'REVIEW', 'reason_codes': ['FIRST_CONTACT_NOT_OBSERVED']},
+                'video_estimate': {'decision': 'REVIEW', 'eligible': False,
+                                   'reason_codes': ['VIDEO_ESTIMATE_NO_UNIQUE_EVENT']},
+                'best_estimate': best_estimate('OUT' if first else 'IN', source_sha256=digest,
+                                               confidence=.7 if first else .6,
+                                               estimator_version=ESTIMATOR_VERSION,
+                                               artifact_path='evidence/best-estimate.jpg'),
+                'analysis': {'width': 960, 'height': 540, 'frame_count': 3}, 'timestamps': [0, .1, .2],
+                'artifacts': {}, 'config': deepcopy(config)}
+    monkeypatch.setattr('badminton.pipeline.analyze_video', analyze)
+    job = wait_job(workspace, submit_fixture(workspace, reuse_review=False))
+    assert job['status'] == 'completed'
+    result = job['result']
+    assert result['decision'] == 'OUT' and result['decision_kind'] == 'best_estimate'
+    # 0.7 winner reduced by the 0.6 dissenting peer: 0.7 - (0.6 - 0.5).
+    assert result['best_estimate_used'] is True and result['confidence'] == .6
+    assert result['source_camera_ids'] == ['A'] and result['conflict_resolved'] is True
+    assert 'CONFLICTING_BEST_ESTIMATES' in result['warning_codes']
+    for view in result['views'].values():
+        assert view['automatic_decision'] == view['direct_decision'] == view['assisted_decision'] == 'REVIEW'
+        assert view['contact_time_seconds'] is None and view['qualified'] is False
+        assert view['best_estimate']['contact_observed'] is False
+    assert [result['views'][camera]['best_estimated_decision'] for camera in ('A', 'B')] == ['OUT', 'IN']
+    assert result['views']['A']['best_estimate']['artifact_url'].endswith('/evidence/best-estimate.jpg')
+    assert workspace.list_jobs()['jobs'][0]['decision_kind'] == 'best_estimate'
+    stored = json.loads((workspace.root / 'jobs' / job['job_id'] / 'job.json').read_text(encoding='utf-8'))
+    assert stored['result']['decision_kind'] == 'best_estimate'
+    assert workspace._snapshot(stored)['result']['decision'] == 'OUT'
+    # History keeps the verdict only while its own donor supports it: a lost donor
+    # is never silently replaced by the remaining, opposite peer estimate.
+    stored['result']['views']['A']['best_estimate']['source_sha256'] = 'c' * 64
+    before = deepcopy(stored)
+    stale = workspace._snapshot(stored)['result']
+    assert stale['decision'] == 'REVIEW' and stale['source_camera_ids'] == []
+    assert {'STALE_REVIEW', 'INVALID_BEST_ESTIMATE'} <= set(stale['reason_codes'])
+    assert stale['best_estimate_used'] is False and stale['confidence'] is None
+    assert stale['historical_decision']['decision'] == 'OUT'
+    assert stale['historical_decision']['source_camera_ids'] == ['A']
+    assert stale['views']['B']['best_estimated_decision'] == 'IN'
+    assert all(not view['analysis_assessment']['contributes_to_final'] for view in stale['views'].values())
+    assert stored == before

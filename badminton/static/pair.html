@@ -107,7 +107,7 @@
         <div class="result-explanation"><div id="source-cameras" class="source-cameras"></div><ul id="result-reasons"></ul><p id="correspondence-status" class="muted"></p><p id="result-timing" class="muted"></p><a id="result-json" class="secondary" href="#" download>결과 JSON 내려받기 ↗</a></div>
       </div>
       <div class="region-result-action"><button id="edit-regions" class="secondary" type="button">검토 영역 지정 후 다시 분석</button><span>저장된 원본을 사용합니다. 수동 탐색 보조 · 접촉 미확정</span></div>
-      <p id="estimate-result-note" class="estimate-result-note" hidden>영상 추정 판정은 착지 전후 원본에서 계산한 접촉 가능 영역 전체를 경계와 비교한 결과입니다. 직접 접촉 판정은 시점별로 따로 표시합니다.</p><p class="result-context">두 시점의 관측 근거와 사건 대응을 함께 검토합니다. 직접 관측·다른 시점의 근거·원본 영상 추정을 구분해 표시합니다.</p>
+      <p id="estimate-result-note" class="estimate-result-note" hidden>영상 추정 판정은 착지 전후 원본에서 계산한 접촉 가능 영역 전체를 경계와 비교한 결과입니다. 직접 접촉 판정은 시점별로 따로 표시합니다.</p><p id="best-result-note" class="estimate-result-note best-result-note" hidden>최선 추정은 직접 접촉이나 영상 추정 근거가 부족할 때, 두 시점에서 가장 강한 착지 근거의 위치를 코트 경계와 비교한 결과입니다. 위치 근거가 약하면 OUT으로 단정하지 않고 IN 기본값(0.7)을 따르며, 이때는 비교 결과가 아니라 기본값에 따른 판정입니다. 신뢰도는 근거 강도와 이 기본값을 섞은 휴리스틱 값이며 측정된 정확도가 아닙니다. 시점별 근거와 위치 사진을 아래에서 확인할 수 있습니다.</p><p class="result-context">두 시점의 관측 근거와 사건 대응을 함께 검토합니다. 직접 관측·다른 시점의 근거·원본 영상 추정을 구분해 표시합니다.</p>
       <section id="review-diagnostics" class="review-diagnostics" aria-labelledby="diagnostics-heading" hidden>
         <div class="section-title"><div><p class="eyebrow">REVIEW DIAGNOSIS</p><h2 id="diagnostics-heading">어떤 근거가 더 필요한가요?</h2></div><span id="diagnostics-count" class="status-pill"></span></div>
         <p id="diagnostics-summary" class="diagnostics-summary"></p>

@@ -176,7 +176,55 @@ _NATIVE_FAILURE_DETAILS = {
 }
 
 
-def assess_analysis(view, *, direct_qualified=False, estimate_valid=False):
+_BEST_BASIS = {
+    "verified_contact": ("직접 접촉 판정", "직접 확인한 접촉과 라인 판정을 사용했습니다."),
+    "video_estimate": ("원본 착지 가능 영역", "원본 착지 가능 영역 전체가 한쪽에 있는 영상 추정을 사용했습니다."),
+    "estimate_envelope": ("원본 착지 가능 영역의 다수 쪽", "착지 가능 영역이 선에 걸쳐 있어, 영역을 더 많이 차지한 쪽으로 판정했습니다."),
+    "flight_family": ("주 코트 착지 경로", "주 코트에 연결된 하강·반동 경로의 대표 위치를 사용했습니다."),
+    "landing_candidate": ("주 코트 범위 안의 착지 후보", "주 코트 판정 범위 안에서 트랙의 첫 하강·반동이며 접근 비행이 확인된 후보를 우선 사용했습니다(없으면 범위 안 후보, 그다음 전체 후보 풀)."),
+    "track_endpoint": ("하강 궤적의 끝 위치", "착지 후보가 없어 하강하던 궤적의 가장 낮은 관측 위치를 사용했습니다."),
+}
+
+
+def _best_estimate_assessment(base, best, label):
+    basis = best.get("basis")
+    title, detail = _BEST_BASIS.get(basis, ("최선 추정 근거", "사용 가능한 가장 강한 착지 근거를 사용했습니다."))
+    classification = best.get("classification") if isinstance(best.get("classification"), dict) else {}
+    margin_px, margin_m = classification.get("margin_px"), classification.get("margin_m")
+    role = classification.get("boundary_role")
+    role_text = {"left": "왼쪽", "right": "오른쪽", "near": "앞쪽", "far": "뒤쪽"}.get(role, "가장 가까운")
+    if _finite_number(margin_px):
+        geometry = (f"{role_text} 경계선에서 {'안쪽' if margin_px >= 0 else '바깥쪽'}으로 "
+                    f"{abs(margin_px):.1f}픽셀 떨어진 위치입니다.")
+    elif _finite_number(margin_m):
+        geometry = (f"코트 모형 기준 경계에서 {'안쪽' if margin_m >= 0 else '바깥쪽'}으로 "
+                    f"약 {abs(margin_m):.2f}m 떨어진 위치입니다.")
+    else:
+        geometry = "선택한 경기 경계와 위치를 비교했습니다."
+    location = best.get("location_decision")
+    if location in ("IN", "OUT") and location != label:
+        geometry += (f" 위치만 보면 {location}이지만 위치 근거가 약해, 착지가 코트 안일 가능성이 높다는 "
+                     f"기본값을 따라 {label}으로 판정했습니다.")
+    confidence = best.get("confidence")
+    confidence_text = f" 신뢰도 {confidence:.2f}(휴리스틱, 측정된 정확도 아님)." if _finite_number(confidence) else ""
+    strength = best.get("evidence_strength")
+    strength_text = f" 근거 강도 {strength:.2f}." if _finite_number(strength) else ""
+    stages = [_stage("location", "착지 위치 근거", "passed", f"{title}: {detail}{strength_text}"),
+              _stage("geometry", "코트 경계 비교", "passed", geometry + confidence_text)]
+    overridden = location in ("IN", "OUT") and location != label
+    for stage, status in zip(stages, ("위치 선택", "기본값 적용" if overridden else "비교 완료")):
+        stage["status_label"] = status
+    base.update(summary=f"최선 추정 {label} · {title}", stages=stages,
+                explanation="직접 접촉이나 영상 추정 근거가 부족해 가장 강한 착지 근거로 판정한 최선 추정입니다.",
+                reason_codes=_codes(best), confidence=confidence if _finite_number(confidence) else None)
+    return base
+
+
+def _finite_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def assess_analysis(view, *, direct_qualified=False, estimate_valid=False, best_valid=False):
     """Describe the actual analysis path selected by pair validation.
 
     The caller owns source/rules/geometry validation and supplies its results.
@@ -184,13 +232,18 @@ def assess_analysis(view, *, direct_qualified=False, estimate_valid=False):
     physical-contact diagnostics remain separately available as ``assessment``.
     Unresolved estimates show their actual stopping stage, never four unrelated
     direct-contact blockers inherited from a different representative candidate.
+    A validated best estimate is the last tier and is always labelled as such.
     """
     estimate = view.get("video_estimate")
     estimate = estimate if isinstance(estimate, dict) else {}
+    best = view.get("best_estimate")
+    best = best if isinstance(best, dict) else {}
     direct = view.get("direct_decision")
     label = direct if direct_qualified and direct in ("IN", "OUT") else (
         estimate.get("decision") if estimate_valid and estimate.get("decision") in ("IN", "OUT") else "REVIEW")
     kind = "verified" if direct_qualified and label != "REVIEW" else "video_estimate" if label != "REVIEW" else "unresolved"
+    if kind == "unresolved" and best_valid and best.get("decision") in ("IN", "OUT"):
+        label, kind = best["decision"], "best_estimate"
     base = {"schema_version": 1, "title": "분석 판정 근거", "line_verdict": label,
             "decision_kind": kind, "changes_decision": False, "stages": [], "reason_codes": [],
             "blocking_stages": [], "next_action": None,
@@ -228,6 +281,8 @@ def assess_analysis(view, *, direct_qualified=False, estimate_valid=False):
                     explanation="원본의 연속 관측과 접촉 가능 영역에 근거한 영상 추정입니다.",
                     reason_codes=_codes(estimate))
         return base
+    if kind == "best_estimate":
+        return _best_estimate_assessment(base, best, label)
     codes = _codes(estimate)
     if view.get("status") == "failed":
         identifier, title, detail, action = ("processing", "영상 분석 실행",

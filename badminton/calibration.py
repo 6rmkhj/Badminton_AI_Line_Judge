@@ -8,6 +8,7 @@ reference corners are available for annotation, never automatic acceptance.
 from __future__ import annotations
 
 import itertools
+import logging
 import math
 
 import cv2
@@ -859,4 +860,21 @@ def calibrate(frames: list[np.ndarray], court_hint: dict | None = None, config: 
         from .primary_court import select_primary_court
         selection = {**(cfg.get("primary_court") or {}), "game": game}
         result["primary_court"] = select_primary_court(frames, result, selection)
+        if (result["primary_court"].get("status") != "selected"
+                and (cfg.get("primary_court") or {}).get("near_half_fallback", True)):
+            # Cameras beside a near corner (e.g. the B side) defeat the
+            # behind-the-baseline selector. An independent near-half court fit
+            # emits the same record, flagged ``fallback: true``; it never
+            # replaces a court the original selector accepted.
+            from .near_half_court import select_near_half_court
+            fallback = select_near_half_court(frames, result, selection)
+            result["primary_court_selector_attempt"] = result["primary_court"]
+            if fallback.get("status") == "selected":
+                result["primary_court"] = fallback
+            else:
+                # Keep the fallback's own reasons (and any fit error) visible.
+                result["primary_court_fallback_attempt"] = fallback
+                if "NEAR_HALF_FIT_FAILED" in (fallback.get("reason_codes") or []):
+                    logging.getLogger(__name__).warning("Near-half court fallback failed: %s",
+                                                        fallback.get("error") or fallback.get("reason_codes"))
     return result

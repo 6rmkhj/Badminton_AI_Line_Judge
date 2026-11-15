@@ -70,7 +70,9 @@ OUT additionally requires one common finite observed edge for the whole region.
                 or primary.get('rules') != selected):
             return {**base, 'reason_codes': ['VIDEO_ESTIMATE_RULES_UNSUPPORTED']}
         score = primary.get('confidence')
-        if (primary.get('status') != 'selected' or primary.get('region_supported') is not True
+        # Near-half fallback courts serve only the best-estimate tier.
+        if (primary.get('status') != 'selected' or primary.get('fallback') is True
+                or primary.get('region_supported') is not True
                 or calibration.get('manual_reference') or calibration.get('method') == 'manual_reference'
                 or not _number(score) or not .65 <= score <= 1):
             return {**base, 'reason_codes': ['VIDEO_ESTIMATE_CALIBRATION_UNSUPPORTED']}
@@ -171,6 +173,11 @@ def estimate_video_verdict(landings, tracks, source_frames, timestamps, analysis
     base = _result(selected, ['VIDEO_ESTIMATE_NO_UNIQUE_EVENT'], family_resolution=compact)
     if resolution.get('status') not in {'selected', 'native_confirmation_required'} or not isinstance(family, dict):
         return base
+    if ((calibration or {}).get('primary_court') or {}).get('fallback') is True:
+        # The family ordering still informs the best estimate, but a fallback
+        # court cannot qualify a video estimate, so skip the native pass.
+        return {**base, 'reason_codes': ['VIDEO_ESTIMATE_CALIBRATION_UNSUPPORTED'],
+                'reasons': [REASONS['VIDEO_ESTIMATE_CALIBRATION_UNSUPPORTED']]}
     native_family = {**family, 'requires_contiguous_native_peak': True} if recovering_peak else family
     native = estimate_native_landing(native_family, tracks, source_frames, timestamps, analysis_size,
                                     calibration, output_dir=output_dir, config=config)

@@ -37,7 +37,9 @@ def test_job_selection_overrides_stale_stage_devices_and_is_recorded(clip, tmp_p
 
     def contact(*args, **kwargs):
         config = kwargs.get('config') if 'config' in kwargs else args[4]
-        calls['events'] = deepcopy(config)
+        # The first call is the pipeline's candidate stage; the best-estimate
+        # tier may rebuild an image-free landing pool afterwards.
+        calls.setdefault('events', deepcopy(config))
         return cpu_events(*args, **kwargs)
 
     monkeypatch.setattr(detection, 'detect_sequence', detector)

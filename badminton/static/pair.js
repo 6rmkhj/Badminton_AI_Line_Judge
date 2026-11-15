@@ -596,7 +596,11 @@ function appendTextList(parent, label, values, className = '') {
 }
 function renderDiagnostics(result) {
   const panel = $('review-diagnostics'), grid = $('diagnostics-issues');
-  panel.hidden = result.decision !== 'REVIEW'; grid.replaceChildren();
+  // A best estimate is a decided but weakly supported verdict: keep the
+  // evidence checklist and the guided re-analysis available for it too.
+  const weak = result.decision === 'REVIEW' || result.decision_kind === 'best_estimate';
+  panel.hidden = !weak; grid.replaceChildren();
+  panel.dataset.decisionKind = result.decision_kind || '';
   $('refine-panel').hidden = panel.hidden || result.refinement_available !== true;
   $('refine-error').hidden = true;
   if (panel.hidden) return;
@@ -695,10 +699,34 @@ function viewEstimateVerdict(view) {
   if (Object.hasOwn(view, 'effective_decision')) return view.effective_decision_kind === 'video_estimate' && view.effective_decision === raw ? raw : 'REVIEW';
   return raw; // Older saved responses predate the explicit presentation fields.
 }
+const decisionKindNames = {verified: '직접 판정', video_estimate: '영상 추정', best_estimate: '최선 추정'};
+const bestBasisNames = {
+  verified_contact: '직접 확인한 접촉·라인 판정',
+  video_estimate: '원본 착지 가능 영역 전체가 한쪽에 있는 영상 추정',
+  estimate_envelope: '선에 걸친 원본 착지 가능 영역 중 더 넓은 쪽',
+  flight_family: '주 코트에 연결된 하강·반동 경로의 대표 위치',
+  landing_candidate: '주 코트 판정 범위 안의 첫 하강·반동 중 접근 비행이 확인된 착지 후보(없으면 범위 안 후보)',
+  track_endpoint: '하강하던 궤적의 가장 낮은 관측 위치',
+};
+function confidenceValue(value) {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1 ? value : null;
+}
+function confidenceText(value) {
+  const confidence = confidenceValue(value);
+  return confidence === null ? '' : `신뢰도 ${fmt(confidence, 2)}`;
+}
+function viewBestVerdict(view) {
+  const best = view.best_estimate;
+  if (!best || typeof best !== 'object' || !['IN', 'OUT'].includes(best.decision)) return 'REVIEW';
+  // The server validates provenance and sets best_estimated_decision; a raw
+  // decision field alone must not restore an estimate rejected there.
+  if (Object.hasOwn(view, 'best_estimated_decision')) return view.best_estimated_decision === best.decision ? best.decision : 'REVIEW';
+  return 'REVIEW';
+}
 function effectiveViewDecision(view) {
   if (Object.hasOwn(view, 'effective_decision')) {
     const label = view.effective_decision, kind = view.effective_decision_kind;
-    if (['IN', 'OUT'].includes(label) && ['verified', 'video_estimate'].includes(kind)) return {label, kind};
+    if (['IN', 'OUT'].includes(label) && Object.hasOwn(decisionKindNames, kind)) return {label, kind};
     return {label: 'REVIEW', kind: 'unresolved'};
   }
   if (view.qualified === true && ['IN', 'OUT'].includes(view.direct_decision)) return {label: view.direct_decision, kind: 'verified'};
@@ -752,6 +780,62 @@ function renderVideoEstimate(camera, view, player) {
   if (Array.isArray(estimate.reason_codes) && estimate.reason_codes.length) details.append(el('p', '', estimate.reason_codes.filter(code => typeof code === 'string').join(' · ')));
   details.append(el('p', '', '영상 추정은 직접 접촉을 확인한 결과나 측정된 판정 정확도로 취급하지 않습니다.'));
   panel.append(details); return panel;
+}
+function renderBestEstimate(camera, view, player) {
+  const best = view.best_estimate;
+  const verdict = viewBestVerdict(view);
+  if (!best || typeof best !== 'object' || verdict === 'REVIEW') return null;
+  if (best.basis === 'video_estimate' && viewEstimateVerdict(view) === verdict) return null; // Same verdict shown by the estimate panel.
+  if (best.basis === 'verified_contact' && effectiveViewDecision(view).kind === 'verified') return null;
+  const panel = el('section', 'video-estimate-panel best-estimate-panel');
+  panel.dataset.verdict = verdict;
+  const heading = el('h4', '', '최선 추정 근거'); heading.id = 'best-estimate-heading-' + camera.toLowerCase();
+  panel.setAttribute('aria-labelledby', heading.id); panel.append(heading);
+  const confidence = confidenceText(best.confidence);
+  const conclusion = el('p', 'estimate-conclusion', `최선 추정 ${verdict}`);
+  if (confidence) conclusion.append(document.createTextNode(' '), el('span', 'best-confidence', '· ' + confidence));
+  panel.append(conclusion);
+  panel.append(el('p', 'estimate-basis', `판정 위치: ${bestBasisNames[best.basis] || '사용 가능한 가장 강한 착지 근거'}.`));
+  if (['IN', 'OUT'].includes(best.location_decision) && best.location_decision !== verdict) {
+    panel.append(el('p', 'estimate-basis best-prior-note',
+      `위치만 보면 ${best.location_decision}이지만 위치 근거가 약해, 착지가 코트 안일 가능성이 높다는 기본값을 따라 ${verdict}으로 판정했습니다.`));
+  }
+  const classification = best.classification && typeof best.classification === 'object' ? best.classification : {};
+  const roles = {left: '왼쪽', right: '오른쪽', near: '앞쪽', far: '뒤쪽'};
+  const metrics = el('dl', 'estimate-metrics');
+  const add = (label, text) => { const row = el('div'); row.append(el('dt', '', label), el('dd', '', text)); metrics.append(row); };
+  if (typeof classification.margin_px === 'number' && Number.isFinite(classification.margin_px)) {
+    add('경계와의 거리', `${roles[classification.boundary_role] || '가까운'} 선 ${classification.margin_px >= 0 ? '안쪽' : '바깥쪽'} ${fmt(Math.abs(classification.margin_px), 1)}픽셀`);
+  } else if (typeof classification.margin_m === 'number' && Number.isFinite(classification.margin_m)) {
+    add('경계와의 거리', `코트 모형 기준 ${classification.margin_m >= 0 ? '안쪽' : '바깥쪽'} 약 ${fmt(Math.abs(classification.margin_m), 2)}m`);
+  }
+  const geometry = classification.method === 'primary_court_boundaries'
+    ? (classification.boundary_observed === false ? '선택한 주 코트의 모형 외삽 경계선'
+      : classification.within_judgment_scope === false ? '선택한 주 코트의 관측 경계선(연장)' : '선택한 주 코트의 관측 경계선')
+    : {homography_court_model: '확정되지 않은 코트 보정 가설', court_outline_hypothesis: '코트 외곽 가설'}[classification.method];
+  if (geometry) add('비교한 경계', geometry);
+  const strength = confidenceValue(best.evidence_strength);
+  if (strength !== null) add('근거 강도', `${fmt(strength, 2)} · 위치 선택 확신 × 경계 신뢰도`);
+  if (typeof best.time === 'number' && Number.isFinite(best.time) && best.time >= 0) add('후보 시각', `${fmt(best.time, 3)}초`);
+  if (metrics.childNodes.length) panel.append(metrics);
+  panel.append(el('p', 'estimate-limitation', '직접 접촉이나 원본 영상 추정 근거가 부족할 때 쓰는 마지막 단계입니다. 신뢰도는 근거 강도·경계 여유와 IN 기본값(0.7)을 섞은 휴리스틱 값이며 측정된 정확도가 아닙니다.'));
+  const artifact = safeUrl(best.artifact_url);
+  if (artifact) {
+    const figure = el('figure', 'trajectory-context estimate-evidence');
+    const link = el('a'); link.href = artifact; link.target = '_blank'; link.rel = 'noopener';
+    const image = el('img'); image.src = artifact; image.loading = 'lazy'; image.alt = camera + ' 시점에서 최선 추정에 사용한 위치와 코트 경계';
+    link.append(image); figure.append(link, el('figcaption', '', '판정에 사용한 위치와 경계 ↗ · 표시점은 추정 위치이며 직접 확인한 바닥 접촉점이 아닙니다.')); panel.append(figure);
+  }
+  if (typeof best.time === 'number' && Number.isFinite(best.time) && best.time >= 0 && player) {
+    const button = el('button', 'seek-button', '추정 위치 부근부터 보기'); button.type = 'button'; button.dataset.bestSeekCamera = camera;
+    button.addEventListener('click', () => seek(player, Math.max(0, best.time - 0.5))); panel.append(button);
+  }
+  const codes = Array.isArray(best.reason_codes) ? best.reason_codes.filter(code => typeof code === 'string') : [];
+  if (codes.length) {
+    const details = el('details', 'estimate-details'); details.append(el('summary', '', '추정 사유 코드'));
+    details.append(el('p', '', codes.join(' · '))); panel.append(details);
+  }
+  return panel;
 }
 function renderCalibration(camera, view) {
   const summary = view.calibration_summary;
@@ -808,13 +892,22 @@ function renderView(camera, view, diagnostics) {
     verdicts.append(cell);
   }
   const effective = effectiveViewDecision(view), assessment = view.analysis_assessment;
-  const supplementary = assessment?.supplementary === true && effective.label === 'REVIEW' && view.status === 'completed';
-  const primary = el('div', 'view-effective-verdict' + (effective.kind === 'video_estimate' ? ' view-estimate-verdict' : ''));
+  const nonDonor = assessment?.supplementary === true && view.status === 'completed';
+  const supplementary = nonDonor && effective.label === 'REVIEW';
+  const primary = el('div', 'view-effective-verdict' + (['video_estimate', 'best_estimate'].includes(effective.kind) ? ' view-estimate-verdict' : ''));
   primary.dataset.verdict = effective.label; primary.dataset.decisionKind = effective.kind;
   primary.dataset.supplementary = String(supplementary);
+  primary.dataset.contributes = String(assessment?.contributes_to_final === true);
   const label = supplementary ? '독립 판정 없음' : effective.label === 'REVIEW' ? 'REVIEW'
-    : `${effective.kind === 'video_estimate' ? '영상 추정' : '직접 판정'} ${effective.label}`;
-  primary.append(el('span', '', supplementary ? '보조 시점' : assessment?.contributes_to_final === true ? '최종 판정에 사용한 시점' : '이 시점의 분석 결과'), el('strong', '', label));
+    : `${decisionKindNames[effective.kind] || '직접 판정'} ${effective.label}`;
+  const role = supplementary ? '보조 시점' : assessment?.contributes_to_final === true ? '최종 판정에 사용한 시점'
+    : nonDonor ? '이 시점의 자체 결과 · 최종 판정에는 미사용' : '이 시점의 분석 결과';
+  const verdictText = el('strong', '', label);
+  if (effective.kind === 'best_estimate' && !supplementary) {
+    const confidence = confidenceText(view.best_estimate?.confidence);
+    if (confidence) verdictText.append(document.createTextNode(' '), el('small', 'best-confidence', confidence));
+  }
+  primary.append(el('span', '', role), verdictText);
   card.append(primary);
   const preview = safeUrl(view.preview_url);
   let player;
@@ -837,6 +930,9 @@ function renderView(camera, view, diagnostics) {
     warning.append(list); body.append(warning);
   }
   if (view.rationale) body.append(el('p', 'rationale', view.rationale));
+  if (nonDonor && !supplementary && typeof assessment.final_context === 'string' && assessment.final_context) {
+    body.append(el('p', 'supplementary-note', assessment.final_context));
+  }
   const supplementaryDetails = supplementary ? el('details', 'supplementary-evidence') : null;
   if (supplementaryDetails) {
     const note = el('p', 'supplementary-note');
@@ -849,6 +945,8 @@ function renderView(camera, view, diagnostics) {
   const evidenceBody = supplementaryDetails || body;
   const effectiveAssessment = renderEvidenceAssessment(camera, assessment, true);
   if (effectiveAssessment) evidenceBody.append(effectiveAssessment);
+  const bestPanel = renderBestEstimate(camera, view, player);
+  if (bestPanel) evidenceBody.append(bestPanel);
   const estimatePanel = renderVideoEstimate(camera, view, player);
   if (estimatePanel) evidenceBody.append(estimatePanel);
   const candidatePanel = renderLandingCandidate(camera, view, player);
@@ -859,7 +957,7 @@ function renderView(camera, view, diagnostics) {
   direct.append(el('summary', '', `직접 접촉 기반 판정 조건 · ${view.direct_decision || 'REVIEW'}`), verdicts);
   if (assessmentPanel) direct.append(assessmentPanel);
   if (candidatePanel) {
-    if (effective.kind === 'video_estimate') direct.append(candidatePanel);
+    if (['video_estimate', 'best_estimate'].includes(effective.kind)) direct.append(candidatePanel);
     else evidenceBody.append(candidatePanel);
   }
   evidenceBody.append(direct);
@@ -938,13 +1036,16 @@ function renderResult(job) {
   $('pair-result').hidden = false;
   $('result-banner').dataset.verdict = result.decision;
   const estimated = result.decision_kind === 'video_estimate';
-  $('result-banner').dataset.decisionKind = estimated ? 'video_estimate' : result.decision_kind || 'verified';
-  $('result-heading').textContent = estimated ? 'A/B 영상 추정 판정' : 'A/B 최종 보조 판정';
-  $('result-kind').hidden = !estimated;
-  $('result-kind').textContent = estimated ? '영상 추정' : '';
+  const bestEstimated = result.decision_kind === 'best_estimate' && result.decision !== 'REVIEW';
+  $('result-banner').dataset.decisionKind = estimated ? 'video_estimate' : bestEstimated ? 'best_estimate' : result.decision_kind || 'verified';
+  $('result-heading').textContent = estimated ? 'A/B 영상 추정 판정' : bestEstimated ? 'A/B 최선 추정 판정' : 'A/B 최종 보조 판정';
+  const confidence = bestEstimated ? confidenceText(result.confidence) : '';
+  $('result-kind').hidden = !(estimated || bestEstimated);
+  $('result-kind').textContent = estimated ? '영상 추정' : bestEstimated ? `최선 추정${confidence ? ' · ' + confidence : ''}` : '';
   $('estimate-result-note').hidden = !estimated;
+  $('best-result-note').hidden = !bestEstimated;
   $('final-verdict').textContent = result.decision;
-  $('final-verdict').setAttribute('aria-label', `${estimated ? '영상 추정 ' : ''}${result.decision}`);
+  $('final-verdict').setAttribute('aria-label', `${estimated ? '영상 추정 ' : bestEstimated ? '최선 추정 ' : ''}${result.decision}`);
   const appliedRules = result.rules || job.request?.rules;
   $('result-rules').textContent = `${gameLabel(appliedRules)} 랠리 · ${gameBoundaryLabel(appliedRules)} 기준`;
   const views = result.views || {};
@@ -967,8 +1068,14 @@ function renderResult(job) {
     $('result-provenance').textContent = `${sourceIds.join('/')} 시점의 유효한 판정${sourceAiUsed ? ' · AI 검수 근거를 활용한 보조 결과' : ''}`;
   }
   if (estimated) $('result-provenance').textContent = `${sourceIds.length ? sourceIds.join('/') + ' 시점 · ' : ''}원본 영상의 접촉 가능 영역으로 추정한 결과${manualCameras.length ? ' · 사용자 지정 탐색 영역 사용' : ''}`;
+  if (bestEstimated) {
+    const assisted = manualCameras.length ? ' · 사용자 지정 탐색 영역 사용' : refinedCameras.length ? ' · AI 검수 후보 구간 참고' : aiUsed ? ' · 기존 AI 검수 근거 활용' : '';
+    $('result-provenance').textContent = `${sourceIds.length ? sourceIds.join('/') + ' 시점 · ' : ''}가장 강한 착지 근거의 위치를 코트 경계와 비교한 결과(위치 근거가 약하면 IN 기본값)${assisted}`;
+  }
+  if (result.conflict_resolved === true) $('result-provenance').textContent += result.conflict_resolution_key === 'camera_order'
+    ? ' · 두 시점 결과가 달라 A 시점 우선(근거 동률)' : ' · 두 시점 결과가 달라 근거가 강한 쪽 사용';
   const hasDirectEvidence = cameras.some(camera => views[camera]?.qualified === true && ['IN', 'OUT'].includes(views[camera]?.direct_decision));
-  sources.append(el('span', '', estimated ? '영상 추정의 원본 근거' : sourceIds.length ? '최종 판정의 접촉 근거' : hasDirectEvidence ? '시점별 접촉 근거 있음 · 연결 조건 확인 필요' : '확인된 접촉 근거 추가 필요'));
+  sources.append(el('span', '', estimated ? '영상 추정의 원본 근거' : bestEstimated ? '최선 추정에 사용한 시점' : sourceIds.length ? '최종 판정의 접촉 근거' : hasDirectEvidence ? '시점별 접촉 근거 있음 · 연결 조건 확인 필요' : '확인된 접촉 근거 추가 필요'));
   sourceIds.forEach(camera => { const link = el('a', 'source-link', camera + ' 시점 보기 ↓'); link.href = '#result-view-' + camera.toLowerCase(); sources.append(link); });
   const reasons = $('result-reasons'); reasons.replaceChildren();
   const messages = Array.isArray(result.reasons) ? result.reasons : [];
@@ -977,7 +1084,7 @@ function renderResult(job) {
   const eventSource = correspondenceNames[result.event_correspondence_source] || '저장된 사건 대응 기록';
   $('correspondence-status').textContent = result.same_event_confirmed ? `같은 사건 연결 확인 · ${eventSource}`
     : result.decision_scope === 'single_view' && sourceIds.length
-      ? `${sourceIds.join('/')} 시점에서 ${estimated ? '영상 추정 판정을 했습니다' : '판정했습니다'}. 두 영상의 동일 사건 연결은 미확인입니다.`
+      ? `${sourceIds.join('/')} 시점에서 ${estimated ? '영상 추정 판정을 했습니다' : bestEstimated ? '최선 추정 판정을 했습니다' : '판정했습니다'}. 두 영상의 동일 사건 연결은 미확인입니다.`
       : '동일 사건 연결이 확인되지 않았습니다.';
   $('result-timing').textContent = typeof result.elapsed_seconds === 'number' ? `이번 작업 ${fmt(result.elapsed_seconds, 1)}초${aiUsed ? ' · 기존 검수 시간은 포함하지 않습니다.' : ''}` : '';
   $('result-json').href = jobUrl(job.job_id);
@@ -1042,9 +1149,11 @@ async function loadHistory() {
       const date = new Date(job.created_at || job.updated_at || '');
       name.append(el('small', '', Number.isNaN(date.getTime()) ? job.job_id : date.toLocaleString('ko-KR', {timeZone: 'Asia/Seoul'}) + ' KST'));
       const decision = job.decision || job.result?.decision;
-      const estimated = (job.decision_kind || job.result?.decision_kind) === 'video_estimate';
-      const label = el('span', 'history-label', decision ? `${estimated ? '영상 추정 ' : ''}${decision}` : statusNames[job.status] || '확인 중');
+      const kind = job.decision_kind || job.result?.decision_kind;
+      const prefix = decision && decision !== 'REVIEW' && ['video_estimate', 'best_estimate'].includes(kind) ? decisionKindNames[kind] + ' ' : '';
+      const label = el('span', 'history-label', decision ? `${prefix}${decision}` : statusNames[job.status] || '확인 중');
       if (decision) label.dataset.verdict = decision;
+      if (kind) label.dataset.decisionKind = kind;
       item.append(name, label);
       item.addEventListener('click', event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); openJob(job.job_id, true); $('job-progress').scrollIntoView({block: 'start'}); });
       list.append(item);
@@ -1153,7 +1262,8 @@ $('pair-form').addEventListener('submit', async event => {
 $('retry-poll').addEventListener('click', () => { if (state.jobId) { $('retry-poll').hidden = true; pollJob(state.jobId, state.pollGeneration); } });
 $('refine-pair').addEventListener('click', async () => {
   const job = state.currentJob;
-  if (state.busy || !job || job.result?.decision !== 'REVIEW' || job.result.refinement_available !== true) return;
+  const weak = job?.result?.decision === 'REVIEW' || job?.result?.decision_kind === 'best_estimate';
+  if (state.busy || !job || !weak || job.result.refinement_available !== true) return;
   const views = {};
   for (const camera of cameras) {
     const source = job.request?.views?.[camera];

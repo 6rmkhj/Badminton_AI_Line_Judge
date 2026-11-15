@@ -33,8 +33,10 @@ SOURCES = {
           'sha256': 'bcac92b83d0e03f45acb66fdcf3fe6535acbef0aed53449ed96cfdf5aeb090e9',
           'provenance': 'Repository source SHA-256 matches the supplied user attachment.'},
 }
-CASES = [('A', 'doubles', 'IN'), ('B', 'doubles', 'REVIEW'),
-         ('A', 'singles', 'OUT'), ('B', 'singles', 'REVIEW')]
+# B has no direct contact or video estimate; since 0.5.15 its display is an
+# explicit best estimate (IN or OUT) instead of REVIEW. 'BEST' marks that case.
+CASES = [('A', 'doubles', 'IN'), ('B', 'doubles', 'BEST'),
+         ('A', 'singles', 'OUT'), ('B', 'singles', 'BEST')]
 
 
 def digest(path):
@@ -119,7 +121,7 @@ def relative_artifacts(result):
                     and (value.startswith('evidence/') or value in {'overview.jpg', 'preview.mp4', 'detections.json'})):
                 paths.add(value)
 
-    for name in ('artifacts', 'video_estimate', 'landings'):
+    for name in ('artifacts', 'video_estimate', 'best_estimate', 'landings'):
         collect(result.get(name))
     return sorted(paths)
 
@@ -136,8 +138,11 @@ def check_artifacts(output, result):
         raise RuntimeError('Required evidence was not declared: ' + ', '.join(sorted(required - set(paths))))
     if result.get('video_estimate', {}).get('eligible') is True:
         required.add('evidence/video-estimate.jpg')
+    best = result.get('best_estimate') or {}
+    if best.get('decision') in {'IN', 'OUT'} and best.get('basis') not in {'verified_contact', 'video_estimate'}:
+        required.add('evidence/best-estimate.jpg')
     if not required.issubset(paths):
-        raise RuntimeError('Resolved video estimate has no rendered evidence')
+        raise RuntimeError('Resolved estimate has no rendered evidence: ' + ', '.join(sorted(required - set(paths))))
     checks = []
     for relative in paths:
         path = output / relative
@@ -179,7 +184,7 @@ def check_pair_assessments(analyzed, games=('doubles', 'singles')):
     is tested separately; the reports do not treat an unresolved B view as a new
     independent verdict simply because A provides a supported video estimate.
     """
-    from badminton.pair_workspace import _video_estimate_summary, combine_views
+    from badminton.pair_workspace import _best_estimate_summary, _video_estimate_summary, combine_views
 
     checks = []
     for game in games:
@@ -195,6 +200,7 @@ def check_pair_assessments(analyzed, games=('doubles', 'singles')):
                 'direct_decision': direct, 'assisted_decision': direct,
                 'qualified': direct in {'IN', 'OUT'},
                 'video_estimate': _video_estimate_summary(result, output, '/verified-' + camera + '/'),
+                'best_estimate': _best_estimate_summary(result, rules, output, '/verified-' + camera + '/'),
                 'assessment': copy.deepcopy(result['assessment']),
                 'reason_codes': result['decision']['reason_codes'],
             }
@@ -218,9 +224,12 @@ def check_pair_assessments(analyzed, games=('doubles', 'singles')):
                 or {stage.get('id') for stage in stages} != {'contact', 'identity', 'event', 'geometry'}
                 or any(stage.get('status') != 'passed' for stage in stages)):
             raise RuntimeError('Resolved A still exposes stale blockers in its primary assessment: ' + game)
+        # B may show its own best estimate, but never as direct contact, never
+        # as a donor of the A video estimate, and always as a supplementary view.
         if (donor['direct_decision'] != 'REVIEW' or other['direct_decision'] != 'REVIEW'
-                or other.get('effective_decision') != 'REVIEW'
-                or (other.get('analysis_assessment') or {}).get('supplementary') is not True):
+                or other.get('effective_decision_kind') not in {'best_estimate', 'unresolved'}
+                or (other.get('analysis_assessment') or {}).get('supplementary') is not True
+                or (other.get('analysis_assessment') or {}).get('contributes_to_final') is not False):
             raise RuntimeError('Pair presentation fabricated independent contact or peer evidence: ' + game)
         checks.append({'game': game, 'decision': pair['decision'], 'decision_kind': pair['decision_kind'],
                        'source_camera_ids': pair['source_camera_ids'],
@@ -279,7 +288,14 @@ def run_cases(app, work, report, report_path):
                 raise RuntimeError('Evidence generation reported a failure: ' + str(result['evidence_warnings']))
             display = result['display_decision']['decision']
             estimate = result['video_estimate']
-            if display != expected or result['decision']['decision'] != 'REVIEW':
+            best = result.get('best_estimate') or {}
+            if expected == 'BEST':
+                if (display not in {'IN', 'OUT'} or result['display_decision'].get('decision_kind') != 'best_estimate'
+                        or best.get('decision') != display or best.get('contact_observed') is not False
+                        or result['decision']['decision'] != 'REVIEW'):
+                    raise RuntimeError('Unresolved view did not get an explicit best estimate: '
+                                       + str((display, result['display_decision'].get('decision_kind'))))
+            elif display != expected or result['decision']['decision'] != 'REVIEW':
                 raise RuntimeError('Source-bound display/strict verdict regression: ' + str((display, result['decision'])))
             if view == 'A' and (estimate.get('eligible') is not True
                                 or result['display_decision'].get('decision_kind') != 'video_estimate'):

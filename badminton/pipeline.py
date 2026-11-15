@@ -39,7 +39,8 @@ def _optional_evidence(artifact, action, warnings):
 def implementation_fingerprint():
     package = Path(__file__).parent
     digest = hashlib.sha256()
-    for name in ('media.py', 'pipeline.py', 'calibration.py', 'primary_court.py', 'detection.py', 'tracking.py',
+    for name in ('media.py', 'pipeline.py', 'calibration.py', 'primary_court.py', 'near_half_court.py',
+                 'near_half_evidence.py', 'near_half_model.py', 'detection.py', 'tracking.py',
                  'events.py', 'identity.py', 'identity_continuity.py', 'candidate_identity.py',
                  'event_continuity.py', 'event_sequence.py', 'landing_recovery.py', 'observation_support.py', 'scene_context.py',
                  'landing_families.py', 'native_landing.py', 'video_estimate.py',
@@ -90,12 +91,26 @@ def aggregate_decision(decisions):
             'note': 'A unique, observed target landing is required for automatic IN/OUT.'}
 
 
-def select_display_landing(candidates, estimate, direct_decision):
-    """Keep the displayed trajectory attached to the measured estimate family.
+def display_verdict(decision, video_estimate, best_estimate):
+    """The shown view verdict: verified, then video estimate, then best estimate."""
+    if decision.get('decision') in {'IN', 'OUT'}:
+        return {**decision, 'decision_kind': 'verified'}
+    if video_estimate.get('eligible') is True:
+        return {key: video_estimate.get(key) for key in
+                ('decision', 'decision_kind', 'source', 'eligible', 'reason_codes', 'reasons')}
+    if isinstance(best_estimate, dict) and best_estimate.get('decision') in {'IN', 'OUT'}:
+        return {key: best_estimate.get(key) for key in
+                ('decision', 'decision_kind', 'source', 'basis', 'confidence', 'reason_codes', 'reasons')}
+    return {**decision, 'decision_kind': 'unresolved'}
+
+
+def select_display_landing(candidates, estimate, direct_decision, best_estimate=None):
+    """Keep the displayed trajectory attached to the event that decided the view.
 
     Candidate ranking is useful for unresolved review, but its first candidate
-    can belong to a different event from the source-backed estimate. This only
-    chooses the evidence to display; it never changes a landing or verdict.
+    can belong to a different event from the source-backed estimate or the
+    best estimate. This only chooses the evidence to display; it never changes
+    a landing or verdict.
     """
     fallback = candidates[0] if candidates else None
     if direct_decision.get('decision') in {'IN', 'OUT'} or not isinstance(estimate, dict):
@@ -103,6 +118,10 @@ def select_display_landing(candidates, estimate, direct_decision):
     resolution = estimate.get('family_resolution') or {}
     native = estimate.get('native_evidence') or {}
     if resolution.get('status') != 'selected' or native.get('status') != 'supported':
+        used = (best_estimate or {}).get('event_ids') if isinstance(best_estimate, dict) else None
+        if (isinstance(used, list) and used and best_estimate.get('decision') in {'IN', 'OUT'}
+                and best_estimate.get('basis') not in {'verified_contact', 'video_estimate'}):
+            return next((candidate for candidate in candidates if candidate.get('event_id') == used[0]), fallback)
         return fallback
     family = resolution.get('selected_family') or {}
     members = estimate.get('member_event_ids') or []
@@ -325,9 +344,31 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
         lambda: write_estimate_overlay(frames, calibration, video_estimate, output), evidence_warnings)
     if overlay:
         video_estimate['artifact_path'] = overlay
+    # The always-decide tier: the strongest remaining evidence, classified
+    # against the selected boundaries and labelled as a best estimate.
+    from .best_estimate import estimate_best_verdict, write_best_estimate_overlay, failed_estimate
+    try:
+        # The same inputs a saved result.json provides, so a later refresh of
+        # this tier reproduces it exactly.
+        best_estimate = estimate_best_verdict(
+            {'decision': decision, 'video_estimate': video_estimate, 'landings': requested, 'tracks': tracks,
+             'calibration': calibration, 'camera_stability': stability, 'timestamps': timestamps,
+             'config': {'events': event_config, 'best_estimate': config.get('best_estimate') or {}},
+             'analysis': {'width': frames[0].shape[1], 'height': frames[0].shape[0],
+                          'frame_count': len(frames)}}, config.get('rules'))
+    except Exception as error:  # an optional tier must not discard the completed analysis
+        logger.exception('Could not compute the best estimate')
+        best_estimate = failed_estimate(config.get('rules'), error)
+    best_estimate['source_sha256'] = source_sha
+    if assistance_used:
+        best_estimate.update(assistance_used=True, evaluation_eligible=False)
+    best_overlay = _optional_evidence('best_estimate_overlay',
+        lambda: write_best_estimate_overlay(frames, calibration, best_estimate, output), evidence_warnings)
+    if best_overlay:
+        best_estimate['artifact_path'] = best_overlay
     timings['events_and_decision_seconds'] = time.perf_counter() - clock
     display_candidates = prioritize_review_candidates(requested, review_regions)
-    selected = select_display_landing(display_candidates, video_estimate, decision)
+    selected = select_display_landing(display_candidates, video_estimate, decision, best_estimate)
     report('evidence', detail='원본 확대 근거·검수 영상 생성')
     artifacts = {'preview': 'preview.mp4', 'detections': 'detections.json', 'evidence': []}
     evidence_dir = output / 'evidence'
@@ -432,11 +473,8 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
               'native_endpoint_recovery': endpoint_recovery,
               'detection_quality': summarize_detection_quality(detections, tracks),
               'landings': landings, 'selected_landing': selected, 'decision': decision,
-              'video_estimate': video_estimate,
-              'display_decision': ({**decision, 'decision_kind': 'verified'} if decision.get('decision') in {'IN', 'OUT'}
-                                   else {key: video_estimate.get(key) for key in
-                                         ('decision', 'decision_kind', 'source', 'eligible', 'reason_codes', 'reasons')}
-                                   if video_estimate.get('eligible') is True else {**decision, 'decision_kind': 'unresolved'}),
+              'video_estimate': video_estimate, 'best_estimate': best_estimate,
+              'display_decision': display_verdict(decision, video_estimate, best_estimate),
               'review_refinement': review_refinement,
               'timings': timings, 'artifacts': artifacts, 'config': config,
               'evidence_warnings': evidence_warnings,
@@ -494,6 +532,14 @@ def analyze_dataset(video_dir, run_dir, config=None, limit=None, resume=True):
                 result['run_config_digest'] = config_digest
                 result['implementation_fingerprint'] = implementation
                 write_json(existing, result)
+            else:
+                from .best_estimate import refresh_best_estimate
+                refreshed = refresh_best_estimate(result, config.get('rules'))
+                if refreshed is not result:
+                    result = {**refreshed, 'display_decision': display_verdict(
+                        refreshed.get('decision') or {}, refreshed.get('video_estimate') or {},
+                        refreshed.get('best_estimate'))}
+                    write_json(existing, result)
             row.update(status='completed', decision=result['decision']['decision'],
                        calibration_status=result['calibration']['status'], track_count=len(result['tracks']),
                        landing_count=len(result['landings']))

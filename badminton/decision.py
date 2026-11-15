@@ -417,8 +417,10 @@ def decide(landing: dict, calibration: dict, rules: dict | None = None) -> dict:
     if landing.get("occluded") or landing.get("first_contact_missing"):
         reasons.append("CONTACT_OCCLUDED_OR_MISSING")
     primary = calibration.get('primary_court')
+    # A near-half *fallback* court feeds only the best-estimate tier; the strict
+    # path keeps accepting only courts from the original selector.
     primary_selected = (calibration.get('status') != 'ok' and isinstance(primary, dict)
-                        and primary.get('status') == 'selected')
+                        and primary.get('status') == 'selected' and primary.get('fallback') is not True)
     if calibration.get("status") != "ok" and not primary_selected:
         reasons.append("CALIBRATION_NOT_ACCEPTED")
     if calibration.get("method") == "manual_reference" or calibration.get("manual_reference"):

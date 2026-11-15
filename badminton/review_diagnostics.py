@@ -43,7 +43,12 @@ def view_diagnostics(view):
             missing.append(label)
             actions = _strings(details.get('follow_up_actions')) or [suggested]
         else:
-            if reasons & {'CALIBRATION_NOT_ACCEPTED', 'CALIBRATION_SUPPORT_INSUFFICIENT', 'CALIBRATION_NOT_CONFIRMED'}:
+            summary = view.get('calibration_summary') if isinstance(view.get('calibration_summary'), dict) else {}
+            # A selected primary court already supplies the judged boundaries;
+            # the full-court template being unconfirmed is not a missing input.
+            primary_selected = summary.get('primary_court_status') == 'selected'
+            if (not primary_selected and reasons & {'CALIBRATION_NOT_ACCEPTED', 'CALIBRATION_SUPPORT_INSUFFICIENT',
+                                                   'CALIBRATION_NOT_CONFIRMED'}):
                 missing.append('목표 코트와 라인 보정 미확정')
                 actions.append('경기 코트의 유효 외곽선을 원본에서 지정하고, 자동 보정이 옆 코트나 다른 종목의 선을 선택했는지 확인합니다.')
             if any('IDENTITY' in reason or 'TARGET_' in reason for reason in reasons):
@@ -74,6 +79,20 @@ def view_diagnostics(view):
 def pair_diagnostics(result):
     views = {camera: view_diagnostics(view) for camera, view in result.get('views', {}).items()}
     issues = []
+    best = result.get('decision_kind') == 'best_estimate' and result.get('decision') in ('IN', 'OUT')
+    if best:
+        # The verdict stands; list what would turn the heuristic estimate into
+        # stronger evidence, without presenting it as a blocker.
+        for camera, detail in views.items():
+            if detail['missing_requirements']:
+                issues.append({'code': 'VIEW_EVIDENCE_INCOMPLETE', 'title': f'{camera} 시점 근거 보강 가능',
+                               'detail': ' · '.join(detail['missing_requirements']), 'camera_ids': [camera],
+                               'remediation': detail['follow_up_actions'], 'category': 'observation',
+                               'resolvable_with_existing_inputs': None})
+        return {'schema_version': 1,
+                'summary': '최선 추정으로 판정했습니다. 아래 근거를 보강하면 직접 판정이나 영상 추정으로 확인할 수 있습니다.',
+                'issues': issues, 'views': views, 'decision_kind': 'best_estimate',
+                'note': '최선 추정은 착지 후보·궤적과 코트 경계를 비교한 휴리스틱 결과이며, 직접 접촉 확인이나 검증된 정확도를 뜻하지 않습니다.'}
     if result.get('decision') == 'REVIEW':
         for code in result.get('reason_codes', []):
             if code in JOINT:

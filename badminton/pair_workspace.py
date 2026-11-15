@@ -50,7 +50,17 @@ REASONS = {
     "VERIFIED_ESTIMATE_CONFLICT": "같은 사건의 확인된 판정과 영상 추정이 서로 달라 검토가 필요합니다.",
     "UNLINKED_ESTIMATE_CONFLICT": "연결이 미확인인 다른 시점의 영상 추정은 확인된 판정과 다릅니다. 확인된 시점의 결과를 유지합니다.",
     "INVALID_VIDEO_ESTIMATE": "영상 추정의 출처·규칙·프레임 또는 위치 범위를 검증하지 못했습니다.",
+    "BEST_ESTIMATE_FROM_VIEW": "직접 판정과 영상 추정이 없어, 근거가 더 강한 시점의 최선 추정 위치로 IN/OUT을 판정했습니다.",
+    "BEST_ESTIMATES_AGREE": "두 시점의 최선 추정 IN/OUT이 일치합니다.",
+    "VIEW_CONFLICT_RESOLVED_BY_CONFIDENCE": "두 시점의 판정이 달라 근거 강도·신뢰도·경계 여유 순으로 더 강한 시점의 결과를 사용했습니다.",
+    "VIEW_CONFLICT_TIE_BROKEN_BY_CAMERA_ORDER": "두 시점의 판정이 다르고 근거 강도·신뢰도·경계 여유가 같아 A 시점의 결과를 사용했습니다. 이 결과는 임의 순서에 따른 것입니다.",
+    "CONFLICTING_BEST_ESTIMATES": "A와 B의 최선 추정 IN/OUT이 서로 다릅니다.",
+    "INVALID_BEST_ESTIMATE": "최선 추정의 출처·규칙 또는 위치 값을 검증하지 못했습니다.",
 }
+
+# Strongest evidence first. A lower tier never overrides a higher one.
+DECISION_TIERS = ("verified", "video_estimate", "best_estimate")
+_TIER_DEFAULT_CONFIDENCE = {"verified": 0.97, "video_estimate": 0.9, "best_estimate": 0.5}
 
 
 class PairWorkspaceError(Exception):
@@ -248,7 +258,9 @@ def _calibration_summary(result):
     legend = "하늘색: 탐지한 직선 후보 · 노란색: 전체 코트 보정이 확인된 외곽선"
     if isinstance(primary, dict):
         if selected:
-            detail = "앞쪽 두 모서리가 보이는 주 코트 하나를 선택했습니다. 선택한 코트의 관측 경계만 표시합니다. "
+            detail = ("모서리 옆 카메라 배치용 근거리 반코트 맞춤으로 카메라 앞 주 코트를 선택했습니다. "
+                      "선택한 코트의 관측 경계만 표시합니다. " if primary.get("fallback") is True else
+                      "앞쪽 두 모서리가 보이는 주 코트 하나를 선택했습니다. 선택한 코트의 관측 경계만 표시합니다. ")
             detail += ("단식 안쪽 사이드라인을 판정 경계로 사용합니다. " if game == "singles" else
                        "복식 바깥쪽 사이드라인을 판정 경계로 사용합니다. ")
             detail += ("옅은 초록 영역은 관측 경계로 확인한 안쪽 판정 범위입니다. "
@@ -267,6 +279,7 @@ def _calibration_summary(result):
             "game": game,
             "court_geometry_status": "supported" if accepted else "unconfirmed", "detail": detail,
             "primary_court_status": primary.get("status") if isinstance(primary, dict) else None,
+            "primary_court_fallback": bool(selected and primary.get("fallback") is True),
             "judgment_scope": primary.get("scope") if selected else None,
             "local_region_supported": selected and primary.get("region_supported") is True and stable,
             "overlay_legend": legend,
@@ -429,6 +442,114 @@ def _video_estimate_summary(result, output, prefix):
     return summary
 
 
+def view_from_result(result, output, prefix, rules=None):
+    """Public view fields for one fresh, source-bound analysis result.
+
+    Shared by the A/B workspace and the batch pair harness so both hand the
+    same per-view evidence to :func:`combine_views`.
+    """
+    output = Path(output)
+    from .best_estimate import refresh_best_estimate
+    result = refresh_best_estimate(result, rules if rules is not None else (result.get("config") or {}).get("rules", RULES))
+    decision = (result.get("decision") or {}).get("decision", "REVIEW")
+    if decision not in LABELS:
+        decision = "REVIEW"
+    artifacts, evidence, trajectory_context = result.get("artifacts") or {}, [], None
+    for item in artifacts.get("evidence", []):
+        for field in ("image", "source_sequence", "source_crop"):
+            relative = item.get(field)
+            if isinstance(relative, str) and _safe(output, relative).is_file():
+                evidence.append(prefix + quote(relative, safe="/"))
+        relative = item.get("trajectory_context")
+        if isinstance(relative, str) and _safe(output, relative).is_file():
+            trajectory_context = prefix + quote(relative, safe="/")
+    contact = (result.get("decision") or {}).get("contact_time_seconds")
+    if contact is None and decision != "REVIEW":
+        contact = (result.get("selected_landing") or {}).get("time")
+    if (result.get("selected_landing") or {}).get("contact_observed") is False:
+        contact = None
+    replay_url, replay_info = _trajectory_replay(output, artifacts, prefix)
+    video_estimate = _video_estimate_summary(result, output, prefix)
+    preview = artifacts.get("preview")
+    preview_url = (prefix + quote(preview, safe="/")
+                   if isinstance(preview, str) and _safe(output, preview).is_file() else None)
+    return dict(automatic_decision=decision, direct_decision=decision, assisted_decision=decision,
+        qualified=decision in {"IN", "OUT"},
+        source_sha256=result.get("source_sha256"),
+        video_estimate=video_estimate,
+        estimated_decision=video_estimate["decision"] if video_estimate else "REVIEW",
+        best_estimate=_best_estimate_summary(result, rules, output, prefix),
+        preview_url=preview_url,
+        evidence_warnings=deepcopy(result.get("evidence_warnings") or []),
+        evidence_urls=evidence, contact_time_seconds=contact if _finite(contact) else None,
+        landing_candidate=_landing_candidate(result), trajectory_context_url=trajectory_context,
+        trajectory_replay_url=replay_url, trajectory_replay_info=replay_info,
+        calibration_summary=_calibration_summary(result),
+        calibration_preview_url=_calibration_preview(output, artifacts, prefix),
+        reason_codes=(result.get("decision") or {}).get("reason_codes", []),
+        rationale="새 원본 분석의 접촉·경계 검증 결과입니다.", analysis_timings=result.get("timings", {}),
+        execution=deepcopy(result.get("execution")), assessment=deepcopy(result.get("assessment")),
+        source_verification="current_original_sha256")
+
+
+_BEST_FIELDS = ("schema_version", "estimator_version", "decision", "decision_kind", "source", "basis",
+                "confidence", "evidence_strength", "geometry_reliability", "location_decision", "p_in",
+                "prior_in", "rules",
+                "classification", "reason_codes", "reasons", "contact_observed", "target_identity_verified",
+                "point_px", "event_ids", "frame_index", "time", "frame_interval", "time_interval",
+                "candidate_score", "track_id", "alternatives", "scope", "artifact_path", "error",
+                "assistance_used", "evaluation_eligible")
+
+
+def _best_estimate_summary(result, rules=None, output=None, prefix=None):
+    """Bounded best-estimate record bound to the analysed source and rules."""
+    raw = result.get("best_estimate")
+    if not isinstance(raw, dict):
+        return None
+    summary = {key: deepcopy(raw[key]) for key in _BEST_FIELDS if key in raw}
+    summary["source_sha256"] = result.get("source_sha256")
+    if output is not None and prefix is not None:
+        summary["artifact_url"] = _calibration_preview(output, {"calibration_overlay": raw.get("artifact_path")}, prefix)
+    expected = rules if rules is not None else (result.get("config") or {}).get("rules", RULES)
+    if (raw.get("source_sha256", result.get("source_sha256")) != result.get("source_sha256")
+            or not _valid_best_estimate(summary, expected, result.get("source_sha256"))):
+        codes = summary.get("reason_codes")
+        codes = [code for code in codes if isinstance(code, str)] if isinstance(codes, list) else []
+        if raw.get("decision") in ("IN", "OUT"):
+            codes.append("INVALID_BEST_ESTIMATE")
+        summary.update(decision="REVIEW", confidence=None, reason_codes=list(dict.fromkeys(codes)))
+    try:
+        json.dumps(summary, allow_nan=False)
+    except (TypeError, ValueError, OverflowError):
+        summary = {"decision": "REVIEW", "decision_kind": "best_estimate", "confidence": None,
+                   "reason_codes": ["INVALID_BEST_ESTIMATE"]}
+    return summary
+
+
+def _valid_best_estimate(estimate, rules, source_sha256):
+    """A best estimate is a labelled heuristic; validate its provenance only."""
+    from .best_estimate import BASIS_PRIOR, DECISION_KIND, SOURCE
+    if (not isinstance(source_sha256, str) or not HASH.fullmatch(source_sha256)
+            or not isinstance(estimate, dict) or estimate.get("schema_version") != 1
+            or type(estimate.get("schema_version")) is not int
+            or estimate.get("decision") not in ("IN", "OUT")
+            or estimate.get("decision_kind") != DECISION_KIND or estimate.get("source") != SOURCE
+            or estimate.get("basis") not in BASIS_PRIOR
+            or estimate.get("rules") != rules or estimate.get("source_sha256") != source_sha256
+            or estimate.get("contact_observed") is not False
+            or estimate.get("target_identity_verified") is not False):
+        return False
+    confidence = estimate.get("confidence")
+    if not _finite(confidence) or not 0.5 <= confidence <= 1:
+        return False
+    point = estimate.get("point_px")
+    if point is not None and (not isinstance(point, (list, tuple)) or len(point) != 2
+                              or not all(_finite(value) for value in point)):
+        return False
+    codes = estimate.get("reason_codes")
+    return isinstance(codes, list) and all(isinstance(code, str) for code in codes)
+
+
 def _add_analysis_assessments(result):
     """Refresh presentation from validated evidence without changing verdicts.
 
@@ -444,7 +565,7 @@ def _add_analysis_assessments(result):
         rules = parse_pair_rules(result.get("rules", RULES))
     except PairWorkspaceError:
         rules = None
-    valid_direct, valid_estimates = set(), set()
+    valid_direct, valid_estimates, valid_best = set(), set(), set()
     for camera, view in views.items():
         if camera not in ("A", "B") or not isinstance(view, dict):
             continue
@@ -454,42 +575,85 @@ def _add_analysis_assessments(result):
                   and view.get("rules", RULES) == rules)
         direct = usable and view.get("qualified") is True and view.get("direct_decision") in ("IN", "OUT")
         estimated = usable and _valid_video_estimate(view.get("video_estimate"), rules, digest)
+        best = usable and _valid_best_estimate(view.get("best_estimate"), rules, digest)
         if direct:
             valid_direct.add(camera)
         if estimated:
             valid_estimates.add(camera)
-        assessment = assess_analysis(view, direct_qualified=bool(direct), estimate_valid=bool(estimated))
+        if best:
+            valid_best.add(camera)
+        assessment = assess_analysis(view, direct_qualified=bool(direct), estimate_valid=bool(estimated),
+                                     best_valid=bool(best))
         view.update(analysis_assessment=assessment, effective_decision=assessment["line_verdict"],
                     effective_decision_kind=assessment["decision_kind"],
-                    estimated_decision=view["video_estimate"]["decision"] if estimated else "REVIEW")
+                    estimated_decision=view["video_estimate"]["decision"] if estimated else "REVIEW",
+                    best_estimated_decision=view["best_estimate"]["decision"] if best else "REVIEW")
     source_ids = result.get("source_camera_ids")
     source_ids = source_ids if isinstance(source_ids, list) else []
     kind = result.get("decision_kind", "verified")
-    eligible_sources = valid_estimates if kind == "video_estimate" else valid_direct if kind == "verified" else set()
+    eligible_sources = {"verified": valid_direct, "video_estimate": valid_estimates,
+                        "best_estimate": valid_best}.get(kind, set())
+    # A donor must supply the final label from the final tier (its own effective
+    # label may come from a stronger tier only when that tier is the final one).
+    tier_label = {"verified": lambda view: view.get("direct_decision"),
+                  "video_estimate": lambda view: view["video_estimate"].get("decision"),
+                  "best_estimate": lambda view: view["best_estimate"].get("decision")}.get(kind)
     donors = [camera for camera in ("A", "B") if camera in source_ids and camera in eligible_sources
-              and views[camera]["effective_decision"] == result.get("decision")]
+              and tier_label is not None and tier_label(views[camera]) == result.get("decision")]
     final_resolved = result.get("decision") in ("IN", "OUT") and bool(donors)
     for camera, view in views.items():
         if not isinstance(view, dict) or "analysis_assessment" not in view:
             continue
         assessment = view["analysis_assessment"]
-        supplementary = (final_resolved and camera not in donors and view.get("status") == "completed"
-                         and view.get("effective_decision") == "REVIEW")
+        supplementary = final_resolved and camera not in donors and view.get("status") == "completed"
         assessment.update(supplementary=supplementary, contributes_to_final=bool(final_resolved and camera in donors),
                           final_source_camera_ids=donors if final_resolved else [], final_context=None)
         if supplementary:
-            assessment["final_context"] = (
-                f"최종 {result['decision']}은 {'/'.join(donors)} 시점의 근거를 사용합니다. "
-                "이 시점에는 독립적인 IN·OUT 근거가 없어 보조 영상으로 제공합니다. "
-                "이 시점의 확인되지 않은 근거는 상세에서 볼 수 있습니다.")
+            own = view.get("effective_decision")
+            key = result.get("conflict_resolution_key")
+            why = {"evidence_strength": "근거 강도(위치 근거의 신뢰성)가 더 낮아",
+                   "confidence": "신뢰도가 더 낮아", "boundary_clearance": "경계 여유가 더 작아",
+                   "camera_order": "근거가 같아 A 시점을 우선하는 순서에 따라"}.get(key, "근거 단계가 더 낮아")
+            if own in ("IN", "OUT") and own != result["decision"]:
+                note = (f"이 시점의 자체 결과는 {own}이지만 {why} 최종 판정에 쓰지 않았습니다. "
+                        "상세에서 이 시점의 근거를 비교할 수 있습니다.")
+            elif own in ("IN", "OUT"):
+                note = "이 시점의 자체 결과도 같으며, 최종 판정은 근거가 더 강한 시점을 기준으로 표시합니다."
+            else:
+                note = ("이 시점에는 독립적인 IN·OUT 근거가 없어 보조 영상으로 제공합니다. "
+                        "이 시점의 확인되지 않은 근거는 상세에서 볼 수 있습니다.")
+            assessment["final_context"] = f"최종 {result['decision']}은 {'/'.join(donors)} 시점의 근거를 사용합니다. " + note
+
+
+def _tier_strength(camera, kind, bests):
+    """Ordering key inside one evidence tier.
+
+    Best estimates are ordered by evidence strength first: a view whose label
+    rests on located evidence outranks one that mostly follows the IN prior,
+    whatever their confidences. Then confidence; camera A breaks exact ties.
+    """
+    best = bests.get(camera) or {}
+    confidence = best.get("confidence") if _finite(best.get("confidence")) else None
+    if kind != "best_estimate" and (confidence is None or best.get("basis") not in (
+            "verified_contact" if kind == "verified" else "video_estimate",)):
+        confidence = _TIER_DEFAULT_CONFIDENCE[kind]
+    strength = best.get("evidence_strength") if kind == "best_estimate" and _finite(best.get("evidence_strength")) else 1.0
+    classification = best.get("classification") if isinstance(best.get("classification"), dict) else {}
+    # Unit-free boundary clearance (pixels and metres are not comparable).
+    clearance = (abs(classification["margin_px"]) / 10.0 if _finite(classification.get("margin_px"))
+                 else abs(classification["margin_m"]) / 0.12 if _finite(classification.get("margin_m")) else 0.0)
+    return (strength, confidence if confidence is not None else _TIER_DEFAULT_CONFIDENCE[kind], clearance, camera == "A")
 
 
 def combine_views(views, *, same_event_confirmed=False, event_source=None, different_event=False, rules=None):
-    """Keep a valid single-view verdict without claiming an unconfirmed transfer.
+    """Return the strongest available A/B verdict, always IN/OUT when any view has evidence.
 
-    Unresolved or failed peers cannot veto a completed source-bound verdict.
-    Event correspondence is still required to transfer it to the other view;
-    known different events and conflicting valid decisions remain unresolved.
+    Tiers, strongest first: verified direct contact, native video estimate,
+    then the per-view best estimate. A lower tier never overrides a higher one.
+    Inside a tier, disagreeing views are resolved by confidence and boundary
+    clearance; the disagreement stays visible as a warning. Unresolved or
+    failed peers cannot veto a completed source-bound verdict, and a known
+    different rally only prevents transferring one view's verdict to the other.
     """
     selected_rules = parse_pair_rules(RULES if rules is None else rules)
     reasons, warnings = [], []
@@ -502,7 +666,7 @@ def combine_views(views, *, same_event_confirmed=False, event_source=None, diffe
     if duplicate:
         warnings.append("DUPLICATE_SOURCE")
     if different_event:
-        reasons.append("KNOWN_DIFFERENT_RALLY")
+        warnings.append("KNOWN_DIFFERENT_RALLY")
         same_event_confirmed = False
     elif not same_event_confirmed:
         warnings.append("SAME_EVENT_UNCONFIRMED")
@@ -525,58 +689,105 @@ def combine_views(views, *, same_event_confirmed=False, event_source=None, diffe
                 or view["video_estimate"].get("eligible") is True and camera not in estimates)
            for camera, view in views.items()):
         warnings.append("INVALID_VIDEO_ESTIMATE")
-    labels = set(qualified.values())
-    if len(labels) > 1:
-        reasons.append("CONFLICTING_VIEW_DECISIONS")
+    bests = {camera: views[camera]["best_estimate"] for camera in ("A", "B")
+             if views[camera].get("status") == "completed" and valid_hashes[camera] and rules_match[camera]
+             and _valid_best_estimate(views[camera].get("best_estimate"), selected_rules,
+                                      views[camera].get("source_sha256"))}
+    if any(isinstance(view.get("best_estimate"), dict)
+           and "INVALID_BEST_ESTIMATE" in (view["best_estimate"].get("reason_codes") or [])
+           for view in views.values()):
+        warnings.append("INVALID_BEST_ESTIMATE")
+    if len(set(qualified.values())) > 1:
+        warnings.append("CONFLICTING_VIEW_DECISIONS")
     verified_estimate_conflict = [(direct_camera, estimate_camera)
                                  for direct_camera, direct in qualified.items()
                                  for estimate_camera, estimate in estimates.items() if direct != estimate]
     if any(a == b or same_event_confirmed for a, b in verified_estimate_conflict):
-        reasons.append("VERIFIED_ESTIMATE_CONFLICT")
+        warnings.append("VERIFIED_ESTIMATE_CONFLICT")
     elif verified_estimate_conflict:
         warnings.append("UNLINKED_ESTIMATE_CONFLICT")
-    selected = qualified or estimates
-    kind = "verified" if qualified else "video_estimate"
-    if not qualified and len(set(estimates.values())) > 1:
-        reasons.append("CONFLICTING_VIDEO_ESTIMATES")
+    if len(set(estimates.values())) > 1:
+        warnings.append("CONFLICTING_VIDEO_ESTIMATES")
+    best_labels = {camera: best["decision"] for camera, best in bests.items()}
+    if len(set(best_labels.values())) > 1:
+        warnings.append("CONFLICTING_BEST_ESTIMATES")
+    kind, selected = next(((name, labels) for name, labels in
+                           zip(DECISION_TIERS, (qualified, estimates, best_labels)) if labels),
+                          ("unresolved", {}))
     if not selected:
         reasons.append("NO_QUALIFIED_CONTACT")
-    selected_labels = set(selected.values())
-    label = next(iter(selected_labels)) if len(selected_labels) == 1 and not reasons else "REVIEW"
     linked = (same_event_confirmed and not duplicate and all(valid_hashes.values())
               and all(rules_match.values()) and not different_event)
-    donors = list(selected) if linked else list(selected)[:1]
+    if kind == "best_estimate":
+        # A best estimate that reuses a higher tier the transport rejected for
+        # this view must not borrow that tier's full strength.
+        for camera, best in list(bests.items()):
+            if ((best.get("basis") == "video_estimate" and camera not in estimates)
+                    or (best.get("basis") == "verified_contact" and camera not in qualified)):
+                bests[camera] = {**best, "evidence_strength": min(_finite(best.get("evidence_strength"))
+                                                                  and best["evidence_strength"] or 0.6, 0.6)}
+    ordered = sorted(selected, key=lambda camera: _tier_strength(camera, kind, bests), reverse=True)
+    label, donors, conflict_resolved, confidence, deciding_key = "REVIEW", [], False, None, None
+    if ordered:
+        label = selected[ordered[0]]
+        agreeing = [camera for camera in ordered if selected[camera] == label]
+        conflict_resolved = len(agreeing) != len(ordered)
+        donors = agreeing if linked and not conflict_resolved else agreeing[:1]
+        winner = float(_tier_strength(ordered[0], kind, bests)[1])
+        if conflict_resolved:
+            # A disagreeing peer of the same tier lowers the final confidence.
+            runner_up = next(camera for camera in ordered if selected[camera] != label)
+            loser = float(_tier_strength(runner_up, kind, bests)[1])
+            winner = max(0.5, winner - (loser - 0.5))
+            first, second = _tier_strength(ordered[0], kind, bests), _tier_strength(runner_up, kind, bests)
+            deciding_key = next((name for name, a, b in zip(
+                ("evidence_strength", "confidence", "boundary_clearance", "camera_order"), first, second)
+                if a != b), "camera_order")
+        confidence = round(winner, 4)
     if label != "REVIEW":
-        reasons = (["QUALIFIED_VIEWS_AGREE" if linked and len(qualified) == 2 else "VERDICT_FROM_QUALIFIED_VIEW"]
-                   if kind == "verified" else
-                   ["VIDEO_ESTIMATES_AGREE" if linked and len(estimates) == 2 else "VIDEO_ESTIMATE_FROM_VIEW"])
+        both = linked and len(selected) == 2 and not conflict_resolved
+        reasons = [{"verified": "QUALIFIED_VIEWS_AGREE" if both else "VERDICT_FROM_QUALIFIED_VIEW",
+                    "video_estimate": "VIDEO_ESTIMATES_AGREE" if both else "VIDEO_ESTIMATE_FROM_VIEW",
+                    "best_estimate": "BEST_ESTIMATES_AGREE" if both else "BEST_ESTIMATE_FROM_VIEW"}[kind]]
+        if conflict_resolved:
+            reasons.append("VIEW_CONFLICT_TIE_BROKEN_BY_CAMERA_ORDER" if deciding_key == "camera_order"
+                           else "VIEW_CONFLICT_RESOLVED_BY_CONFIDENCE")
     else:
         reasons = list(dict.fromkeys(reasons + warnings))
+    warnings = list(dict.fromkeys(warnings))
     public_views = deepcopy(views)
     for camera, view in public_views.items():
         direct = view.get("direct_decision", "REVIEW") if camera in qualified else "REVIEW"
-        transfer = label != "REVIEW" and kind == "verified" and linked and view.get("status") == "completed"
+        # A dissenting view keeps its own verdict; only agreement is transferred.
+        transfer = (label != "REVIEW" and kind == "verified" and linked and not conflict_resolved
+                    and view.get("status") == "completed")
         view["assisted_decision"] = label if transfer else direct
         view["verdict_source_camera_ids"] = donors if transfer else [camera] if direct in {"IN", "OUT"} else []
         view.pop("assistance_mode", None)
         if transfer and camera not in qualified:
             view["assistance_mode"] = "other_view_verdict"
         view["estimated_decision"] = estimates.get(camera, "REVIEW")
+        view["best_estimated_decision"] = best_labels.get(camera, "REVIEW")
         for key in list(view):
             if key.startswith("_"):
                 view.pop(key)
+    resolved = label != "REVIEW"
     result = {
         "decision": label, "reason_codes": reasons, "reasons": [REASONS[code] for code in reasons],
-        "decision_kind": kind if label != "REVIEW" else "unresolved",
+        "decision_kind": kind if resolved else "unresolved",
+        "confidence": confidence if resolved else None,
         "warning_codes": warnings, "warnings": [REASONS[code] for code in warnings],
         "same_event_confirmed": bool(same_event_confirmed),
         "event_correspondence_source": event_source if same_event_confirmed else None,
-        "source_camera_ids": donors if label != "REVIEW" else [],
-        "decision_scope": ("linked_views" if linked else "single_view") if label != "REVIEW" else "unresolved",
+        "source_camera_ids": donors if resolved else [],
+        "decision_scope": ("linked_views" if linked else "single_view") if resolved else "unresolved",
         "views": public_views, "rules": selected_rules, "court_position_m": None,
         "assistance_used": True, "automatic_benchmark_eligible": False, "evaluation_eligible": False,
         "ground_truth_created": False, "human_verified": False,
-        "video_estimate_used": label != "REVIEW" and kind == "video_estimate",
+        "video_estimate_used": resolved and kind == "video_estimate",
+        "best_estimate_used": resolved and kind == "best_estimate",
+        "conflict_resolved": bool(resolved and conflict_resolved),
+        "conflict_resolution_key": deciding_key if resolved and conflict_resolved else None,
         "scope": "A/B verdict linkage; no 3D reconstruction or common pixel coordinates.",
     }
     _add_analysis_assessments(result)
@@ -609,7 +820,8 @@ def _revalidate_snapshot_result(result):
         recomputed = combine_views(result["views"],
             same_event_confirmed=result.get("same_event_confirmed") is True,
             event_source=result.get("event_correspondence_source"),
-            different_event="KNOWN_DIFFERENT_RALLY" in recorded_codes,
+            different_event=("KNOWN_DIFFERENT_RALLY" in recorded_codes
+                             or "KNOWN_DIFFERENT_RALLY" in (result.get("warning_codes") or [])),
             rules=result.get("rules", RULES))
     except (KeyError, TypeError, ValueError, AttributeError, PairWorkspaceError):
         recomputed = None
@@ -649,9 +861,12 @@ def _revalidate_snapshot_result(result):
     codes.append("STALE_REVIEW")
     if recorded_kind == "video_estimate" and not donors_valid:
         codes.append("INVALID_VIDEO_ESTIMATE")
+    if recorded_kind == "best_estimate" and not donors_valid:
+        codes.append("INVALID_BEST_ESTIMATE")
     codes = list(dict.fromkeys(codes))
     result.update(decision="REVIEW", decision_kind="unresolved", decision_scope="unresolved",
-                  source_camera_ids=[], video_estimate_used=False, reason_codes=codes,
+                  source_camera_ids=[], video_estimate_used=False, best_estimate_used=False,
+                  confidence=None, conflict_resolved=False, conflict_resolution_key=None, reason_codes=codes,
                   reasons=[REASONS[code] for code in codes], historical_decision=original,
                   snapshot_revalidation={"status": "historical_verdict_rejected",
                                          "inference_rerun": False, "stored_result_modified": False})
@@ -1157,114 +1372,38 @@ class PairWorkspace:
                 base["review_reuse_skipped"] = "RULES_CHANGED"
                 if original is None:
                     raise PairWorkspaceError(409, "저장된 검수의 경기 규칙이 선택한 규칙과 다릅니다. 원본을 업로드해 선택한 규칙으로 새 분석하세요.")
-            if reuse and entry is not None and entry["kind"] == "review" and stored_rule_match:
-                self._analysis_progress(identifier, camera, {"stage": "stored_review"})
-                row = entry["row"]
-                if not self._review_valid(row):
+            use_stored = reuse and entry is not None and entry["kind"] == "review" and stored_rule_match
+            fallback_from_stored = False
+            if use_stored and original is not None:
+                if not self._review_valid(entry["row"]):
                     raise PairWorkspaceError(409, REASONS["STALE_REVIEW"])
-                direct = self._direct_review(row, rules)
-                annotation = row["annotation"]
-                base.update(direct_decision=direct, assisted_decision=direct, qualified=direct in {"IN", "OUT"},
-                    automatic_decision=row.get("automatic_decision", "REVIEW"), review_source="ai_visual_review",
-                    processing_mode="stored_ai_review", stored_video_id=row["video_id"],
-                    preview_url=self._review_preview(row),
-                    evidence_urls=["/pair-review-assets/" + quote(item["path"], safe="/") for item in row["assets"]["evidence"]],
-                    contact_time_seconds=annotation.get("time") if direct in {"IN", "OUT"} else None,
-                    reason_codes=deepcopy(row["review"].get("direct_reason_codes", row["review"].get("reason_codes", []))),
-                    rationale=annotation.get("rationale", ""),
-                    review_details={"observation_status": annotation.get("observation_status"),
-                        "follow_up_actions": deepcopy(annotation.get("follow_up_actions") or []),
-                        "focus_time_seconds": annotation.get("time")},
-                    source_verification="current_original_sha256" if original is not None else "packaged_source_bound_review")
+                # An unresolved stored review gives no verdict. With the original
+                # at hand, analyse it fresh so the view can still reach a
+                # verified, video or best estimate; keep the review otherwise.
+                fallback_from_stored = self._direct_review(entry["row"], rules) not in {"IN", "OUT"}
+            if use_stored and not fallback_from_stored:
+                self._stored_view(identifier, camera, base, entry["row"], rules, original)
+            elif fallback_from_stored:
+                from .inference import InferenceDeviceError
+                from .resources import ResourceSettingsError
+                attempt = dict(base, review_reuse_skipped="STORED_REVIEW_UNRESOLVED")
+                try:
+                    self._fresh_view(identifier, camera, attempt, original, digest, selected, refine, hint, rules)
+                    base = attempt
+                except (InferenceDeviceError, ResourceSettingsError):
+                    raise  # settings the operator must fix; never hidden behind the stored review
+                except PairWorkspaceError as error:
+                    if error.message == REASONS["SOURCE_CHANGED"]:
+                        raise
+                    self._keep_stored_after_failed_fallback(identifier, camera, base, entry["row"], rules,
+                                                            original, error)
+                except Exception as error:  # the stored review remains the result, with the failure shown
+                    self._keep_stored_after_failed_fallback(identifier, camera, base, entry["row"], rules,
+                                                            original, error)
             else:
                 if original is None:
                     raise PairWorkspaceError(409, "새 분석에 필요한 원본이 없습니다. 원본 A/B를 업로드하거나 저장된 검수를 사용하세요.")
-                from .pipeline import analyze_video
-                from .media import probe
-                import cv2
-                metadata = probe(original)
-                base["metadata"] = {key: value for key, value in metadata.items() if key != "timestamps"}
-                if not 1 <= metadata["frame_count"] <= MAX_FRAMES:
-                    raise PairWorkspaceError(413, f"영상 한 개는 {MAX_FRAMES}프레임 이하여야 합니다.")
-                config = _read(self.project / "configs/poc.json", {"analysis_width": 960, "max_frames": MAX_FRAMES})
-                config.update(video_id=f"pair_{identifier}_{camera.lower()}", rules=deepcopy(rules), max_frames=MAX_FRAMES)
-                resources = self.jobs[identifier]["request"].get("resource_settings")
-                if resources is not None:
-                    config["resource_settings"] = deepcopy(resources)
-                    config["opencv_threads"] = resources["cpu_threads"]
-                manual_region = selected.get("review_region")
-                if manual_region is not None:
-                    regions = _manual_review_regions(manual_region, metadata, config.get("analysis_width", 1280))
-                elif refine:
-                    regions = review_regions(hint, min(metadata["width"], config.get("analysis_width", 960)),
-                                             metadata["frame_count"])
-                else:
-                    regions = []
-                if regions:
-                    config.setdefault("detector", {}).update(refinement_regions=regions, include_dark_components=True)
-                    config.setdefault("events", {})["review_refinement_regions"] = deepcopy(regions)
-                    base["refinement"] = {"source": "operator_review_region" if manual_region is not None else "ai_visual_review",
-                        "source_sha256": digest,
-                        "regions": regions, "assistance_used": True, "automatic_benchmark_eligible": False,
-                        "evaluation_eligible": False,
-                        "scope": "영역은 후보 검색에만 사용하며 코트 보정·셔틀콕 식별·접촉 확정 근거가 아닙니다."}
-                    base.update(assistance_used=True, evaluation_eligible=False)
-                    if manual_region is not None:
-                        base["refinement"].update(normalized_region=deepcopy(manual_region),
-                            coordinate_system="displayed_video_normalized", mapping="outward_integer_analysis_pixels",
-                            ai_visual_refinement_requested=refine, ai_visual_refinement_applied=False,
-                            ai_visual_refinement_available=base["refinement_available"],
-                            priority="operator_region_over_ai_visual_review")
-                        config.setdefault("request_context", {})["review_region_guidance"] = deepcopy(base["refinement"])
-                if resources is None:
-                    cv2.setNumThreads(max(1, min(2, int(config.get("opencv_threads", 2)))))
-                output = self.root / "jobs" / identifier / "views" / camera
-                result = analyze_video(original, output, config=config,
-                    progress_callback=lambda event: self._analysis_progress(identifier, camera, event))
-                if result.get("source_sha256") != digest:
-                    raise PairWorkspaceError(409, REASONS["SOURCE_CHANGED"])
-                decision = result.get("decision", {}).get("decision", "REVIEW")
-                if decision not in LABELS:
-                    decision = "REVIEW"
-                prefix = f"/pair-media/jobs/{identifier}/views/{camera}/"
-                artifacts, evidence, trajectory_context = result.get("artifacts") or {}, [], None
-                for item in artifacts.get("evidence", []):
-                    for field in ("image", "source_sequence", "source_crop"):
-                        relative = item.get(field)
-                        if isinstance(relative, str) and _safe(output, relative).is_file():
-                            evidence.append(prefix + quote(relative, safe="/"))
-                    relative = item.get("trajectory_context")
-                    if isinstance(relative, str) and _safe(output, relative).is_file():
-                        trajectory_context = prefix + quote(relative, safe="/")
-                contact = (result.get("decision") or {}).get("contact_time_seconds")
-                if contact is None and decision != "REVIEW":
-                    contact = (result.get("selected_landing") or {}).get("time")
-                if (result.get("selected_landing") or {}).get("contact_observed") is False:
-                    contact = None
-                replay_url, replay_info = _trajectory_replay(output, artifacts, prefix)
-                video_estimate = _video_estimate_summary(result, output, prefix)
-                preview = artifacts.get("preview")
-                preview_url = (prefix + quote(preview, safe="/")
-                               if isinstance(preview, str) and _safe(output, preview).is_file() else None)
-                base.update(automatic_decision=decision, direct_decision=decision, assisted_decision=decision,
-                    qualified=decision in {"IN", "OUT"},
-                    video_estimate=video_estimate,
-                    estimated_decision=video_estimate["decision"] if video_estimate else "REVIEW",
-                    review_source=("operator_region_guided_search" if manual_region is not None else
-                                   "ai_review_guided_search" if regions else "automatic"),
-                    processing_mode=("user_region_reanalysis" if manual_region is not None else
-                                     "review_guided_reanalysis" if regions else "fresh_analysis"),
-                    preview_url=preview_url,
-                    evidence_warnings=deepcopy(result.get("evidence_warnings") or []),
-                    evidence_urls=evidence, contact_time_seconds=contact if _finite(contact) else None,
-                    landing_candidate=_landing_candidate(result), trajectory_context_url=trajectory_context,
-                    trajectory_replay_url=replay_url, trajectory_replay_info=replay_info,
-                    calibration_summary=_calibration_summary(result),
-                    calibration_preview_url=_calibration_preview(output, artifacts, prefix),
-                    reason_codes=(result.get("decision") or {}).get("reason_codes", []),
-                    rationale="새 원본 분석의 접촉·경계 검증 결과입니다.", analysis_timings=result.get("timings", {}),
-                    execution=deepcopy(result.get("execution")), assessment=deepcopy(result.get("assessment")),
-                    source_verification="current_original_sha256")
+                self._fresh_view(identifier, camera, base, original, digest, selected, refine, hint, rules)
             return self._finish_view(identifier, camera, base)
         except Exception as error:
             with self.lock:
@@ -1284,6 +1423,88 @@ class PairWorkspace:
                         processing_mode="failed", error=message, error_details=diagnostics,
                         elapsed_seconds=round(time.perf_counter() - started, 6))
             return self._finish_view(identifier, camera, base)
+
+    def _keep_stored_after_failed_fallback(self, identifier, camera, base, row, rules, original, error):
+        LOGGER.exception("Fresh analysis after an unresolved stored review failed: job=%s camera=%s",
+                         identifier, camera)
+        message = f"{type(error).__name__}: {' '.join(str(error).split())[:300]}"
+        base["fresh_analysis_fallback_error"] = message
+        base.setdefault("evidence_warnings", []).append({
+            "artifact": "fresh_analysis_fallback", "error_type": type(error).__name__,
+            "message": "미해결 저장 검수 대신 시도한 새 분석이 실패해 저장 검수 결과를 유지했습니다. " + message})
+        self._stored_view(identifier, camera, base, row, rules, original)
+
+    def _stored_view(self, identifier, camera, base, row, rules, original):
+        self._analysis_progress(identifier, camera, {"stage": "stored_review"})
+        if not self._review_valid(row):
+            raise PairWorkspaceError(409, REASONS["STALE_REVIEW"])
+        direct = self._direct_review(row, rules)
+        annotation = row["annotation"]
+        base.update(direct_decision=direct, assisted_decision=direct, qualified=direct in {"IN", "OUT"},
+            automatic_decision=row.get("automatic_decision", "REVIEW"), review_source="ai_visual_review",
+            processing_mode="stored_ai_review", stored_video_id=row["video_id"],
+            preview_url=self._review_preview(row),
+            evidence_urls=["/pair-review-assets/" + quote(item["path"], safe="/") for item in row["assets"]["evidence"]],
+            contact_time_seconds=annotation.get("time") if direct in {"IN", "OUT"} else None,
+            reason_codes=deepcopy(row["review"].get("direct_reason_codes", row["review"].get("reason_codes", []))),
+            rationale=annotation.get("rationale", ""),
+            review_details={"observation_status": annotation.get("observation_status"),
+                "follow_up_actions": deepcopy(annotation.get("follow_up_actions") or []),
+                "focus_time_seconds": annotation.get("time")},
+            source_verification="current_original_sha256" if original is not None else "packaged_source_bound_review")
+
+    def _fresh_view(self, identifier, camera, base, original, digest, selected, refine, hint, rules):
+        from .pipeline import analyze_video
+        from .media import probe
+        from .review_refinement import review_regions
+        import cv2
+        metadata = probe(original)
+        base["metadata"] = {key: value for key, value in metadata.items() if key != "timestamps"}
+        if not 1 <= metadata["frame_count"] <= MAX_FRAMES:
+            raise PairWorkspaceError(413, f"영상 한 개는 {MAX_FRAMES}프레임 이하여야 합니다.")
+        config = _read(self.project / "configs/poc.json", {"analysis_width": 960, "max_frames": MAX_FRAMES})
+        config.update(video_id=f"pair_{identifier}_{camera.lower()}", rules=deepcopy(rules), max_frames=MAX_FRAMES)
+        resources = self.jobs[identifier]["request"].get("resource_settings")
+        if resources is not None:
+            config["resource_settings"] = deepcopy(resources)
+            config["opencv_threads"] = resources["cpu_threads"]
+        manual_region = selected.get("review_region")
+        if manual_region is not None:
+            regions = _manual_review_regions(manual_region, metadata, config.get("analysis_width", 1280))
+        elif refine:
+            regions = review_regions(hint, min(metadata["width"], config.get("analysis_width", 960)),
+                                     metadata["frame_count"])
+        else:
+            regions = []
+        if regions:
+            config.setdefault("detector", {}).update(refinement_regions=regions, include_dark_components=True)
+            config.setdefault("events", {})["review_refinement_regions"] = deepcopy(regions)
+            base["refinement"] = {"source": "operator_review_region" if manual_region is not None else "ai_visual_review",
+                "source_sha256": digest,
+                "regions": regions, "assistance_used": True, "automatic_benchmark_eligible": False,
+                "evaluation_eligible": False,
+                "scope": "영역은 후보 검색에만 사용하며 코트 보정·셔틀콕 식별·접촉 확정 근거가 아닙니다."}
+            base.update(assistance_used=True, evaluation_eligible=False)
+            if manual_region is not None:
+                base["refinement"].update(normalized_region=deepcopy(manual_region),
+                    coordinate_system="displayed_video_normalized", mapping="outward_integer_analysis_pixels",
+                    ai_visual_refinement_requested=refine, ai_visual_refinement_applied=False,
+                    ai_visual_refinement_available=base["refinement_available"],
+                    priority="operator_region_over_ai_visual_review")
+                config.setdefault("request_context", {})["review_region_guidance"] = deepcopy(base["refinement"])
+        if resources is None:
+            cv2.setNumThreads(max(1, min(2, int(config.get("opencv_threads", 2)))))
+        output = self.root / "jobs" / identifier / "views" / camera
+        result = analyze_video(original, output, config=config,
+            progress_callback=lambda event: self._analysis_progress(identifier, camera, event))
+        if result.get("source_sha256") != digest:
+            raise PairWorkspaceError(409, REASONS["SOURCE_CHANGED"])
+        prefix = f"/pair-media/jobs/{identifier}/views/{camera}/"
+        base.update(view_from_result(result, output, prefix, rules),
+            review_source=("operator_region_guided_search" if manual_region is not None else
+                           "ai_review_guided_search" if regions else "automatic"),
+            processing_mode=("user_region_reanalysis" if manual_region is not None else
+                             "review_guided_reanalysis" if regions else "fresh_analysis"))
 
     def _correspondence(self, views, catalog):
         accepted, rejected, actions = False, False, []
