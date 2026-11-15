@@ -22,7 +22,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
     steps:
-      - name: Check the verified artifact and unused release tag
+      - name: Check the verified artifact and exact uploaded draft
         uses: actions/github-script@v7
         with:
           script: |
@@ -46,6 +46,11 @@ jobs:
                 throw error;
               }
               throw new Error('v0.5.14 already exists; do not overwrite it');
+            }
+            const draft = (await github.rest.repos.getRelease({...repo, release_id: 445726499})).data;
+            if (!draft.draft || draft.prerelease || draft.tag_name !== 'v0.5.14' ||
+                draft.target_commitish !== 'db5fc41e88dd9a805180ccbefeb185f6791ba5a5') {
+              throw new Error('Expected the exact draft created by publishing run 43662056624');
             }
       - name: Download the exact tested package and reports
         uses: actions/download-artifact@v4
@@ -112,17 +117,17 @@ jobs:
 
           ZIP SHA256: `280b5b2b1cdd28bc4c258228a61cf7da118c24455db26bc80307cd2edfc533e7`
           NOTES
-          gh release create v0.5.14 verified/* \
-            --target db5fc41e88dd9a805180ccbefeb185f6791ba5a5 \
-            --title 'Windows 0.5.14 · 착지 판정 근거 및 반복 REVIEW 개선' \
-            --notes-file "$RUNNER_TEMP/release-notes.md" --draft
-          gh api "repos/$GH_REPO/releases/tags/v0.5.14" > "$RUNNER_TEMP/uploaded-release.json"
+          # Drafts whose tags are not created yet must be addressed by release ID.
+          # Resume the already uploaded draft; never recreate or overwrite assets.
+          gh api "repos/$GH_REPO/releases/445726499" > "$RUNNER_TEMP/uploaded-release.json"
           python - <<'PY'
           import hashlib, json, os
           from pathlib import Path
           release = json.loads((Path(os.environ['RUNNER_TEMP']) / 'uploaded-release.json').read_text())
-          assert release['draft'] is True
+          assert release['id'] == 445726499 and release['draft'] is True
+          assert release['tag_name'] == 'v0.5.14' and release['prerelease'] is False
           assert release['target_commitish'] == 'db5fc41e88dd9a805180ccbefeb185f6791ba5a5'
+          assert release['body'].strip() == (Path(os.environ['RUNNER_TEMP']) / 'release-notes.md').read_text().strip()
           assets = {asset['name']: asset for asset in release['assets']}
           assert len(release['assets']) == 4
           assert set(assets) == {path.name for path in Path('verified').iterdir()}
@@ -134,7 +139,8 @@ jobs:
               assert asset['digest'] == 'sha256:' + digest
           print('All four uploaded assets match the locally verified bytes')
           PY
-          gh release edit v0.5.14 --draft=false --latest
+          gh api --method PATCH "repos/$GH_REPO/releases/445726499" \
+            -F draft=false -f make_latest=true --jq .html_url
       - name: Verify the published release points to the tested source
         uses: actions/github-script@v7
         with:
