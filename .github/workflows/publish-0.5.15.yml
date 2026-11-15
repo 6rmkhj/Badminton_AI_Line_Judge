@@ -1,0 +1,161 @@
+name: Publish verified Windows 0.5.15
+
+on:
+  push:
+    branches: [codex/publish-0.5.15]
+    paths: [.github/workflows/publish-0.5.15.yml]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: publish-windows-0.5.15
+  cancel-in-progress: false
+
+env:
+  SOURCE_SHA: 89ea23033fc5b7f7bc2e98bd6c646cb567be8270
+  RUN_ID: '43729129024'
+  ARTIFACT_ID: '14168142135'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Check the verified artifact and unused release tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const repo = context.repo;
+            const run = (await github.rest.actions.getWorkflowRun({...repo, run_id: Number(process.env.RUN_ID)})).data;
+            if (run.conclusion !== 'success' || run.head_sha !== process.env.SOURCE_SHA) {
+              throw new Error('Expected successful tested source commit');
+            }
+            const artifact = (await github.rest.actions.getArtifact({...repo, artifact_id: Number(process.env.ARTIFACT_ID)})).data;
+            if (artifact.expired || artifact.workflow_run.id !== run.id || artifact.name !== 'badminton-windows-0.5.15') {
+              throw new Error('Verified artifact identity changed');
+            }
+            for (const check of [
+              () => github.rest.repos.getReleaseByTag({...repo, tag: 'v0.5.15'}),
+              () => github.rest.git.getRef({...repo, ref: 'tags/v0.5.15'})
+            ]) {
+              try { await check(); } catch (error) {
+                if (error.status === 404) continue;
+                throw error;
+              }
+              throw new Error('v0.5.15 already exists; do not overwrite it');
+            }
+      - name: Download the exact tested package and reports
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ env.ARTIFACT_ID }}
+          run-id: ${{ env.RUN_ID }}
+          github-token: ${{ github.token }}
+          path: verified
+          merge-multiple: true
+      - name: Verify ZIP bytes and successful source-bound reports
+        shell: python
+        run: |
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path('verified')
+          expected = {'badminton-windows-0.5.15.zip', 'badminton-windows-0.5.15.zip.sha256',
+                      'windows-0.5.15-launcher-validation.json', 'windows-0.5.15-analysis-validation.json'}
+          assert {path.name for path in root.iterdir()} == expected
+          package = root / 'badminton-windows-0.5.15.zip'
+          with package.open('rb') as stream:
+              checksum = hashlib.file_digest(stream, 'sha256').hexdigest()
+          assert (root / (package.name + '.sha256')).read_text().split()[0] == checksum
+          reports = {}
+          for name in ('launcher', 'analysis'):
+              report = json.loads((root / f'windows-0.5.15-{name}-validation.json').read_text())
+              assert report['status'] == 'passed' and report['app_version'] == '0.5.15'
+              assert report['source_commit'] == os.environ['SOURCE_SHA']
+              reports[name] = report
+          assert reports['launcher']['source_snapshot_sha256'] == reports['analysis']['source_snapshot_sha256']
+          cases = {(case['view'], case['game']): case for case in reports['analysis']['cases']}
+          assert len(cases) == 4 and all(case['status'] == 'passed' and case['strict_decision'] == 'REVIEW'
+                                         for case in cases.values())
+          assert cases[('A', 'doubles')]['display_decision'] == 'IN'
+          assert cases[('A', 'singles')]['display_decision'] == 'OUT'
+          for game in ('doubles', 'singles'):
+              case = cases[('B', game)]
+              assert case['display_decision'] in {'IN', 'OUT'} and case['decision_kind'] == 'best_estimate'
+          pairs = reports['analysis']['pair_assessments']
+          assert {pair['game']: pair['decision'] for pair in pairs} == {'doubles': 'IN', 'singles': 'OUT'}
+          assert all(pair['A']['assessment']['blocking_stages'] == [] and
+                     pair['B']['assessment']['supplementary'] is True for pair in pairs)
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write(f'ZIP_SHA256={checksum}\nZIP_BYTES={package.stat().st_size}\n')
+          print('Exact Windows-tested ZIP and both validation reports verified:', checksum)
+      - name: Upload the verified assets as a draft
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
+          ## Windows 0.5.15 · 항상 IN/OUT을 내는 최선 추정
+
+          0.5.14까지는 직접 판정과 영상 추정이 모두 성립하지 않으면 A/B 결과가 REVIEW였습니다. 0.5.15는 마지막 단계로 **최선 추정**을 추가해, 코트 경계와 셔틀 착지 근거가 조금이라도 있으면 IN 또는 OUT을 냅니다. 직접 판정·영상 추정의 기준과 결과는 바꾸지 않았고, 낮은 단계가 높은 단계를 덮어쓰지 않습니다.
+
+          - 주 화면에 **최선 추정 IN/OUT**과 신뢰도(휴리스틱), 판정 위치·비교한 경계·근거 사진을 표시합니다.
+          - 코트 모서리 옆에 놓인 B 카메라에서도 주 코트를 찾도록 근거리 반코트 맞춤을 추가했습니다. 기존 선택기가 실패할 때만 실행하며 최선 추정에만 씁니다.
+          - A/B가 같은 단계에서 다른 결과를 내면 근거가 강한 시점을 쓰고 충돌을 경고로 남깁니다. REVIEW는 두 시점 모두 근거가 전혀 없을 때만 남습니다.
+          - 저장된 분석도 영상을 다시 읽지 않고 새 추정기로 갱신됩니다.
+
+          **검증:** `video/` 37쌍(74개 원본) 새 분석에서 복식은 REVIEW 36쌍 → IN 25·OUT 12·REVIEW 0, 단식은 IN 14·OUT 23·REVIEW 0입니다. 레이블 있는 24쌍에서 AI 시각 검수 레이블과 21/24 일치했습니다(항상 IN이라고 답하면 19/24). AI 레이블은 사람이 확인한 정답이 아니고 표본이 작아 정확도 측정으로 주장하지 않습니다. Windows PowerShell 5.1 실행기 테스트, 번들 Python의 A/B 복식·단식 전체 분석 4회, 전체 Python 테스트 1,301개를 통과했습니다. 자세한 내용은 `docs/BEST_ESTIMATE.md`를 보세요.
+
+          **실행:** 아래 `badminton-windows-0.5.15.zip`을 새 폴더에 전부 압축 해제하고 `START.bat`를 실행하세요. PyTorch는 포함하지 않습니다.
+
+          [Windows 검증 작업](https://github.com/6rmkhj/Badminton_AI_Line_Judge/actions/runs/43729129024)
+          NOTES
+          printf '\nZIP SHA256: `%s`\n' "$ZIP_SHA256" >> "$RUNNER_TEMP/release-notes.md"
+          gh release create v0.5.15 verified/* \
+            --target "$SOURCE_SHA" \
+            --title 'Windows 0.5.15 · 항상 IN/OUT을 내는 최선 추정' \
+            --notes-file "$RUNNER_TEMP/release-notes.md" --draft
+          gh api "repos/$GH_REPO/releases?per_page=20" \
+            --jq '[.[] | select(.tag_name == "v0.5.15" and .draft)] | if length == 1 then .[0] else error("expected exactly one v0.5.15 draft") end' \
+            > "$RUNNER_TEMP/uploaded-release.json"
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          release = json.loads((Path(os.environ['RUNNER_TEMP']) / 'uploaded-release.json').read_text())
+          assert release['draft'] is True and release['target_commitish'] == os.environ['SOURCE_SHA']
+          assets = {asset['name']: asset for asset in release['assets']}
+          assert len(release['assets']) == 4
+          assert set(assets) == {path.name for path in Path('verified').iterdir()}
+          for path in Path('verified').iterdir():
+              asset = assets[path.name]
+              with path.open('rb') as stream:
+                  digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+              assert asset['state'] == 'uploaded' and asset['size'] == path.stat().st_size
+              assert asset['digest'] == 'sha256:' + digest
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write(f"RELEASE_ID={release['id']}\n")
+          print('All four uploaded assets match the locally verified bytes')
+          PY
+      - name: Make the release public
+        shell: bash
+        run: |
+          gh api --method PATCH "repos/$GH_REPO/releases/$RELEASE_ID" \
+            -F draft=false -f make_latest=true --jq .html_url
+      - name: Verify the published release points to the tested source
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const release = (await github.rest.repos.getReleaseByTag({...context.repo, tag: 'v0.5.15'})).data;
+            const tag = (await github.rest.git.getRef({...context.repo, ref: 'tags/v0.5.15'})).data;
+            if (release.draft || release.prerelease || tag.object.sha !== process.env.SOURCE_SHA) {
+              throw new Error('Published release/source mismatch');
+            }
+            const asset = release.assets.find(asset => asset.name === 'badminton-windows-0.5.15.zip');
+            if (!asset || String(asset.size) !== process.env.ZIP_BYTES || asset.state !== 'uploaded' ||
+                asset.digest !== 'sha256:' + process.env.ZIP_SHA256) {
+              throw new Error('Published package checksum mismatch');
+            }
+            core.notice(release.html_url);
