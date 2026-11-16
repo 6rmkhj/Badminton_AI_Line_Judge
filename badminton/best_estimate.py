@@ -26,13 +26,15 @@ import cv2
 import numpy as np
 
 from .decision import rule_region
+from .shuttle_appearance import MAX_FOREGROUND_FRACTION, METHOD as APPEARANCE_METHOD, ForegroundProbe, is_isolated
 
 
 logger = logging.getLogger(__name__)
 SCHEMA_VERSION = 1
 # The tier is recomputable from result.json, so it is versioned on its own
 # instead of invalidating the (expensive) analysis fingerprint.
-ESTIMATOR_VERSION = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:16]
+ESTIMATOR_VERSION = hashlib.sha256(
+    Path(__file__).read_bytes() + (Path(__file__).parent / 'shuttle_appearance.py').read_bytes()).hexdigest()[:16]
 SOURCE = 'best_available_landing_evidence'
 DECISION_KIND = 'best_estimate'
 
@@ -44,7 +46,9 @@ BASIS_PRIOR = {
     'estimate_envelope': 0.78,
     'flight_family': 0.72,
     'landing_candidate': 0.64,
+    # Kept so stored pre-0.5.16 estimates still validate until refreshed.
     'track_endpoint': 0.56,
+    'no_landing_found': 0.5,
 }
 
 REASONS = {
@@ -52,7 +56,7 @@ REASONS = {
     'BEST_ESTIMATE_FROM_VIDEO_ESTIMATE': '원본 착지 가능 영역 전체가 한쪽에 있는 영상 추정을 사용했습니다.',
     'BEST_ESTIMATE_FROM_ESTIMATE_ENVELOPE': '원본 착지 가능 영역이 경계에 걸쳐 있어 더 넓게 차지한 쪽으로 판정했습니다.',
     'BEST_ESTIMATE_FROM_FLIGHT_FAMILY': '주 코트에 연결된 착지 경로의 대표 위치로 판정했습니다.',
-    'BEST_ESTIMATE_FROM_LANDING_CANDIDATE': '주 코트 범위 안의 첫 하강·반동(접근 비행 확인 우선) 착지 후보 위치로 판정했습니다.',
+    'BEST_ESTIMATE_FROM_LANDING_CANDIDATE': '접근 비행 뒤 트랙의 첫 반동이며 작은 단독 물체인 착지 후보 위치로 판정했습니다.',
     'BEST_ESTIMATE_FROM_TRACK_ENDPOINT': '착지 후보가 없어 하강하던 셔틀 궤적의 마지막 관측 위치로 판정했습니다.',
     'BEST_ESTIMATE_NEAR_BOUNDARY': '판정 위치가 경계에 가까워 신뢰도가 낮습니다.',
     'BEST_ESTIMATE_PRIOR_OVERRODE_WEAK_LOCATION': '위치 근거가 약해 OUT으로 판정하지 않고, 착지가 코트 안일 가능성이 높다는 기본값을 따랐습니다.',
@@ -63,6 +67,9 @@ REASONS = {
     'BEST_ESTIMATE_CAMERA_UNSTABLE': '영상 전체에서 카메라 고정이 확인되지 않아 경계 비교의 신뢰도를 낮췄습니다.',
     'BEST_ESTIMATE_PROCESSING_FAILED': '최선 추정을 계산하는 중 오류가 발생했습니다. 분석 기록의 오류를 확인하세요.',
     'BEST_ESTIMATE_BOUNDARY_EXTRAPOLATED': '판정에 쓴 경계선이 영상에서 직접 측정되지 않고 코트 모형으로 외삽한 선입니다.',
+    'BEST_ESTIMATE_SKIPPED_NON_SHUTTLE_OBJECTS': '선수 몸·다리·라켓처럼 셔틀보다 큰 움직이는 물체 위의 후보는 셔틀 착지로 보지 않고 건너뛰었습니다.',
+    'BEST_ESTIMATE_NO_SHUTTLE_LANDING': '셔틀로 볼 수 있는 착지(하강 비행 뒤 첫 반동, 작은 단독 물체)를 찾지 못해 위치를 표시하지 않고, 착지가 코트 안일 가능성이 높다는 기본값을 따랐습니다.',
+    'BEST_ESTIMATE_APPEARANCE_UNCHECKED': '후보가 셔틀처럼 작은 물체인지 영상으로 확인하지 못했습니다.',
 }
 
 _ROLES = ('left', 'right', 'near', 'far')
@@ -274,86 +281,6 @@ def landing_pool(result, event_config=None):
     return estimate_landings(tracks, stand_in, list(timestamps), calibration, options)
 
 
-# -------------------------------------------------------- candidate ranking --
-
-def _court_proximity(point, calibration, width):
-    """1 inside the selected court region, decaying with distance outside it."""
-    primary = calibration.get('primary_court') if isinstance(calibration, dict) else None
-    polygon = None
-    if isinstance(primary, dict) and primary.get('status') == 'selected':
-        polygon = _polygon(primary.get('judgment_scope_polygon_px') or primary.get('physical_court_polygon_px'))
-    if polygon is None and isinstance(calibration, dict):
-        polygon = _polygon(calibration.get('polygon_px'))
-    if polygon is None:
-        return 0.5
-    distance = cv2.pointPolygonTest(polygon.astype(np.float32), (float(point[0]), float(point[1])), True)
-    if distance >= 0:
-        return 1.0
-    return float(math.exp(distance / (40.0 * width / 960.0)))
-
-
-def score_landing(landing, calibration, width):
-    """Heuristic first-landing evidence score in [0, 1] (not a probability)."""
-    point = landing.get('contact_px') if _point(landing.get('contact_px')) else landing.get('candidate_px')
-    if not _point(point):
-        return None
-    motion = landing.get('image_motion_event') if isinstance(landing.get('image_motion_event'), dict) else {}
-    codes = set(landing.get('reason_codes') or [])
-    if motion.get('kind') == 'descent_and_rebound':
-        motion_score = 1.0 if motion.get('first_in_track') else 0.45
-        if motion.get('point_kind') == 'inferred_object_center':
-            motion_score *= 0.8
-    elif 'TRACK_TERMINATED_WITHOUT_CONTACT' in codes:
-        motion_score = 0.3
-    else:
-        motion_score = 0.55
-    if 'LATER_REBOUND_AFTER_FIRST_CANDIDATE' in codes:
-        motion_score = min(motion_score, 0.45)
-    flight = landing.get('flight_trajectory_support') if isinstance(landing.get('flight_trajectory_support'), dict) else {}
-    flight_score = 1.0 if flight.get('supported_for_review') is True else 0.4 if flight else 0.0
-    drop = flight.get('approach_displacement_y_px')
-    drop_score = min(1.0, max(0.0, float(drop) / (60.0 * width / 960.0))) if _finite(drop) else 0.0
-    continuity = landing.get('identity_continuity') if isinstance(landing.get('identity_continuity'), dict) else {}
-    veto = 0.6 if continuity.get('flight_support_veto') is True else 1.0
-    confidence = landing.get('confidence')
-    raw = min(1.0, max(0.0, float(confidence))) if _finite(confidence) else 0.0
-    proximity = _court_proximity(point, calibration, width)
-    score = (0.30 * motion_score + 0.20 * flight_score + 0.10 * drop_score
-             + 0.15 * raw + 0.25 * proximity) * veto
-    if landing.get('contact_observed') is True:
-        score = max(score, 0.95)
-    return {'score': round(float(score), 4), 'point_px': [float(point[0]), float(point[1])],
-            'components': {'motion': round(motion_score, 3), 'flight': round(flight_score, 3),
-                           'approach_drop': round(drop_score, 3), 'candidate_confidence': round(raw, 3),
-                           'court_proximity': round(proximity, 3), 'continuity_factor': veto}}
-
-
-def _track_endpoints(tracks, calibration, width, limit=24):
-    """Descending/terminating track ends as last-resort landing locations."""
-    rows = []
-    for track in tracks or []:
-        observations = [item for item in (track.get('observations') or [])
-                        if isinstance(item, dict) and item.get('observed', True) is not False
-                        and _finite(item.get('x')) and _finite(item.get('y')) and _finite(item.get('time'))]
-        if len(observations) < 4:
-            continue
-        observations.sort(key=lambda item: item['time'])
-        ys = np.asarray([item['y'] for item in observations], dtype=np.float64)
-        lowest = int(np.argmax(ys))  # image y grows toward the floor/near side
-        descent = float(ys[lowest] - ys[:lowest + 1].min()) if lowest > 0 else 0.0
-        if descent < 4.0 * width / 960.0:
-            continue
-        end = observations[lowest]
-        point = [float(end['x']), float(end['y'])]
-        proximity = _court_proximity(point, calibration, width)
-        score = (0.5 * min(1.0, descent / (80.0 * width / 960.0)) + 0.5 * proximity) * min(1.0, len(observations) / 12)
-        rows.append({'track_id': track.get('track_id'), 'frame_index': end.get('frame_index'),
-                     'time': end.get('time'), 'point_px': point, 'score': round(score, 4),
-                     'descent_px': round(descent, 3)})
-    rows.sort(key=lambda row: -row['score'])
-    return rows[:limit]
-
-
 # --------------------------------------------------------- landing selection --
 
 # IN rate assumed when location evidence is weak. A rally-ending shuttle is
@@ -417,44 +344,111 @@ def _landing_zone_px(calibration):
     return float(np.linalg.norm(points[1] - points[0])) / _DOUBLES_WIDTH_M * LANDING_ZONE_M
 
 
-# Selection rank -> how sure the pick is the rally-ending first landing.
-RANK_STRENGTH = {4: 0.75, 3: 0.45, 2: 0.6, 1: 0.25}
+# How sure a shuttle-like pick is the rally-ending first landing: inside the
+# judgment scope, or outside it but within the landing zone (a clear OUT).
+SCOPE_STRENGTH = {'in_scope': 0.75, 'landing_zone': 0.6}
 
 
-def _pick(landings, calibration):
-    """First landing (in the producer's order) meeting the strongest rule.
+def _candidate_point(landing):
+    return landing.get('contact_px') if _point(landing.get('contact_px')) else landing.get('candidate_px')
 
-    Ranks: a first rebound of its track with a coherent incoming flight inside
-    the judgment scope (4), any landing inside the scope (3), a first rebound
-    with a coherent flight outside the scope but within the landing zone (2;
-    only when nothing lies in the scope, and strong enough to call a clear
-    OUT), anything else (1). Returns (landing, rank) or None.
+
+def _appearance(fraction, checked, skipped):
+    return {'checked': checked, 'method': APPEARANCE_METHOD,
+            'foreground_fraction': None if fraction is None else round(fraction, 4),
+            'max_foreground_fraction': MAX_FOREGROUND_FRACTION, 'isolated_object': is_isolated(fraction),
+            'skipped_larger_object_candidates': skipped}
+
+
+def estimate_landing(result, estimate):
+    """The landing record behind a located best estimate, for display.
+
+    Returns the producer's candidate, or the matching unbudgeted-pool landing,
+    whose track and frame the estimate used; None when the estimate shows no
+    location (for example ``no_landing_found``) or the record cannot be found.
     """
-    zone = _landing_zone_px(calibration)
+    if not isinstance(estimate, dict) or estimate.get('decision') not in ('IN', 'OUT') \
+            or estimate.get('basis') not in ('landing_candidate', 'flight_family') or not _point(estimate.get('point_px')):
+        return None
+    frame, track = estimate.get('frame_index'), estimate.get('track_id')
+    ids = set(estimate.get('event_ids') or [])
+    for item in result.get('landings') or []:
+        if isinstance(item, dict) and item.get('event_id') in ids and item.get('frame_index') == frame:
+            return item
+    for item in landing_pool(result):
+        point = _candidate_point(item)
+        if (item.get('track_id') == track and item.get('frame_index') == frame and _point(point)
+                and np.allclose(point, estimate['point_px'], atol=0.01)):
+            return {**item, 'event_id': 'pool_' + str(item.get('event_id') or 'candidate')}
+    return None
+
+
+def _beyond_far_edge(point, calibration):
+    """Whether a point lies past the far edge of the judged court area.
+
+    Past that edge (the far baseline, or the short service line of a
+    near-half court) the image also shows the net, the far court and the wall
+    behind it, so a "rebound" there is far more often a shuttle struck in the
+    air than a floor contact, and this camera does not judge that area.
+    """
+    primary = calibration.get('primary_court') if isinstance(calibration, dict) else None
+    polygon = _polygon((primary or {}).get('physical_court_polygon_px')) if isinstance(primary, dict) else None
+    if polygon is None or len(polygon) != 4:
+        return False
+    # Corners are ordered near-left, near-right, far-right, far-left.
+    start, end = polygon[2], polygon[3]
+    near = (polygon[0] + polygon[1]) / 2.0
+
+    def side(value):
+        return float((end[0] - start[0]) * (value[1] - start[1]) - (end[1] - start[1]) * (value[0] - start[0]))
+
+    return side(np.asarray(point, dtype=np.float64)) * side(near) < 0
+
+
+def _pick(landings, calibration, probe=None):
+    """The first shuttle-like landing, in the producer's order.
+
+    A landing is shuttle-like only when it is the first rebound of its track
+    after a coherent incoming flight (a descent, not a knee or foot motion
+    without one) and, when frames are available, a small isolated object
+    rather than part of a larger moving body. Inside the judgment scope beats
+    the landing zone just outside its sidelines or near baseline; anything
+    farther, or past the far edge of the judged area, is not used. Returns
+    (landing, zone, appearance, skipped_count) with landing None when nothing
+    qualifies.
+    """
+    zone_px = _landing_zone_px(calibration)
     rows = []
     for index, landing in enumerate(landings):
-        point = landing.get('contact_px') if _point(landing.get('contact_px')) else landing.get('candidate_px')
-        if not _point(point):
+        point = _candidate_point(landing)
+        if not _point(point) or not (_first_in_track(landing) and _flight_supported(landing)):
             continue
         extent = max(1.0, float(landing.get('uncertainty_px') or 1.0)) + max(0.0, float(landing.get('contact_radius_px') or 0.0))
         distance = _scope_distance(point, calibration, extent)
-        in_scope = distance is not None and distance >= 0
-        in_zone = distance is not None and distance >= -zone
-        strong = _first_in_track(landing) and _flight_supported(landing)
-        rank = 4 if in_scope and strong else 3 if in_scope else 2 if in_zone and strong else 1
-        rows.append((rank, -index, landing))
-    if not rows:
-        return None
-    rank, _, landing = max(rows, key=lambda row: (row[0], row[1]))
-    return landing, rank
+        if distance is None or distance < -zone_px or (distance < 0 and _beyond_far_edge(point, calibration)):
+            continue
+        rows.append((1 if distance >= 0 else 0, -index, landing, point))
+    rows.sort(key=lambda row: (row[0], row[1]), reverse=True)
+    fractions = (probe.fractions([(row[2].get('frame_index'), row[3]) for row in rows])
+                 if probe is not None and rows else [None] * len(rows))
+    skipped = 0
+    for row, fraction in zip(rows, fractions):
+        if is_isolated(fraction) is False:
+            skipped += 1
+            continue
+        zone = 'in_scope' if row[0] else 'landing_zone'
+        return row[2], zone, _appearance(fraction, fraction is not None, skipped), skipped
+    return None, None, None, skipped
 
 
-def select_landing(result, calibration, width, rules):
-    """Choose the most plausible rally-ending first landing.
+def select_landing(result, calibration, width, rules, probe=None):
+    """Choose the rally-ending first landing among shuttle-like candidates.
 
-    The producer's ranked landings come first; when none lies in the primary
-    judgment scope, the unbudgeted landing pool is searched with the same
-    rule. Returns (landing, basis, selection_strength, alternatives, pool size).
+    The producer's ranked landings come first; when none of them is a
+    shuttle-like landing inside the judgment scope, the unbudgeted landing
+    pool is searched with the same rule. Returns (landing, basis, strength,
+    alternatives, pool size, appearance, skipped) or
+    (None, ..., skipped) when nothing qualifies.
     """
     landings = [item for item in (result.get('landings') or []) if isinstance(item, dict)]
     estimate = result.get('video_estimate') or {}
@@ -468,28 +462,28 @@ def select_landing(result, calibration, width, rules):
         landing = _landing_by_id(landings, representative) or next(
             (item for item in landings if item.get('event_id') in (family.get('member_event_ids') or [])), None)
         if landing is not None:
-            return landing, 'flight_family', 0.8, [], None
+            return landing, 'flight_family', 0.8, [], None, None, 0
     pool_size = None
-    picked = _pick(landings, calibration)
-    if picked is None or picked[1] < 3:
+    landing, zone, appearance, skipped = _pick(landings, calibration, probe)
+    if zone != 'in_scope':
         pool = landing_pool(result)
         pool_size = len(pool)
-        from_pool = _pick(pool, calibration)
-        if from_pool is not None and (picked is None or from_pool[1] > picked[1]):
-            landing, rank = from_pool
-            landing = {**landing, 'event_id': landing.get('event_id') or 'pool_candidate'}
-            picked = (landing, rank)
-    if picked is None:
-        return None
-    landing, rank = picked
-    strength = RANK_STRENGTH[rank]
+        found, found_zone, found_appearance, found_skipped = _pick(pool, calibration, probe)
+        skipped = max(skipped, found_skipped)
+        if found is not None and (landing is None or found_zone == 'in_scope'):
+            # Pool events are numbered independently of the producer's list, so
+            # their ids are prefixed to never alias a different stored candidate.
+            landing, zone, appearance = ({**found, 'event_id': 'pool_' + str(found.get('event_id') or 'candidate')},
+                                         found_zone, found_appearance)
+    if landing is None:
+        return None, None, None, [], pool_size, None, skipped
     alternatives = []
     for item in landings[:8]:
         point = item.get('candidate_px')
         if _point(point):
             alternatives.append({'event_id': item.get('event_id'), 'frame_index': item.get('frame_index'),
                                  'time': item.get('time'), 'point_px': [round(float(v), 2) for v in point]})
-    return landing, 'landing_candidate', strength, alternatives, pool_size
+    return landing, 'landing_candidate', SCOPE_STRENGTH[zone], alternatives, pool_size, appearance, skipped
 
 
 def _decide_with_prior(rules, classification, basis, strength, prior_in, uncertainty_px, width,
@@ -511,8 +505,7 @@ def _decide_with_prior(rules, classification, basis, strength, prior_in, uncerta
     confidence = round(max(p_in, 1.0 - p_in), 4)
     codes = [{'estimate_envelope': 'BEST_ESTIMATE_FROM_ESTIMATE_ENVELOPE',
               'flight_family': 'BEST_ESTIMATE_FROM_FLIGHT_FAMILY',
-              'landing_candidate': 'BEST_ESTIMATE_FROM_LANDING_CANDIDATE',
-              'track_endpoint': 'BEST_ESTIMATE_FROM_TRACK_ENDPOINT'}[basis]]
+              'landing_candidate': 'BEST_ESTIMATE_FROM_LANDING_CANDIDATE'}[basis]]
     if clearance < 1:
         codes.append('BEST_ESTIMATE_NEAR_BOUNDARY')
     if camera_unstable:
@@ -646,13 +639,16 @@ def _landing_by_id(landings, identifier):
     return next((item for item in landings if isinstance(item, dict) and item.get('event_id') == identifier), None)
 
 
-def estimate_best_verdict(result, rules=None, *, prior_in=None):
+def estimate_best_verdict(result, rules=None, *, prior_in=None, probe=None):
     """Return the best available IN/OUT estimate for one analysed view.
 
     ``result`` is a pipeline result (or a dict with the same keys). REVIEW is
     returned only when no court geometry or no shuttle location exists at all.
     ``prior_in`` is the IN rate assumed when the location evidence is weak
     (default :data:`DEFAULT_PRIOR_IN`, or ``config.best_estimate.prior_in``).
+    ``probe`` (a :class:`ForegroundProbe` over the analysis frames) lets the
+    landing choice skip candidates on players' bodies; without it the choice
+    uses track evidence alone and says so.
     """
     if prior_in is None:
         configured = ((result.get('config') or {}).get('best_estimate') or {}).get('prior_in')
@@ -703,52 +699,153 @@ def estimate_best_verdict(result, rules=None, *, prior_in=None):
                 point_px=majority['point_px'], event_ids=list(estimate.get('member_event_ids') or []),
                 frame_interval=estimate.get('frame_interval'), time_interval=estimate.get('time_interval'))
 
-    selection = select_landing(result, calibration, width, rules)
-    if selection is not None:
-        landing, basis, strength, alternatives, pool_size = selection
-        point = landing.get('contact_px') if _point(landing.get('contact_px')) else landing.get('candidate_px')
+    # A moving camera breaks the clip background the appearance check needs.
+    # Why the appearance check could not run, if it could not: refresh redoes
+    # an estimate only for missing frames, never for a camera that moved.
+    unchecked_reason = 'camera_unstable' if unstable and probe is not None else None if probe is not None else 'no_frames'
+    probe = None if unstable else probe
+    landing, basis, strength, alternatives, pool_size, appearance, skipped = select_landing(
+        result, calibration, width, rules, probe)
+    if landing is not None:
+        point = _candidate_point(landing)
         classification = classify_point(point, calibration, rules)
         if classification is not None:
-            return _decide_with_prior(
+            estimate = _decide_with_prior(
                 selected_rules, classification, basis, strength, prior_in,
                 landing.get('uncertainty_px'), width, camera_unstable=unstable,
                 point_px=[round(float(v), 3) for v in point], event_ids=[landing.get('event_id')],
                 frame_index=landing.get('frame_index'), time=landing.get('time'),
                 track_id=landing.get('track_id'), alternatives=alternatives[:8], pool_size=pool_size)
-
-    endpoints = _track_endpoints(result.get('tracks'), calibration, width)
-    for endpoint in endpoints:
-        classification = classify_point(endpoint['point_px'], calibration, rules)
-        if classification is None:
-            continue
-        return _decide_with_prior(
-            selected_rules, classification, 'track_endpoint', 0.15 * endpoint['score'], prior_in, 0.0, width,
-            camera_unstable=unstable,
-            point_px=endpoint['point_px'], frame_index=endpoint['frame_index'],
-            time=endpoint['time'], track_id=endpoint['track_id'])
-    return _unavailable(selected_rules)
+            return _with_appearance(estimate, appearance, unchecked_reason)
+    if not (result.get('tracks') or landings) or not _has_geometry(calibration, rules, width, result):
+        return _unavailable(selected_rules)
+    return _prior_only(selected_rules, prior_in, skipped, probe is not None, pool_size, unchecked_reason)
 
 
-def refresh_best_estimate(result, rules=None):
+def _has_geometry(calibration, rules, width, result):
+    """Whether any court boundary can be compared (probed at the frame centre)."""
+    analysis = result.get('analysis') or {}
+    height = analysis.get('height') or calibration.get('image_height') or width * 9 / 16
+    return classify_point([width / 2.0, float(height) / 2.0], calibration, rules) is not None
+
+
+def _prior_only(rules, prior_in, skipped, checked, pool_size, unchecked_reason=None):
+    """No shuttle-like landing: decide by the IN prior and show no location.
+
+    A knee, foot or racket motion is never presented as the shuttle. The view
+    keeps an IN/OUT label from the prior with zero evidence strength, so in a
+    pair any view with a located landing outranks it.
+    """
+    decision = 'IN' if prior_in >= 0.5 else 'OUT'
+    codes = ['BEST_ESTIMATE_NO_SHUTTLE_LANDING']
+    if skipped:
+        codes.append('BEST_ESTIMATE_SKIPPED_NON_SHUTTLE_OBJECTS')
+    if not checked:
+        codes.append('BEST_ESTIMATE_APPEARANCE_UNCHECKED')
+    return _result(rules, decision, 'no_landing_found', None, round(max(prior_in, 1.0 - prior_in), 4), codes,
+                   evidence_strength=0.0, geometry_reliability=None, p_in=round(prior_in, 4),
+                   prior_in=prior_in, location_decision=None, point_px=None, pool_size=pool_size,
+                   appearance={**_appearance(None, checked, skipped), 'unchecked_reason': unchecked_reason})
+
+
+def _with_appearance(estimate, appearance, unchecked_reason=None):
+    """Attach the shuttle-appearance check and its reason codes."""
+    if appearance is None:
+        return estimate
+    if not appearance.get('checked'):
+        # A probe that ran but could not measure (no background, frame out of
+        # range) is final too; only absent frames are worth a later redo.
+        appearance = {**appearance, 'unchecked_reason': unchecked_reason or 'not_measurable'}
+    codes = list(estimate.get('reason_codes') or [])
+    if not appearance.get('checked'):
+        codes.append('BEST_ESTIMATE_APPEARANCE_UNCHECKED')
+    elif appearance.get('skipped_larger_object_candidates'):
+        codes.append('BEST_ESTIMATE_SKIPPED_NON_SHUTTLE_OBJECTS')
+    return {**estimate, 'appearance': appearance, 'reason_codes': codes,
+            'reasons': [REASONS.get(code, code) for code in codes]}
+
+
+def preview_probe(result, output_dir):
+    """Appearance probe over a saved analysis's ``preview.mp4`` (or None)."""
+    if output_dir is None:
+        return None
+    analysis = result.get("analysis") or {}
+    count = analysis.get("frame_count") or len(result.get("timestamps") or [])
+    return ForegroundProbe.from_preview(Path(output_dir) / "preview.mp4", count)
+
+
+def _needs_refresh(current, probe):
+    if not isinstance(current, dict) or current.get("estimator_version") != ESTIMATOR_VERSION:
+        return True
+    # An estimate made without frames is redone once the preview is available.
+    appearance = current.get("appearance")
+    return (probe is not None and isinstance(appearance, dict) and appearance.get("checked") is False
+            and appearance.get("unchecked_reason") == "no_frames")
+
+
+def refresh_best_estimate(result, rules=None, output_dir=None):
     """Recompute a missing or outdated best estimate from the saved analysis.
 
-    The tier reads only result.json evidence, so a newer estimator can be
-    applied without decoding the video again. The overlay image is not
-    redrawn here; a stale artifact path is dropped instead of misattributed.
+    The tier reads result.json evidence plus, when ``output_dir`` holds the
+    saved ``preview.mp4``, the analysis frames for the shuttle-appearance
+    check and the evidence image. Without the preview the overlay is not
+    redrawn and a stale artifact path is dropped instead of misattributed.
     """
     current = result.get("best_estimate")
-    if isinstance(current, dict) and current.get("estimator_version") == ESTIMATOR_VERSION:
+    probe = preview_probe(result, output_dir)
+    if not _needs_refresh(current, probe):
         return result
     expected = rules if rules is not None else (result.get("config") or {}).get("rules")
     try:
-        estimate = estimate_best_verdict(result, expected)
+        estimate = estimate_best_verdict(result, expected, probe=probe)
     except Exception as error:  # an optional tier must not discard the completed analysis
         logger.exception("Could not refresh the best estimate")
         estimate = failed_estimate(expected, error)
     estimate["source_sha256"] = result.get("source_sha256")
-    # The overlay burns in the verdict, so it is reused only for an identical one.
-    if (isinstance(current, dict) and current.get("artifact_path")
+    for key in ("assistance_used", "evaluation_eligible"):
+        if isinstance(current, dict) and key in current and current.get("assistance_used"):
+            estimate[key] = current[key]
+    same = (isinstance(current, dict) and current.get("artifact_path")
             and all(current.get(key) == estimate.get(key)
-                    for key in ("point_px", "frame_index", "decision", "confidence", "basis", "rules"))):
+                    for key in ("point_px", "frame_index", "decision", "confidence", "basis", "rules")))
+    if same:
+        # The overlay burns in the verdict, so it is reused only for an identical one.
         estimate["artifact_path"] = current["artifact_path"]
+    elif probe is not None:
+        estimate = _redraw_overlay(result, estimate, probe, output_dir)
     return {**result, "best_estimate": estimate}
+
+
+def _redraw_overlay(result, estimate, probe, output_dir):
+    index = estimate.get("frame_index")
+    if estimate.get("decision") not in ("IN", "OUT") or not _finite(index):
+        return estimate
+    try:
+        frame = probe.frame(int(index))
+        if frame is None:
+            return estimate
+        # The writer indexes frames by frame_index; give it a sparse view.
+        frames = _SingleFrame(frame, int(index), len(result.get("timestamps") or []) or int(index) + 1)
+        path = write_best_estimate_overlay(frames, result.get("calibration") or {}, estimate, output_dir)
+    except Exception:  # evidence is optional; the verdict stands without it
+        logger.exception("Could not redraw the best-estimate evidence image")
+        return estimate
+    return {**estimate, "artifact_path": path} if path else estimate
+
+
+class _SingleFrame:
+    """Sequence stand-in exposing one decoded frame at its clip index."""
+
+    def __init__(self, frame, index, count):
+        self._frame, self._index, self._count = frame, index, count
+
+    def __len__(self):
+        return self._count
+
+    def __bool__(self):
+        return True
+
+    def __getitem__(self, index):
+        if index != self._index:
+            raise IndexError(index)
+        return self._frame

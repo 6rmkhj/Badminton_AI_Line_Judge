@@ -194,9 +194,50 @@ def _manual_review_regions(region, metadata, analysis_width=1280):
              "bbox": [left, top, right - left, bottom - top]}]
 
 
-def _landing_candidate(result):
+def _shown_landing(result):
+    """The landing the view displays, and whether stored replays still match it.
+
+    Analyses record ``display_landing`` (None: show no location). Older ones
+    only have the strict representative. When the shown verdict is a best
+    estimate whose location differs from the landing the stored images and
+    replay were drawn for, nothing is shown rather than another object.
+    """
+    drawn = result["display_landing"] if "display_landing" in result else result.get("selected_landing")
+    best = result.get("best_estimate") or {}
+    if not _estimate_shown(result):
+        return drawn, True
+    if best.get("basis") not in {"landing_candidate", "flight_family"}:
+        return None, drawn is None
+    matches = (isinstance(drawn, dict) and drawn.get("track_id") == best.get("track_id")
+               and drawn.get("frame_index") == best.get("frame_index"))
+    return (drawn, True) if matches else (None, False)
+
+
+_STRICT = object()
+_ALL = object()
+
+
+def _estimate_shown(result):
+    """Whether the view shows a best estimate that chose its own location."""
+    best = result.get("best_estimate") or {}
+    decided = {"IN", "OUT"}
+    return not ((result.get("decision") or {}).get("decision") in decided
+                or (result.get("video_estimate") or {}).get("eligible") is True
+                or best.get("decision") not in decided
+                or best.get("basis") in {"verified_contact", "video_estimate", "estimate_envelope"})
+
+
+def _estimate_event(result, shown):
+    """Which stored evidence event a view may show: all, one event id, or none (None)."""
+    if not _estimate_shown(result):
+        return _ALL
+    return shown.get("event_id") if isinstance(shown, dict) else None
+
+
+def _landing_candidate(result, landing=_STRICT):
     """Expose a useful image-space hypothesis without promoting it to contact."""
-    landing, analysis = result.get("selected_landing") or {}, result.get("analysis") or {}
+    landing = (result.get("selected_landing") if landing is _STRICT else landing) or {}
+    analysis = result.get("analysis") or {}
     if not isinstance(landing, dict) or not isinstance(analysis, dict) or landing.get("contact_observed") is True:
         return None
     point, stamp, frame = landing.get("candidate_px"), landing.get("time"), landing.get("frame_index")
@@ -450,12 +491,19 @@ def view_from_result(result, output, prefix, rules=None):
     """
     output = Path(output)
     from .best_estimate import refresh_best_estimate
-    result = refresh_best_estimate(result, rules if rules is not None else (result.get("config") or {}).get("rules", RULES))
+    result = refresh_best_estimate(result, rules if rules is not None else (result.get("config") or {}).get("rules", RULES), output)
     decision = (result.get("decision") or {}).get("decision", "REVIEW")
     if decision not in LABELS:
         decision = "REVIEW"
     artifacts, evidence, trajectory_context = result.get("artifacts") or {}, [], None
+    shown, current = _shown_landing(result)
+    # A best-estimate view shows photos of its own landing only; the strict
+    # candidates it rejected (often a knee or foot) stay in the saved analysis
+    # for direct review but are not circled next to the estimate.
+    only = _estimate_event(result, shown)
     for item in artifacts.get("evidence", []):
+        if only is not _ALL and item.get("event_id") != only:
+            continue
         for field in ("image", "source_sequence", "source_crop"):
             relative = item.get(field)
             if isinstance(relative, str) and _safe(output, relative).is_file():
@@ -469,6 +517,11 @@ def view_from_result(result, output, prefix, rules=None):
     if (result.get("selected_landing") or {}).get("contact_observed") is False:
         contact = None
     replay_url, replay_info = _trajectory_replay(output, artifacts, prefix)
+    if not current:
+        # Stored trajectory images, candidate photos and replay follow a
+        # different object than the shown estimate; hide them instead of
+        # circling the wrong thing.
+        trajectory_context, replay_url, replay_info, evidence = None, None, None, []
     video_estimate = _video_estimate_summary(result, output, prefix)
     preview = artifacts.get("preview")
     preview_url = (prefix + quote(preview, safe="/")
@@ -482,7 +535,7 @@ def view_from_result(result, output, prefix, rules=None):
         preview_url=preview_url,
         evidence_warnings=deepcopy(result.get("evidence_warnings") or []),
         evidence_urls=evidence, contact_time_seconds=contact if _finite(contact) else None,
-        landing_candidate=_landing_candidate(result), trajectory_context_url=trajectory_context,
+        landing_candidate=_landing_candidate(result, shown), trajectory_context_url=trajectory_context,
         trajectory_replay_url=replay_url, trajectory_replay_info=replay_info,
         calibration_summary=_calibration_summary(result),
         calibration_preview_url=_calibration_preview(output, artifacts, prefix),
@@ -498,7 +551,7 @@ _BEST_FIELDS = ("schema_version", "estimator_version", "decision", "decision_kin
                 "classification", "reason_codes", "reasons", "contact_observed", "target_identity_verified",
                 "point_px", "event_ids", "frame_index", "time", "frame_interval", "time_interval",
                 "candidate_score", "track_id", "alternatives", "scope", "artifact_path", "error",
-                "assistance_used", "evaluation_eligible")
+                "assistance_used", "evaluation_eligible", "appearance")
 
 
 def _best_estimate_summary(result, rules=None, output=None, prefix=None):

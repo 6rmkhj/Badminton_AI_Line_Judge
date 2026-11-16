@@ -139,7 +139,8 @@ def check_artifacts(output, result):
     if result.get('video_estimate', {}).get('eligible') is True:
         required.add('evidence/video-estimate.jpg')
     best = result.get('best_estimate') or {}
-    if best.get('decision') in {'IN', 'OUT'} and best.get('basis') not in {'verified_contact', 'video_estimate'}:
+    if (best.get('decision') in {'IN', 'OUT'} and best.get('point_px')
+            and best.get('basis') not in {'verified_contact', 'video_estimate'}):
         required.add('evidence/best-estimate.jpg')
     if not required.issubset(paths):
         raise RuntimeError('Resolved estimate has no rendered evidence: ' + ', '.join(sorted(required - set(paths))))

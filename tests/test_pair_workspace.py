@@ -1648,3 +1648,22 @@ def test_best_estimate_flows_through_fresh_pair_jobs_and_history_without_contact
     assert stale['views']['B']['best_estimated_decision'] == 'IN'
     assert all(not view['analysis_assessment']['contributes_to_final'] for view in stale['views'].values())
     assert stored == before
+
+
+def test_view_without_a_shuttle_landing_yields_to_a_located_view():
+    """A prior-only view (no shuttle-like landing) never outranks a view that located the landing."""
+    prior_only = best_estimate('IN', basis='no_landing_found', confidence=.7, classification=None,
+                               point_px=None, frame_index=None, time=None, evidence_strength=0.0,
+                               location_decision=None,
+                               reason_codes=['BEST_ESTIMATE_NO_SHUTTLE_LANDING'])
+    located = best_estimate('OUT', 'b', confidence=.6, evidence_strength=.45, location_decision='OUT')
+    views = {'A': source_view('REVIEW', best_estimate=prior_only),
+             'B': source_view('REVIEW', 'b', best_estimate=located)}
+    result = combine_views(views, same_event_confirmed=True)
+    assert result['decision'] == 'OUT' and result['source_camera_ids'] == ['B']
+    stages = {stage['id']: stage for stage in result['views']['A']['analysis_assessment']['stages']}
+    assert stages['location']['status'] == 'absent' and stages['location']['status_label'] == '찾지 못함'
+    assert '비교할 셔틀 착지 위치가 없어' in stages['geometry']['detail']
+    alone = combine_views({'A': source_view('REVIEW', best_estimate=prior_only), 'B': source_view('REVIEW', 'b')},
+                          same_event_confirmed=True)
+    assert alone['decision'] == 'IN' and alone['decision_kind'] == 'best_estimate'

@@ -181,8 +181,9 @@ _BEST_BASIS = {
     "video_estimate": ("원본 착지 가능 영역", "원본 착지 가능 영역 전체가 한쪽에 있는 영상 추정을 사용했습니다."),
     "estimate_envelope": ("원본 착지 가능 영역의 다수 쪽", "착지 가능 영역이 선에 걸쳐 있어, 영역을 더 많이 차지한 쪽으로 판정했습니다."),
     "flight_family": ("주 코트 착지 경로", "주 코트에 연결된 하강·반동 경로의 대표 위치를 사용했습니다."),
-    "landing_candidate": ("주 코트 범위 안의 착지 후보", "주 코트 판정 범위 안에서 트랙의 첫 하강·반동이며 접근 비행이 확인된 후보를 우선 사용했습니다(없으면 범위 안 후보, 그다음 전체 후보 풀)."),
+    "landing_candidate": ("셔틀 착지 후보", "접근 비행 뒤 트랙의 첫 반동이며, 선수 몸·라켓이 아닌 작은 단독 물체인 후보를 사용했습니다(주 코트 판정 범위 안 우선, 없으면 사이드라인·앞쪽 베이스라인 바로 바깥)."),
     "track_endpoint": ("하강 궤적의 끝 위치", "착지 후보가 없어 하강하던 궤적의 가장 낮은 관측 위치를 사용했습니다."),
+    "no_landing_found": ("셔틀 착지를 찾지 못함", "셔틀로 볼 수 있는 착지(접근 비행 뒤 첫 반동, 작은 단독 물체)가 없어 위치를 표시하지 않았습니다."),
 }
 
 
@@ -199,6 +200,9 @@ def _best_estimate_assessment(base, best, label):
     elif _finite_number(margin_m):
         geometry = (f"코트 모형 기준 경계에서 {'안쪽' if margin_m >= 0 else '바깥쪽'}으로 "
                     f"약 {abs(margin_m):.2f}m 떨어진 위치입니다.")
+    elif basis == "no_landing_found":
+        geometry = (f"비교할 셔틀 착지 위치가 없어, 착지가 코트 안일 가능성이 높다는 기본값을 따라 "
+                    f"{label}으로 판정했습니다.")
     else:
         geometry = "선택한 경기 경계와 위치를 비교했습니다."
     location = best.get("location_decision")
@@ -208,11 +212,14 @@ def _best_estimate_assessment(base, best, label):
     confidence = best.get("confidence")
     confidence_text = f" 신뢰도 {confidence:.2f}(휴리스틱, 측정된 정확도 아님)." if _finite_number(confidence) else ""
     strength = best.get("evidence_strength")
-    strength_text = f" 근거 강도 {strength:.2f}." if _finite_number(strength) else ""
-    stages = [_stage("location", "착지 위치 근거", "passed", f"{title}: {detail}{strength_text}"),
+    strength_text = (f" 근거 강도 {strength:.2f}." if _finite_number(strength) and basis != "no_landing_found"
+                     else "")
+    stages = [_stage("location", "착지 위치 근거", "absent" if basis == "no_landing_found" else "passed",
+                     f"{title}: {detail}{strength_text}"),
               _stage("geometry", "코트 경계 비교", "passed", geometry + confidence_text)]
-    overridden = location in ("IN", "OUT") and location != label
-    for stage, status in zip(stages, ("위치 선택", "기본값 적용" if overridden else "비교 완료")):
+    overridden = (location in ("IN", "OUT") and location != label) or basis == "no_landing_found"
+    location_status = "찾지 못함" if basis == "no_landing_found" else "위치 선택"
+    for stage, status in zip(stages, (location_status, "기본값 적용" if overridden else "비교 완료")):
         stage["status_label"] = status
     base.update(summary=f"최선 추정 {label} · {title}", stages=stages,
                 explanation="직접 접촉이나 영상 추정 근거가 부족해 가장 강한 착지 근거로 판정한 최선 추정입니다.",

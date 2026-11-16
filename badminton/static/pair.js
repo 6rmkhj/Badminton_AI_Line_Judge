@@ -705,8 +705,9 @@ const bestBasisNames = {
   video_estimate: '원본 착지 가능 영역 전체가 한쪽에 있는 영상 추정',
   estimate_envelope: '선에 걸친 원본 착지 가능 영역 중 더 넓은 쪽',
   flight_family: '주 코트에 연결된 하강·반동 경로의 대표 위치',
-  landing_candidate: '주 코트 판정 범위 안의 첫 하강·반동 중 접근 비행이 확인된 착지 후보(없으면 범위 안 후보)',
+  landing_candidate: '접근 비행 뒤 첫 반동이며 선수 몸·라켓이 아닌 작은 단독 물체인 셔틀 착지 후보',
   track_endpoint: '하강하던 궤적의 가장 낮은 관측 위치',
+  no_landing_found: '셔틀 착지를 찾지 못함',
 };
 function confidenceValue(value) {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1 ? value : null;
@@ -795,7 +796,18 @@ function renderBestEstimate(camera, view, player) {
   const conclusion = el('p', 'estimate-conclusion', `최선 추정 ${verdict}`);
   if (confidence) conclusion.append(document.createTextNode(' '), el('span', 'best-confidence', '· ' + confidence));
   panel.append(conclusion);
-  panel.append(el('p', 'estimate-basis', `판정 위치: ${bestBasisNames[best.basis] || '사용 가능한 가장 강한 착지 근거'}.`));
+  if (best.basis === 'no_landing_found') {
+    panel.append(el('p', 'estimate-basis best-prior-note',
+      `셔틀로 볼 수 있는 착지(접근 비행 뒤 첫 반동, 작은 단독 물체)를 찾지 못해 위치를 표시하지 않았습니다. 착지가 코트 안일 가능성이 높다는 기본값을 따라 ${verdict}으로 판정했습니다.`));
+  } else {
+    panel.append(el('p', 'estimate-basis', `판정 위치: ${bestBasisNames[best.basis] || '사용 가능한 가장 강한 착지 근거'}.`));
+  }
+  const skipped = best.appearance && Number.isInteger(best.appearance.skipped_larger_object_candidates)
+    ? best.appearance.skipped_larger_object_candidates : 0;
+  if (skipped > 0) {
+    panel.append(el('p', 'estimate-basis',
+      `선수 몸·다리·라켓처럼 셔틀보다 큰 움직이는 물체 위의 후보 ${skipped}개는 셔틀 착지로 보지 않았습니다.`));
+  }
   if (['IN', 'OUT'].includes(best.location_decision) && best.location_decision !== verdict) {
     panel.append(el('p', 'estimate-basis best-prior-note',
       `위치만 보면 ${best.location_decision}이지만 위치 근거가 약해, 착지가 코트 안일 가능성이 높다는 기본값을 따라 ${verdict}으로 판정했습니다.`));
@@ -815,7 +827,7 @@ function renderBestEstimate(camera, view, player) {
     : {homography_court_model: '확정되지 않은 코트 보정 가설', court_outline_hypothesis: '코트 외곽 가설'}[classification.method];
   if (geometry) add('비교한 경계', geometry);
   const strength = confidenceValue(best.evidence_strength);
-  if (strength !== null) add('근거 강도', `${fmt(strength, 2)} · 위치 선택 확신 × 경계 신뢰도`);
+  if (strength !== null && best.basis !== 'no_landing_found') add('근거 강도', `${fmt(strength, 2)} · 위치 선택 확신 × 경계 신뢰도`);
   if (typeof best.time === 'number' && Number.isFinite(best.time) && best.time >= 0) add('후보 시각', `${fmt(best.time, 3)}초`);
   if (metrics.childNodes.length) panel.append(metrics);
   panel.append(el('p', 'estimate-limitation', '직접 접촉이나 원본 영상 추정 근거가 부족할 때 쓰는 마지막 단계입니다. 신뢰도는 근거 강도·경계 여유와 IN 기본값(0.7)을 섞은 휴리스틱 값이며 측정된 정확도가 아닙니다.'));

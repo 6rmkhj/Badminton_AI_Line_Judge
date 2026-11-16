@@ -60,17 +60,17 @@ jobs:
           $listed = ((Get-Content -LiteralPath "$baseZip.sha256" -Raw).Trim() -split '\s+')[0]
           if ($listed -ne $expected -or (Get-FileHash -LiteralPath $baseZip -Algorithm SHA256).Hash -ne $expected) { throw 'Base ZIP SHA256 mismatch' }
           Expand-Archive -LiteralPath $baseZip -DestinationPath (Join-Path $buildRoot 'base')
-          "PACKAGE_ROOT=$(Join-Path $buildRoot '한글 package/badminton-windows-0.5.15')" >> $env:GITHUB_ENV
-      - name: Build the standard Windows 0.5.15 ZIP
+          "PACKAGE_ROOT=$(Join-Path $buildRoot '한글 package/badminton-windows-0.5.16')" >> $env:GITHUB_ENV
+      - name: Build the standard Windows 0.5.16 ZIP
         run: >-
           python scripts/package_windows_portable.py
           --runtime-base "${{ env.PACKAGE_BUILD_ROOT }}/base/badminton-windows-0.5.13"
           --output-dir "${{ env.PACKAGE_BUILD_ROOT }}/build"
-          --zip "${{ env.PACKAGE_BUILD_ROOT }}/badminton-windows-0.5.15.zip"
+          --zip "${{ env.PACKAGE_BUILD_ROOT }}/badminton-windows-0.5.16.zip"
       - name: Extract the final ZIP into a fresh Korean path
         shell: pwsh
         run: |
-          Expand-Archive -LiteralPath (Join-Path $env:PACKAGE_BUILD_ROOT 'badminton-windows-0.5.15.zip') -DestinationPath (Join-Path $env:PACKAGE_BUILD_ROOT '한글 package')
+          Expand-Archive -LiteralPath (Join-Path $env:PACKAGE_BUILD_ROOT 'badminton-windows-0.5.16.zip') -DestinationPath (Join-Path $env:PACKAGE_BUILD_ROOT '한글 package')
       - name: Verify the packaged launcher and A/B screen
         env:
           PIP_NO_INDEX: '1'
@@ -78,7 +78,7 @@ jobs:
         run: >-
           python scripts/verify_windows_portable.py
           --package "${{ env.PACKAGE_ROOT }}"
-          --report "${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.15-launcher-validation.json"
+          --report "${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.16-launcher-validation.json"
       - name: Analyze original A/B videos with the bundled runtime
         shell: pwsh
         env:
@@ -89,25 +89,25 @@ jobs:
         run: |
           $runtime = Join-Path $env:PACKAGE_ROOT 'runtime/python.exe'
           $verifier = Join-Path $env:PACKAGE_ROOT 'app/scripts/verify_windows_analysis.py'
-          & $runtime $verifier --package $env:PACKAGE_ROOT --work-dir (Join-Path $env:PACKAGE_BUILD_ROOT '실제 영상 검증') --report (Join-Path $env:PACKAGE_BUILD_ROOT 'windows-0.5.15-analysis-validation.json')
+          & $runtime $verifier --package $env:PACKAGE_ROOT --work-dir (Join-Path $env:PACKAGE_BUILD_ROOT '실제 영상 검증') --report (Join-Path $env:PACKAGE_BUILD_ROOT 'windows-0.5.16-analysis-validation.json')
           if ($LASTEXITCODE -ne 0) { throw 'Full bundled-runtime video analysis or effective-assessment validation failed' }
       - name: Upload the verified package and reports
         uses: actions/upload-artifact@v4
         with:
-          name: badminton-windows-0.5.15
+          name: badminton-windows-0.5.16
           compression-level: 0
           if-no-files-found: error
           path: |
-            ${{ env.PACKAGE_BUILD_ROOT }}/badminton-windows-0.5.15.zip
-            ${{ env.PACKAGE_BUILD_ROOT }}/badminton-windows-0.5.15.zip.sha256
-            ${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.15-launcher-validation.json
-            ${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.15-analysis-validation.json
+            ${{ env.PACKAGE_BUILD_ROOT }}/badminton-windows-0.5.16.zip
+            ${{ env.PACKAGE_BUILD_ROOT }}/badminton-windows-0.5.16.zip.sha256
+            ${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.16-launcher-validation.json
+            ${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.16-analysis-validation.json
       - name: Preserve validation diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: windows-0.5.15-diagnostics
+          name: windows-0.5.16-diagnostics
           if-no-files-found: ignore
           path: |
-            ${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.15-*-validation.json
+            ${{ env.PACKAGE_BUILD_ROOT }}/windows-0.5.16-*-validation.json
             ${{ env.PACKAGE_ROOT }}/startup-error.log

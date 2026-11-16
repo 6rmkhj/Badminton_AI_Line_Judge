@@ -136,9 +136,31 @@ def select_display_landing(candidates, estimate, direct_decision, best_estimate=
 
 def select_evidence_landings(ranked, selected, limit=6):
     """Retain the displayed event's evidence when the gallery is bounded."""
-    if selected is not None and any(item is selected for item in ranked):
-        ranked = [selected, *(item for item in ranked if item is not selected)]
+    if selected is not None:
+        # A pool landing behind a best estimate is not in the ranked list; it still leads.
+        ranked = [selected, *(item for item in ranked
+                              if item is not selected and item.get('event_id') != selected.get('event_id'))]
     return ranked[:limit]
+
+
+def follows_best_estimate(verdict, best_estimate):
+    """Whether the shown verdict is a best estimate that picked its own location."""
+    return ((verdict or {}).get('decision_kind') == 'best_estimate' and isinstance(best_estimate, dict)
+            and best_estimate.get('basis') not in {'verified_contact', 'video_estimate', 'estimate_envelope'})
+
+
+def display_landing(selected, verdict, best_estimate, best_input):
+    """The landing the screen, overview and replay follow (None: show none)."""
+    if not follows_best_estimate(verdict, best_estimate):
+        return selected
+    if best_input is None:
+        return None
+    from .best_estimate import estimate_landing
+    try:
+        return estimate_landing(best_input, best_estimate)
+    except Exception:  # display only; the verdict stands without it
+        logger.exception('Could not locate the best-estimate landing for display')
+        return None
 
 
 def _draw_frame(frame, calibration, tracks, frame_index, landing=None):
@@ -347,18 +369,24 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     # The always-decide tier: the strongest remaining evidence, classified
     # against the selected boundaries and labelled as a best estimate.
     from .best_estimate import estimate_best_verdict, write_best_estimate_overlay, failed_estimate
+    from .shuttle_appearance import ForegroundProbe
     try:
         # The same inputs a saved result.json provides, so a later refresh of
         # this tier reproduces it exactly.
+        best_input = {
+            'decision': decision, 'video_estimate': video_estimate, 'landings': requested, 'tracks': tracks,
+            'calibration': calibration, 'camera_stability': stability, 'timestamps': timestamps,
+            'config': {'events': event_config, 'best_estimate': config.get('best_estimate') or {}},
+            'analysis': {'width': frames[0].shape[1], 'height': frames[0].shape[0], 'frame_count': len(frames)}}
         best_estimate = estimate_best_verdict(
-            {'decision': decision, 'video_estimate': video_estimate, 'landings': requested, 'tracks': tracks,
-             'calibration': calibration, 'camera_stability': stability, 'timestamps': timestamps,
-             'config': {'events': event_config, 'best_estimate': config.get('best_estimate') or {}},
-             'analysis': {'width': frames[0].shape[1], 'height': frames[0].shape[0],
-                          'frame_count': len(frames)}}, config.get('rules'))
+            best_input, config.get('rules'),
+            # Always the preview's frames, so a later refresh measures the same pixels.
+            probe=(ForegroundProbe(frames) if preprocessing == 'h264_preview_crf21_bgr_v1'
+                   else ForegroundProbe.from_preview(output / 'preview.mp4', len(frames))))
     except Exception as error:  # an optional tier must not discard the completed analysis
         logger.exception('Could not compute the best estimate')
         best_estimate = failed_estimate(config.get('rules'), error)
+        best_input = None
     best_estimate['source_sha256'] = source_sha
     if assistance_used:
         best_estimate.update(assistance_used=True, evaluation_eligible=False)
@@ -369,6 +397,12 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     timings['events_and_decision_seconds'] = time.perf_counter() - clock
     display_candidates = prioritize_review_candidates(requested, review_regions)
     selected = select_display_landing(display_candidates, video_estimate, decision, best_estimate)
+    # What the screen and the replay follow: the strict representative, except
+    # when the shown verdict is a best estimate, which shows its own landing or
+    # none at all (never a body part the strict ranking happened to put first).
+    shown_verdict = display_verdict(decision, video_estimate, best_estimate)
+    display = display_landing(selected, shown_verdict, best_estimate, best_input)
+    follows_estimate = follows_best_estimate(shown_verdict, best_estimate)
     report('evidence', detail='원본 확대 근거·검수 영상 생성')
     artifacts = {'preview': 'preview.mp4', 'detections': 'detections.json', 'evidence': []}
     evidence_dir = output / 'evidence'
@@ -378,12 +412,12 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
     if calibration_overlay:
         artifacts['calibration_overlay'] = calibration_overlay
     trajectory_context = None
-    if selected and selected.get('image_motion_event'):
+    if display and display.get('image_motion_event'):
         from .evidence import write_trajectory_context
         def trajectory():
             with SourceFrameSequence(source, len(frames)) as originals:
                 return write_trajectory_context(originals, timestamps,
-                    (frames[0].shape[1], frames[0].shape[0]), selected, output)
+                    (frames[0].shape[1], frames[0].shape[0]), display, output)
         trajectory_context = _optional_evidence('trajectory_context', trajectory, evidence_warnings)
 
     def save_frame(path, frame):
@@ -392,7 +426,7 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
         return path.relative_to(output).as_posix()
 
     # Preserve several candidate contexts, including original-resolution crops.
-    for landing in select_evidence_landings(prioritize_review_candidates(landings, review_regions), selected):
+    for landing in select_evidence_landings(prioritize_review_candidates(landings, review_regions), display):
         index = max(0, min(len(frames)-1, int(landing.get('frame_index', 0))))
         filename = f"{landing['event_id']}.jpg"
         candidate_image = _optional_evidence('candidate_' + landing['event_id'],
@@ -401,7 +435,7 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
         evidence = {'event_id': landing['event_id'], 'frame_index': index, 'time': timestamps[index]}
         if candidate_image:
             evidence['image'] = candidate_image
-        if landing is selected and trajectory_context:
+        if landing is display and trajectory_context:
             evidence['trajectory_context'] = trajectory_context['path']
             evidence['trajectory_context_info'] = trajectory_context
         native = landing.get('source_contact_evidence', {})
@@ -435,16 +469,18 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
         'scope': 'Evidence prioritization only; all landing decisions remain in the request aggregate.',
         'assistance_used': bool(review_regions),
     }
-    representative = int(selected['frame_index']) if selected else int(len(frames) / 2)
+    representative = int(display['frame_index']) if display else int(len(frames) / 2)
+    # Without a displayed landing for a best estimate, no track is drawn as if it were the shuttle.
+    shown_tracks = [] if display is None and (selected is not None or follows_estimate) else tracks
     overview = _optional_evidence('overview', lambda: save_frame(output / 'overview.jpg',
-        _draw_frame(frames[representative], calibration, tracks, representative, selected)), evidence_warnings)
+        _draw_frame(frames[representative], calibration, shown_tracks, representative, display)), evidence_warnings)
     if overview:
         artifacts['overview'] = overview
     if config.get('evidence', {}).get('annotated_clip', True):
         from .evidence import write_annotated_clip
         annotated_clip = _optional_evidence('annotated_clip',
-            lambda: write_annotated_clip(frames, timestamps, calibration, tracks,
-                selected, decision, output, config.get('evidence'), **observe('evidence')), evidence_warnings)
+            lambda: write_annotated_clip(frames, timestamps, calibration, shown_tracks,
+                display, decision, output, config.get('evidence'), **observe('evidence')), evidence_warnings)
         if annotated_clip:
             artifacts['annotated_clip'] = annotated_clip
     report('save', detail='분석 결과·탐지 근거 저장')
@@ -472,7 +508,7 @@ def _analyze_video(video_path, output_dir, config=None, *, progress_callback=Non
               'timestamps': timestamps, 'calibration': calibration, 'camera_stability': stability, 'tracks': tracks,
               'native_endpoint_recovery': endpoint_recovery,
               'detection_quality': summarize_detection_quality(detections, tracks),
-              'landings': landings, 'selected_landing': selected, 'decision': decision,
+              'landings': landings, 'selected_landing': selected, 'display_landing': display, 'decision': decision,
               'video_estimate': video_estimate, 'best_estimate': best_estimate,
               'display_decision': display_verdict(decision, video_estimate, best_estimate),
               'review_refinement': review_refinement,
@@ -534,7 +570,7 @@ def analyze_dataset(video_dir, run_dir, config=None, limit=None, resume=True):
                 write_json(existing, result)
             else:
                 from .best_estimate import refresh_best_estimate
-                refreshed = refresh_best_estimate(result, config.get('rules'))
+                refreshed = refresh_best_estimate(result, config.get('rules'), folder)
                 if refreshed is not result:
                     result = {**refreshed, 'display_decision': display_verdict(
                         refreshed.get('decision') or {}, refreshed.get('video_estimate') or {},

@@ -288,6 +288,10 @@ def _apply_flight_continuity(candidate, track, nominal_step):
     candidate['reason_codes'] = list(dict.fromkeys([*candidate['reason_codes'], *reasons]))
 
 
+# Post-gap samples handed to the rebound check (origin plus four steps).
+REBOUND_CHECK_SAMPLES = 5
+
+
 def _occluded_rebound_candidates(track, observations, timestamps, frames, calibration, nominal_step):
     """Infer a bounded image-trajectory intersection across a missing interval.
 
@@ -324,8 +328,13 @@ def _occluded_rebound_candidates(track, observations, timestamps, frames, calibr
         outgoing, after_error = fit(after)
         # The post-gap samples are already after the inferred turn. Three
         # measured samples with two upward intervals are enough; the missing
-        # turn itself is never inserted as an observed sample.
-        rebound_support = _measured_rebound_support(after, 0, nominal_step, minimum_after=2)
+        # turn itself is never inserted as an observed sample. The rebound
+        # check gets at least the five samples it can use: at low frame rates
+        # (15 fps) the 0.133 s fit window holds only three, which could never
+        # show two upward intervals after the first post-gap sample.
+        rebound_support = _measured_rebound_support(
+            observations[gap_index + 1:min(stop, gap_index + 1 + max(outgoing_window, REBOUND_CHECK_SAMPLES))],
+            0, nominal_step, minimum_after=2)
         approach_visibility = _approach_occluder_support(before, after)
         radius = max(1., _value(left, 'radius', 2.), _value(right, 'radius', 2.))
         tolerance = max(3., radius * 1.5)
